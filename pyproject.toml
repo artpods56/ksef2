@@ -1,0 +1,22 @@
+[project]
+name = "ksef-sdk"
+version = "0.1.0"
+description = "Python SDK for Poland's KSeF (Krajowy System e-Faktur) API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.12.5",
+    "httpx>=0.28.0",
+    "cryptography>=44.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.37.4",
+    "ruff>=0.15.0",
+    "pytest>=8.0",
+    "respx>=0.22.0",
+]
+codegen = [
+    "datamodel-code-generator[ruff]>=0.53.0",
+]

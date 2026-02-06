@@ -1,0 +1,100 @@
+from __future__ import annotations
+
+import base64
+import hashlib
+import os
+
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.x509 import load_der_x509_certificate
+
+from ksef_sdk._generated.model import PublicKeyCertificate
+from ksef_sdk.exceptions import KsefEncryptionError
+
+
+def _load_public_key(cert_b64: str):
+    """Load an RSA public key from a Base64-encoded DER certificate."""
+    try:
+        cert_der = base64.b64decode(cert_b64)
+        cert = load_der_x509_certificate(cert_der)
+        return cert.public_key()
+    except Exception as exc:
+        raise KsefEncryptionError(f"Failed to load public key from certificate: {exc}") from exc
+
+
+def select_certificate(
+    certificates: list[PublicKeyCertificate],
+    usage: str,
+) -> PublicKeyCertificate:
+    """Select the first valid certificate matching *usage*.
+
+    *usage* should be ``"KsefTokenEncryption"`` or ``"SymmetricKeyEncryption"``.
+    """
+    for cert in certificates:
+        if usage in cert.usage:
+            return cert
+    raise KsefEncryptionError(f"No certificate found with usage={usage!r}")
+
+
+def encrypt_token(token: str, timestamp: str, cert_b64: str) -> str:
+    """RSA-OAEP encrypt ``token|timestamp`` and return Base64."""
+    plaintext = f"{token}|{timestamp}".encode()
+    public_key = _load_public_key(cert_b64)
+    try:
+        ciphertext = public_key.encrypt(
+            plaintext,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
+        )
+    except Exception as exc:
+        raise KsefEncryptionError(f"Token encryption failed: {exc}") from exc
+    return base64.b64encode(ciphertext).decode()
+
+
+def generate_session_key() -> tuple[bytes, bytes]:
+    """Generate a random AES-256 key (32 bytes) and IV (16 bytes)."""
+    return os.urandom(32), os.urandom(16)
+
+
+def encrypt_symmetric_key(key: bytes, cert_b64: str) -> str:
+    """RSA-OAEP encrypt the AES key and return Base64."""
+    public_key = _load_public_key(cert_b64)
+    try:
+        ciphertext = public_key.encrypt(
+            key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
+        )
+    except Exception as exc:
+        raise KsefEncryptionError(f"Symmetric key encryption failed: {exc}") from exc
+    return base64.b64encode(ciphertext).decode()
+
+
+def encrypt_invoice(xml_bytes: bytes, key: bytes, iv: bytes) -> bytes:
+    """AES-256-CBC encrypt *xml_bytes* with PKCS#7 padding.
+
+    Returns raw ciphertext bytes (caller is responsible for Base64 encoding).
+    """
+    try:
+        # PKCS#7 padding
+        block_size = 16
+        pad_len = block_size - (len(xml_bytes) % block_size)
+        padded = xml_bytes + bytes([pad_len] * pad_len)
+
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+        encryptor = cipher.encryptor()
+        return encryptor.update(padded) + encryptor.finalize()
+    except Exception as exc:
+        raise KsefEncryptionError(f"Invoice encryption failed: {exc}") from exc
+
+
+def sha256_b64(data: bytes) -> str:
+    """Return the SHA-256 digest of *data* as a Base64-encoded string."""
+    return base64.b64encode(hashlib.sha256(data).digest()).decode()
