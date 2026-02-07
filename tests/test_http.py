@@ -21,7 +21,7 @@ class TestRequest:
     @respx.mock
     def test_get_deserializes(self, transport):
         respx.get(
-            "https://ksef-test.mf.gov.pl/api/auth/challenge",
+            "https://api-test.ksef.mf.gov.pl/api/v2/auth/challenge",
         ).mock(
             return_value=httpx.Response(
                 200,
@@ -41,10 +41,13 @@ class TestRequest:
 
     @respx.mock
     def test_post_serializes_body(self, transport):
-        from ksef_sdk._generated.model import InitTokenAuthenticationRequest, AuthenticationContextIdentifier
+        from ksef_sdk._generated.model import (
+            InitTokenAuthenticationRequest,
+            AuthenticationContextIdentifier,
+        )
 
         route = respx.post(
-            "https://ksef-test.mf.gov.pl/api/auth/ksef-token",
+            "https://api-test.ksef.mf.gov.pl/api/v2/auth/ksef-token",
         ).mock(
             return_value=httpx.Response(
                 200,
@@ -62,7 +65,9 @@ class TestRequest:
 
         body = InitTokenAuthenticationRequest(
             challenge="c" * 36,
-            contextIdentifier=AuthenticationContextIdentifier(type="Nip", value="1234567890"),
+            contextIdentifier=AuthenticationContextIdentifier(
+                type="Nip", value="1234567890"
+            ),
             encryptedToken="ZW5jcnlwdGVk",  # base64 of "encrypted"
         )
         resp = transport.post(
@@ -75,6 +80,7 @@ class TestRequest:
         # Verify the body was serialized with camelCase keys
         sent = route.calls[0].request
         import json
+
         sent_json = json.loads(sent.content)
         assert "contextIdentifier" in sent_json
         assert "encryptedToken" in sent_json
@@ -83,7 +89,7 @@ class TestRequest:
 class TestBearerToken:
     @respx.mock
     def test_sets_auth_header(self, transport):
-        route = respx.get("https://ksef-test.mf.gov.pl/api/test").mock(
+        route = respx.get("https://api-test.ksef.mf.gov.pl/api/v2/test").mock(
             return_value=httpx.Response(200)
         )
 
@@ -94,7 +100,7 @@ class TestBearerToken:
 
     @respx.mock
     def test_clears_auth_header(self, transport):
-        route = respx.get("https://ksef-test.mf.gov.pl/api/test").mock(
+        route = respx.get("https://api-test.ksef.mf.gov.pl/api/v2/test").mock(
             return_value=httpx.Response(200)
         )
 
@@ -108,16 +114,22 @@ class TestBearerToken:
 class TestErrorMapping:
     @respx.mock
     def test_401_raises_auth_error(self, transport):
-        respx.get("https://ksef-test.mf.gov.pl/api/test").mock(
-            return_value=httpx.Response(401, json={
-                "exception": {
-                    "serviceName": "auth",
-                    "serviceCtx": "unauthorized",
-                    "exceptionDetailList": [
-                        {"exceptionCode": 401, "exceptionDescription": "Invalid token"}
-                    ],
-                }
-            })
+        respx.get("https://api-test.ksef.mf.gov.pl/api/v2/test").mock(
+            return_value=httpx.Response(
+                401,
+                json={
+                    "exception": {
+                        "serviceName": "auth",
+                        "serviceCtx": "unauthorized",
+                        "exceptionDetailList": [
+                            {
+                                "exceptionCode": 401,
+                                "exceptionDescription": "Invalid token",
+                            }
+                        ],
+                    }
+                },
+            )
         )
         with pytest.raises(KsefAuthError) as exc_info:
             transport.get("/test", response_model=AuthenticationChallengeResponse)
@@ -125,7 +137,7 @@ class TestErrorMapping:
 
     @respx.mock
     def test_403_raises_auth_error(self, transport):
-        respx.get("https://ksef-test.mf.gov.pl/api/test").mock(
+        respx.get("https://api-test.ksef.mf.gov.pl/api/v2/test").mock(
             return_value=httpx.Response(403, text="Forbidden")
         )
         with pytest.raises(KsefAuthError) as exc_info:
@@ -134,7 +146,7 @@ class TestErrorMapping:
 
     @respx.mock
     def test_429_raises_rate_limit_error(self, transport):
-        respx.get("https://ksef-test.mf.gov.pl/api/test").mock(
+        respx.get("https://api-test.ksef.mf.gov.pl/api/v2/test").mock(
             return_value=httpx.Response(
                 429,
                 text="Too Many Requests",
@@ -147,7 +159,7 @@ class TestErrorMapping:
 
     @respx.mock
     def test_500_raises_api_error(self, transport):
-        respx.get("https://ksef-test.mf.gov.pl/api/test").mock(
+        respx.get("https://api-test.ksef.mf.gov.pl/api/v2/test").mock(
             return_value=httpx.Response(500, text="Internal Server Error")
         )
         with pytest.raises(KsefApiError) as exc_info:
@@ -156,17 +168,26 @@ class TestErrorMapping:
 
     @respx.mock
     def test_structured_exception_parsed(self, transport):
-        respx.get("https://ksef-test.mf.gov.pl/api/test").mock(
-            return_value=httpx.Response(400, json={
-                "exception": {
-                    "serviceName": "TestService",
-                    "serviceCtx": "validation",
-                    "exceptionDetailList": [
-                        {"exceptionCode": 1, "exceptionDescription": "field X invalid"},
-                        {"exceptionCode": 2, "exceptionDescription": "field Y missing"},
-                    ],
-                }
-            })
+        respx.get("https://api-test.ksef.mf.gov.pl/api/v2/test").mock(
+            return_value=httpx.Response(
+                400,
+                json={
+                    "exception": {
+                        "serviceName": "TestService",
+                        "serviceCtx": "validation",
+                        "exceptionDetailList": [
+                            {
+                                "exceptionCode": 1,
+                                "exceptionDescription": "field X invalid",
+                            },
+                            {
+                                "exceptionCode": 2,
+                                "exceptionDescription": "field Y missing",
+                            },
+                        ],
+                    }
+                },
+            )
         )
         with pytest.raises(KsefApiError) as exc_info:
             transport.get("/test", response_model=AuthenticationChallengeResponse)

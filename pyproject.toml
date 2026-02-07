@@ -8,6 +8,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "httpx>=0.28.0",
     "cryptography>=44.0.0",
+    "signxml>=4.0",
 ]
 
 [dependency-groups]
@@ -16,7 +17,13 @@ dev = [
     "ruff>=0.15.0",
     "pytest>=8.0",
     "respx>=0.22.0",
+    "lxml-stubs>=0.5.1",
 ]
 codegen = [
     "datamodel-code-generator[ruff]>=0.53.0",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: tests that hit the real KSeF TEST environment",
 ]

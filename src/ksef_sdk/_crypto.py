@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.x509 import load_der_x509_certificate
 
-from ksef_sdk._generated.model import PublicKeyCertificate
+from ksef_sdk.models import PublicKeyCertificate
 from ksef_sdk.exceptions import KsefEncryptionError
 
 
@@ -20,7 +20,9 @@ def _load_public_key(cert_b64: str):
         cert = load_der_x509_certificate(cert_der)
         return cert.public_key()
     except Exception as exc:
-        raise KsefEncryptionError(f"Failed to load public key from certificate: {exc}") from exc
+        raise KsefEncryptionError(
+            f"Failed to load public key from certificate: {exc}"
+        ) from exc
 
 
 def select_certificate(

@@ -20,9 +20,9 @@ from ksef_sdk.exceptions import KsefEncryptionError
 class TestEncryptToken:
     def test_roundtrip(self, rsa_key_pair, self_signed_cert_b64):
         token = "my-ksef-token"
-        timestamp = "2025-01-01T00:00:00+00:00"
+        timestamp_ms = "1735689600000"
 
-        encrypted_b64 = encrypt_token(token, timestamp, self_signed_cert_b64)
+        encrypted_b64 = encrypt_token(token, timestamp_ms, self_signed_cert_b64)
         ciphertext = base64.b64decode(encrypted_b64)
 
         # Decrypt with the private key to verify
@@ -34,7 +34,7 @@ class TestEncryptToken:
                 label=None,
             ),
         )
-        assert plaintext == b"my-ksef-token|2025-01-01T00:00:00+00:00"
+        assert plaintext == b"my-ksef-token|1735689600000"
 
     def test_bad_cert_raises(self):
         with pytest.raises(KsefEncryptionError, match="Failed to load public key"):

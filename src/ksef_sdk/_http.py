@@ -99,7 +99,9 @@ class HttpTransport:
         raw_body: bytes | None = None,
         extra_headers: dict[str, str] | None = None,
     ) -> T | None:
-        resp = self._raw_request(method, path, body=body, raw_body=raw_body, extra_headers=extra_headers)
+        resp = self._raw_request(
+            method, path, body=body, raw_body=raw_body, extra_headers=extra_headers
+        )
 
         if response_model is None:
             return None
@@ -160,7 +162,11 @@ class HttpTransport:
                 info = exception_response.exception
                 parts = [info.serviceName or "", info.serviceCtx or ""]
                 if info.exceptionDetailList:
-                    parts.extend(d.exceptionDescription for d in info.exceptionDetailList if d.exceptionDescription)
+                    parts.extend(
+                        d.exceptionDescription
+                        for d in info.exceptionDetailList
+                        if d.exceptionDescription
+                    )
                 message = " | ".join(p for p in parts if p)
         except (ValueError, ValidationError):
             pass
@@ -173,7 +179,9 @@ class HttpTransport:
                     retry_after = int(raw)
                 except ValueError:
                     pass
-            raise KsefRateLimitError(retry_after=retry_after, message=message, response=exception_response)
+            raise KsefRateLimitError(
+                retry_after=retry_after, message=message, response=exception_response
+            )
 
         if status in (401, 403):
             raise KsefAuthError(status, message, exception_response)

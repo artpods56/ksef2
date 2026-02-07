@@ -40,7 +40,7 @@ def init_token_auth(
     cert = select_certificate(certificates, "KsefTokenEncryption")
     encrypted = encrypt_token(
         token,
-        challenge.timestamp.isoformat(),
+        str(challenge.timestampMs),
         cert.certificate,
     )
 
@@ -83,7 +83,9 @@ def poll_auth_status(
             )
         time.sleep(poll_interval)
 
-    raise KsefAuthError(0, f"Authentication polling timed out after {max_attempts} attempts")
+    raise KsefAuthError(
+        0, f"Authentication polling timed out after {max_attempts} attempts"
+    )
 
 
 def redeem_token(http: HttpTransport, auth_token: str) -> AuthenticationTokensResponse:
@@ -101,7 +103,9 @@ def redeem_token(http: HttpTransport, auth_token: str) -> AuthenticationTokensRe
         http.clear_access_token()
 
 
-def refresh_access_token(http: HttpTransport, refresh_token: str) -> AuthenticationTokenRefreshResponse:
+def refresh_access_token(
+    http: HttpTransport, refresh_token: str
+) -> AuthenticationTokenRefreshResponse:
     """``POST /auth/token/refresh`` — obtain a new access token using a refresh token."""
     # The refresh token is sent as Bearer
     http.set_access_token(refresh_token)

@@ -4,9 +4,9 @@ from enum import Enum
 
 
 class Environment(Enum):
-    PRODUCTION = "https://ksef.mf.gov.pl/api"
-    TEST = "https://ksef-test.mf.gov.pl/api"
-    DEMO = "https://ksef-demo.mf.gov.pl/api"
+    PRODUCTION = "https://api.ksef.mf.gov.pl/api/v2"
+    TEST = "https://api-test.ksef.mf.gov.pl/api/v2"
+    DEMO = "https://api-demo.ksef.mf.gov.pl/api/v2"
 
     @property
     def base_url(self) -> str:

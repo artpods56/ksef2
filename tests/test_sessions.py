@@ -12,7 +12,7 @@ from ksef_sdk.exceptions import KsefSessionError
 from tests.conftest import SAMPLE_INVOICE_XML
 
 
-BASE = "https://ksef-test.mf.gov.pl/api"
+BASE = "https://api-test.ksef.mf.gov.pl/api/v2"
 REF = "s" * 36
 
 
@@ -28,16 +28,21 @@ def transport():
 def mock_open():
     """Mock the open-session endpoint."""
     return respx.post(f"{BASE}/sessions/online").mock(
-        return_value=httpx.Response(200, json={
-            "referenceNumber": REF,
-            "validUntil": "2025-01-01T01:00:00+00:00",
-        })
+        return_value=httpx.Response(
+            200,
+            json={
+                "referenceNumber": REF,
+                "validUntil": "2025-01-01T01:00:00+00:00",
+            },
+        )
     )
 
 
 class TestOnlineSessionOpen:
     @respx.mock
-    def test_open_sends_encryption_info(self, transport, sample_certificates, mock_open):
+    def test_open_sends_encryption_info(
+        self, transport, sample_certificates, mock_open
+    ):
         session = OnlineSession(transport, sample_certificates)
         resp = session.open()
 
@@ -64,9 +69,12 @@ class TestOnlineSessionSendInvoice:
     @respx.mock
     def test_send_invoice(self, transport, sample_certificates, mock_open):
         respx.post(f"{BASE}/sessions/online/{REF}/invoices").mock(
-            return_value=httpx.Response(200, json={
-                "referenceNumber": "i" * 36,
-            })
+            return_value=httpx.Response(
+                200,
+                json={
+                    "referenceNumber": "i" * 36,
+                },
+            )
         )
 
         session = OnlineSession(transport, sample_certificates)
@@ -102,7 +110,9 @@ class TestOnlineSessionClose:
 
 class TestOnlineSessionContextManager:
     @respx.mock
-    def test_context_manager_opens_and_closes(self, transport, sample_certificates, mock_open):
+    def test_context_manager_opens_and_closes(
+        self, transport, sample_certificates, mock_open
+    ):
         respx.post(f"{BASE}/sessions/online/{REF}/close").mock(
             return_value=httpx.Response(200)
         )
@@ -114,7 +124,9 @@ class TestOnlineSessionContextManager:
         assert not session.is_open
 
     @respx.mock
-    def test_context_manager_closes_on_exception(self, transport, sample_certificates, mock_open):
+    def test_context_manager_closes_on_exception(
+        self, transport, sample_certificates, mock_open
+    ):
         respx.post(f"{BASE}/sessions/online/{REF}/close").mock(
             return_value=httpx.Response(200)
         )
@@ -130,12 +142,15 @@ class TestOnlineSessionStatus:
     @respx.mock
     def test_status(self, transport, sample_certificates, mock_open):
         respx.get(f"{BASE}/sessions/{REF}").mock(
-            return_value=httpx.Response(200, json={
-                "status": {"code": 100, "description": "Open"},
-                "dateCreated": "2025-01-01T00:00:00+00:00",
-                "dateUpdated": "2025-01-01T00:00:00+00:00",
-                "validUntil": "2025-01-01T01:00:00+00:00",
-            })
+            return_value=httpx.Response(
+                200,
+                json={
+                    "status": {"code": 100, "description": "Open"},
+                    "dateCreated": "2025-01-01T00:00:00+00:00",
+                    "dateUpdated": "2025-01-01T00:00:00+00:00",
+                    "validUntil": "2025-01-01T01:00:00+00:00",
+                },
+            )
         )
 
         session = OnlineSession(transport, sample_certificates)

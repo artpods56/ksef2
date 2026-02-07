@@ -12,15 +12,30 @@ from ksef_sdk._auth import (
 from ksef_sdk._environments import Environment
 from ksef_sdk._generated.model import (
     FormCode,
+    GenerateTokenResponse,
     PublicKeyCertificate,
     SessionInvoicesResponse,
     SessionStatusResponse,
+    TokenStatusResponse,
 )
 from ksef_sdk._http import HttpTransport
 from ksef_sdk._sessions import OnlineSession
+from ksef_sdk._tokens import (
+    generate_token,
+    get_token_status,
+    poll_token_status,
+    revoke_token,
+)
+from ksef_sdk._xades import (
+    authenticate_xades as _authenticate_xades,
+    generate_test_certificate,
+)
 
 if TYPE_CHECKING:
     from types import TracebackType
+
+    from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+    from cryptography.x509 import Certificate
 
 
 class KsefClient:
@@ -40,7 +55,7 @@ class KsefClient:
         self,
         *,
         nip: str,
-        token: str,
+        token: str | None = None,
         env: Environment = Environment.PRODUCTION,
     ) -> None:
         self._nip = nip
@@ -92,7 +107,17 @@ class KsefClient:
         3. POST encrypted token → get referenceNumber
         4. Poll until status=200
         5. Redeem → access_token + refresh_token
+
+        Requires a ``token`` to have been passed to the constructor.
+        For token-less auth see :meth:`authenticate_xades`.
         """
+        if self._token is None:
+            from ksef_sdk.exceptions import KsefAuthError
+
+            raise KsefAuthError(
+                0, "No KSeF token provided — pass token= to KsefClient or use authenticate_xades()"
+            )
+
         certs = self.get_public_key_certificates()
 
         challenge = request_challenge(self._http)
@@ -121,10 +146,70 @@ class KsefClient:
         """Refresh the current access token using the stored refresh token."""
         if self._refresh_token is None:
             from ksef_sdk.exceptions import KsefAuthError
+
             raise KsefAuthError(0, "No refresh token available — authenticate first")
 
         resp = _refresh_access_token(self._http, self._refresh_token)
         self._http.set_access_token(resp.accessToken.token)
+
+    def authenticate_xades(
+        self,
+        *,
+        cert: Certificate | None = None,
+        private_key: RSAPrivateKey | None = None,
+        poll_interval: float = 1.0,
+        max_poll_attempts: int = 30,
+    ) -> None:
+        """Authenticate via XAdES signature (no pre-existing KSeF token needed).
+
+        If *cert* and *private_key* are not provided, a self-signed test
+        certificate is auto-generated using the client's NIP.
+        """
+        if cert is None or private_key is None:
+            cert, private_key = generate_test_certificate(self._nip)
+
+        self._refresh_token = _authenticate_xades(
+            self._http,
+            self._nip,
+            cert,
+            private_key,
+            poll_interval=poll_interval,
+            max_poll_attempts=max_poll_attempts,
+        )
+
+    # -- token management --
+
+    def generate_ksef_token(
+        self,
+        permissions: list[str],
+        description: str,
+        *,
+        poll_interval: float = 1.0,
+        max_poll_attempts: int = 60,
+    ) -> GenerateTokenResponse:
+        """Generate a new KSeF token and wait for it to become active.
+
+        Returns the :class:`GenerateTokenResponse` whose ``.token`` field
+        contains the token string usable for future :meth:`authenticate` calls.
+        """
+        resp = generate_token(
+            self._http, permissions=permissions, description=description
+        )
+        poll_token_status(
+            self._http,
+            resp.referenceNumber,
+            poll_interval=poll_interval,
+            max_attempts=max_poll_attempts,
+        )
+        return resp
+
+    def get_ksef_token_status(self, reference_number: str) -> TokenStatusResponse:
+        """Get the current status of a KSeF token."""
+        return get_token_status(self._http, reference_number)
+
+    def revoke_ksef_token(self, reference_number: str) -> None:
+        """Revoke a KSeF token."""
+        revoke_token(self._http, reference_number)
 
     # -- sessions --
 

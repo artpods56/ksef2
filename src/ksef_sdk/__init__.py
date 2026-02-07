@@ -1,4 +1,5 @@
 from ksef_sdk._environments import Environment
+from ksef_sdk._testdata import TestDataClient
 from ksef_sdk.client import KsefClient
 from ksef_sdk.exceptions import (
     KsefApiError,
@@ -12,6 +13,7 @@ from ksef_sdk.exceptions import (
 __all__ = [
     "Environment",
     "KsefClient",
+    "TestDataClient",
     "KsefApiError",
     "KsefAuthError",
     "KsefEncryptionError",

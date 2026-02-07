@@ -22,9 +22,11 @@ def rsa_key_pair():
 def self_signed_cert_b64(rsa_key_pair):
     """Return a Base64-encoded DER self-signed certificate."""
     private_key = rsa_key_pair
-    subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COMMON_NAME, "KSeF Test"),
-    ])
+    subject = issuer = x509.Name(
+        [
+            x509.NameAttribute(NameOID.COMMON_NAME, "KSeF Test"),
+        ]
+    )
     cert = (
         x509.CertificateBuilder()
         .subject_name(subject)
@@ -32,7 +34,9 @@ def self_signed_cert_b64(rsa_key_pair):
         .public_key(private_key.public_key())
         .serial_number(x509.random_serial_number())
         .not_valid_before(datetime.datetime.now(datetime.timezone.utc))
-        .not_valid_after(datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365))
+        .not_valid_after(
+            datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365)
+        )
         .sign(private_key, hashes.SHA256())
     )
     return base64.b64encode(cert.public_bytes(serialization.Encoding.DER)).decode()
