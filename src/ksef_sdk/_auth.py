@@ -25,7 +25,7 @@ def request_challenge(http: HttpTransport) -> AuthenticationChallengeResponse:
     return http.post(
         "/auth/challenge",
         response_model=AuthenticationChallengeResponse,
-    )  # type: ignore[return-value]
+    )
 
 
 def init_token_auth(
@@ -54,7 +54,7 @@ def init_token_auth(
         "/auth/ksef-token",
         body=body,
         response_model=AuthenticationInitResponse,
-    )  # type: ignore[return-value]
+    )
 
 
 def poll_auth_status(
@@ -96,7 +96,7 @@ def redeem_token(http: HttpTransport, auth_token: str) -> AuthenticationTokensRe
         return http.post(
             "/auth/token/redeem",
             response_model=AuthenticationTokensResponse,
-        )  # type: ignore[return-value]
+        )
     finally:
         http.clear_access_token()
 
@@ -109,7 +109,7 @@ def refresh_access_token(http: HttpTransport, refresh_token: str) -> Authenticat
         return http.post(
             "/auth/token/refresh",
             response_model=AuthenticationTokenRefreshResponse,
-        )  # type: ignore[return-value]
+        )
     finally:
         # Restore after refresh attempt — caller sets the new access token
         http.clear_access_token()

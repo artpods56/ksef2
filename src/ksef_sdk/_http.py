@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, overload
 
 import httpx
 from pydantic import BaseModel, TypeAdapter, ValidationError
@@ -65,6 +65,30 @@ class HttpTransport:
         self._raise_for_status(resp)
         return resp
 
+    @overload
+    def request(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: BaseModel | None = ...,
+        response_model: type[T],
+        raw_body: bytes | None = ...,
+        extra_headers: dict[str, str] | None = ...,
+    ) -> T: ...
+
+    @overload
+    def request(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: BaseModel | None = ...,
+        response_model: None = ...,
+        raw_body: bytes | None = ...,
+        extra_headers: dict[str, str] | None = ...,
+    ) -> None: ...
+
     def request(
         self,
         method: str,
@@ -83,15 +107,31 @@ class HttpTransport:
         return response_model.model_validate(resp.json())
 
     def get(self, path: str, *, response_model: type[T]) -> T:
-        result = self.request("GET", path, response_model=response_model)
-        assert result is not None
-        return result
+        return self.request("GET", path, response_model=response_model)
 
     def get_list(self, path: str, *, item_model: type[T]) -> list[T]:
         """GET a path that returns a JSON array of *item_model*."""
         resp = self._raw_request("GET", path)
         adapter: TypeAdapter[list[T]] = TypeAdapter(list[item_model])
         return adapter.validate_python(resp.json())
+
+    @overload
+    def post(
+        self,
+        path: str,
+        *,
+        body: BaseModel | None = ...,
+        response_model: type[T],
+    ) -> T: ...
+
+    @overload
+    def post(
+        self,
+        path: str,
+        *,
+        body: BaseModel | None = ...,
+        response_model: None = ...,
+    ) -> None: ...
 
     def post(
         self,

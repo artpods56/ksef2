@@ -87,7 +87,7 @@ class OnlineSession:
             "/sessions/online",
             body=body,
             response_model=OpenOnlineSessionResponse,
-        )  # type: ignore[assignment]
+        )
         self._reference_number = resp.referenceNumber
         return resp
 
@@ -110,7 +110,7 @@ class OnlineSession:
             f"/sessions/online/{self.reference_number}/invoices",
             body=body,
             response_model=SendInvoiceResponse,
-        )  # type: ignore[return-value]
+        )
 
     def close(self) -> None:
         """Close the online session."""
