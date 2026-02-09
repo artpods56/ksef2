@@ -7,12 +7,10 @@ from ksef2.infra.schema import model as spec
 
 @final
 class ChallengeEndpoint:
+    url: str = "/auth/challenge"
+
     def __init__(self, transport: HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/auth/challenge"
 
     def send(self) -> spec.AuthenticationChallengeResponse:
         return codecs.JsonResponseCodec.parse(
@@ -23,12 +21,10 @@ class ChallengeEndpoint:
 
 @final
 class TokenAuthEndpoint:
+    url: str = "/auth/ksef-token"
+
     def __init__(self, transport: HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/auth/ksef-token"
 
     def send(self, body: dict[str, Any]) -> spec.AuthenticationInitResponse:
         return codecs.JsonResponseCodec.parse(
@@ -39,12 +35,10 @@ class TokenAuthEndpoint:
 
 @final
 class XAdESAuthEndpoint:
+    url: str = "/auth/xades-signature"
+
     def __init__(self, transport: HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/auth/xades-signature"
 
     def get_url(self, *, verify_chain: bool = False) -> str:
         return f"{self.url}?verifyCertificateChain={str(verify_chain).lower()}"
@@ -68,12 +62,10 @@ class XAdESAuthEndpoint:
 
 @final
 class AuthStatusEndpoint:
+    url: str = "/auth/{referenceNumber}"
+
     def __init__(self, transport: HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/auth/{referenceNumber}"
 
     def get_url(self, *, reference_number: str) -> str:
         return self.url.format(referenceNumber=reference_number)
@@ -94,12 +86,10 @@ class AuthStatusEndpoint:
 
 @final
 class RedeemTokenEndpoint:
+    url: str = "/auth/token/redeem"
+
     def __init__(self, transport: HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/auth/token/redeem"
 
     def send(
         self,
@@ -116,12 +106,10 @@ class RedeemTokenEndpoint:
 
 @final
 class RefreshTokenEndpoint:
+    url: str = "/auth/token/refresh"
+
     def __init__(self, transport: HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/auth/token/refresh"
 
     def send(
         self,

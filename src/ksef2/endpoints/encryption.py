@@ -12,12 +12,10 @@ class CertificateEndpoint:
         `https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Certyfikaty-klucza-publicznego/paths/~1security~1public-key-certificates/get`
     """
 
+    url: str = "/security/public-key-certificates"
+
     def __init__(self, transport: HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/security/public-key-certificates"
 
     def fetch(
         self,
