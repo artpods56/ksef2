@@ -5,12 +5,10 @@ from ksef2.core import http
 
 @final
 class CreateSubjectEndpoint:
+    url: str = "/testdata/subject"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/testdata/subject"
 
     def send(self, body: dict[str, Any]) -> None:
         _ = self._transport.post(self.url, json=body)
@@ -18,12 +16,10 @@ class CreateSubjectEndpoint:
 
 @final
 class DeleteSubjectEndpoint:
+    url: str = "/testdata/subject/remove"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/testdata/subject/remove"
 
     def send(self, body: dict[str, Any]) -> None:
         _ = self._transport.post(self.url, json=body)
@@ -31,12 +27,10 @@ class DeleteSubjectEndpoint:
 
 @final
 class CreatePersonEndpoint:
+    url: str = "/testdata/person"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/testdata/person"
 
     def send(self, body: dict[str, Any]) -> None:
         _ = self._transport.post(self.url, json=body)
@@ -44,12 +38,10 @@ class CreatePersonEndpoint:
 
 @final
 class DeletePersonEndpoint:
+    url: str = "/testdata/person/remove"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/testdata/person/remove"
 
     def send(self, body: dict[str, Any]) -> None:
         _ = self._transport.post(self.url, json=body)
@@ -57,12 +49,10 @@ class DeletePersonEndpoint:
 
 @final
 class GrantPermissionsEndpoint:
+    url: str = "/testdata/permissions"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/testdata/permissions"
 
     def send(self, body: dict[str, Any]) -> None:
         self._transport.post(self.url, json=body)
@@ -70,12 +60,10 @@ class GrantPermissionsEndpoint:
 
 @final
 class RevokePermissionsEndpoint:
+    url: str = "/testdata/permissions/revoke"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/testdata/permissions/revoke"
 
     def send(self, body: dict[str, Any]) -> None:
         self._transport.post(self.url, json=body)
@@ -83,12 +71,10 @@ class RevokePermissionsEndpoint:
 
 @final
 class EnableAttachmentsEndpoint:
+    url: str = "/testdata/attachment-permission"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/testdata/attachment-permission"
 
     def send(self, body: dict[str, Any]) -> None:
         self._transport.post(self.url, json=body)

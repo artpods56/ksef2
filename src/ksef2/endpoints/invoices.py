@@ -5,12 +5,10 @@ from ksef2.infra.schema import model as spec
 
 @final
 class DownloadInvoiceEndpoint:
+    url: str = "/invoices/{ksefNumber}"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/invoices/{ksefNumber}"
 
     def get_url(self, *, ksef_number: str) -> str:
         return self.url.format(ksefNumber=ksef_number)
@@ -25,12 +23,10 @@ class DownloadInvoiceEndpoint:
 
 @final
 class SendingInvoicesEndpoint:
+    url: str = "/sessions/online/{referenceNumber}/invoices"
+
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/sessions/online/{referenceNumber}/invoices"
 
     def get_url(self, *, reference_number: str) -> str:
         return self.url.format(referenceNumber=reference_number)
