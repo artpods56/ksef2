@@ -8,9 +8,7 @@ class OpenSessionEndpoint:
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
 
-    @property
-    def url(self) -> str:
-        return "/sessions/online"
+    url: str = "/sessions/online"
 
     def get_url(self) -> str:
         return self.url
@@ -32,12 +30,11 @@ class OpenSessionEndpoint:
 
 @final
 class TerminateSessionEndpoint:
+    
+    url: str = "/sessions/online/{referenceNumber}/close"
+    
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
-
-    @property
-    def url(self) -> str:
-        return "/sessions/online/{referenceNumber}"
 
     def get_url(self, *, reference_number: str) -> str:
         return self.url.format(referenceNumber=reference_number)
@@ -47,7 +44,7 @@ class TerminateSessionEndpoint:
         access_token: str,
         reference_number: str,
     ) -> None:
-        self._transport.delete(
+        _ = self._transport.post(
             self.get_url(reference_number=reference_number),
             headers=headers.KSeFHeaders.session(access_token),
         )

@@ -5,7 +5,7 @@ from ksef2.infra.schema import model as spec
 
 @final
 class DownloadInvoiceEndpoint:
-    url: str = "/invoices/{ksefNumber}"
+    url: str = "/invoices/ksef/{ksefNumber}"
 
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
