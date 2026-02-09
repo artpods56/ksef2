@@ -10,8 +10,8 @@ from typing import Any
 import httpx
 import pytest
 
-from ksef_sdk.domain.models.encryption import CertUsage, PublicKeyCertificate
-from ksef_sdk.domain.models.session import FormSchema, SessionState
+from ksef2.domain.models.encryption import CertUsage, PublicKeyCertificate
+from ksef2.domain.models.session import FormSchema, SessionState
 
 
 # ---------------------------------------------------------------------------

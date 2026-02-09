@@ -5,12 +5,12 @@ from __future__ import annotations
 import base64
 from datetime import datetime, timezone
 
-from ksef_sdk.core.crypto import sha256_b64
-from ksef_sdk.domain.models.session import FormSchema
-from ksef_sdk.infra.mappers.encryption import PublicKeyCertificateMapper
-from ksef_sdk.infra.mappers.invoices import SendInvoiceMapper
-from ksef_sdk.infra.mappers.session import OpenOnlineSessionMapper
-from ksef_sdk.infra.schema import model as spec
+from ksef2.core.crypto import sha256_b64
+from ksef2.domain.models.session import FormSchema
+from ksef2.infra.mappers.encryption import PublicKeyCertificateMapper
+from ksef2.infra.mappers.invoices import SendInvoiceMapper
+from ksef2.infra.mappers.session import OpenOnlineSessionMapper
+from ksef2.infra.schema import model as spec
 
 
 class TestOpenOnlineSessionMapper:
@@ -114,7 +114,7 @@ class TestPublicKeyCertificateMapper:
         assert cert.valid_to == later
 
     def test_maps_multiple_usages(self) -> None:
-        from ksef_sdk.domain.models.encryption import CertUsage
+        from ksef2.domain.models.encryption import CertUsage
 
         dto = spec.PublicKeyCertificate.model_construct(
             certificate="BB",

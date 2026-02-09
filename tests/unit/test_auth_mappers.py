@@ -4,18 +4,18 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from ksef_sdk.domain.models.auth import (
+from ksef2.domain.models.auth import (
     AuthenticationMethod,
     ContextIdentifierType,
 )
-from ksef_sdk.infra.mappers.auth import (
+from ksef2.infra.mappers.auth import (
     AuthInitMapper,
     AuthStatusMapper,
     AuthTokensMapper,
     ChallengeMapper,
     RefreshTokenMapper,
 )
-from ksef_sdk.infra.schema import model as spec
+from ksef2.infra.schema import model as spec
 
 
 _TS = datetime(2025, 7, 11, 12, 0, 0, tzinfo=timezone.utc)

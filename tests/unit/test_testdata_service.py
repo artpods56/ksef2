@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from ksef_sdk.domain.models.testdata import (
+from ksef2.domain.models.testdata import (
     Identifier,
     IdentifierType,
     Permission,
@@ -12,7 +12,7 @@ from ksef_sdk.domain.models.testdata import (
     SubjectType,
     Subunit,
 )
-from ksef_sdk.services.testdata import TestDataService
+from ksef2.services.testdata import TestDataService
 
 from tests.unit.conftest import FakeTransport
 

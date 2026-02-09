@@ -377,7 +377,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ksef-sdk"
+name = "ksef2"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

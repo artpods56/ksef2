@@ -6,9 +6,9 @@ import pytest
 import respx
 import httpx
 
-from ksef_sdk.config import Environment
-from ksef_sdk.core import exceptions
-from ksef_sdk.core.http import HttpTransport
+from ksef2.config import Environment
+from ksef2.core import exceptions
+from ksef2.core.http import HttpTransport
 
 
 BASE = Environment.TEST.base_url

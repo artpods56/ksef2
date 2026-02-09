@@ -7,7 +7,7 @@ from tests.unit.conftest import FakeTransport, _TOKEN, _REF
 
 class TestGenerateTokenEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.tokens import GenerateTokenEndpoint
+        from ksef2.endpoints.tokens import GenerateTokenEndpoint
 
         ep = GenerateTokenEndpoint(FakeTransport())
         assert ep.url == "/tokens"
@@ -15,7 +15,7 @@ class TestGenerateTokenEndpoint:
     def test_send_posts_with_correct_headers(
         self, fake_transport: FakeTransport
     ) -> None:
-        from ksef_sdk.endpoints.tokens import GenerateTokenEndpoint
+        from ksef2.endpoints.tokens import GenerateTokenEndpoint
 
         fake_transport.enqueue({"referenceNumber": _REF, "token": "tok123"})
         ep = GenerateTokenEndpoint(fake_transport)
@@ -30,7 +30,7 @@ class TestGenerateTokenEndpoint:
 
 class TestTokenStatusEndpoint:
     def test_url_contains_reference_number(self) -> None:
-        from ksef_sdk.endpoints.tokens import TokenStatusEndpoint
+        from ksef2.endpoints.tokens import TokenStatusEndpoint
 
         ep = TokenStatusEndpoint(FakeTransport())
         assert _REF in ep.get_url(reference_number=_REF)
@@ -38,7 +38,7 @@ class TestTokenStatusEndpoint:
     def test_send_gets_with_correct_headers(
         self, fake_transport: FakeTransport
     ) -> None:
-        from ksef_sdk.endpoints.tokens import TokenStatusEndpoint
+        from ksef2.endpoints.tokens import TokenStatusEndpoint
 
         fake_transport.enqueue(
             {
@@ -63,13 +63,13 @@ class TestTokenStatusEndpoint:
 
 class TestRevokeTokenEndpoint:
     def test_url_contains_reference_number(self) -> None:
-        from ksef_sdk.endpoints.tokens import RevokeTokenEndpoint
+        from ksef2.endpoints.tokens import RevokeTokenEndpoint
 
         ep = RevokeTokenEndpoint(FakeTransport())
         assert _REF in ep.get_url(reference_number=_REF)
 
     def test_send_deletes(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.tokens import RevokeTokenEndpoint
+        from ksef2.endpoints.tokens import RevokeTokenEndpoint
 
         fake_transport.enqueue(status_code=200)
         ep = RevokeTokenEndpoint(fake_transport)

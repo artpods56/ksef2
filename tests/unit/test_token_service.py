@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from ksef_sdk.core import exceptions
-from ksef_sdk.domain.models.tokens import (
+from ksef2.core import exceptions
+from ksef2.domain.models.tokens import (
     GenerateTokenResponse,
     TokenPermission,
     TokenStatus,
     TokenStatusResponse,
 )
-from ksef_sdk.services.tokens import TokenService
+from ksef2.services.tokens import TokenService
 
 from tests.unit.conftest import FakeTransport, _REF
 
