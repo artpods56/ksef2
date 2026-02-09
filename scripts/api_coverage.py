@@ -28,12 +28,12 @@ def collect_sdk_endpoints() -> set[tuple[str, str]]:
 
 def badge_color(pct: int) -> str:
     if pct >= 80:
-        return "brightgreen"
+        return "44cc11"
     if pct >= 60:
-        return "yellow"
+        return "dfb317"
     if pct >= 40:
-        return "orange"
-    return "red"
+        return "fe7d37"
+    return "e05d44"
 
 
 def main() -> None:
