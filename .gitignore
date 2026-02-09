@@ -14,3 +14,7 @@ wheels/
 
 # macOS
 .DS_Store
+
+
+# envs
+.env.*
