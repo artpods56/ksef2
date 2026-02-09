@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from pydantic import BaseModel
 
 
@@ -80,6 +80,18 @@ class KSeFSessionError(KSeFException):
     """Raised on session-state violations (e.g. sending invoice on closed session)."""
 
     code: str = "SESSION_ERROR"
+
+    def __init__(
+        self,
+        message: str,
+    ) -> None:
+        super().__init__(f"{self.code}: {message}")
+
+
+class NoCertificateAvailableError(KSeFException):
+    """Raised when no certificate is available for signing."""
+
+    code: str = "NO_CERTIFICATE_AVAILABLE"
 
     def __init__(
         self,

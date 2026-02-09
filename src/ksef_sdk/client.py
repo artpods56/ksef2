@@ -1,70 +1,50 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final
 
-from ksef_sdk._auth import (
-    init_token_auth,
-    poll_auth_status,
-    redeem_token,
-    refresh_access_token as _refresh_access_token,
-    request_challenge,
-)
-from ksef_sdk._environments import Environment
-from ksef_sdk._generated.model import (
-    FormCode,
-    GenerateTokenResponse,
-    PublicKeyCertificate,
-    SessionInvoicesResponse,
-    SessionStatusResponse,
-    TokenStatusResponse,
-)
-from ksef_sdk._http import HttpTransport
-from ksef_sdk._sessions import OnlineSession
-from ksef_sdk._tokens import (
-    generate_token,
-    get_token_status,
-    poll_token_status,
-    revoke_token,
-)
-from ksef_sdk._xades import (
-    authenticate_xades as _authenticate_xades,
-    generate_test_certificate,
-)
+from ksef_sdk.core._certificates import CertificateStore
+from ksef_sdk.core.http import HttpTransport
+from ksef_sdk.domain.models._deprecated._environments import Environment
 
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-    from cryptography.x509 import Certificate
+    from ksef_sdk.clients._deprecated.auth import AuthClient
+    from ksef_sdk.clients._deprecated.exports import ExportsClient
+    from ksef_sdk.clients._deprecated.invoices import InvoicesClient
+    from ksef_sdk.clients._deprecated.limits import LimitsClient
+    from ksef_sdk.clients._deprecated.sessions import SessionsClient
+    from ksef_sdk.clients._deprecated.tokens import TokensClient
 
 
+@final
 class KsefClient:
-    """High-level facade for the KSeF API.
+    """High-level stateless facade for the KSeF API.
+
+    ``KsefClient`` owns the HTTP transport and certificate store.
+    All session state lives in the sub-clients or is passed explicitly
+    by the caller (e.g. ``access_token``).
 
     Usage::
 
-        with KsefClient(nip="1234567890", token="abc...", env=Environment.TEST) as client:
-            client.authenticate()
+        with KsefClient(env=Environment.TEST) as client:
+            tokens = client.auth.authenticate(token="abc...", nip="1234567890")
 
-            with client.online_session() as session:
+            with client.sessions.open_online(access_token=tokens.access_token) as session:
                 result = session.send_invoice(invoice_xml_bytes)
-                print(result.referenceNumber)
     """
 
-    def __init__(
-        self,
-        *,
-        nip: str,
-        token: str | None = None,
-        env: Environment = Environment.PRODUCTION,
-    ) -> None:
-        self._nip = nip
-        self._token = token
+    def __init__(self, *, env: Environment = Environment.PRODUCTION) -> None:
         self._http = HttpTransport(env)
-        self._certificates: list[PublicKeyCertificate] | None = None
-        self._refresh_token: str | None = None
+        self._certificate_store = CertificateStore(self._http)
+        self._auth: AuthClient | None = None
+        self._sessions: SessionsClient | None = None
+        self._tokens: TokensClient | None = None
+        self._invoices: InvoicesClient | None = None
+        self._exports: ExportsClient | None = None
+        self._limits: LimitsClient | None = None
 
-    # -- lifecycle (resource management) --
+    # -- lifecycle --
 
     def close(self) -> None:
         """Close the underlying HTTP transport."""
@@ -81,160 +61,52 @@ class KsefClient:
     ) -> None:
         self.close()
 
-    # -- certificates --
+    # -- sub-clients (lazy) --
 
-    def get_public_key_certificates(self) -> list[PublicKeyCertificate]:
-        """Fetch (and cache) MF public-key certificates."""
-        if self._certificates is None:
-            self._certificates = self._http.get_list(
-                "/security/public-key-certificates",
-                item_model=PublicKeyCertificate,
-            )
-        return self._certificates
+    @property
+    def auth(self) -> AuthClient:
+        if self._auth is None:
+            from ksef_sdk.clients._deprecated.auth import AuthClient
 
-    # -- authentication --
+            self._auth = AuthClient(self._http, self._certificate_store)
+        return self._auth
 
-    def authenticate(
-        self,
-        *,
-        poll_interval: float = 1.0,
-        max_poll_attempts: int = 30,
-    ) -> None:
-        """Run the full KSeF token-authentication flow.
+    @property
+    def sessions(self) -> SessionsClient:
+        if self._sessions is None:
+            from ksef_sdk.clients._deprecated.sessions import SessionsClient
 
-        1. Request a challenge
-        2. Encrypt ``token|timestamp`` with MF public key
-        3. POST encrypted token → get referenceNumber
-        4. Poll until status=200
-        5. Redeem → access_token + refresh_token
+            self._sessions = SessionsClient(self._http, self._certificate_store)
+        return self._sessions
 
-        Requires a ``token`` to have been passed to the constructor.
-        For token-less auth see :meth:`authenticate_xades`.
-        """
-        if self._token is None:
-            from ksef_sdk.exceptions import KsefAuthError
+    @property
+    def tokens(self) -> TokensClient:
+        if self._tokens is None:
+            from ksef_sdk.clients._deprecated.tokens import TokensClient
 
-            raise KsefAuthError(
-                0, "No KSeF token provided — pass token= to KsefClient or use authenticate_xades()"
-            )
+            self._tokens = TokensClient(self._http, self._certificate_store)
+        return self._tokens
 
-        certs = self.get_public_key_certificates()
+    @property
+    def invoices(self) -> InvoicesClient:
+        if self._invoices is None:
+            from ksef_sdk.clients._deprecated.invoices import InvoicesClient
 
-        challenge = request_challenge(self._http)
+            self._invoices = InvoicesClient(self._http, self._certificate_store)
+        return self._invoices
 
-        init_resp = init_token_auth(
-            self._http,
-            nip=self._nip,
-            token=self._token,
-            challenge=challenge,
-            certificates=certs,
-        )
+    @property
+    def exports(self) -> ExportsClient:
+        if self._exports is None:
+            from ksef_sdk.clients._deprecated.exports import ExportsClient
 
-        poll_auth_status(
-            self._http,
-            init_resp.referenceNumber,
-            poll_interval=poll_interval,
-            max_attempts=max_poll_attempts,
-        )
+            self._exports = ExportsClient(self._http, self._certificate_store)
+        return self._exports
 
-        # Use the authenticationToken from init as Bearer to redeem
-        tokens = redeem_token(self._http, init_resp.authenticationToken.token)
-        self._http.set_access_token(tokens.accessToken.token)
-        self._refresh_token = tokens.refreshToken.token
+    @property
+    def limits(self) -> LimitsClient:
+        if self._limits is None:
+            from ksef_sdk.clients._deprecated.limits import LimitsClient
 
-    def refresh_access_token(self) -> None:
-        """Refresh the current access token using the stored refresh token."""
-        if self._refresh_token is None:
-            from ksef_sdk.exceptions import KsefAuthError
-
-            raise KsefAuthError(0, "No refresh token available — authenticate first")
-
-        resp = _refresh_access_token(self._http, self._refresh_token)
-        self._http.set_access_token(resp.accessToken.token)
-
-    def authenticate_xades(
-        self,
-        *,
-        cert: Certificate | None = None,
-        private_key: RSAPrivateKey | None = None,
-        poll_interval: float = 1.0,
-        max_poll_attempts: int = 30,
-    ) -> None:
-        """Authenticate via XAdES signature (no pre-existing KSeF token needed).
-
-        If *cert* and *private_key* are not provided, a self-signed test
-        certificate is auto-generated using the client's NIP.
-        """
-        if cert is None or private_key is None:
-            cert, private_key = generate_test_certificate(self._nip)
-
-        self._refresh_token = _authenticate_xades(
-            self._http,
-            self._nip,
-            cert,
-            private_key,
-            poll_interval=poll_interval,
-            max_poll_attempts=max_poll_attempts,
-        )
-
-    # -- token management --
-
-    def generate_ksef_token(
-        self,
-        permissions: list[str],
-        description: str,
-        *,
-        poll_interval: float = 1.0,
-        max_poll_attempts: int = 60,
-    ) -> GenerateTokenResponse:
-        """Generate a new KSeF token and wait for it to become active.
-
-        Returns the :class:`GenerateTokenResponse` whose ``.token`` field
-        contains the token string usable for future :meth:`authenticate` calls.
-        """
-        resp = generate_token(
-            self._http, permissions=permissions, description=description
-        )
-        poll_token_status(
-            self._http,
-            resp.referenceNumber,
-            poll_interval=poll_interval,
-            max_attempts=max_poll_attempts,
-        )
-        return resp
-
-    def get_ksef_token_status(self, reference_number: str) -> TokenStatusResponse:
-        """Get the current status of a KSeF token."""
-        return get_token_status(self._http, reference_number)
-
-    def revoke_ksef_token(self, reference_number: str) -> None:
-        """Revoke a KSeF token."""
-        revoke_token(self._http, reference_number)
-
-    # -- sessions --
-
-    def online_session(self, *, form_code: FormCode | None = None) -> OnlineSession:
-        """Create an :class:`OnlineSession` context manager."""
-        certs = self.get_public_key_certificates()
-        return OnlineSession(self._http, certs, form_code=form_code)
-
-    # -- status queries --
-
-    def get_session_status(self, reference_number: str) -> SessionStatusResponse:
-        """``GET /sessions/{referenceNumber}``"""
-        return self._http.get(
-            f"/sessions/{reference_number}",
-            response_model=SessionStatusResponse,
-        )
-
-    def get_session_invoices(
-        self,
-        reference_number: str,
-        *,
-        continuation_token: str | None = None,
-    ) -> SessionInvoicesResponse:
-        """``GET /sessions/{referenceNumber}/invoices``"""
-        path = f"/sessions/{reference_number}/invoices"
-        if continuation_token:
-            path += f"?continuationToken={continuation_token}"
-        return self._http.get(path, response_model=SessionInvoicesResponse)
+            self._limits = LimitsClient(self._http, self._certificate_store)
+        return self._limits

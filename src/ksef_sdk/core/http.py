@@ -1,11 +1,17 @@
-from typing import Any, final, Never
+from typing import Any, final
 import httpx
+
+from ksef_sdk.config import Environment
 from ksef_sdk.core import exceptions
 
 
 @final
 class HttpTransport:
-    def __init__(self) -> None:
+    def __init__(
+        self, environment: Environment, *, base_url: str | None = None
+    ) -> None:
+        self._environment = environment
+        self._base_url = base_url or environment.base_url
         self._client = httpx.Client(http2=True)
 
     @staticmethod
@@ -37,9 +43,12 @@ class HttpTransport:
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
     ) -> httpx.Response:
+
+        full_path = self._base_url + path
+
         resp = self._client.request(
             method,
-            path,
+            full_path,
             headers=headers,
             json=json,
             content=content,
@@ -60,3 +69,11 @@ class HttpTransport:
         json: dict[str, Any] | None = None,
     ) -> httpx.Response:
         return self.request("POST", path, headers=headers, json=json)
+
+    def delete(
+        self,
+        path: str,
+        *,
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
+        return self.request("DELETE", path, headers=headers)

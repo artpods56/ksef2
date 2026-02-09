@@ -4,6 +4,26 @@ from ksef_sdk.infra.schema import model as spec
 
 
 @final
+class DownloadInvoiceEndpoint:
+    def __init__(self, transport: http.HttpTransport):
+        self._transport = transport
+
+    @property
+    def url(self) -> str:
+        return "/invoices/{ksefNumber}"
+
+    def get_url(self, *, ksef_number: str) -> str:
+        return self.url.format(ksefNumber=ksef_number)
+
+    def send(self, access_token: str, ksef_number: str) -> bytes:
+        resp = self._transport.get(
+            self.get_url(ksef_number=ksef_number),
+            headers=headers.KSeFHeaders.session(access_token),
+        )
+        return resp.content
+
+
+@final
 class SendingInvoicesEndpoint:
     def __init__(self, transport: http.HttpTransport):
         self._transport = transport
@@ -23,9 +43,7 @@ class SendingInvoicesEndpoint:
     ) -> spec.SendInvoiceResponse:
         return codecs.JsonResponseCodec.parse(
             self._transport.post(
-                self.get_url(
-                    reference_number=reference_number
-                ),
+                self.get_url(reference_number=reference_number),
                 headers=headers.KSeFHeaders.session(access_token),
                 json=body,
             ),
