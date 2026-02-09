@@ -7,11 +7,11 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from ksef_sdk.core import exceptions
-from ksef_sdk.core.stores import CertificateStore
-from ksef_sdk.domain.models.auth import AuthTokens, RefreshedToken
-from ksef_sdk.domain.models.encryption import CertUsage
-from ksef_sdk.services.auth import AuthService
+from ksef2.core import exceptions
+from ksef2.core.stores import CertificateStore
+from ksef2.domain.models.auth import AuthTokens, RefreshedToken
+from ksef2.domain.models.encryption import CertUsage
+from ksef2.services.auth import AuthService
 
 from tests.unit.conftest import (
     FakeTransport,
@@ -237,9 +237,9 @@ class TestAuthenticateToken:
 
 
 class TestAuthenticateXades:
-    @patch("ksef_sdk.core._xades.sign_xades", return_value=b"<SignedXML/>")
+    @patch("ksef2.core.xades.sign_xades", return_value=b"<SignedXML/>")
     @patch(
-        "ksef_sdk.core._xades.build_auth_token_request_xml",
+        "ksef2.core.xades.build_auth_token_request_xml",
         return_value=b"<AuthTokenRequest/>",
     )
     def test_full_flow_returns_auth_tokens(
@@ -267,9 +267,9 @@ class TestAuthenticateXades:
         mock_build.assert_called_once_with("c" * 36, "1234567890")
         mock_sign.assert_called_once_with(b"<AuthTokenRequest/>", cert_mock, key_mock)
 
-    @patch("ksef_sdk.core._xades.sign_xades", return_value=b"<SignedXML/>")
+    @patch("ksef2.core.xades.sign_xades", return_value=b"<SignedXML/>")
     @patch(
-        "ksef_sdk.core._xades.build_auth_token_request_xml",
+        "ksef2.core.xades.build_auth_token_request_xml",
         return_value=b"<AuthTokenRequest/>",
     )
     def test_does_not_load_certificates(
@@ -294,9 +294,9 @@ class TestAuthenticateXades:
         methods = [c.method for c in fake_transport.calls]
         assert "GET" not in methods[:2]  # first two calls should be POST
 
-    @patch("ksef_sdk.core._xades.sign_xades", return_value=b"<SignedXML/>")
+    @patch("ksef2.core.xades.sign_xades", return_value=b"<SignedXML/>")
     @patch(
-        "ksef_sdk.core._xades.build_auth_token_request_xml",
+        "ksef2.core.xades.build_auth_token_request_xml",
         return_value=b"<AuthTokenRequest/>",
     )
     def test_sends_xml_content(

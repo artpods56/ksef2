@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from ksef_sdk.clients.session import OnlineSessionClient
-from ksef_sdk.domain.models.invoices import SendInvoiceResponse
+from ksef2.clients.session import OnlineSessionClient
+from ksef2.domain.models.invoices import SendInvoiceResponse
 
 from tests.unit.conftest import (
     FakeTransport,

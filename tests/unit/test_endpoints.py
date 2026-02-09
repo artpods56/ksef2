@@ -7,7 +7,7 @@ from tests.unit.conftest import FakeTransport, _REF, _TOKEN
 
 class TestOpenSessionEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.session import OpenSessionEndpoint
+        from ksef2.endpoints.session import OpenSessionEndpoint
 
         ep = OpenSessionEndpoint(FakeTransport())
         assert ep.url == "/sessions/online"
@@ -15,7 +15,7 @@ class TestOpenSessionEndpoint:
     def test_send_posts_with_correct_headers(
         self, fake_transport: FakeTransport
     ) -> None:
-        from ksef_sdk.endpoints.session import OpenSessionEndpoint
+        from ksef2.endpoints.session import OpenSessionEndpoint
 
         fake_transport.enqueue(
             {
@@ -35,13 +35,13 @@ class TestOpenSessionEndpoint:
 
 class TestTerminateSessionEndpoint:
     def test_url_contains_reference_number(self) -> None:
-        from ksef_sdk.endpoints.session import TerminateSessionEndpoint
+        from ksef2.endpoints.session import TerminateSessionEndpoint
 
         ep = TerminateSessionEndpoint(FakeTransport())
         assert _REF in ep.get_url(reference_number=_REF)
 
     def test_send_deletes(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.session import TerminateSessionEndpoint
+        from ksef2.endpoints.session import TerminateSessionEndpoint
 
         fake_transport.enqueue(status_code=200)
         ep = TerminateSessionEndpoint(fake_transport)
@@ -56,7 +56,7 @@ class TestTerminateSessionEndpoint:
 
 class TestDownloadInvoiceEndpoint:
     def test_url_contains_ksef_number(self) -> None:
-        from ksef_sdk.endpoints.invoices import DownloadInvoiceEndpoint
+        from ksef2.endpoints.invoices import DownloadInvoiceEndpoint
 
         ep = DownloadInvoiceEndpoint(FakeTransport())
         url = ep.get_url(ksef_number="INV-123")
@@ -64,7 +64,7 @@ class TestDownloadInvoiceEndpoint:
         assert "INV-123" in url
 
     def test_send_gets(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.invoices import DownloadInvoiceEndpoint
+        from ksef2.endpoints.invoices import DownloadInvoiceEndpoint
 
         fake_transport.enqueue(content=b"<Invoice/>")
         ep = DownloadInvoiceEndpoint(fake_transport)
@@ -79,7 +79,7 @@ class TestDownloadInvoiceEndpoint:
 
 class TestSendingInvoicesEndpoint:
     def test_url_contains_reference_number(self) -> None:
-        from ksef_sdk.endpoints.invoices import SendingInvoicesEndpoint
+        from ksef2.endpoints.invoices import SendingInvoicesEndpoint
 
         ep = SendingInvoicesEndpoint(FakeTransport())
         url = ep.get_url(reference_number=_REF)
@@ -88,7 +88,7 @@ class TestSendingInvoicesEndpoint:
         assert url.endswith("/invoices")
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.invoices import SendingInvoicesEndpoint
+        from ksef2.endpoints.invoices import SendingInvoicesEndpoint
 
         fake_transport.enqueue({"referenceNumber": _REF})
         ep = SendingInvoicesEndpoint(fake_transport)
@@ -102,13 +102,13 @@ class TestSendingInvoicesEndpoint:
 
 class TestCertificateEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.encryption import CertificateEndpoint
+        from ksef2.endpoints.encryption import CertificateEndpoint
 
         ep = CertificateEndpoint(FakeTransport())
         assert ep.url == "/security/public-key-certificates"
 
     def test_fetch_sends_get(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.encryption import CertificateEndpoint
+        from ksef2.endpoints.encryption import CertificateEndpoint
 
         fake_transport.enqueue([])
         ep = CertificateEndpoint(fake_transport)

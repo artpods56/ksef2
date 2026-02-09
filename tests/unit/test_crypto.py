@@ -7,7 +7,7 @@ import hashlib
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from ksef_sdk.core.crypto import (
+from ksef2.core.crypto import (
     encrypt_invoice,
     generate_session_key,
     sha256_b64,

@@ -6,9 +6,9 @@ from datetime import datetime, timezone, timedelta
 
 import pytest
 
-from ksef_sdk.core import exceptions
-from ksef_sdk.core.stores import CertificateStore
-from ksef_sdk.domain.models.encryption import CertUsage
+from ksef2.core import exceptions
+from ksef2.core.stores import CertificateStore
+from ksef2.domain.models.encryption import CertUsage
 
 from tests.unit.conftest import make_certificate
 

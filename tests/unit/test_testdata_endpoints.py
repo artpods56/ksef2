@@ -7,13 +7,13 @@ from tests.unit.conftest import FakeTransport
 
 class TestCreateSubjectEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.testdata import CreateSubjectEndpoint
+        from ksef2.endpoints.testdata import CreateSubjectEndpoint
 
         ep = CreateSubjectEndpoint(FakeTransport())
         assert ep.url == "/testdata/subject"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.testdata import CreateSubjectEndpoint
+        from ksef2.endpoints.testdata import CreateSubjectEndpoint
 
         fake_transport.enqueue(status_code=204)
         ep = CreateSubjectEndpoint(fake_transport)
@@ -28,13 +28,13 @@ class TestCreateSubjectEndpoint:
 
 class TestDeleteSubjectEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.testdata import DeleteSubjectEndpoint
+        from ksef2.endpoints.testdata import DeleteSubjectEndpoint
 
         ep = DeleteSubjectEndpoint(FakeTransport())
         assert ep.url == "/testdata/subject/remove"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.testdata import DeleteSubjectEndpoint
+        from ksef2.endpoints.testdata import DeleteSubjectEndpoint
 
         fake_transport.enqueue(status_code=204)
         ep = DeleteSubjectEndpoint(fake_transport)
@@ -48,13 +48,13 @@ class TestDeleteSubjectEndpoint:
 
 class TestCreatePersonEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.testdata import CreatePersonEndpoint
+        from ksef2.endpoints.testdata import CreatePersonEndpoint
 
         ep = CreatePersonEndpoint(FakeTransport())
         assert ep.url == "/testdata/person"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.testdata import CreatePersonEndpoint
+        from ksef2.endpoints.testdata import CreatePersonEndpoint
 
         fake_transport.enqueue(status_code=204)
         ep = CreatePersonEndpoint(fake_transport)
@@ -68,13 +68,13 @@ class TestCreatePersonEndpoint:
 
 class TestDeletePersonEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.testdata import DeletePersonEndpoint
+        from ksef2.endpoints.testdata import DeletePersonEndpoint
 
         ep = DeletePersonEndpoint(FakeTransport())
         assert ep.url == "/testdata/person/remove"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.testdata import DeletePersonEndpoint
+        from ksef2.endpoints.testdata import DeletePersonEndpoint
 
         fake_transport.enqueue(status_code=204)
         ep = DeletePersonEndpoint(fake_transport)
@@ -88,13 +88,13 @@ class TestDeletePersonEndpoint:
 
 class TestGrantPermissionsEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.testdata import GrantPermissionsEndpoint
+        from ksef2.endpoints.testdata import GrantPermissionsEndpoint
 
         ep = GrantPermissionsEndpoint(FakeTransport())
         assert ep.url == "/testdata/permissions"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.testdata import GrantPermissionsEndpoint
+        from ksef2.endpoints.testdata import GrantPermissionsEndpoint
 
         fake_transport.enqueue(status_code=204)
         ep = GrantPermissionsEndpoint(fake_transport)
@@ -110,13 +110,13 @@ class TestGrantPermissionsEndpoint:
 
 class TestRevokePermissionsEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.testdata import RevokePermissionsEndpoint
+        from ksef2.endpoints.testdata import RevokePermissionsEndpoint
 
         ep = RevokePermissionsEndpoint(FakeTransport())
         assert ep.url == "/testdata/permissions/revoke"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.testdata import RevokePermissionsEndpoint
+        from ksef2.endpoints.testdata import RevokePermissionsEndpoint
 
         fake_transport.enqueue(status_code=204)
         ep = RevokePermissionsEndpoint(fake_transport)
@@ -130,13 +130,13 @@ class TestRevokePermissionsEndpoint:
 
 class TestEnableAttachmentsEndpoint:
     def test_url(self) -> None:
-        from ksef_sdk.endpoints.testdata import EnableAttachmentsEndpoint
+        from ksef2.endpoints.testdata import EnableAttachmentsEndpoint
 
         ep = EnableAttachmentsEndpoint(FakeTransport())
         assert ep.url == "/testdata/attachment-permission"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
-        from ksef_sdk.endpoints.testdata import EnableAttachmentsEndpoint
+        from ksef2.endpoints.testdata import EnableAttachmentsEndpoint
 
         fake_transport.enqueue(status_code=204)
         ep = EnableAttachmentsEndpoint(fake_transport)

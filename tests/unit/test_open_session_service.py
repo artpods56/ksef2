@@ -6,12 +6,12 @@ from datetime import datetime, timezone, timedelta
 
 import pytest
 
-from ksef_sdk.clients.session import OnlineSessionClient
-from ksef_sdk.core import exceptions
-from ksef_sdk.core.stores import CertificateStore
-from ksef_sdk.domain.models.encryption import CertUsage
-from ksef_sdk.domain.models.session import FormSchema
-from ksef_sdk.services.session import OpenSessionService
+from ksef2.clients.session import OnlineSessionClient
+from ksef2.core import exceptions
+from ksef2.core.stores import CertificateStore
+from ksef2.domain.models.encryption import CertUsage
+from ksef2.domain.models.session import FormSchema
+from ksef2.services.session import OpenSessionService
 
 from tests.unit.conftest import (
     FakeTransport,

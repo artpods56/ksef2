@@ -1,4 +1,4 @@
-from ksef_sdk import Client, FormSchema
+from ksef2 import Client, FormSchema
 
 client = Client()
 
@@ -13,7 +13,4 @@ with client.sessions.open_online(
 # Option B: Manual — session stays open for later use (e.g. workers)
 session = client.sessions.open_online(access_token="...", form_code=FormSchema.FA3)
 _ = session.send_invoice(b"<invoice xml>")
-# session.terminate()  # call explicitly when ready, or let it expire
-
-
-x = client.auth.authenticate_token()
+session.terminate()

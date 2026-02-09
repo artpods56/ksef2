@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone, timedelta
 
-from ksef_sdk.clients.encryption import EncryptionClient
-from ksef_sdk.domain.models.encryption import CertUsage, PublicKeyCertificate
+from ksef2.clients.encryption import EncryptionClient
+from ksef2.domain.models.encryption import CertUsage, PublicKeyCertificate
 
 from tests.unit.conftest import FakeTransport
 
