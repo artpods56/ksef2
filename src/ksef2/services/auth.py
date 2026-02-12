@@ -7,7 +7,7 @@ from ksef2.clients.encryption import EncryptionClient
 from ksef2.core import exceptions
 from ksef2.core.crypto import encrypt_token
 from ksef2.core.exceptions import KSeFAuthError
-from ksef2.core.http import HttpTransport
+from ksef2.core import middleware
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models.auth import (
     AuthTokens,
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 class AuthService:
     def __init__(
         self,
-        transport: HttpTransport,
+        transport: middleware.KSeFProtocol,
         certificate_store: CertificateStore,
     ) -> None:
         self._transport = transport
@@ -151,13 +151,13 @@ class AuthService:
                 return
             if status.status_code >= 400:
                 raise KSeFAuthError(
-                    code=status.status_code,
+                    status_code=status.status_code,
                     message=f"Authentication failed: {status.status_description}",
                 )
             time.sleep(poll_interval)
 
         raise KSeFAuthError(
-            code=408,
+            status_code=408,
             message="Authentication polling timed out.",
         )
 

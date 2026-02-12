@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
-from typing import final
+from types import TracebackType
+from typing import Self, final
 
-from ksef2.core.http import HttpTransport
+from ksef2.core import middleware
 from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
     SubjectType,
-    Subunit,
+    SubUnit,
+    CreateSubjectRequest,
 )
 from ksef2.endpoints.testdata import (
     CreatePersonEndpoint,
@@ -19,12 +22,14 @@ from ksef2.endpoints.testdata import (
     GrantPermissionsEndpoint,
     RevokePermissionsEndpoint,
 )
-from ksef2.infra.mappers.testdata import TestDataMapper
+from ksef2.infra.mappers.testdata import TestDataMapper, TestDataMapperv2
+
+logger = logging.getLogger(__name__)
 
 
 @final
 class TestDataService:
-    def __init__(self, transport: HttpTransport) -> None:
+    def __init__(self, transport: middleware.KSeFProtocol) -> None:
         self._create_subject_ep = CreateSubjectEndpoint(transport)
         self._delete_subject_ep = DeleteSubjectEndpoint(transport)
         self._create_person_ep = CreatePersonEndpoint(transport)
@@ -39,17 +44,19 @@ class TestDataService:
         nip: str,
         subject_type: SubjectType,
         description: str,
-        subunits: list[Subunit] | None = None,
+        subunits: list[SubUnit] | None = None,
         created_date: datetime | None = None,
     ) -> None:
         self._create_subject_ep.send(
-            TestDataMapper.create_subject(
-                nip=nip,
-                subject_type=subject_type,
-                description=description,
-                subunits=subunits,
-                created_date=created_date,
-            )
+            TestDataMapperv2.map_request(
+                CreateSubjectRequest(
+                    subject_nip=nip,
+                    subject_type=subject_type,
+                    description=description,
+                    subunits=subunits,
+                    created_date=created_date,
+                )
+            ).model_dump()
         )
 
     def delete_subject(self, *, nip: str) -> None:
@@ -109,3 +116,102 @@ class TestDataService:
 
     def enable_attachments(self, *, nip: str) -> None:
         self._enable_attachments_ep.send(TestDataMapper.enable_attachments(nip=nip))
+
+    def temporal(self) -> TemporalTestData:
+        return TemporalTestData(self)
+
+
+@final
+class TemporalTestData:
+    def __init__(self, service: TestDataService) -> None:
+        self._service = service
+        self._subjects: list[str] = []
+        self._persons: list[str] = []
+        self._permissions: list[tuple[Identifier, Identifier]] = []
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        for context, authorized in reversed(self._permissions):
+            try:
+                self._service.revoke_permissions(context=context, authorized=authorized)
+            except Exception:
+                logger.warning(
+                    "Failed to revoke permissions for %s → %s",
+                    context,
+                    authorized,
+                    exc_info=True,
+                )
+
+        for nip in reversed(self._persons):
+            try:
+                self._service.delete_person(nip=nip)
+            except Exception:
+                logger.warning("Failed to delete person %s", nip, exc_info=True)
+
+        for nip in reversed(self._subjects):
+            try:
+                self._service.delete_subject(nip=nip)
+            except Exception:
+                logger.warning("Failed to delete subject %s", nip, exc_info=True)
+
+    def create_subject(
+        self,
+        *,
+        nip: str,
+        subject_type: SubjectType,
+        description: str,
+        subunits: list[SubUnit] | None = None,
+        created_date: datetime | None = None,
+    ) -> None:
+        self._service.create_subject(
+            nip=nip,
+            subject_type=subject_type,
+            description=description,
+            subunits=subunits,
+            created_date=created_date,
+        )
+        self._subjects.append(nip)
+
+    def create_person(
+        self,
+        *,
+        nip: str,
+        pesel: str,
+        description: str,
+        is_bailiff: bool = False,
+        is_deceased: bool = False,
+        created_date: datetime | None = None,
+    ) -> None:
+        self._service.create_person(
+            nip=nip,
+            pesel=pesel,
+            description=description,
+            is_bailiff=is_bailiff,
+            is_deceased=is_deceased,
+            created_date=created_date,
+        )
+        self._persons.append(nip)
+
+    def grant_permissions(
+        self,
+        *,
+        context: Identifier,
+        authorized: Identifier,
+        permissions: list[Permission],
+    ) -> None:
+        self._service.grant_permissions(
+            context=context,
+            authorized=authorized,
+            permissions=permissions,
+        )
+        self._permissions.append((context, authorized))
+
+    def enable_attachments(self, *, nip: str) -> None:
+        self._service.enable_attachments(nip=nip)

@@ -4,7 +4,7 @@ import time
 from typing import final
 
 from ksef2.core import exceptions
-from ksef2.core.http import HttpTransport
+from ksef2.core import middleware
 from ksef2.domain.models.tokens import (
     GenerateTokenResponse,
     TokenPermission,
@@ -21,7 +21,7 @@ from ksef2.infra.mappers.tokens import GenerateTokenMapper, TokenStatusMapper
 
 @final
 class TokenService:
-    def __init__(self, transport: HttpTransport) -> None:
+    def __init__(self, transport: middleware.KSeFProtocol) -> None:
         self._generate_ep = GenerateTokenEndpoint(transport)
         self._status_ep = TokenStatusEndpoint(transport)
         self._revoke_ep = RevokeTokenEndpoint(transport)
