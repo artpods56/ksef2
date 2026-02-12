@@ -1,13 +1,13 @@
 from typing import final, Any
 
-from ksef2.core import http
+from ksef2.core import http, middleware
 
 
 @final
 class CreateSubjectEndpoint:
     url: str = "/testdata/subject"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -18,7 +18,7 @@ class CreateSubjectEndpoint:
 class DeleteSubjectEndpoint:
     url: str = "/testdata/subject/remove"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -29,7 +29,7 @@ class DeleteSubjectEndpoint:
 class CreatePersonEndpoint:
     url: str = "/testdata/person"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -40,7 +40,7 @@ class CreatePersonEndpoint:
 class DeletePersonEndpoint:
     url: str = "/testdata/person/remove"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -51,30 +51,30 @@ class DeletePersonEndpoint:
 class GrantPermissionsEndpoint:
     url: str = "/testdata/permissions"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
-        self._transport.post(self.url, json=body)
+        _ = self._transport.post(self.url, json=body)
 
 
 @final
 class RevokePermissionsEndpoint:
     url: str = "/testdata/permissions/revoke"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
-        self._transport.post(self.url, json=body)
+        _ = self._transport.post(self.url, json=body)
 
 
 @final
 class EnableAttachmentsEndpoint:
     url: str = "/testdata/attachment-permission"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
-        self._transport.post(self.url, json=body)
+        _ = self._transport.post(self.url, json=body)

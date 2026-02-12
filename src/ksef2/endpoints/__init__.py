@@ -8,6 +8,7 @@ class EndpointRef:
     method: str
     url: str
 
+
 __auth_endpoints__ = [
     EndpointRef("POST", auth.ChallengeEndpoint.url),
     EndpointRef("POST", auth.TokenAuthEndpoint.url),

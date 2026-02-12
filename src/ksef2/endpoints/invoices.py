@@ -1,13 +1,13 @@
 from typing import final, Any
-from ksef2.core import http, headers, codecs
-from ksef2.infra.schema import model as spec
+from ksef2.core import http, headers, codecs, middleware
+from ksef2.infra.schema.api import spec as spec
 
 
 @final
 class DownloadInvoiceEndpoint:
     url: str = "/invoices/ksef/{ksefNumber}"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def get_url(self, *, ksef_number: str) -> str:
@@ -25,7 +25,7 @@ class DownloadInvoiceEndpoint:
 class SendingInvoicesEndpoint:
     url: str = "/sessions/online/{referenceNumber}/invoices"
 
-    def __init__(self, transport: http.HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def get_url(self, *, reference_number: str) -> str:

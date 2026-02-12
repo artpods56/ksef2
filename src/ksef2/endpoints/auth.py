@@ -1,15 +1,15 @@
 from typing import final, Any
 
-from ksef2.core import headers, codecs
-from ksef2.core.http import HttpTransport
-from ksef2.infra.schema import model as spec
+from ksef2.core import headers, codecs, middleware
+from ksef2.core import middleware
+from ksef2.infra.schema.api import spec as spec
 
 
 @final
 class ChallengeEndpoint:
     url: str = "/auth/challenge"
 
-    def __init__(self, transport: HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self) -> spec.AuthenticationChallengeResponse:
@@ -23,7 +23,7 @@ class ChallengeEndpoint:
 class TokenAuthEndpoint:
     url: str = "/auth/ksef-token"
 
-    def __init__(self, transport: HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> spec.AuthenticationInitResponse:
@@ -37,7 +37,7 @@ class TokenAuthEndpoint:
 class XAdESAuthEndpoint:
     url: str = "/auth/xades-signature"
 
-    def __init__(self, transport: HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def get_url(self, *, verify_chain: bool = False) -> str:
@@ -64,7 +64,7 @@ class XAdESAuthEndpoint:
 class AuthStatusEndpoint:
     url: str = "/auth/{referenceNumber}"
 
-    def __init__(self, transport: HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def get_url(self, *, reference_number: str) -> str:
@@ -88,7 +88,7 @@ class AuthStatusEndpoint:
 class RedeemTokenEndpoint:
     url: str = "/auth/token/redeem"
 
-    def __init__(self, transport: HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(
@@ -108,7 +108,7 @@ class RedeemTokenEndpoint:
 class RefreshTokenEndpoint:
     url: str = "/auth/token/refresh"
 
-    def __init__(self, transport: HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def send(

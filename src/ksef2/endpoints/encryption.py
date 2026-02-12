@@ -1,7 +1,8 @@
 from typing import final
-from ksef2.core.http import HttpTransport
+
+from ksef2.core import middleware
 from ksef2.core.codecs import JsonResponseCodec
-from ksef2.infra.schema import model as spec
+from ksef2.infra.schema.api import spec as spec
 
 
 @final
@@ -14,7 +15,7 @@ class CertificateEndpoint:
 
     url: str = "/security/public-key-certificates"
 
-    def __init__(self, transport: HttpTransport):
+    def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
 
     def fetch(
