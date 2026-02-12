@@ -1,7 +1,7 @@
 import base64
 
 from ksef2.domain.models import FormSchema, OpenOnlineSessionResponse
-from ksef2.infra.schema import model as spec
+from ksef2.infra.schema.api import spec as spec
 
 
 class OpenOnlineSessionMapper:

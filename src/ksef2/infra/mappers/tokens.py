@@ -6,7 +6,7 @@ from ksef2.domain.models.tokens import (
     TokenStatus,
     TokenStatusResponse,
 )
-from ksef2.infra.schema import model as spec
+from ksef2.infra.schema.api import spec as spec
 
 
 class GenerateTokenMapper:

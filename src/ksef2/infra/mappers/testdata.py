@@ -7,8 +7,28 @@ from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
     SubjectType,
-    Subunit,
+    SubUnit,
+    CreateSubjectRequest,
 )
+
+from ksef2.infra.schema.api import spec, supp
+
+
+class TestDataMapperv2:
+    @staticmethod
+    def map_request(request: CreateSubjectRequest) -> supp.CreateSubjectRequest:
+        return supp.CreateSubjectRequest(
+            subjectNip=request.subject_nip,
+            subjectType=request.subject_type.value,
+            description=request.description,
+            createdDate=request.created_date,
+            subunits=[
+                supp.SubUnit(subjectNip=unit.subject_nip, description=unit.description)
+                for unit in request.subunits
+            ]
+            if request.subunits
+            else None,
+        )
 
 
 class TestDataMapper:
@@ -18,17 +38,18 @@ class TestDataMapper:
         nip: str,
         subject_type: SubjectType,
         description: str,
-        subunits: list[Subunit] | None = None,
+        subunits: list[SubUnit] | None = None,
         created_date: datetime | None = None,
     ) -> dict[str, Any]:
         body: dict[str, Any] = {
-            "subjectNip": nip,
+            "subjectNiip": nip,
             "subjectType": subject_type.value,
             "description": description,
         }
         if subunits:
             body["subunits"] = [
-                {"subjectNip": s.nip, "description": s.description} for s in subunits
+                {"subjectNip": s.subject_nip, "description": s.description}
+                for s in subunits
             ]
         if created_date is not None:
             body["createdDate"] = created_date.isoformat()

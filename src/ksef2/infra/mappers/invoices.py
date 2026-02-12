@@ -1,7 +1,7 @@
 import base64
 
 from ksef2.core.crypto import sha256_b64
-from ksef2.infra.schema import model as spec
+from ksef2.infra.schema.api import spec as spec
 from ksef2.domain.models import invoices
 
 
