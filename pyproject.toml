@@ -9,6 +9,7 @@ dependencies = [
     "cryptography>=44.0.0",
     "signxml>=4.0",
     "httpx[http2]>=0.28.1",
+    "structlog>=25.5.0",
 ]
 
 [dependency-groups]
@@ -21,6 +22,7 @@ dev = [
 ]
 codegen = [
     "datamodel-code-generator[ruff]>=0.53.0",
+    "xsdata[cli,lxml]>=24.0",
 ]
 
 [tool.pytest.ini_options]

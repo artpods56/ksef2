@@ -385,11 +385,13 @@ dependencies = [
     { name = "httpx", extra = ["http2"] },
     { name = "pydantic" },
     { name = "signxml" },
+    { name = "structlog" },
 ]
 
 [package.dev-dependencies]
 codegen = [
     { name = "datamodel-code-generator", extra = ["ruff"] },
+    { name = "xsdata", extra = ["cli", "lxml"] },
 ]
 dev = [
     { name = "basedpyright" },
@@ -405,10 +407,14 @@ requires-dist = [
     { name = "httpx", extras = ["http2"], specifier = ">=0.28.1" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "signxml", specifier = ">=4.0" },
+    { name = "structlog", specifier = ">=25.5.0" },
 ]
 
 [package.metadata.requires-dev]
-codegen = [{ name = "datamodel-code-generator", extras = ["ruff"], specifier = ">=0.53.0" }]
+codegen = [
+    { name = "datamodel-code-generator", extras = ["ruff"], specifier = ">=0.53.0" },
+    { name = "xsdata", extras = ["cli", "lxml"], specifier = ">=24.0" },
+]
 dev = [
     { name = "basedpyright", specifier = ">=1.37.4" },
     { name = "lxml-stubs", specifier = ">=0.5.1" },
@@ -886,6 +892,24 @@ wheels = [
 ]
 
 [[package]]
+name = "structlog"
+version = "25.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/52/9ba0f43b686e7f3ddfeaa78ac3af750292662284b3661e91ad5494f21dbc/structlog-25.5.0.tar.gz", hash = "sha256:098522a3bebed9153d4570c6d0288abf80a031dfdb2048d59a49e9dc2190fc98", size = 1460830, upload-time = "2025-10-27T08:28:23.028Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/45/a132b9074aa18e799b891b91ad72133c98d8042c70f6240e4c5f9dabee2f/structlog-25.5.0-py3-none-any.whl", hash = "sha256:a8453e9b9e636ec59bd9e79bbd4a72f025981b3ba0f5837aebf48f02f37a7f9f", size = 72510, upload-time = "2025-10-27T08:28:21.535Z" },
+]
+
+[[package]]
+name = "toposort"
+version = "1.10"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/19/8e955d90985ecbd3b9adb2a759753a6840da2dff3c569d412b2c9217678b/toposort-1.10.tar.gz", hash = "sha256:bfbb479c53d0a696ea7402601f4e693c97b0367837c8898bc6471adfca37a6bd", size = 11132, upload-time = "2023-02-27T13:59:51.834Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f6/17/57b444fd314d5e1593350b9a31d000e7411ba8e17ce12dc7ad54ca76b810/toposort-1.10-py3-none-any.whl", hash = "sha256:cbdbc0d0bee4d2695ab2ceec97fe0679e9c10eab4b2a87a9372b929e70563a87", size = 8500, upload-time = "2023-02-25T20:07:06.538Z" },
+]
+
+[[package]]
 name = "typeguard"
 version = "4.4.4"
 source = { registry = "https://pypi.org/simple" }
@@ -916,4 +940,27 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/55/e3/70399cb7dd41c10ac53367ae42139cf4b1ca5f36bb3dc6c9d33acdb43655/typing_inspection-0.4.2.tar.gz", hash = "sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464", size = 75949, upload-time = "2025-10-01T02:14:41.687Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl", hash = "sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7", size = 14611, upload-time = "2025-10-01T02:14:40.154Z" },
+]
+
+[[package]]
+name = "xsdata"
+version = "26.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/24/9f/c1b0fa54f2b3f43989015668daddd8bd50d3bf3461ba8b79fdeb8000b27d/xsdata-26.1.tar.gz", hash = "sha256:dcae2c0e5f329f1b4e09a2d148c96941c9556616bb5e3418970a63c5eb2cd831", size = 348523, upload-time = "2026-01-19T19:03:54.347Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7b/48/37775c15adba3070f0af934a6617696a608a75f2e01be37a454e298cf32c/xsdata-26.1-py3-none-any.whl", hash = "sha256:aa02adf1b75668e7b685f4de3c4507e4aa31af3f2e2210fd45aa2f0e4a637a99", size = 235422, upload-time = "2026-01-19T19:03:52.684Z" },
+]
+
+[package.optional-dependencies]
+cli = [
+    { name = "click" },
+    { name = "jinja2" },
+    { name = "ruff" },
+    { name = "toposort" },
+]
+lxml = [
+    { name = "lxml" },
 ]
