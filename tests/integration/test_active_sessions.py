@@ -4,9 +4,9 @@ import pytest
 
 
 @pytest.mark.integration
-def test_list_active_sessions(authenticated_context):
+def test_list_active_sessions(xades_authenticated_context):
     """List active authentication sessions."""
-    client, tokens = authenticated_context
+    client, tokens = xades_authenticated_context
 
     response = client.auth.list_active_sessions(
         access_token=tokens.access_token.token,
@@ -18,9 +18,9 @@ def test_list_active_sessions(authenticated_context):
 
 
 @pytest.mark.integration
-def test_list_active_sessions_with_pagination(authenticated_context):
+def test_list_active_sessions_with_pagination(xades_authenticated_context):
     """List active sessions with pagination."""
-    client, tokens = authenticated_context
+    client, tokens = xades_authenticated_context
 
     response = client.auth.list_active_sessions(
         access_token=tokens.access_token.token,
@@ -32,9 +32,9 @@ def test_list_active_sessions_with_pagination(authenticated_context):
 
 
 @pytest.mark.integration
-def test_terminate_current_session(authenticated_context):
+def test_terminate_current_session(xades_authenticated_context):
     """Terminate the current authentication session."""
-    client, tokens = authenticated_context
+    client, tokens = xades_authenticated_context
 
     client.auth.terminate_current_session(
         access_token=tokens.access_token.token,
@@ -42,9 +42,9 @@ def test_terminate_current_session(authenticated_context):
 
 
 @pytest.mark.integration
-def test_terminate_specific_session(authenticated_context):
+def test_terminate_specific_session(xades_authenticated_context):
     """Terminate a specific authentication session by reference number."""
-    client, tokens = authenticated_context
+    client, tokens = xades_authenticated_context
 
     sessions_response = client.auth.list_active_sessions(
         access_token=tokens.access_token.token,
