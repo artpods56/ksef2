@@ -8,9 +8,7 @@ The SDK supports multiple authentication methods for accessing the KSeF API.
 
 Uses a digital certificate to sign an authentication request. Works with self-signed certificates on the TEST environment.
 
-**Endpoint:** `POST /auth/xades-signature`
-
-**KSeF API:** [`/auth/xades-signature`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Uzyskiwanie-dostepu/paths/~1auth~1xades-signature/post)
+**SDK Endpoint:** `POST /auth/xades-signature`
 
 **Requirements:**
 - Self-signed certificate (TEST only) or qualified certificate (PRODUCTION)
@@ -22,9 +20,7 @@ Uses a digital certificate to sign an authentication request. Works with self-si
 
 Uses a pre-generated KSeF token (not the access token) for authentication.
 
-**Endpoint:** `POST /auth/ksef-token`
-
-**KSeF API:** [`/auth/ksef-token`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Uzyskiwanie-dostepu/paths/~1auth~1ksef-token/post)
+**SDK Endpoint:** `POST /auth/ksef-token`
 
 **Requirements:**
 - Valid KSeF token obtained from:
@@ -37,9 +33,7 @@ Uses a pre-generated KSeF token (not the access token) for authentication.
 
 Refresh an expired access token without re-authenticating.
 
-**Endpoint:** `POST /auth/token/refresh`
-
-**KSeF API:** [`/auth/token/refresh`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Uzyskiwanie-dostepu/paths/~1auth~1token~1refresh/post)
+**SDK Endpoint:** `POST /auth/token/refresh`
 
 **Requirements:**
 - Valid refresh token from previous authentication
@@ -72,7 +66,7 @@ Refresh an expired access token without re-authenticating.
    → {accessToken, refreshToken}
 ```
 
-**Endpoints:**
+**SDK Endpoints:**
 - `POST /auth/challenge` - Get authentication challenge
 - `POST /auth/xades-signature` - Submit XAdES signed request
 - `POST /auth/ksef-token` - Submit token-based request
@@ -86,9 +80,9 @@ Refresh an expired access token without re-authenticating.
 
 | Environment | Base URL | Self-Signed Cert | Notes |
 |-------------|----------|------------------|-------|
-| PRODUCTION | `api.ksef.mf.gov.pl/api/v2` | ❌ | Requires qualified cert |
-| TEST | `api-test.ksef.mf.gov.pl/api/v2` | ✅ | Full test support |
-| DEMO | `api-demo.ksef.mf.gov.pl/api/v2` | ✅ | Demo environment |
+| PRODUCTION | `api.ksef.mf.gov.pl/v2` | ❌ | Requires qualified cert |
+| TEST | `api-test.ksef.mf.gov.pl/v2` | ✅ | Full test support |
+| DEMO | `api-demo.ksef.mf.gov.pl/v2` | ✅ | Demo environment |
 
 ---
 
@@ -96,4 +90,3 @@ Refresh an expired access token without re-authenticating.
 
 - [Test Data](guides/testdata.md) - Setting up test subjects
 - [Tokens](guides/tokens.md) - Token generation and management
-- KSeF API: [Authentication](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Uzyskiwanie-dostepu)

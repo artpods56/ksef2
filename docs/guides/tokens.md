@@ -18,9 +18,7 @@ A separate credential used for token-based authentication (`authenticate_token`)
 
 Create a new KSeF token for future authentication.
 
-**Endpoint:** `POST /token/manage`
-
-**KSeF API:** [`/token/manage`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Zarzadzanie-tokenami/paths/~1token~1manage/post)
+**SDK Endpoint:** `POST /tokens`
 
 **Requirements:**
 - Valid access token with `CREDENTIALS_MANAGE` permission
@@ -31,9 +29,7 @@ Create a new KSeF token for future authentication.
 
 Check the status of a token generation request.
 
-**Endpoint:** `GET /token/manage/{referenceNumber}`
-
-**KSeF API:** [`/token/manage/{referenceNumber}`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Zarzadzanie-tokenami/paths/~1token~1manage~1%7BreferenceNumber%7D/get)
+**SDK Endpoint:** `GET /tokens/{referenceNumber}`
 
 ---
 
@@ -41,9 +37,7 @@ Check the status of a token generation request.
 
 Revoke an existing KSeF token.
 
-**Endpoint:** `DELETE /token/manage/{referenceNumber}`
-
-**KSeF API:** [`/token/manage/{referenceNumber}`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Zarzadzanie-tokenami/paths/~1token~1manage~1%7BreferenceNumber%7D/delete)
+**SDK Endpoint:** `DELETE /tokens/{referenceNumber}`
 
 ---
 
@@ -64,4 +58,3 @@ Revoke an existing KSeF token.
 ## Related
 
 - [Authentication](guides/authentication.md) - Using tokens for authentication
-- KSeF API: [Tokeny](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Zarzadzanie-tokenami)

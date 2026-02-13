@@ -8,17 +8,15 @@ Manage KSeF online sessions for invoice operations.
 
 Start a new online session for invoice operations.
 
-**Endpoint:** `POST /online/session`
-
-**KSeF API:** [`/online/session`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Sesje/paths/~1online~1session/post)
+**SDK Endpoint:** `POST /sessions/online`
 
 ---
 
 ### Resume Session
 
-Resume an existing session.
+Resume an existing session from saved state.
 
-**Endpoint:** `POST /online/session/resume`
+**SDK Endpoint:** Uses stored session state
 
 ---
 
@@ -26,9 +24,7 @@ Resume an existing session.
 
 End an active session.
 
-**Endpoint:** `DELETE /online/session`
-
-**KSeF API:** [`/online/session`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Sesje/paths/~1online~1session/delete)
+**SDK Endpoint:** `POST /sessions/online/{referenceNumber}/close`
 
 ---
 
@@ -36,15 +32,14 @@ End an active session.
 
 ```
 1. Open Session
-   POST /online/session → {sessionId, ...}
+   POST /sessions/online → {referenceNumber, ...}
 
 2. Perform Operations
    - send_invoice()
    - download_invoice()
-   - search_invoices()
 
 3. Terminate Session
-   DELETE /online/session
+   POST /sessions/online/{referenceNumber}/close
 ```
 
 ---
@@ -53,4 +48,3 @@ End an active session.
 
 - [Invoices](guides/invoices.md) - Invoice operations within sessions
 - [Authentication](guides/authentication.md) - Getting access tokens
-- KSeF API: [Sesje](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Sesje)

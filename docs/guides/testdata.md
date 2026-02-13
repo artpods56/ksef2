@@ -4,8 +4,6 @@ The TEST environment provides test data APIs for setting up integration tests.
 
 **Note:** These endpoints are only available on the TEST environment, not PRODUCTION or DEMO.
 
-**Base URL:** `https://api-test.ksef.mf.gov.pl/v2`
-
 ---
 
 ## Operations
@@ -14,9 +12,7 @@ The TEST environment provides test data APIs for setting up integration tests.
 
 Create a test subject (organization/entity).
 
-**Endpoint:** `POST /testdata/subject`
-
-**KSeF API:** [`/testdata/subject`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Dane-testyowe/paths/~1testdata~1subject/post)
+**SDK Endpoint:** `POST /testdata/subject`
 
 ---
 
@@ -24,9 +20,7 @@ Create a test subject (organization/entity).
 
 Create a test person associated with a subject.
 
-**Endpoint:** `POST /testdata/person`
-
-**KSeF API:** [`/testdata/person`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Dane-testyowe/paths/~1testdata~1person/post)
+**SDK Endpoint:** `POST /testdata/person`
 
 ---
 
@@ -34,9 +28,7 @@ Create a test person associated with a subject.
 
 Grant permissions to a person for a subject context.
 
-**Endpoint:** `POST /testdata/permissions`
-
-**KSeF API:** [`/testdata/permissions`](https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Dane-testyowe/paths/~1testdata~1permissions/post)
+**SDK Endpoint:** `POST /testdata/permissions`
 
 ---
 
@@ -44,7 +36,7 @@ Grant permissions to a person for a subject context.
 
 Revoke previously granted permissions.
 
-**Endpoint:** `POST /testdata/permissions/revoke`
+**SDK Endpoint:** `POST /testdata/permissions/revoke`
 
 ---
 
@@ -52,7 +44,7 @@ Revoke previously granted permissions.
 
 Delete a test subject.
 
-**Endpoint:** `POST /testdata/subject/remove`
+**SDK Endpoint:** `POST /testdata/subject/remove`
 
 ---
 
@@ -60,7 +52,7 @@ Delete a test subject.
 
 Delete a test person.
 
-**Endpoint:** `POST /testdata/person/remove`
+**SDK Endpoint:** `POST /testdata/person/remove`
 
 ---
 
@@ -112,4 +104,3 @@ with client.testdata.temporal() as td:
 
 - [Authentication](guides/authentication.md) - Using XAdES auth
 - [Tokens](guides/tokens.md) - Token generation
-- KSeF API: [Test Data](https://api-test.ksef.mf.gov.pl/docs/v2)
