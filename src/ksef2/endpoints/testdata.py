@@ -71,7 +71,7 @@ class RevokePermissionsEndpoint:
 
 @final
 class EnableAttachmentsEndpoint:
-    url: str = "/testdata/attachment-permission"
+    url: str = "/testdata/attachment"
 
     def __init__(self, transport: middleware.KSeFProtocol):
         self._transport = transport
