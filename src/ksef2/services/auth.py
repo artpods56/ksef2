@@ -18,8 +18,11 @@ from ksef2.domain.models.encryption import CertUsage
 from ksef2.endpoints.auth import (
     AuthStatusEndpoint,
     ChallengeEndpoint,
+    ListActiveSessionsEndpoint,
     RedeemTokenEndpoint,
     RefreshTokenEndpoint,
+    TerminateAuthSessionEndpoint,
+    TerminateCurrentSessionEndpoint,
     TokenAuthEndpoint,
     XAdESAuthEndpoint,
 )
@@ -52,6 +55,9 @@ class AuthService:
         self._status_ep = AuthStatusEndpoint(transport)
         self._redeem_ep = RedeemTokenEndpoint(transport)
         self._refresh_ep = RefreshTokenEndpoint(transport)
+        self._list_sessions_ep = ListActiveSessionsEndpoint(transport)
+        self._terminate_current_ep = TerminateCurrentSessionEndpoint(transport)
+        self._terminate_session_ep = TerminateAuthSessionEndpoint(transport)
 
     def authenticate_token(
         self,
@@ -126,6 +132,36 @@ class AuthService:
     def refresh(self, *, refresh_token: str) -> RefreshedToken:
         return RefreshTokenMapper.map_response(
             self._refresh_ep.send(bearer_token=refresh_token)
+        )
+
+    def list_active_sessions(
+        self,
+        *,
+        access_token: str,
+        page_size: int | None = None,
+        continuation_token: str | None = None,
+    ):
+        """List active authentication sessions."""
+        return self._list_sessions_ep.send(
+            bearer_token=access_token,
+            page_size=page_size,
+            continuation_token=continuation_token,
+        )
+
+    def terminate_current_session(self, *, access_token: str) -> None:
+        """Terminate the current authentication session."""
+        self._terminate_current_ep.send(bearer_token=access_token)
+
+    def terminate_session(
+        self,
+        *,
+        access_token: str,
+        reference_number: str,
+    ) -> None:
+        """Terminate a specific authentication session by reference number."""
+        self._terminate_session_ep.send(
+            bearer_token=access_token,
+            reference_number=reference_number,
         )
 
     def _ensure_certificates(self) -> None:
