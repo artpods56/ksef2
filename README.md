@@ -42,6 +42,18 @@ with client.sessions.open_online(
     with open("invoice.xml", "rb") as f:
         result = session.send_invoice(f.read())
     print(result.reference_number)
+
+# Sessions also support manual management:
+session = client.sessions.open_online(
+    access_token=tokens.access_token.token,
+    form_code=FormSchema.FA3,
+)
+try:
+    with open("invoice.xml", "rb") as f:
+        result = session.send_invoice(f.read())
+    print(result.reference_number)
+finally:
+    session.terminate()
 ```
 
 ### Token Authentication
