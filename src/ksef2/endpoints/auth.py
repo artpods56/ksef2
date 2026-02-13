@@ -1,7 +1,8 @@
-from typing import final, Any
+from typing import Any, final
+
+from urllib.parse import urlencode
 
 from ksef2.core import headers, codecs, middleware
-from ksef2.core import middleware
 from ksef2.infra.schema.api import spec as spec
 
 
@@ -121,4 +122,69 @@ class RefreshTokenEndpoint:
                 headers=headers.KSeFHeaders.bearer(bearer_token),
             ),
             spec.AuthenticationTokenRefreshResponse,
+        )
+
+
+@final
+class ListActiveSessionsEndpoint:
+    url: str = "/auth/sessions"
+
+    def __init__(self, transport: middleware.KSeFProtocol):
+        self._transport = transport
+
+    def send(
+        self,
+        bearer_token: str,
+        *,
+        page_size: int | None = None,
+        continuation_token: str | None = None,
+    ) -> spec.AuthenticationListResponse:
+        headers_dict = headers.KSeFHeaders.bearer(bearer_token)
+        if continuation_token:
+            headers_dict["x-continuation-token"] = continuation_token
+
+        query_params: list[tuple[str, str]] = []
+        if page_size is not None:
+            query_params.append(("pageSize", str(page_size)))
+
+        query_string = urlencode(query_params) if query_params else ""
+        path = f"{self.url}?{query_string}" if query_string else self.url
+
+        return codecs.JsonResponseCodec.parse(
+            self._transport.get(
+                path,
+                headers=headers_dict,
+            ),
+            spec.AuthenticationListResponse,
+        )
+
+
+@final
+class TerminateCurrentSessionEndpoint:
+    url: str = "/auth/sessions/current"
+
+    def __init__(self, transport: middleware.KSeFProtocol):
+        self._transport = transport
+
+    def send(self, bearer_token: str) -> None:
+        _ = self._transport.delete(
+            self.url,
+            headers=headers.KSeFHeaders.bearer(bearer_token),
+        )
+
+
+@final
+class TerminateAuthSessionEndpoint:
+    url: str = "/auth/sessions/{referenceNumber}"
+
+    def __init__(self, transport: middleware.KSeFProtocol):
+        self._transport = transport
+
+    def get_url(self, *, reference_number: str) -> str:
+        return self.url.format(referenceNumber=reference_number)
+
+    def send(self, bearer_token: str, reference_number: str) -> None:
+        _ = self._transport.delete(
+            self.get_url(reference_number=reference_number),
+            headers=headers.KSeFHeaders.bearer(bearer_token),
         )

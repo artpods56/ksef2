@@ -1,8 +1,17 @@
 # Sessions
 
-Manage KSeF online sessions for invoice operations.
+Manage KSeF sessions for invoice operations.
 
-## Operations
+## Session Types
+
+KSeF has two types of sessions:
+
+1. **Authentication Sessions** (`/auth/sessions/*`) - Manage authenticated sessions and refresh tokens
+2. **Invoice Sessions** (`/sessions/online`, `/sessions/batch`) - Send and process invoices
+
+For authentication session management, see [Authentication](guides/authentication.md).
+
+## Invoice Sessions
 
 ### Open Session
 

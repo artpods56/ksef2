@@ -16,6 +16,9 @@ __auth_endpoints__ = [
     EndpointRef("GET", auth.AuthStatusEndpoint.url),
     EndpointRef("POST", auth.RedeemTokenEndpoint.url),
     EndpointRef("POST", auth.RefreshTokenEndpoint.url),
+    EndpointRef("GET", auth.ListActiveSessionsEndpoint.url),
+    EndpointRef("DELETE", auth.TerminateCurrentSessionEndpoint.url),
+    EndpointRef("DELETE", auth.TerminateAuthSessionEndpoint.url),
 ]
 
 __encryption_endpoints__ = [

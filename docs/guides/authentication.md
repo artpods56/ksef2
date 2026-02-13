@@ -40,6 +40,34 @@ Refresh an expired access token without re-authenticating.
 
 ---
 
+### 4. Active Sessions Management
+
+Manage active authentication sessions. Each successful authentication creates a session tied to a refresh token.
+
+**List Active Sessions** - Get all active authentication sessions for your account.
+
+**SDK Endpoint:** `GET /auth/sessions`
+
+Returns a paginated list with:
+- `referenceNumber` - Session identifier
+- `startDate` - When the session was created
+- `authenticationMethod` - Method used (XAdES, Token, etc.)
+- `status` - Session status (200 = success)
+- `isCurrent` - Whether this is the current session
+- `refreshTokenValidUntil` - When the refresh token expires
+
+**Terminate Current Session** - Invalidate the session used for the current request.
+
+**SDK Endpoint:** `DELETE /auth/sessions/current`
+
+**Terminate Specific Session** - Invalidate a specific session by reference number.
+
+**SDK Endpoint:** `DELETE /auth/sessions/{referenceNumber}`
+
+Note: Terminating a session invalidates its refresh token. Active access tokens remain valid until expiration.
+
+---
+
 ## Authentication Flow
 
 ```
@@ -73,6 +101,9 @@ Refresh an expired access token without re-authenticating.
 - `GET /auth/{referenceNumber}` - Check auth status
 - `POST /auth/token/redeem` - Redeem auth token for access/refresh
 - `POST /auth/token/refresh` - Refresh access token
+- `GET /auth/sessions` - List active authentication sessions
+- `DELETE /auth/sessions/current` - Terminate current session
+- `DELETE /auth/sessions/{referenceNumber}` - Terminate specific session
 
 ---
 
