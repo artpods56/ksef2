@@ -1,14 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "KSeF API PR",
-    "description": "**Wersja API:** 2.0.1 (build 2.0.1-pr-20260201.2+346bbd20a78a0747a6f370c7696879ddb380cbe2)<br>\n**Klucze publiczne** Ministerstwa Finansów (dla danego środowiska): [Pobierz klucze](#tag/Certyfikaty-klucza-publicznego)<br>\n**Historia zmian:** [Changelog](https://github.com/CIRFMF/ksef-docs/blob/main/api-changelog.md)<br>\n**Rozszerzona dokumentacja API:** [ksef-docs](https://github.com/CIRFMF/ksef-docs/tree/main)\n\n**Adres serwera API:**\n- Środowisko PRODUKCYJNE: `https://api.ksef.mf.gov.pl/v2`\n",
+    "title": "KSeF API TE",
+    "description": "**Wersja API:** 2.1.1 (build 2.1.1-te-20260212.1+e997352e3eeadca42252ffce12dfb2aa434407b4)<br>\n**Klucze publiczne** Ministerstwa Finansów (dla danego środowiska): [Pobierz klucze](#tag/Certyfikaty-klucza-publicznego)<br>\n**Historia zmian:** [Changelog](https://github.com/CIRFMF/ksef-docs/blob/main/api-changelog.md)<br>\n**Rozszerzona dokumentacja API:** [ksef-docs](https://github.com/CIRFMF/ksef-docs/tree/main)\n\n**Adres serwera API:**\n- Środowisko TEST: `https://api-test.ksef.mf.gov.pl/v2`\n",
     "version": "v2"
   },
   "servers": [
     {
-      "url": "https://api.ksef.mf.gov.pl/v2",
-      "description": "Środowisko PRODUKCYJNE"
+      "url": "https://api-test.ksef.mf.gov.pl/v2",
+      "description": "Środowisko TEST"
     }
   ],
   "paths": {
@@ -57,6 +57,11 @@
                       "isCurrent": false,
                       "startDate": "2025-10-11T12:23:56.0154302+00:00",
                       "authenticationMethod": "QualifiedSeal",
+                      "authenticationMethodInfo": {
+                        "category": "XadesSignature",
+                        "code": "xades.qualified-seal",
+                        "displayName": "Pieczęć kwalifikowana"
+                      },
                       "status": {
                         "code": 200,
                         "description": "Uwierzytelnianie zakończone sukcesem"
@@ -81,7 +86,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -108,9 +113,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -143,7 +148,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -170,9 +175,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -210,7 +215,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -237,9 +242,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -273,7 +278,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -300,9 +305,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -344,7 +349,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -371,9 +376,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -436,7 +441,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -463,9 +468,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -517,7 +522,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -544,9 +549,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -613,7 +618,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -640,9 +645,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -694,7 +699,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -721,9 +726,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -820,7 +825,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -847,9 +852,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -926,6 +931,684 @@
         }
       }
     },
+    "/testdata/subject": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Utworzenie podmiotu",
+        "description": "Tworzenie nowego podmiotu testowego. W przypadku grupy VAT i JST istnieje możliwość stworzenia jednostek podrzędnych. W wyniku takiego działania w systemie powstanie powiązanie między tymi podmiotami.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "subjectNip",
+                  "subjectType",
+                  "description"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubjectCreateRequest"
+                  }
+                ]
+              },
+              "example": {
+                "subjectNip": "7762811692",
+                "subjectType": "EnforcementAuthority",
+                "description": "Centrala",
+                "createdDate": "2025-08-25T14:15:22+00:00"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode       | ExceptionDescription                                       | Details |\n|---------------------|------------------------------------------------------------|---------|\n| 30001               | Podmiot lub uprawnienie już istnieje.  |  |\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/subject/remove": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Usunięcie podmiotu",
+        "description": "Usuwanie podmiotu testowego. W przypadku grupy VAT i JST usunięte zostaną również jednostki podrzędne.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "subjectNip"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SubjectRemoveRequest"
+                  }
+                ]
+              },
+              "example": {
+                "subjectNip": "7762811692"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/person": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Utworzenie osoby fizycznej",
+        "description": "Tworzenie nowej osoby fizycznej, której system nadaje uprawnienia właścicielskie. Można również określić, czy osoba ta jest komornikiem – wówczas otrzyma odpowiednie uprawnienie egzekucyjne.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "nip",
+                  "pesel",
+                  "isBailiff",
+                  "description"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PersonCreateRequest"
+                  }
+                ]
+              },
+              "example": {
+                "nip": "7762811692",
+                "pesel": "15062788702",
+                "isBailiff": true,
+                "description": "TestPerson_01",
+                "isDeceased": false,
+                "createdDate": "2025-08-25T14:15:22+00:00"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode       | ExceptionDescription                                       | Details |\n|---------------------|------------------------------------------------------------|---------|\n| 30001               | Podmiot lub uprawnienie już istnieje.  |  |\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/person/remove": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Usunięcie osoby fizycznej",
+        "description": "Usuwanie testowej osoby fizycznej. System automatycznie odbierze jej wszystkie uprawnienia.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "nip"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PersonRemoveRequest"
+                  }
+                ]
+              },
+              "example": {
+                "nip": "7762811692"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/permissions": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Nadanie uprawnień testowemu podmiotowi/osobie fizycznej",
+        "description": "Nadawanie uprawnień testowemu podmiotowi lub osobie fizycznej, a także w ich kontekście.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "contextIdentifier",
+                  "authorizedIdentifier",
+                  "permissions"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TestDataPermissionsGrantRequest"
+                  }
+                ]
+              },
+              "example": {
+                "contextIdentifier": {
+                  "type": "Nip",
+                  "value": "7762811692"
+                },
+                "authorizedIdentifier": {
+                  "type": "Nip",
+                  "value": "7762811692"
+                },
+                "permissions": [
+                  {
+                    "description": "Opis testowy",
+                    "permissionType": "InvoiceRead"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/permissions/revoke": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Odebranie uprawnień testowemu podmiotowi/osobie fizycznej",
+        "description": "Odbieranie uprawnień nadanych testowemu podmiotowi lub osobie fizycznej, a także w ich kontekście.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "contextIdentifier",
+                  "authorizedIdentifier"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TestDataPermissionsRevokeRequest"
+                  }
+                ]
+              },
+              "example": {
+                "contextIdentifier": {
+                  "type": "Nip",
+                  "value": "5265877635"
+                },
+                "authorizedIdentifier": {
+                  "type": "Nip",
+                  "value": "7762811692"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/attachment": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Umożliwienie wysyłania faktur z załącznikiem",
+        "description": "Dodaje możliwość wysyłania faktur z załącznikiem przez wskazany podmiot",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "nip"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AttachmentPermissionGrantRequest"
+                  }
+                ]
+              },
+              "example": {
+                "nip": "7762811692"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/attachment/revoke": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Odebranie możliwości wysyłania faktur z załącznikiem",
+        "description": "Odbiera możliwość wysyłania faktur z załącznikiem przez wskazany podmiot",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "nip"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AttachmentPermissionRevokeRequest"
+                  }
+                ]
+              },
+              "example": {
+                "nip": "7762811692"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 60 | - | - | -\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 60
+        }
+      }
+    },
+    "/testdata/context/block": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Zablokowanie kontekstu",
+        "description": "Blokuje możliwość uwierzytelniania dla wskazanego kontekstu. Uwierzytelnianie zakończy się błędem 480.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BlockContextAuthenticationRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      }
+    },
+    "/testdata/context/unblock": {
+      "post": {
+        "tags": [
+          "Dane testowe"
+        ],
+        "summary": "Odblokowanie kontekstu",
+        "description": "Odblokowuje możliwość uwierzytelniania dla wskazanego kontekstu.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UnblockContextAuthenticationRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          }
+        },
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      }
+    },
     "/limits/context": {
       "get": {
         "tags": [
@@ -968,7 +1651,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -995,9 +1678,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -1039,7 +1722,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1066,9 +1749,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -1089,64 +1772,64 @@
                 },
                 "example": {
                   "onlineSession": {
-                    "perSecond": 10,
-                    "perMinute": 30,
-                    "perHour": 120
+                    "perSecond": 100,
+                    "perMinute": 300,
+                    "perHour": 1200
                   },
                   "batchSession": {
-                    "perSecond": 10,
-                    "perMinute": 20,
-                    "perHour": 60
-                  },
-                  "invoiceSend": {
-                    "perSecond": 10,
-                    "perMinute": 30,
-                    "perHour": 180
-                  },
-                  "invoiceStatus": {
-                    "perSecond": 30,
-                    "perMinute": 120,
-                    "perHour": 1200
-                  },
-                  "sessionList": {
-                    "perSecond": 5,
-                    "perMinute": 10,
-                    "perHour": 60
-                  },
-                  "sessionInvoiceList": {
-                    "perSecond": 10,
-                    "perMinute": 20,
-                    "perHour": 200
-                  },
-                  "sessionMisc": {
-                    "perSecond": 10,
-                    "perMinute": 120,
-                    "perHour": 1200
-                  },
-                  "invoiceMetadata": {
-                    "perSecond": 8,
-                    "perMinute": 16,
-                    "perHour": 20
-                  },
-                  "invoiceExport": {
-                    "perSecond": 4,
-                    "perMinute": 8,
-                    "perHour": 20
-                  },
-                  "invoiceExportStatus": {
-                    "perSecond": 10,
-                    "perMinute": 60,
+                    "perSecond": 100,
+                    "perMinute": 200,
                     "perHour": 600
                   },
+                  "invoiceSend": {
+                    "perSecond": 100,
+                    "perMinute": 300,
+                    "perHour": 1800
+                  },
+                  "invoiceStatus": {
+                    "perSecond": 300,
+                    "perMinute": 1200,
+                    "perHour": 12000
+                  },
+                  "sessionList": {
+                    "perSecond": 50,
+                    "perMinute": 100,
+                    "perHour": 600
+                  },
+                  "sessionInvoiceList": {
+                    "perSecond": 100,
+                    "perMinute": 200,
+                    "perHour": 2000
+                  },
+                  "sessionMisc": {
+                    "perSecond": 100,
+                    "perMinute": 1200,
+                    "perHour": 12000
+                  },
+                  "invoiceMetadata": {
+                    "perSecond": 80,
+                    "perMinute": 160,
+                    "perHour": 200
+                  },
+                  "invoiceExport": {
+                    "perSecond": 40,
+                    "perMinute": 80,
+                    "perHour": 200
+                  },
+                  "invoiceExportStatus": {
+                    "perSecond": 100,
+                    "perMinute": 600,
+                    "perHour": 6000
+                  },
                   "invoiceDownload": {
-                    "perSecond": 8,
-                    "perMinute": 16,
-                    "perHour": 64
+                    "perSecond": 80,
+                    "perMinute": 160,
+                    "perHour": 640
                   },
                   "other": {
-                    "perSecond": 10,
-                    "perMinute": 30,
-                    "perHour": 120
+                    "perSecond": 100,
+                    "perMinute": 300,
+                    "perHour": 1200
                   }
                 }
               }
@@ -1164,7 +1847,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1191,9 +1874,441 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      }
+    },
+    "/testdata/limits/context/session": {
+      "post": {
+        "tags": [
+          "Limity i ograniczenia"
+        ],
+        "summary": "Zmiana limitów sesji dla bieżącego kontekstu",
+        "description": "Zmienia wartości aktualnie obowiązujących limitów sesji dla bieżącego kontekstu. **Tylko na środowiskach testowych.**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "onlineSession",
+                  "batchSession"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SetSessionLimitsRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      },
+      "delete": {
+        "tags": [
+          "Limity i ograniczenia"
+        ],
+        "summary": "Przywrócenie domyślnych wartości limitów sesji dla bieżącego kontekstu",
+        "description": "Przywraca wartości aktualnie obowiązujących limitów sesji dla bieżącego kontekstu do wartości domyślnych. **Tylko na środowiskach testowych.**",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      }
+    },
+    "/testdata/limits/subject/certificate": {
+      "post": {
+        "tags": [
+          "Limity i ograniczenia"
+        ],
+        "summary": "Zmiana limitów certyfikatów dla bieżącego podmiotu",
+        "description": "Zmienia wartości aktualnie obowiązujących limitów certyfikatów dla bieżącego podmiotu. **Tylko na środowiskach testowych.**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SetSubjectLimitsRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      },
+      "delete": {
+        "tags": [
+          "Limity i ograniczenia"
+        ],
+        "summary": "Przywrócenie domyślnych wartości limitów certyfikatów dla bieżącego podmiotu",
+        "description": "Przywraca wartości aktualnie obowiązujących limitów certyfikatów dla bieżącego podmiotu do wartości domyślnych. **Tylko na środowiskach testowych.**",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      }
+    },
+    "/testdata/rate-limits": {
+      "post": {
+        "tags": [
+          "Limity i ograniczenia"
+        ],
+        "summary": "Zmiana limitów API dla bieżącego kontekstu",
+        "description": "Zmienia wartości aktualnie obowiązujących limitów żądań przesyłanych do API dla bieżącego kontekstu. **Tylko na środowiskach testowych.**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "rateLimits"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SetRateLimitsRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      },
+      "delete": {
+        "tags": [
+          "Limity i ograniczenia"
+        ],
+        "summary": "Przywrócenie domyślnych wartości limitów API dla bieżącego kontekstu",
+        "description": "Przywraca wartości aktualnie obowiązujących limitów żądań przesyłanych do API dla bieżącego kontekstu do wartości domyślnych. **Tylko na środowiskach testowych.**",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
+        }
+      }
+    },
+    "/testdata/rate-limits/production": {
+      "post": {
+        "tags": [
+          "Limity i ograniczenia"
+        ],
+        "summary": "Zmiana limitów API dla bieżącego kontekstu na wartości produkcyjne",
+        "description": "Zmienia wartości aktualnie obowiązujących limitów żądań przesyłanych do API dla bieżącego kontekstu na wartości takie jakie będą na środowisku produkcyjnym. **Tylko na środowiskach testowych.**",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "| ExceptionCode | ExceptionDescription | Details |\n|-|-|-|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -1269,7 +2384,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1299,9 +2414,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage"
@@ -1380,7 +2495,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1410,9 +2525,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage"
@@ -1482,7 +2597,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1512,9 +2627,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage"
@@ -1595,7 +2710,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1625,9 +2740,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage"
@@ -1705,7 +2820,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1735,9 +2850,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "SubunitManage"
@@ -1825,7 +2940,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1855,9 +2970,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage"
@@ -1938,7 +3053,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -1968,9 +3083,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "VatUeManage"
@@ -2021,7 +3136,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2051,9 +3166,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage",
@@ -2106,7 +3221,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2136,9 +3251,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage"
@@ -2192,7 +3307,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2219,9 +3334,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -2255,7 +3370,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2285,9 +3400,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "CredentialsManage",
@@ -2344,7 +3459,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 8 | 16 | 64 | invoiceDownload\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 80 | 160 | 640 | invoiceDownload\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2374,9 +3489,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 8,
-          "perMinute": 16,
-          "perHour": 64
+          "perSecond": 80,
+          "perMinute": 160,
+          "perHour": 640
         },
         "x-required-permissions": [
           "InvoiceRead"
@@ -2577,7 +3692,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 8 | 16 | 20 | invoiceMetadata\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 80 | 160 | 200 | invoiceMetadata\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2607,9 +3722,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 8,
-          "perMinute": 16,
-          "perHour": 20
+          "perSecond": 80,
+          "perMinute": 160,
+          "perHour": 200
         },
         "x-sort": [
           {
@@ -2695,7 +3810,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 4 | 8 | 20 | invoiceExport\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 40 | 80 | 200 | invoiceExport\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2725,9 +3840,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 4,
-          "perMinute": 8,
-          "perHour": 20
+          "perSecond": 40,
+          "perMinute": 80,
+          "perHour": 200
         },
         "x-sort": [
           {
@@ -2812,7 +3927,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 60 | 600 | invoiceExportStatus\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 600 | 6000 | invoiceExportStatus\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -2842,9 +3957,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 60,
-          "perHour": 600
+          "perSecond": 100,
+          "perMinute": 600,
+          "perHour": 6000
         },
         "x-sort": [
           {
@@ -3030,7 +4145,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 5 | 10 | 60 | sessionList\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 50 | 100 | 600 | sessionList\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3060,9 +4175,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 5,
-          "perMinute": 10,
-          "perHour": 60
+          "perSecond": 50,
+          "perMinute": 100,
+          "perHour": 600
         },
         "x-sort": [
           {
@@ -3138,7 +4253,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 120 | 1200 | sessionMisc\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 1200 | 12000 | sessionMisc\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3168,9 +4283,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 120,
-          "perHour": 1200
+          "perSecond": 100,
+          "perMinute": 1200,
+          "perHour": 12000
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -3279,7 +4394,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 20 | 200 | sessionInvoiceList\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 200 | 2000 | sessionInvoiceList\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3309,9 +4424,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 20,
-          "perHour": 200
+          "perSecond": 100,
+          "perMinute": 200,
+          "perHour": 2000
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -3387,7 +4502,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 30 | 120 | 1200 | invoiceStatus\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 300 | 1200 | 12000 | invoiceStatus\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3417,9 +4532,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 30,
-          "perMinute": 120,
-          "perHour": 1200
+          "perSecond": 300,
+          "perMinute": 1200,
+          "perHour": 12000
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -3513,7 +4628,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 20 | 200 | sessionInvoiceList\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 200 | 2000 | sessionInvoiceList\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3543,9 +4658,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 20,
-          "perHour": 200
+          "perSecond": 100,
+          "perMinute": 200,
+          "perHour": 2000
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -3613,7 +4728,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 120 | 1200 | sessionMisc\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 1200 | 12000 | sessionMisc\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3643,9 +4758,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 120,
-          "perHour": 1200
+          "perSecond": 100,
+          "perMinute": 1200,
+          "perHour": 12000
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -3713,7 +4828,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 120 | 1200 | sessionMisc\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 1200 | 12000 | sessionMisc\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3743,9 +4858,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 120,
-          "perHour": 1200
+          "perSecond": 100,
+          "perMinute": 1200,
+          "perHour": 12000
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -3813,7 +4928,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 120 | 1200 | sessionMisc\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 1200 | 12000 | sessionMisc\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3843,9 +4958,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 120,
-          "perHour": 1200
+          "perSecond": 100,
+          "perMinute": 1200,
+          "perHour": 12000
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -3913,7 +5028,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -3940,9 +5055,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       },
       "get": {
@@ -4061,7 +5176,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -4088,9 +5203,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -4160,7 +5275,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -4187,9 +5302,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       },
       "delete": {
@@ -4225,7 +5340,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -4252,9 +5367,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         }
       }
     },
@@ -4950,7 +6065,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | onlineSession\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | onlineSession\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -4980,9 +6095,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -5064,7 +6179,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 180 | invoiceSend\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1800 | invoiceSend\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5094,9 +6209,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 180
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1800
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -5139,7 +6254,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | onlineSession\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | onlineSession\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5169,9 +6284,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -5264,7 +6379,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 20 | 60 | batchSession\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 200 | 600 | batchSession\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5294,9 +6409,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 20,
-          "perHour": 60
+          "perSecond": 100,
+          "perMinute": 200,
+          "perHour": 600
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -5338,7 +6453,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 20 | 60 | batchSession\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 200 | 600 | batchSession\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5368,9 +6483,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 20,
-          "perHour": 60
+          "perSecond": 100,
+          "perMinute": 200,
+          "perHour": 600
         },
         "x-required-permissions": [
           "InvoiceWrite",
@@ -5477,7 +6592,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5504,9 +6619,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -5629,7 +6744,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5659,9 +6774,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -5777,7 +6892,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5807,9 +6922,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -5893,7 +7008,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -5923,9 +7038,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -6031,7 +7146,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -6061,9 +7176,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -6188,7 +7303,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -6218,9 +7333,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -6332,7 +7447,7 @@
             "x-summary": "Bad Request"
           },
           "429": {
-            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 100 | 300 | 1200 | other\n",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -6362,9 +7477,9 @@
           }
         ],
         "x-rate-limits": {
-          "perSecond": 10,
-          "perMinute": 30,
-          "perHour": 120
+          "perSecond": 100,
+          "perMinute": 300,
+          "perHour": 1200
         },
         "x-sort": [
           {
@@ -6426,6 +7541,238 @@
           "Vat"
         ],
         "type": "string"
+      },
+      "ApiRateLimitValuesOverride": {
+        "required": [
+          "perHour",
+          "perMinute",
+          "perSecond"
+        ],
+        "type": "object",
+        "properties": {
+          "perSecond": {
+            "type": "integer",
+            "description": "Limit na sekundę.",
+            "format": "int32"
+          },
+          "perMinute": {
+            "type": "integer",
+            "description": "Limit na minutę.",
+            "format": "int32"
+          },
+          "perHour": {
+            "type": "integer",
+            "description": "Limit na godzinę.",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ApiRateLimitsOverride": {
+        "required": [
+          "batchSession",
+          "invoiceDownload",
+          "invoiceExport",
+          "invoiceExportStatus",
+          "invoiceMetadata",
+          "invoiceSend",
+          "invoiceStatus",
+          "onlineSession",
+          "other",
+          "sessionInvoiceList",
+          "sessionList",
+          "sessionMisc"
+        ],
+        "type": "object",
+        "properties": {
+          "onlineSession": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla otwierania/zamykania sesji interaktywnych."
+          },
+          "batchSession": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla otwierania/zamykania sesji wsadowych."
+          },
+          "invoiceSend": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla wysyłki faktur."
+          },
+          "invoiceStatus": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pobierania statusu faktury z sesji."
+          },
+          "sessionList": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pobierania listy sesji."
+          },
+          "sessionInvoiceList": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pobierania listy faktur w sesji."
+          },
+          "sessionMisc": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pozostałych operacji w ramach sesji."
+          },
+          "invoiceMetadata": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pobierania metadanych faktur."
+          },
+          "invoiceExport": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla eksportu paczki faktur."
+          },
+          "invoiceExportStatus": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pobierania statusu eksportu paczki faktur."
+          },
+          "invoiceDownload": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pobierania faktur po numerze KSeF."
+          },
+          "other": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla pozostałych operacji API."
+          }
+        },
+        "additionalProperties": false
+      },
+      "AttachmentPermissionGrantRequest": {
+        "required": [
+          "nip"
+        ],
+        "type": "object",
+        "properties": {
+          "nip": {
+            "$ref": "#/components/schemas/Nip"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AttachmentPermissionRevokeRequest": {
+        "required": [
+          "nip"
+        ],
+        "type": "object",
+        "properties": {
+          "nip": {
+            "$ref": "#/components/schemas/Nip"
+          },
+          "expectedEndDate": {
+            "type": "string",
+            "description": "Data wycofania zgody na przesyłanie faktur z załącznikiem.",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "AuthenticationChallengeResponse": {
         "required": [
@@ -6515,6 +7862,7 @@
       "AuthenticationListItem": {
         "required": [
           "authenticationMethod",
+          "authenticationMethodInfo",
           "referenceNumber",
           "startDate",
           "status"
@@ -6532,7 +7880,22 @@
                 "$ref": "#/components/schemas/AuthenticationMethod"
               }
             ],
-            "description": "Metoda uwierzytelnienia.\n| Wartość | Opis |\n| --- | --- |\n| Token | Token KSeF. |\n| TrustedProfile | Profil Zaufany. |\n| InternalCertificate | Certyfikat KSeF. |\n| QualifiedSignature | Podpis kwalifikowany. |\n| QualifiedSeal | Pieczęć kwalifikowana. |\n| PersonalSignature | Podpis osobisty. |\n| PeppolSignature | Podpis dostawcy usług Peppol. |\n"
+            "description": "Metoda uwierzytelnienia.\n| Wartość | Opis |\n| --- | --- |\n| Token | Token KSeF. |\n| TrustedProfile | Profil Zaufany. |\n| InternalCertificate | Certyfikat KSeF. |\n| QualifiedSignature | Podpis kwalifikowany. |\n| QualifiedSeal | Pieczęć kwalifikowana. |\n| PersonalSignature | Podpis osobisty. |\n| PeppolSignature | Podpis dostawcy usług Peppol. |\n",
+            "deprecated": true,
+            "x-removal-date": "2026-11-16"
+          },
+          "authenticationMethodInfo": {
+            "required": [
+              "category",
+              "code",
+              "displayName"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthenticationMethodInfo"
+              }
+            ],
+            "description": "Użyta metoda uwierzytelnienia."
           },
           "status": {
             "allOf": [
@@ -6540,7 +7903,7 @@
                 "$ref": "#/components/schemas/StatusInfo"
               }
             ],
-            "description": "Informacje o aktualnym statusie.\n| Code | Description | Details |\n| --- | --- | --- |\n| 100 | Uwierzytelnianie w toku | - |\n| 200 | Uwierzytelnianie zakończone sukcesem | - |\n| 415 | Uwierzytelnianie zakończone niepowodzeniem | Brak przypisanych uprawnień |\n| 425 | Uwierzytelnienie unieważnione  | Uwierzytelnienie i powiązane refresh tokeny zostały unieważnione przez użytkownika |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowe wyzwanie autoryzacyjne |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy token |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy czas tokena |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token unieważniony |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token nieaktywny |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Nieważny certyfikat |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Błąd weryfikacji łańcucha certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niezaufany łańcuch certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Certyfikat odwołany |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niepoprawny certyfikat |\n| 470 | Uwierzytelnianie zakończone niepowodzeniem | Próba wykorzystania metod autoryzacyjnych osoby zmarłej |\n| 480 | Uwierzytelnienie zablokowane | Podejrzenie incydentu bezpieczeństwa. Skontaktuj się z Ministerstwem Finansów przez formularz zgłoszeniowy. |\n| 500 | Nieznany błąd | - |\n| 550 | Operacja została anulowana przez system | Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie |"
+            "description": "Informacje o aktualnym statusie.\n| Code | Description | Details |\n| --- | --- | --- |\n| 100 | Uwierzytelnianie w toku | - |\n| 200 | Uwierzytelnianie zakończone sukcesem | - |\n| 415 | Uwierzytelnianie zakończone niepowodzeniem | Brak przypisanych uprawnień |\n| 425 | Uwierzytelnienie unieważnione  | Uwierzytelnienie i powiązane refresh tokeny zostały unieważnione przez użytkownika |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowe wyzwanie autoryzacyjne |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy token |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy czas tokena |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token unieważniony |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token nieaktywny |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Nieważny certyfikat |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Błąd weryfikacji łańcucha certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niezaufany łańcuch certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Certyfikat odwołany |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Certyfikat zawieszony |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niepoprawny certyfikat |\n| 470 | Uwierzytelnianie zakończone niepowodzeniem | Próba wykorzystania metod autoryzacyjnych osoby zmarłej |\n| 480 | Uwierzytelnienie zablokowane | Podejrzenie incydentu bezpieczeństwa. Skontaktuj się z Ministerstwem Finansów przez formularz zgłoszeniowy. |\n| 500 | Nieznany błąd | - |\n| 550 | Operacja została anulowana przez system | Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie |"
           },
           "isTokenRedeemed": {
             "type": "boolean",
@@ -6609,9 +7972,48 @@
         "type": "string",
         "description": "Metoda uwierzytelnienia.\n| Wartość | Opis |\n| --- | --- |\n| Token | Token KSeF. |\n| TrustedProfile | Profil Zaufany. |\n| InternalCertificate | Certyfikat KSeF. |\n| QualifiedSignature | Podpis kwalifikowany. |\n| QualifiedSeal | Pieczęć kwalifikowana. |\n| PersonalSignature | Podpis osobisty. |\n| PeppolSignature | Podpis dostawcy usług Peppol. |\n"
       },
+      "AuthenticationMethodCategory": {
+        "enum": [
+          "XadesSignature",
+          "NationalNode",
+          "Token",
+          "Other"
+        ],
+        "type": "string",
+        "description": "| Wartość | Opis |\n| --- | --- |\n| XadesSignature | Uwierzytelnienie podpisem Xades. |\n| NationalNode | Uwierzytelnienie za pomocą Węzła Krajowego (login.gov.pl). |\n| Token | Uwierzytelnienie tokenem. |\n| Other | Uwierzytelnienie inną metodą. |\n"
+      },
+      "AuthenticationMethodInfo": {
+        "required": [
+          "category",
+          "code",
+          "displayName"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthenticationMethodCategory"
+              }
+            ],
+            "description": "Kategoria metody uwierzytelnienia.\n| Wartość | Opis |\n| --- | --- |\n| XadesSignature | Uwierzytelnienie podpisem Xades. |\n| NationalNode | Uwierzytelnienie za pomocą Węzła Krajowego (login.gov.pl). |\n| Token | Uwierzytelnienie tokenem. |\n| Other | Uwierzytelnienie inną metodą. |\n"
+          },
+          "code": {
+            "type": "string",
+            "description": "Kod metody uwierzytelnienia."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Nazwa metody uwierzytelnienia do wyświetlenia użytkownikowi.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AuthenticationOperationStatusResponse": {
         "required": [
           "authenticationMethod",
+          "authenticationMethodInfo",
           "startDate",
           "status"
         ],
@@ -6628,7 +8030,22 @@
                 "$ref": "#/components/schemas/AuthenticationMethod"
               }
             ],
-            "description": "Metoda uwierzytelnienia.\n| Wartość | Opis |\n| --- | --- |\n| Token | Token KSeF. |\n| TrustedProfile | Profil Zaufany. |\n| InternalCertificate | Certyfikat KSeF. |\n| QualifiedSignature | Podpis kwalifikowany. |\n| QualifiedSeal | Pieczęć kwalifikowana. |\n| PersonalSignature | Podpis osobisty. |\n| PeppolSignature | Podpis dostawcy usług Peppol. |\n"
+            "description": "Metoda uwierzytelnienia.\n| Wartość | Opis |\n| --- | --- |\n| Token | Token KSeF. |\n| TrustedProfile | Profil Zaufany. |\n| InternalCertificate | Certyfikat KSeF. |\n| QualifiedSignature | Podpis kwalifikowany. |\n| QualifiedSeal | Pieczęć kwalifikowana. |\n| PersonalSignature | Podpis osobisty. |\n| PeppolSignature | Podpis dostawcy usług Peppol. |\n",
+            "deprecated": true,
+            "x-removal-date": "2026-11-16"
+          },
+          "authenticationMethodInfo": {
+            "required": [
+              "category",
+              "code",
+              "displayName"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthenticationMethodInfo"
+              }
+            ],
+            "description": "Użyta metoda uwierzytelnienia."
           },
           "status": {
             "allOf": [
@@ -6636,7 +8053,7 @@
                 "$ref": "#/components/schemas/StatusInfo"
               }
             ],
-            "description": "Informacje o aktualnym statusie.\n| Code | Description | Details |\n| --- | --- | --- |\n| 100 | Uwierzytelnianie w toku | - |\n| 200 | Uwierzytelnianie zakończone sukcesem | - |\n| 415 | Uwierzytelnianie zakończone niepowodzeniem | Brak przypisanych uprawnień |\n| 425 | Uwierzytelnienie unieważnione  | Uwierzytelnienie i powiązane refresh tokeny zostały unieważnione przez użytkownika |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowe wyzwanie autoryzacyjne |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy token |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy czas tokena |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token unieważniony |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token nieaktywny |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Nieważny certyfikat |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Błąd weryfikacji łańcucha certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niezaufany łańcuch certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Certyfikat odwołany |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niepoprawny certyfikat |\n| 470 | Uwierzytelnianie zakończone niepowodzeniem | Próba wykorzystania metod autoryzacyjnych osoby zmarłej |\n| 480 | Uwierzytelnienie zablokowane | Podejrzenie incydentu bezpieczeństwa. Skontaktuj się z Ministerstwem Finansów przez formularz zgłoszeniowy. |\n| 500 | Nieznany błąd | - |\n| 550 | Operacja została anulowana przez system | Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie |"
+            "description": "Informacje o aktualnym statusie.\n| Code | Description | Details |\n| --- | --- | --- |\n| 100 | Uwierzytelnianie w toku | - |\n| 200 | Uwierzytelnianie zakończone sukcesem | - |\n| 415 | Uwierzytelnianie zakończone niepowodzeniem | Brak przypisanych uprawnień |\n| 425 | Uwierzytelnienie unieważnione  | Uwierzytelnienie i powiązane refresh tokeny zostały unieważnione przez użytkownika |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowe wyzwanie autoryzacyjne |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy token |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Nieprawidłowy czas tokena |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token unieważniony |\n| 450 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu | Token nieaktywny |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Nieważny certyfikat |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Błąd weryfikacji łańcucha certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niezaufany łańcuch certyfikatów |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Certyfikat odwołany |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Certyfikat zawieszony |\n| 460 | Uwierzytelnianie zakończone niepowodzeniem z powodu błędu certyfikatu | Niepoprawny certyfikat |\n| 470 | Uwierzytelnianie zakończone niepowodzeniem | Próba wykorzystania metod autoryzacyjnych osoby zmarłej |\n| 480 | Uwierzytelnienie zablokowane | Podejrzenie incydentu bezpieczeństwa. Skontaktuj się z Ministerstwem Finansów przez formularz zgłoszeniowy. |\n| 500 | Nieznany błąd | - |\n| 550 | Operacja została anulowana przez system | Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie |"
           },
           "isTokenRedeemed": {
             "type": "boolean",
@@ -6805,6 +8222,38 @@
         },
         "additionalProperties": false
       },
+      "BatchSessionContextLimitsOverride": {
+        "required": [
+          "maxInvoices",
+          "maxInvoiceSizeInMB",
+          "maxInvoiceWithAttachmentSizeInMB"
+        ],
+        "type": "object",
+        "properties": {
+          "maxInvoiceSizeInMB": {
+            "maximum": 5,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Maksymalny rozmiar faktury w MB.",
+            "format": "int32"
+          },
+          "maxInvoiceWithAttachmentSizeInMB": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Maksymalny rozmiar faktury z załącznikiem w MB.",
+            "format": "int32"
+          },
+          "maxInvoices": {
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Maksymalna ilość faktur które można przesłać w pojedynczej sesji.",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "BatchSessionEffectiveContextLimits": {
         "required": [
           "maxInvoices",
@@ -6830,6 +8279,24 @@
             "type": "integer",
             "description": "Maksymalna ilość faktur które można przesłać w pojedynczej sesji.",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BlockContextAuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "contextIdentifier": {
+            "required": [
+              "value",
+              "type"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataAuthenticationContextIdentifier"
+              }
+            ],
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -7121,6 +8588,18 @@
           "Fingerprint"
         ],
         "type": "string"
+      },
+      "CertificateSubjectLimitsOverride": {
+        "type": "object",
+        "properties": {
+          "maxCertificates": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "Challenge": {
         "maxLength": 36,
@@ -7687,6 +9166,18 @@
           "maxEnrollments": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EnrollmentSubjectLimitsOverride": {
+        "type": "object",
+        "properties": {
+          "maxEnrollments": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -9838,7 +11329,7 @@
                 "$ref": "#/components/schemas/InvoiceQueryDateRange"
               }
             ],
-            "description": "Typ i zakres dat, według którego filtrowane są faktury.\nMaksymalny dozwolony okres wynosi 3 miesiące w strefie UTC lub w strefie Europe/Warsaw (WAW).\n            \nFormat daty:\n * Daty muszą być przekazane w formacie ISO 8601, np. `yyyy-MM-ddTHH:mm:ss`.\n * Dopuszczalne są następujące warianty:\n   - z sufiksem `Z` (czas UTC),\n   - z jawnym offsetem, np. `+01:00`, `+03:00`,\n   - bez offsetu (interpretowane jako czas lokalny strefy Europe/Warsaw).\n   \nZasady interpretacji dat:\n * Daty z sufiksem `Z` są traktowane jako czas UTC.\n * Daty bez jawnie podanego offsetu są interpretowane jako czas lokalny strefy Europe/Warsaw (WAW).\n * Daty z jawnym offsetem (`+01:00`, `+08:00` itd.) są przeliczane z uwzględnieniem offsetu, a następnie walidowane w strefie UTC lub w strefie Europe/Warsaw (WAW)."
+            "description": "Typ i zakres dat, według którego filtrowane są faktury.\nMaksymalny dozwolony okres wynosi 3 miesiące w strefie UTC lub w strefie Europe/Warsaw (WAW).\n            \nFormat daty:\n * Daty muszą być przekazane w formacie ISO 8601, np. `yyyy-MM-ddTHH:mm:ss`.\n * Dopuszczalne są następujące warianty:\n   - z sufiksem `Z` (czas UTC),\n   - z jawnym offsetem, np. `+01:00`, `+03:00`,\n   - bez offsetu (interpretowane jako czas lokalny strefy Europe/Warsaw)."
           },
           "ksefNumber": {
             "allOf": [
@@ -10043,6 +11534,38 @@
         "type": "string",
         "description": "Identyfikator złożony, czyli dwuczłonowy identyfikator składający się z nr NIP podmiotu polskiego oraz numeru VAT UE podmiotu unijnego."
       },
+      "OnlineSessionContextLimitsOverride": {
+        "required": [
+          "maxInvoices",
+          "maxInvoiceSizeInMB",
+          "maxInvoiceWithAttachmentSizeInMB"
+        ],
+        "type": "object",
+        "properties": {
+          "maxInvoiceSizeInMB": {
+            "maximum": 5,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Maksymalny rozmiar faktury w MB.",
+            "format": "int32"
+          },
+          "maxInvoiceWithAttachmentSizeInMB": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Maksymalny rozmiar faktury z załącznikiem w MB.",
+            "format": "int32"
+          },
+          "maxInvoices": {
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Maksymalna ilość faktur które można przesłać w pojedynczej sesji.",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "OnlineSessionEffectiveContextLimits": {
         "required": [
           "maxInvoices",
@@ -10091,7 +11614,7 @@
                 "$ref": "#/components/schemas/FormCode"
               }
             ],
-            "description": "Schemat faktur wysyłanych w ramach sesji.\n\nObsługiwane schematy:\n| SystemCode | SchemaVersion | Value |\n| --- | --- | --- |\n| [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |\n"
+            "description": "Schemat faktur wysyłanych w ramach sesji.\n\nObsługiwane schematy:\n| SystemCode | SchemaVersion | Value |\n| --- | --- | --- |\n| [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |\n| [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |\n"
           },
           "batchFile": {
             "required": [
@@ -10169,7 +11692,7 @@
                 "$ref": "#/components/schemas/FormCode"
               }
             ],
-            "description": "Schemat faktur wysyłanych w ramach sesji.\n\nObsługiwane schematy:\n| SystemCode | SchemaVersion | Value |\n| --- | --- | --- |\n| [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |\n| [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |\n| [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |\n"
+            "description": "Schemat faktur wysyłanych w ramach sesji.\n\nObsługiwane schematy:\n| SystemCode | SchemaVersion | Value |\n| --- | --- | --- |\n| [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |\n| [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |\n| [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |\n| [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |\n"
           },
           "encryption": {
             "required": [
@@ -10629,6 +12152,41 @@
               }
             ],
             "description": "Dane dokumentu tożsamości osoby fizycznej."
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonCreateRequest": {
+        "required": [
+          "description",
+          "isBailiff",
+          "nip",
+          "pesel"
+        ],
+        "type": "object",
+        "properties": {
+          "nip": {
+            "$ref": "#/components/schemas/Nip"
+          },
+          "pesel": {
+            "$ref": "#/components/schemas/Pesel"
+          },
+          "isBailiff": {
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 256,
+            "minLength": 5,
+            "type": "string"
+          },
+          "isDeceased": {
+            "type": "boolean"
+          },
+          "createdDate": {
+            "type": "string",
+            "description": "W przypadku wielokrotnego tworzenia danych testowych z tym samym identyfikatorem nie można podawać daty wcześniejszej ani takiej samej jak poprzednia.",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -11212,6 +12770,18 @@
           "InternalId"
         ],
         "type": "string"
+      },
+      "PersonRemoveRequest": {
+        "required": [
+          "nip"
+        ],
+        "type": "object",
+        "properties": {
+          "nip": {
+            "$ref": "#/components/schemas/Nip"
+          }
+        },
+        "additionalProperties": false
       },
       "PersonSubjectByFingerprintDetailsType": {
         "enum": [
@@ -12402,6 +13972,102 @@
         },
         "additionalProperties": false
       },
+      "SetRateLimitsRequest": {
+        "required": [
+          "rateLimits"
+        ],
+        "type": "object",
+        "properties": {
+          "rateLimits": {
+            "required": [
+              "onlineSession",
+              "batchSession",
+              "invoiceSend",
+              "invoiceStatus",
+              "sessionList",
+              "sessionInvoiceList",
+              "sessionMisc",
+              "invoiceMetadata",
+              "invoiceExport",
+              "invoiceExportStatus",
+              "invoiceDownload",
+              "other"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitsOverride"
+              }
+            ],
+            "description": "Limity dla ilości żądań do API."
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetSessionLimitsRequest": {
+        "required": [
+          "batchSession",
+          "onlineSession"
+        ],
+        "type": "object",
+        "properties": {
+          "onlineSession": {
+            "required": [
+              "maxInvoiceSizeInMB",
+              "maxInvoiceWithAttachmentSizeInMB",
+              "maxInvoices"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OnlineSessionContextLimitsOverride"
+              }
+            ],
+            "description": "Limity dla sesji interaktywnych."
+          },
+          "batchSession": {
+            "required": [
+              "maxInvoiceSizeInMB",
+              "maxInvoiceWithAttachmentSizeInMB",
+              "maxInvoices"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BatchSessionContextLimitsOverride"
+              }
+            ],
+            "description": "Limity dla sesji wsadowych."
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetSubjectLimitsRequest": {
+        "type": "object",
+        "properties": {
+          "subjectIdentifierType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubjectIdentifierType"
+              }
+            ]
+          },
+          "enrollment": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnrollmentSubjectLimitsOverride"
+              }
+            ],
+            "nullable": true
+          },
+          "certificate": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CertificateSubjectLimitsOverride"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Sha256HashBase64": {
         "maxLength": 44,
         "minLength": 44,
@@ -12444,6 +14110,73 @@
           }
         },
         "additionalProperties": false
+      },
+      "SubjectCreateRequest": {
+        "required": [
+          "description",
+          "subjectNip",
+          "subjectType"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectNip": {
+            "$ref": "#/components/schemas/Nip"
+          },
+          "subjectType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubjectType"
+              }
+            ]
+          },
+          "subunits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Subunit"
+            },
+            "nullable": true
+          },
+          "description": {
+            "maxLength": 256,
+            "minLength": 5,
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "description": "W przypadku wielokrotnego tworzenia danych testowych z tym samym identyfikatorem nie można podawać daty wcześniejszej ani takiej samej jak poprzednia.",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubjectIdentifierType": {
+        "enum": [
+          "Nip",
+          "Pesel",
+          "Fingerprint"
+        ],
+        "type": "string"
+      },
+      "SubjectRemoveRequest": {
+        "required": [
+          "subjectNip"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectNip": {
+            "$ref": "#/components/schemas/Nip"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubjectType": {
+        "enum": [
+          "EnforcementAuthority",
+          "VatGroup",
+          "JST"
+        ],
+        "type": "string"
       },
       "SubordinateEntityRole": {
         "required": [
@@ -12544,6 +14277,24 @@
           "Nip"
         ],
         "type": "string"
+      },
+      "Subunit": {
+        "required": [
+          "description",
+          "subjectNip"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectNip": {
+            "$ref": "#/components/schemas/Nip"
+          },
+          "description": {
+            "maxLength": 256,
+            "minLength": 5,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "SubunitPermission": {
         "required": [
@@ -12884,6 +14635,198 @@
         ],
         "type": "string"
       },
+      "TestDataAuthenticationContextIdentifier": {
+        "required": [
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataAuthenticationContextIdentifierType"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "TestDataAuthenticationContextIdentifierType": {
+        "enum": [
+          "Nip",
+          "InternalId",
+          "NipVatUe",
+          "PeppolId"
+        ],
+        "type": "string"
+      },
+      "TestDataAuthorizedIdentifier": {
+        "required": [
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataAuthorizedIdentifierType"
+              }
+            ]
+          },
+          "value": {
+            "maxLength": 64,
+            "minLength": 10,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TestDataAuthorizedIdentifierType": {
+        "enum": [
+          "Nip",
+          "Pesel",
+          "Fingerprint"
+        ],
+        "type": "string"
+      },
+      "TestDataContextIdentifier": {
+        "required": [
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataContextIdentifierType"
+              }
+            ]
+          },
+          "value": {
+            "maxLength": 10,
+            "minLength": 10,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TestDataContextIdentifierType": {
+        "enum": [
+          "Nip"
+        ],
+        "type": "string"
+      },
+      "TestDataPermission": {
+        "required": [
+          "description",
+          "permissionType"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "maxLength": 256,
+            "minLength": 5,
+            "type": "string"
+          },
+          "permissionType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataPermissionType"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "TestDataPermissionType": {
+        "enum": [
+          "InvoiceRead",
+          "InvoiceWrite",
+          "Introspection",
+          "CredentialsRead",
+          "CredentialsManage",
+          "EnforcementOperations",
+          "SubunitManage"
+        ],
+        "type": "string"
+      },
+      "TestDataPermissionsGrantRequest": {
+        "required": [
+          "authorizedIdentifier",
+          "contextIdentifier",
+          "permissions"
+        ],
+        "type": "object",
+        "properties": {
+          "contextIdentifier": {
+            "required": [
+              "type",
+              "value"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataContextIdentifier"
+              }
+            ]
+          },
+          "authorizedIdentifier": {
+            "required": [
+              "type",
+              "value"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataAuthorizedIdentifier"
+              }
+            ]
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestDataPermission"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "TestDataPermissionsRevokeRequest": {
+        "required": [
+          "authorizedIdentifier",
+          "contextIdentifier"
+        ],
+        "type": "object",
+        "properties": {
+          "contextIdentifier": {
+            "required": [
+              "type",
+              "value"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataContextIdentifier"
+              }
+            ]
+          },
+          "authorizedIdentifier": {
+            "required": [
+              "type",
+              "value"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataAuthorizedIdentifier"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
       "ThirdSubjectIdentifierType": {
         "enum": [
           "Nip",
@@ -13118,6 +15061,24 @@
           }
         }
       },
+      "UnblockContextAuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "contextIdentifier": {
+            "required": [
+              "value",
+              "type"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TestDataAuthenticationContextIdentifier"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UpoPageResponse": {
         "required": [
           "downloadUrl",
@@ -13188,6 +15149,10 @@
     },
     {
       "name": "Certyfikaty klucza publicznego"
+    },
+    {
+      "name": "Dane testowe",
+      "description": "API służy do tworzenia i zarządzania danymi testowymi, takimi jak podmioty, osoby fizyczne oraz uprawnienia. Możliwe do utworzenia podmioty to: organ egzekucyjny, grupa VAT oraz jednostki samorządu terytorialnego. W przypadku osób fizycznych można określić, czy dana osoba jest komornikiem. Funkcjonalność nadawania i odbierania uprawnień ma na celu odwzorowanie działania formularza ZAW-FA w środowisku testowym.\n\nWięcej informacji:\n- [Scenariusze testowe](https://github.com/CIRFMF/ksef-docs/blob/main/dane-testowe-scenariusze.md)"
     },
     {
       "name": "Limity i ograniczenia"
@@ -13284,6 +15249,12 @@
       "name": "Usługi Peppol",
       "tags": [
         "Usługi Peppol"
+      ]
+    },
+    {
+      "name": "Dane testowe",
+      "tags": [
+        "Dane testowe"
       ]
     }
   ]
