@@ -97,13 +97,14 @@ just fetch-spec     # Fetch latest OpenAPI spec from KSeF
 
 ## API Coverage
 
-The SDK currently covers **14 of 77** KSeF API endpoints (18%). Calculated via `scripts/api_coverage.py`. See individual feature docs for endpoint details:
+The SDK currently covers **33 of 77** KSeF API endpoints (43%). Calculated via `scripts/api_coverage.py`. See individual feature docs for endpoint details:
 
 - [Authentication](docs/guides/authentication.md)
 - [Invoices](docs/guides/invoices.md)
 - [Sessions](docs/guides/sessions.md)
 - [Tokens](docs/guides/tokens.md)
 - [Test Data](docs/guides/testdata.md)
+- [Limits](docs/guides/limits.md)
 
 ## License
 
