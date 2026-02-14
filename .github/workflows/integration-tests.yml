@@ -32,7 +32,6 @@ jobs:
           KSEF_TEST_SUBJECT_NIP: ${{ secrets.KSEF_TEST_SUBJECT_NIP }}
           KSEF_TEST_PERSON_NIP: ${{ secrets.KSEF_TEST_PERSON_NIP }}
           KSEF_TEST_PERSON_PESEL: ${{ secrets.KSEF_TEST_PERSON_PESEL }}
-          KSEF_TEST_KSEF_TOKEN: ${{ secrets.KSEF_TEST_KSEF_TOKEN }}
         run: uv run pytest tests/integration/ -v -m integration
 
       - name: Report success

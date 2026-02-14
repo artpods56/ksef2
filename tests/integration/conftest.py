@@ -30,7 +30,6 @@ class KSeFCredentials:
     subject_nip: str
     person_nip: str
     person_pesel: str
-    ksef_token: str
 
 
 @pytest.fixture(scope="session")
@@ -41,12 +40,10 @@ def ksef_credentials() -> KSeFCredentials:
         KSEF_TEST_SUBJECT_NIP - NIP for test subject
         KSEF_TEST_PERSON_NIP  - NIP for test person
         KSEF_TEST_PERSON_PESEL - PESEL for test person
-        KSEF_TEST_KSEF_TOKEN  - KSeF token for authentication (optional for XAdES tests)
     """
     subject_nip = os.environ.get("KSEF_TEST_SUBJECT_NIP")
     person_nip = os.environ.get("KSEF_TEST_PERSON_NIP")
     person_pesel = os.environ.get("KSEF_TEST_PERSON_PESEL")
-    ksef_token = os.environ.get("KSEF_TEST_KSEF_TOKEN")
 
     missing = []
     if not subject_nip:
@@ -65,7 +62,6 @@ def ksef_credentials() -> KSeFCredentials:
         subject_nip=subject_nip,
         person_nip=person_nip,
         person_pesel=person_pesel,
-        ksef_token=ksef_token or "",
     )
 
 
