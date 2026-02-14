@@ -22,7 +22,10 @@ format-check:
     uv run ruff format --check src/ tests/
 
 typecheck:
-    uv run basedpyright
+    #!/usr/bin/env bash
+    output=$(uv run basedpyright --level error 2>&1)
+    echo "$output"
+    echo "$output" | grep -q "0 errors"
 
 
 fetch-spec:
