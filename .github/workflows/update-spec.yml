@@ -1,0 +1,56 @@
+name: Update OpenAPI spec
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # daily at 08:00 UTC
+  workflow_dispatch: # allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-spec:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+
+      - uses: extractions/setup-just@v2
+
+      - name: Install Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --all-groups --group codegen
+
+      - name: Fetch latest spec
+        run: just fetch-spec
+
+      - name: Regenerate models
+        run: just regenerate-models
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/update-openapi-spec
+          commit-message: "chore: update OpenAPI spec and regenerate models"
+          title: "chore: update OpenAPI spec and regenerate models"
+          body: |
+            The KSeF OpenAPI spec has changed. This PR contains the
+            updated `openapi.json` and regenerated model code.
+
+            Please review the diff carefully before merging.
+          labels: dependencies
