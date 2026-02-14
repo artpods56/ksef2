@@ -69,11 +69,11 @@ def test_set_api_rate_limits_roundtrip(xades_authenticated_context):
     limits = client.limits.get_api_rate_limits(access_token=token)
     original_per_second = limits.invoice_send.per_second
 
-    limits.invoice_send.per_second = original_per_second + 1
+    limits.invoice_send.per_second = original_per_second - 50 # has to be between 1 and 100
     client.limits.set_api_rate_limits(access_token=token, limits=limits)
 
     updated = client.limits.get_api_rate_limits(access_token=token)
-    assert updated.invoice_send.per_second == original_per_second + 1
+    assert updated.invoice_send.per_second == original_per_second - 50
 
     client.limits.reset_api_rate_limits(access_token=token)
 

@@ -13,10 +13,6 @@ from ksef2.core.exceptions import KSeFApiError
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.auth import AuthTokens
 from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
     SubjectType,
 )
 from ksef2.services.testdata import TemporalTestData
@@ -94,7 +90,7 @@ def _ensure_subject_exists(td: TemporalTestData, nip: str) -> None:
     try:
         td.create_subject(
             nip=nip,
-            subject_type=SubjectType.VAT_GROUP,
+            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
             description="Integration test subject",
         )
     except KSeFApiError as e:
@@ -174,52 +170,31 @@ def authenticated_context(
     ksef_credentials: KSeFCredentials,
     test_context: TemporalTestData,
 ) -> Generator[tuple[Client, AuthTokens], None, None]:
-    """Create an authenticated context using KSeF token.
+    """Create an authenticated context using XAdES authentication.
 
-    Requires KSEF_TEST_KSEF_TOKEN to be set.
+    Note: We use XAdES instead of KSeF token authentication because:
+    1. Token authentication requires encrypting the token with RSA-OAEP
+    2. The KSeF token must fit within ~190 bytes (2048-bit key limit)
+    3. Pre-generated tokens from env are typically JWTs that are too long
 
     Sets up:
         1. Test subject (VAT_GROUP) - or uses existing
-        2. Test person - or uses existing
-        3. Permissions (InvoiceWrite)
-        4. Authenticates via KSeF token and yields (client, tokens)
+        2. Authenticates using XAdES with self-signed certificate
+        3. Yields (client, tokens)
 
     Cleanup (automatic via TemporalTestData):
-        1. Revoke permissions
-        2. Delete person
-        3. Delete subject
+        1. Delete subject
     """
-    if not ksef_credentials.ksef_token:
-        pytest.skip("KSEF_TEST_KSEF_TOKEN not set")
-
     td = test_context
 
     _ensure_subject_exists(td, ksef_credentials.subject_nip)
 
-    _ensure_person_exists(
-        td, ksef_credentials.person_nip, ksef_credentials.person_pesel
-    )
+    cert, private_key = generate_test_certificate(ksef_credentials.subject_nip)
 
-    td.grant_permissions(
-        context=Identifier(
-            type=IdentifierType.NIP,
-            value=ksef_credentials.subject_nip,
-        ),
-        authorized=Identifier(
-            type=IdentifierType.PESEL,
-            value=ksef_credentials.person_pesel,
-        ),
-        permissions=[
-            Permission(
-                type=PermissionType.INVOICE_WRITE,
-                description="Integration test permission",
-            ),
-        ],
-    )
-
-    tokens = real_client.auth.authenticate_token(
-        ksef_token=ksef_credentials.ksef_token,
+    tokens = real_client.auth.authenticate_xades(
         nip=ksef_credentials.subject_nip,
+        cert=cert,
+        private_key=private_key,
     )
 
     yield real_client, tokens

@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+
 import pytest
+
+from ksef2 import Client
+from ksef2.domain.models.auth import AuthTokens
 
 
 @pytest.mark.integration
-def test_list_active_sessions(xades_authenticated_context):
+def test_list_active_sessions(xades_authenticated_context: tuple[Client, AuthTokens]):
     """List active authentication sessions."""
     client, tokens = xades_authenticated_context
 
@@ -24,11 +28,11 @@ def test_list_active_sessions_with_pagination(xades_authenticated_context):
 
     response = client.auth.list_active_sessions(
         access_token=tokens.access_token.token,
-        page_size=5,
+        page_size=15, # must be between 10 and 100
     )
 
     assert response is not None
-    assert len(response.items) <= 5
+    assert len(response.items) <= 15
 
 
 @pytest.mark.integration
