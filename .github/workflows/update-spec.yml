@@ -54,3 +54,4 @@ jobs:
 
             Please review the diff carefully before merging.
           labels: dependencies
+          delete-branch: true
