@@ -18,6 +18,8 @@ from signxml.xades.xades import XAdESSigner
 
 # OID 2.5.4.97 = organizationIdentifier (used in company-seal certificates)
 _OID_ORGANIZATION_IDENTIFIER = ObjectIdentifier("2.5.4.97")
+# OID 2.5.4.5 = serialNumber (used for PESEL in personal certificates)
+_OID_SERIAL_NUMBER = ObjectIdentifier("2.5.4.5")
 
 _AUTH_TOKEN_NS = "http://ksef.mf.gov.pl/auth/token/2.0"
 
@@ -38,6 +40,47 @@ def generate_test_certificate(nip: str) -> tuple[Certificate, RSAPrivateKey]:
             x509.NameAttribute(NameOID.COUNTRY_NAME, "PL"),
         ]
     )
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(private_key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now - datetime.timedelta(hours=1))
+        .not_valid_after(now + datetime.timedelta(days=365))
+        .sign(private_key, hashes.SHA256())
+    )
+    return cert, private_key
+
+
+def generate_personal_test_certificate(
+    pesel: str,
+    nip: str | None = None,
+) -> tuple[Certificate, RSAPrivateKey]:
+    """Generate a self-signed RSA-2048 certificate for a person (XAdES auth).
+
+    The DN uses the personal certificate format:
+    ``2.5.4.5=TINPL-{PESEL}, CN=KSeF SDK Test, C=PL``
+
+    Optionally includes NIP for company representatives:
+    ``2.5.4.97=VATPL-{NIP}``
+    """
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    attributes = [
+        x509.NameAttribute(_OID_SERIAL_NUMBER, f"TINPL-{pesel}"),
+        x509.NameAttribute(NameOID.COMMON_NAME, "KSeF SDK Test"),
+        x509.NameAttribute(NameOID.COUNTRY_NAME, "PL"),
+    ]
+
+    if nip:
+        attributes.insert(
+            0, x509.NameAttribute(_OID_ORGANIZATION_IDENTIFIER, f"VATPL-{nip}")
+        )
+
+    subject = issuer = x509.Name(attributes)
 
     now = datetime.datetime.now(datetime.timezone.utc)
     cert = (

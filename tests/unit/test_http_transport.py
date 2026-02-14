@@ -9,6 +9,7 @@ import httpx
 from ksef2.config import Environment
 from ksef2.core import exceptions
 from ksef2.core.http import HttpTransport
+from ksef2.core.middleware import KSeFProtocol
 
 
 BASE = Environment.TEST.base_url
@@ -16,7 +17,12 @@ BASE = Environment.TEST.base_url
 
 @pytest.fixture
 def transport() -> HttpTransport:
-    return HttpTransport(Environment.TEST)
+    return HttpTransport(httpx.Client(base_url=BASE))
+
+
+@pytest.fixture
+def protocol(transport: HttpTransport) -> KSeFProtocol:
+    return KSeFProtocol(transport)
 
 
 class TestGet:
@@ -83,29 +89,29 @@ class TestDelete:
 
 class TestErrorHandling:
     @respx.mock
-    def test_429_raises_rate_limit_error(self, transport: HttpTransport) -> None:
+    def test_429_raises_rate_limit_error(self, protocol: KSeFProtocol) -> None:
         respx.get(f"{BASE}/limited").mock(
             return_value=httpx.Response(429, headers={"Retry-After": "30"}, json={})
         )
 
         with pytest.raises(exceptions.KSeFRateLimitError) as exc_info:
-            transport.get("/limited")
+            protocol.get("/limited")
 
         assert exc_info.value.retry_after == 30
 
     @respx.mock
-    def test_429_without_retry_after(self, transport: HttpTransport) -> None:
+    def test_429_without_retry_after(self, protocol: KSeFProtocol) -> None:
         respx.get(f"{BASE}/limited").mock(return_value=httpx.Response(429, json={}))
 
         with pytest.raises(exceptions.KSeFRateLimitError) as exc_info:
-            transport.get("/limited")
+            protocol.get("/limited")
 
         assert exc_info.value.retry_after is None
 
     @respx.mock
-    def test_200_does_not_raise(self, transport: HttpTransport) -> None:
+    def test_200_does_not_raise(self, protocol: KSeFProtocol) -> None:
         respx.get(f"{BASE}/ok").mock(return_value=httpx.Response(200, json={}))
 
-        resp = transport.get("/ok")
+        resp = protocol.get("/ok")
 
         assert resp.status_code == 200

@@ -10,6 +10,7 @@ dependencies = [
     "signxml>=4.0",
     "httpx[http2]>=0.28.1",
     "structlog>=25.5.0",
+    "dotenv>=0.9.9",
 ]
 
 [dependency-groups]
@@ -26,6 +27,7 @@ codegen = [
 ]
 
 [tool.pytest.ini_options]
+addopts = "-m 'not integration'"
 markers = [
     "integration: tests that hit the real KSeF TEST environment",
 ]

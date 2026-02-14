@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, final
 
+from ksef2.core import exceptions
 from ksef2.core.crypto import encrypt_invoice
-from ksef2.core.http import HttpTransport
+from ksef2.core import middleware
 from ksef2.domain.models import invoices
 from ksef2.domain.models.session import SessionState
 from ksef2.endpoints.invoices import DownloadInvoiceEndpoint, SendingInvoicesEndpoint
@@ -13,10 +14,14 @@ from ksef2.infra.mappers.invoices import SendInvoiceMapper
 if TYPE_CHECKING:
     from types import TracebackType
 
+from structlog import get_logger
+
+logger = get_logger(__name__)
+
 
 @final
 class OnlineSessionClient:
-    def __init__(self, transport: HttpTransport, state: SessionState):
+    def __init__(self, transport: middleware.KSeFProtocol, state: SessionState):
         self._transport = transport
         self._state = state
         self._invoice_endpoint = SendingInvoicesEndpoint(transport)
@@ -56,4 +61,9 @@ class OnlineSessionClient:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        self.terminate()
+        try:
+            self.terminate()
+        except exceptions.KSeFException:
+            logger.warning("Failed to terminate KSeF session, might be already closed.")
+        except Exception:
+            logger.exception("Unexpected error during session termination.")

@@ -133,7 +133,7 @@ class TestEnableAttachmentsEndpoint:
         from ksef2.endpoints.testdata import EnableAttachmentsEndpoint
 
         ep = EnableAttachmentsEndpoint(FakeTransport())
-        assert ep.url == "/testdata/attachment-permission"
+        assert ep.url == "/testdata/attachment"
 
     def test_send_posts(self, fake_transport: FakeTransport) -> None:
         from ksef2.endpoints.testdata import EnableAttachmentsEndpoint
@@ -145,4 +145,4 @@ class TestEnableAttachmentsEndpoint:
 
         call = fake_transport.calls[0]
         assert call.method == "POST"
-        assert call.path == "/testdata/attachment-permission"
+        assert call.path == "/testdata/attachment"

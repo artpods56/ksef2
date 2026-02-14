@@ -1,6 +1,14 @@
 from dataclasses import dataclass
 
-from ksef2.endpoints import auth, encryption, invoices, session, testdata, tokens
+from ksef2.endpoints import (
+    auth,
+    encryption,
+    invoices,
+    limits,
+    session,
+    testdata,
+    tokens,
+)
 
 
 @dataclass(frozen=True)
@@ -51,6 +59,18 @@ __tokens_endpoints__ = [
     EndpointRef("DELETE", tokens.RevokeTokenEndpoint.url),
 ]
 
+__limits_endpoints__ = [
+    EndpointRef("GET", limits.GetContextLimitsEndpoint.url),
+    EndpointRef("GET", limits.GetSubjectLimitsEndpoint.url),
+    EndpointRef("GET", limits.GetApiRateLimitsEndpoint.url),
+    EndpointRef("POST", limits.SetSessionLimitsEndpoint.url),
+    EndpointRef("DELETE", limits.ResetSessionLimitsEndpoint.url),
+    EndpointRef("POST", limits.SetSubjectLimitsEndpoint.url),
+    EndpointRef("DELETE", limits.ResetSubjectLimitsEndpoint.url),
+    EndpointRef("POST", limits.SetApiRateLimitsEndpoint.url),
+    EndpointRef("DELETE", limits.ResetApiRateLimitsEndpoint.url),
+]
+
 __all_endpoints__: list[EndpointRef] = [
     *__auth_endpoints__,
     *__encryption_endpoints__,
@@ -58,4 +78,5 @@ __all_endpoints__: list[EndpointRef] = [
     *__session_endpoints__,
     *__testdata_endpoints__,
     *__tokens_endpoints__,
+    *__limits_endpoints__,
 ]

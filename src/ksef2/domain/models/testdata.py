@@ -1,23 +1,25 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
+
+from pydantic import AwareDatetime
 
 from ksef2.domain.models._deprecated._base import KSeFBaseModel
 
 
-class SubjectType(Enum):
+class SubjectType(StrEnum):
     ENFORCEMENT_AUTHORITY = "EnforcementAuthority"
     VAT_GROUP = "VatGroup"
     JST = "JST"
 
 
-class IdentifierType(Enum):
+class IdentifierType(StrEnum):
     NIP = "Nip"
     PESEL = "Pesel"
     FINGERPRINT = "Fingerprint"
 
 
-class PermissionType(Enum):
+class PermissionType(StrEnum):
     INVOICE_READ = "InvoiceRead"
     INVOICE_WRITE = "InvoiceWrite"
     INTROSPECTION = "Introspection"
@@ -27,8 +29,8 @@ class PermissionType(Enum):
     SUBUNIT_MANAGE = "SubunitManage"
 
 
-class Subunit(KSeFBaseModel):
-    nip: str
+class SubUnit(KSeFBaseModel):
+    subject_nip: str
     description: str
 
 
@@ -40,3 +42,11 @@ class Identifier(KSeFBaseModel):
 class Permission(KSeFBaseModel):
     type: PermissionType
     description: str
+
+
+class CreateSubjectRequest(KSeFBaseModel):
+    subject_nip: str
+    subject_type: SubjectType
+    description: str
+    subunits: list[SubUnit] | None = None
+    created_date: AwareDatetime | None = None

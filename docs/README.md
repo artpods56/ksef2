@@ -15,6 +15,7 @@ The SDK provides a Python interface to Poland's KSeF (Krajowy System e-Faktur) v
 | [Sessions](guides/sessions.md) | Session management | `/online/session` |
 | [Tokens](guides/tokens.md) | Token generation, refresh, revocation | `/token/manage` |
 | [Test Data](guides/testdata.md) | Test environment setup | `/testdata/*` |
+| [Limits](guides/limits.md) | API limits and restrictions | `/limits/*`, `/rate-limits` |
 
 ## Requirements
 

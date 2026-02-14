@@ -26,10 +26,12 @@ class KSeFApiError(KSeFException):
         message: str,
         response: BaseModel | None = None,
     ) -> None:
+        self.status_code = status_code
+        self.response = response
 
         msg = (
             f"{self.code}/{status_code}: {message}"
-            f"Response: {response.model_dump() if response else '<none>'}"
+            f"Response: {response.model_dump_json(indent=2) if response else '<none>'}"
         )
 
         super().__init__(msg)
@@ -42,11 +44,11 @@ class KSeFAuthError(KSeFApiError):
 
     def __init__(
         self,
-        code: int,
+        status_code: int,
         message: str,
         response: BaseModel | None = None,
     ) -> None:
-        super().__init__(code, message, response)
+        super().__init__(status_code, message, response)
 
 
 class KSeFRateLimitError(KSeFApiError):
@@ -61,6 +63,7 @@ class KSeFRateLimitError(KSeFApiError):
         response: BaseModel | None = None,
     ) -> None:
         self.retry_after = retry_after
+        self.response = response
         super().__init__(429, message, response)
 
 

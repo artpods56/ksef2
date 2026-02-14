@@ -17,4 +17,5 @@ wheels/
 
 
 # envs
-.env.*
+.env
+.env.test

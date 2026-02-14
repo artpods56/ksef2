@@ -1,11 +1,11 @@
 from typing import final, Any
-from ksef2.core import http, headers, codecs, middleware
+from ksef2.core import http, headers, codecs, middleware, protocols
 from ksef2.infra.schema.api import spec as spec
 
 
 @final
 class OpenSessionEndpoint:
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     url: str = "/sessions/online"

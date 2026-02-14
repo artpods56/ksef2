@@ -40,7 +40,7 @@ class TestTerminateSessionEndpoint:
         ep = TerminateSessionEndpoint(FakeTransport())
         assert _REF in ep.get_url(reference_number=_REF)
 
-    def test_send_deletes(self, fake_transport: FakeTransport) -> None:
+    def test_send_posts(self, fake_transport: FakeTransport) -> None:
         from ksef2.endpoints.session import TerminateSessionEndpoint
 
         fake_transport.enqueue(status_code=200)
@@ -49,7 +49,7 @@ class TestTerminateSessionEndpoint:
         ep.send(access_token=_TOKEN, reference_number=_REF)
 
         call = fake_transport.calls[0]
-        assert call.method == "DELETE"
+        assert call.method == "POST"
         assert _REF in call.path
         assert call.headers == {"SessionToken": _TOKEN}
 

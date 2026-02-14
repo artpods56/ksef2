@@ -54,7 +54,7 @@ from ksef2.domain.models.testdata import (
     Permission,
     PermissionType,
     SubjectType,
-    Subunit,
+    SubUnit,
 )
 from ksef2.domain.models.tokens import (
     TokenPermission,
@@ -119,7 +119,7 @@ __all__ = [
     "Permission",
     "PermissionType",
     "SubjectType",
-    "Subunit",
+    "SubUnit",
     # tokens
     "TokenPermission",
     "TokenStatus",

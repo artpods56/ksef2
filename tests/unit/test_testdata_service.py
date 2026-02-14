@@ -10,7 +10,7 @@ from ksef2.domain.models.testdata import (
     Permission,
     PermissionType,
     SubjectType,
-    Subunit,
+    SubUnit,
 )
 from ksef2.services.testdata import TestDataService
 
@@ -48,10 +48,10 @@ class TestCreateSubject:
         svc.create_subject(
             nip="1234567890",
             subject_type=SubjectType.VAT_GROUP,
-            description="Test",
+            description="Test subject",
             subunits=[
-                Subunit(nip="1111111111", description="Sub 1"),
-                Subunit(nip="2222222222", description="Sub 2"),
+                SubUnit(subject_nip="1111111111", description="Sub 1"),
+                SubUnit(subject_nip="2222222222", description="Sub 2"),
             ],
         )
 
@@ -69,18 +69,18 @@ class TestCreateSubject:
         svc.create_subject(
             nip="1234567890",
             subject_type=SubjectType.JST,
-            description="Test",
+            description="Test subject",
             created_date=dt,
         )
 
         body = fake_transport.calls[0].json
-        assert body["createdDate"] == dt.isoformat()
+        assert body["createdDate"] == "2025-01-15T12:00:00Z"
 
     def test_all_subject_types(self, fake_transport: FakeTransport) -> None:
         for st in SubjectType:
             fake_transport.enqueue(status_code=204)
             svc = _build_service(fake_transport)
-            svc.create_subject(nip="1234567890", subject_type=st, description="Test")
+            svc.create_subject(nip="1234567890", subject_type=st, description="Test subject")
 
             body = fake_transport.calls[-1].json
             assert body["subjectType"] == st.value
@@ -241,5 +241,5 @@ class TestEnableAttachments:
 
         call = fake_transport.calls[0]
         assert call.method == "POST"
-        assert call.path == "/testdata/attachment-permission"
+        assert call.path == "/testdata/attachment"
         assert call.json == {"nip": "1234567890"}

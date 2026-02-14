@@ -1,38 +1,12 @@
 from typing import Any, final
-import httpx
 
-from ksef2.config import Environment
-from ksef2.core import exceptions
+import httpx
 
 
 @final
 class HttpTransport:
-    def __init__(
-        self, environment: Environment, *, base_url: str | None = None
-    ) -> None:
-        self._environment = environment
-        self._base_url = base_url or environment.base_url
-        self._client = httpx.Client(http2=True)
-
-    @staticmethod
-    def _raise_for_status(response: httpx.Response) -> None:
-        if response.is_success:
-            return
-
-        status = response.status_code
-
-        if status == 429:
-            retry_after: int | None = None
-            raw = response.headers.get("Retry-After")
-            if raw is not None:
-                try:
-                    retry_after = int(raw)
-                except ValueError:
-                    pass
-            raise exceptions.KSeFRateLimitError(
-                retry_after=retry_after,
-                message="Server responded with 429 Too Many Requests.",
-            )
+    def __init__(self, client: httpx.Client) -> None:
+        self._client = client
 
     def request(
         self,
@@ -43,18 +17,13 @@ class HttpTransport:
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
     ) -> httpx.Response:
-
-        full_path = self._base_url + path
-
-        resp = self._client.request(
+        return self._client.request(
             method,
-            full_path,
+            path,
             headers=headers,
             json=json,
             content=content,
         )
-        self._raise_for_status(resp)
-        return resp
 
     def get(
         self, path: str, *, headers: dict[str, str] | None = None

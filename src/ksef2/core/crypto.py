@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.x509 import load_der_x509_certificate
 
-from ksef2.infra.schema.model import PublicKeyCertificate
+from ksef2.infra.schema.api.spec import PublicKeyCertificate
 from ksef2.core.exceptions import KSeFEncryptionError
 
 

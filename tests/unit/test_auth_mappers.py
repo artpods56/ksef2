@@ -15,8 +15,7 @@ from ksef2.infra.mappers.auth import (
     ChallengeMapper,
     RefreshTokenMapper,
 )
-from ksef2.infra.schema import model as spec
-
+from ksef2.infra.schema.api import spec as spec
 
 _TS = datetime(2025, 7, 11, 12, 0, 0, tzinfo=timezone.utc)
 _TS_MS = 1720699200000
@@ -84,6 +83,7 @@ class TestAuthStatusMapper:
         dto = spec.AuthenticationOperationStatusResponse(
             startDate=_TS,
             authenticationMethod="Token",
+            authenticationMethodInfo=spec.AuthenticationMethodInfo(category="Token", code="Token", displayName="Token KSeF"),
             status=spec.StatusInfo(code=200, description="OK"),
         )
 
@@ -100,6 +100,7 @@ class TestAuthStatusMapper:
         dto = spec.AuthenticationOperationStatusResponse(
             startDate=_TS,
             authenticationMethod="QualifiedSeal",
+            authenticationMethodInfo=spec.AuthenticationMethodInfo(category="XadesSignature", code="QualifiedSeal", displayName="Pieczęć kwalifikowana"),
             status=spec.StatusInfo(
                 code=415, description="Failed", details=["No permissions"]
             ),

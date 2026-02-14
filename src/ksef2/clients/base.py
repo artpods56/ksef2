@@ -1,11 +1,14 @@
 from functools import cached_property
 from typing import final
 
+import httpx
+
 from ksef2.clients import encryption
 from ksef2.config import Environment
 from ksef2.core.http import HttpTransport
+from ksef2.core.middleware import KSeFProtocol
 
-from ksef2.services import auth, session, testdata, tokens
+from ksef2.services import auth, limits, session, testdata, tokens
 from ksef2.core import stores
 
 
@@ -13,7 +16,9 @@ from ksef2.core import stores
 class Client:
     def __init__(self, environment: Environment = Environment.PRODUCTION) -> None:
         self._environment = environment
-        self._transport = HttpTransport(environment)
+        self._transport = KSeFProtocol(
+            HttpTransport(client=httpx.Client(base_url=environment.base_url)),
+        )
 
     @cached_property
     def auth(self) -> auth.AuthService:
@@ -42,5 +47,11 @@ class Client:
         base_url = self._environment.testdata_base_url
         if base_url is None:
             raise ValueError("Testdata is only available on TEST environment")
-        transport = HttpTransport(self._environment, base_url=base_url)
+        transport = KSeFProtocol(
+            HttpTransport(client=httpx.Client(base_url=base_url)),
+        )
         return testdata.TestDataService(transport)
+
+    @cached_property
+    def limits(self) -> limits.LimitsService:
+        return limits.LimitsService(self._transport)

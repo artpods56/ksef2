@@ -145,14 +145,14 @@ class TestDownloadInvoice:
 
 
 class TestTerminate:
-    def test_sends_delete_request(self, fake_transport: FakeTransport) -> None:
+    def test_sends_post_request(self, fake_transport: FakeTransport) -> None:
         fake_transport.enqueue(status_code=200)
         client = _build_client(fake_transport)
 
         client.terminate()
 
         call = fake_transport.calls[0]
-        assert call.method == "DELETE"
+        assert call.method == "POST"
 
     def test_delete_url_contains_reference_number(
         self, fake_transport: FakeTransport
@@ -194,7 +194,7 @@ class TestContextManager:
             pass
 
         assert len(fake_transport.calls) == 1
-        assert fake_transport.calls[0].method == "DELETE"
+        assert fake_transport.calls[0].method == "POST"
 
     def test_exit_calls_terminate_on_exception(
         self, fake_transport: FakeTransport
@@ -207,7 +207,7 @@ class TestContextManager:
                 raise ValueError("boom")
 
         assert len(fake_transport.calls) == 1
-        assert fake_transport.calls[0].method == "DELETE"
+        assert fake_transport.calls[0].method == "POST"
 
     def test_with_block_allows_sending_then_terminates(
         self, fake_transport: FakeTransport
@@ -221,4 +221,4 @@ class TestContextManager:
 
         assert len(fake_transport.calls) == 2
         assert fake_transport.calls[0].method == "POST"
-        assert fake_transport.calls[1].method == "DELETE"
+        assert fake_transport.calls[1].method == "POST"

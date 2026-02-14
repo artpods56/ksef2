@@ -56,7 +56,7 @@ class TestDataService:
                     subunits=subunits,
                     created_date=created_date,
                 )
-            ).model_dump()
+            ).model_dump(mode="json", exclude_none=True)
         )
 
     def delete_subject(self, *, nip: str) -> None:

@@ -10,7 +10,7 @@ from ksef2.domain.models.session import FormSchema
 from ksef2.infra.mappers.encryption import PublicKeyCertificateMapper
 from ksef2.infra.mappers.invoices import SendInvoiceMapper
 from ksef2.infra.mappers.session import OpenOnlineSessionMapper
-from ksef2.infra.schema import model as spec
+from ksef2.infra.schema.api import spec as spec
 
 
 class TestOpenOnlineSessionMapper:

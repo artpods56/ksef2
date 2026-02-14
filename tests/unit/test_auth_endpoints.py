@@ -144,6 +144,7 @@ class TestAuthStatusEndpoint:
             {
                 "startDate": "2025-07-11T12:00:00+00:00",
                 "authenticationMethod": "Token",
+                "authenticationMethodInfo": {"category": "Token", "code": "Token", "displayName": "Token KSeF"},
                 "status": {"code": 200, "description": "OK"},
             }
         )
