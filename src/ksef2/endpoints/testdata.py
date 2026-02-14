@@ -1,6 +1,6 @@
 from typing import final, Any
 
-from ksef2.core import http, middleware
+from ksef2.core import middleware
 
 
 @final

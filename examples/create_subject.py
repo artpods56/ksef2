@@ -2,10 +2,6 @@ from ksef2 import Client
 from ksef2.config import Environment
 from ksef2.domain.models import (
     SubjectType,
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
 )
 
 client = Client(environment=Environment.TEST)

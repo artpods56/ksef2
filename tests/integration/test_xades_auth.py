@@ -25,7 +25,7 @@ def test_xades_auth_with_self_signed_cert(xades_authenticated_context):
     assert tokens.access_token.valid_until is not None
     assert tokens.refresh_token.valid_until is not None
 
-    print(f"\n\n=== KSEF TOKEN (add to .env.test as KSEF_TEST_KSEF_TOKEN) ===")
+    print("\n\n=== KSEF TOKEN (add to .env.test as KSEF_TEST_KSEF_TOKEN) ===")
     print(tokens.access_token.token[:50] + "...")  # Just show a hint
     print("=========================================================\n")
 

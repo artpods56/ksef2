@@ -11,7 +11,7 @@ from ksef2.domain.models.testdata import (
     CreateSubjectRequest,
 )
 
-from ksef2.infra.schema.api import spec, supp
+from ksef2.infra.schema.api import supp
 
 
 class TestDataMapperv2:

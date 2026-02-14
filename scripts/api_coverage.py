@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 
 from ksef2 import endpoints
-from ksef2.endpoints import EndpointRef
 
 OPENAPI_PATH = Path(__file__).resolve().parent.parent / "openapi.json"
 BADGE_PATH = Path(__file__).resolve().parent.parent / "coverage.json"

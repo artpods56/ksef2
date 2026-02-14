@@ -1,5 +1,5 @@
 from typing import final, Any
-from ksef2.core import http, headers, codecs, middleware
+from ksef2.core import headers, codecs, middleware
 from ksef2.infra.schema.api import spec as spec
 
 
