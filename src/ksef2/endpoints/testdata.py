@@ -1,13 +1,13 @@
 from typing import final, Any
 
-from ksef2.core import middleware
+from ksef2.core import protocols
 
 
 @final
 class CreateSubjectEndpoint:
     url: str = "/testdata/subject"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -18,7 +18,7 @@ class CreateSubjectEndpoint:
 class DeleteSubjectEndpoint:
     url: str = "/testdata/subject/remove"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -29,7 +29,7 @@ class DeleteSubjectEndpoint:
 class CreatePersonEndpoint:
     url: str = "/testdata/person"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -40,7 +40,7 @@ class CreatePersonEndpoint:
 class DeletePersonEndpoint:
     url: str = "/testdata/person/remove"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -51,7 +51,7 @@ class DeletePersonEndpoint:
 class GrantPermissionsEndpoint:
     url: str = "/testdata/permissions"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -62,7 +62,7 @@ class GrantPermissionsEndpoint:
 class RevokePermissionsEndpoint:
     url: str = "/testdata/permissions/revoke"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -73,7 +73,7 @@ class RevokePermissionsEndpoint:
 class EnableAttachmentsEndpoint:
     url: str = "/testdata/attachment"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:

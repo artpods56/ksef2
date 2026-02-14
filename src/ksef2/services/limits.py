@@ -1,6 +1,6 @@
 from typing import final
 
-from ksef2.core import middleware
+from ksef2.core import protocols
 from ksef2.domain.models.limits import ApiRateLimits, ContextLimits, SubjectLimits
 from ksef2.endpoints.limits import (
     GetApiRateLimitsEndpoint,
@@ -22,7 +22,7 @@ from ksef2.infra.mappers.limits import (
 
 @final
 class LimitsService:
-    def __init__(self, transport: middleware.KSeFProtocol) -> None:
+    def __init__(self, transport: protocols.Middleware) -> None:
         self._transport = transport
         self._get_context_limits_ep = GetContextLimitsEndpoint(transport)
         self._get_subject_limits_ep = GetSubjectLimitsEndpoint(transport)

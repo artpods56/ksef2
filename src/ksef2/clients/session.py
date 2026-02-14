@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, final
 
 from ksef2.core import exceptions
 from ksef2.core.crypto import encrypt_invoice
-from ksef2.core import middleware
+from ksef2.core import protocols
 from ksef2.domain.models import invoices
 from ksef2.domain.models.session import SessionState
 from ksef2.endpoints.invoices import DownloadInvoiceEndpoint, SendingInvoicesEndpoint
@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 
 @final
 class OnlineSessionClient:
-    def __init__(self, transport: middleware.KSeFProtocol, state: SessionState):
+    def __init__(self, transport: protocols.Middleware, state: SessionState):
         self._transport = transport
         self._state = state
         self._invoice_endpoint = SendingInvoicesEndpoint(transport)

@@ -1,6 +1,6 @@
 from typing import final
 
-from ksef2.core import headers, codecs, middleware
+from ksef2.core import headers, codecs, protocols
 from ksef2.infra.schema.api import spec as spec
 
 
@@ -8,7 +8,7 @@ from ksef2.infra.schema.api import spec as spec
 class GetContextLimitsEndpoint:
     url: str = "/limits/context"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> spec.EffectiveContextLimits:
@@ -25,7 +25,7 @@ class GetContextLimitsEndpoint:
 class GetSubjectLimitsEndpoint:
     url: str = "/limits/subject"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> spec.EffectiveSubjectLimits:
@@ -42,7 +42,7 @@ class GetSubjectLimitsEndpoint:
 class GetApiRateLimitsEndpoint:
     url: str = "/rate-limits"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> spec.EffectiveApiRateLimits:
@@ -59,7 +59,7 @@ class GetApiRateLimitsEndpoint:
 class SetSessionLimitsEndpoint:
     url: str = "/testdata/limits/context/session"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(
@@ -78,7 +78,7 @@ class SetSessionLimitsEndpoint:
 class ResetSessionLimitsEndpoint:
     url: str = "/testdata/limits/context/session"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> None:
@@ -92,7 +92,7 @@ class ResetSessionLimitsEndpoint:
 class SetSubjectLimitsEndpoint:
     url: str = "/testdata/limits/subject/certificate"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(
@@ -111,7 +111,7 @@ class SetSubjectLimitsEndpoint:
 class ResetSubjectLimitsEndpoint:
     url: str = "/testdata/limits/subject/certificate"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> None:
@@ -125,7 +125,7 @@ class ResetSubjectLimitsEndpoint:
 class SetApiRateLimitsEndpoint:
     url: str = "/testdata/rate-limits"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(
@@ -144,7 +144,7 @@ class SetApiRateLimitsEndpoint:
 class ResetApiRateLimitsEndpoint:
     url: str = "/testdata/rate-limits"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> None:

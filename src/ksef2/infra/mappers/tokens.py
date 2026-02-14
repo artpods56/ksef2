@@ -16,7 +16,7 @@ class GenerateTokenMapper:
         description: str,
     ) -> spec.GenerateTokenRequest:
         return spec.GenerateTokenRequest(
-            permissions=[p.value for p in permissions],
+            permissions=[spec.TokenPermissionType(p.value) for p in permissions],
             description=description,
         )
 

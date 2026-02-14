@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone, timedelta
+from typing import Any
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -25,7 +26,7 @@ _VALID_UNTIL = (_NOW + timedelta(hours=1)).isoformat()
 _REFRESH_UNTIL = (_NOW + timedelta(days=7)).isoformat()
 
 
-def _challenge_response() -> dict:
+def _challenge_response() -> dict[str, Any]:
     return {
         "challenge": "c" * 36,
         "timestamp": _NOW.isoformat(),
@@ -33,7 +34,7 @@ def _challenge_response() -> dict:
     }
 
 
-def _init_response(ref: str = _REF) -> dict:
+def _init_response(ref: str = _REF) -> dict[str, Any]:
     return {
         "referenceNumber": ref,
         "authenticationToken": {
@@ -43,7 +44,7 @@ def _init_response(ref: str = _REF) -> dict:
     }
 
 
-def _status_response(code: int = 200, description: str = "OK") -> dict:
+def _status_response(code: int = 200, description: str = "OK") -> dict[str, Any]:
     return {
         "startDate": _NOW.isoformat(),
         "authenticationMethod": "Token",
@@ -56,14 +57,14 @@ def _status_response(code: int = 200, description: str = "OK") -> dict:
     }
 
 
-def _tokens_response() -> dict:
+def _tokens_response() -> dict[str, Any]:
     return {
         "accessToken": {"token": "access-jwt", "validUntil": _VALID_UNTIL},
         "refreshToken": {"token": "refresh-jwt", "validUntil": _REFRESH_UNTIL},
     }
 
 
-def _refresh_response() -> dict:
+def _refresh_response() -> dict[str, Any]:
     return {
         "accessToken": {"token": "new-access-jwt", "validUntil": _VALID_UNTIL},
     }

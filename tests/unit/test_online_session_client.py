@@ -90,6 +90,7 @@ class TestSendInvoice:
         client.send_invoice(SAMPLE_XML)
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert body["invoiceSize"] == len(SAMPLE_XML)
 
     def test_encrypted_size_differs_from_plain(
@@ -101,6 +102,7 @@ class TestSendInvoice:
         client.send_invoice(SAMPLE_XML)
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert body["encryptedInvoiceSize"] >= body["invoiceSize"]
 
 

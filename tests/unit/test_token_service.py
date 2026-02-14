@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from ksef2.core import exceptions
@@ -24,7 +26,7 @@ def _token_status_response(
     *,
     ref: str = _REF,
     status: str = "Active",
-) -> dict:
+) -> dict[str, Any]:
     return {
         "referenceNumber": ref,
         "authorIdentifier": {"type": "Nip", "value": "1234567890"},
@@ -37,7 +39,7 @@ def _token_status_response(
 
 
 def _build_service(transport: FakeTransport) -> TokenService:
-    return TokenService(transport)  # type: ignore[arg-type]
+    return TokenService(transport)
 
 
 class TestGenerate:

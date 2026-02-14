@@ -7,7 +7,7 @@ from ksef2.core.crypto import (
     generate_session_key,
     encrypt_symmetric_key,
 )
-from ksef2.core import middleware
+from ksef2.core import protocols
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models import FormSchema
 from ksef2.domain.models.encryption import CertUsage
@@ -20,7 +20,7 @@ from ksef2.infra.mappers.session import OpenOnlineSessionMapper
 class OpenSessionService:
     def __init__(
         self,
-        transport: middleware.KSeFProtocol,
+        transport: protocols.Middleware,
         certificate_store: CertificateStore,
     ):
         self._transport = transport

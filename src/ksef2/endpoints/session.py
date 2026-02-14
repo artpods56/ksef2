@@ -1,5 +1,5 @@
 from typing import final, Any
-from ksef2.core import headers, codecs, middleware, protocols
+from ksef2.core import headers, codecs, protocols
 from ksef2.infra.schema.api import spec as spec
 
 
@@ -32,7 +32,7 @@ class OpenSessionEndpoint:
 class TerminateSessionEndpoint:
     url: str = "/sessions/online/{referenceNumber}/close"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def get_url(self, *, reference_number: str) -> str:

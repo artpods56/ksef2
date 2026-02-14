@@ -103,7 +103,7 @@ def build_auth_token_request_xml(
 ) -> bytes:
     """Build the AuthTokenRequest XML per the XSD ``http://ksef.mf.gov.pl/auth/token/2.0``."""
     nsmap: dict[str | None, str] = {None: _AUTH_TOKEN_NS}
-    root = etree.Element(f"{{{_AUTH_TOKEN_NS}}}AuthTokenRequest", nsmap=nsmap)
+    root = etree.Element(f"{{{_AUTH_TOKEN_NS}}}AuthTokenRequest", nsmap=nsmap)  # pyright: ignore[reportArgumentType]
 
     etree.SubElement(root, f"{{{_AUTH_TOKEN_NS}}}Challenge").text = challenge
 
@@ -137,7 +137,7 @@ def sign_xades(
         serialization.NoEncryption(),
     )
 
-    signed_root = signer.sign(data=root, key=key_pem, cert=cert_pem)
+    signed_root = signer.sign(data=root, key=key_pem, cert=cert_pem)  # pyright: ignore[reportCallIssue]
     return etree.tostring(signed_root, xml_declaration=True, encoding="UTF-8")
 
 

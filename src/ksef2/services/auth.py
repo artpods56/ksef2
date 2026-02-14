@@ -7,7 +7,7 @@ from ksef2.clients.encryption import EncryptionClient
 from ksef2.core import exceptions
 from ksef2.core.crypto import encrypt_token
 from ksef2.core.exceptions import KSeFAuthError
-from ksef2.core import middleware
+from ksef2.core import protocols
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models.auth import (
     AuthTokens,
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 class AuthService:
     def __init__(
         self,
-        transport: middleware.KSeFProtocol,
+        transport: protocols.Middleware,
         certificate_store: CertificateStore,
     ) -> None:
         self._transport = transport

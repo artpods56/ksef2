@@ -2,7 +2,7 @@ from typing import Any, final
 
 from urllib.parse import urlencode
 
-from ksef2.core import headers, codecs, middleware
+from ksef2.core import headers, codecs, protocols
 from ksef2.infra.schema.api import spec as spec
 
 
@@ -10,7 +10,7 @@ from ksef2.infra.schema.api import spec as spec
 class ChallengeEndpoint:
     url: str = "/auth/challenge"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self) -> spec.AuthenticationChallengeResponse:
@@ -24,7 +24,7 @@ class ChallengeEndpoint:
 class TokenAuthEndpoint:
     url: str = "/auth/ksef-token"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> spec.AuthenticationInitResponse:
@@ -38,7 +38,7 @@ class TokenAuthEndpoint:
 class XAdESAuthEndpoint:
     url: str = "/auth/xades-signature"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def get_url(self, *, verify_chain: bool = False) -> str:
@@ -65,7 +65,7 @@ class XAdESAuthEndpoint:
 class AuthStatusEndpoint:
     url: str = "/auth/{referenceNumber}"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def get_url(self, *, reference_number: str) -> str:
@@ -89,7 +89,7 @@ class AuthStatusEndpoint:
 class RedeemTokenEndpoint:
     url: str = "/auth/token/redeem"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(
@@ -109,7 +109,7 @@ class RedeemTokenEndpoint:
 class RefreshTokenEndpoint:
     url: str = "/auth/token/refresh"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(
@@ -129,7 +129,7 @@ class RefreshTokenEndpoint:
 class ListActiveSessionsEndpoint:
     url: str = "/auth/sessions"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(
@@ -163,7 +163,7 @@ class ListActiveSessionsEndpoint:
 class TerminateCurrentSessionEndpoint:
     url: str = "/auth/sessions/current"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> None:
@@ -177,7 +177,7 @@ class TerminateCurrentSessionEndpoint:
 class TerminateAuthSessionEndpoint:
     url: str = "/auth/sessions/{referenceNumber}"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
     def get_url(self, *, reference_number: str) -> str:

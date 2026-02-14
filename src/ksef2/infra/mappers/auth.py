@@ -32,7 +32,7 @@ class AuthInitMapper:
         return spec.InitTokenAuthenticationRequest.model_construct(
             challenge=challenge,
             contextIdentifier=spec.AuthenticationContextIdentifier(
-                type=context_type.value,
+                type=spec.AuthenticationContextIdentifierType(context_type.value),
                 value=context_value,
             ),
             encryptedToken=encrypted_token,

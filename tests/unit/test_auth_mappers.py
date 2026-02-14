@@ -82,9 +82,9 @@ class TestAuthStatusMapper:
     def test_maps_success_status(self) -> None:
         dto = spec.AuthenticationOperationStatusResponse(
             startDate=_TS,
-            authenticationMethod="Token",
+            authenticationMethod=spec.AuthenticationMethod.Token,
             authenticationMethodInfo=spec.AuthenticationMethodInfo(
-                category="Token", code="Token", displayName="Token KSeF"
+                category=spec.AuthenticationMethodCategory.Token, code="Token", displayName="Token KSeF"
             ),
             status=spec.StatusInfo(code=200, description="OK"),
         )
@@ -101,9 +101,9 @@ class TestAuthStatusMapper:
     def test_maps_with_details_and_redeemed(self) -> None:
         dto = spec.AuthenticationOperationStatusResponse(
             startDate=_TS,
-            authenticationMethod="QualifiedSeal",
+            authenticationMethod=spec.AuthenticationMethod.QualifiedSeal,
             authenticationMethodInfo=spec.AuthenticationMethodInfo(
-                category="XadesSignature",
+                category=spec.AuthenticationMethodCategory.XadesSignature,
                 code="QualifiedSeal",
                 displayName="Pieczęć kwalifikowana",
             ),

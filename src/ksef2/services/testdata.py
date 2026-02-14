@@ -5,7 +5,7 @@ from datetime import datetime
 from types import TracebackType
 from typing import Self, final
 
-from ksef2.core import middleware
+from ksef2.core import protocols
 from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 @final
 class TestDataService:
-    def __init__(self, transport: middleware.KSeFProtocol) -> None:
+    def __init__(self, transport: protocols.Middleware) -> None:
         self._create_subject_ep = CreateSubjectEndpoint(transport)
         self._delete_subject_ep = DeleteSubjectEndpoint(transport)
         self._create_person_ep = CreatePersonEndpoint(transport)

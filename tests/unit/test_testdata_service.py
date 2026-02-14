@@ -18,7 +18,7 @@ from tests.unit.conftest import FakeTransport
 
 
 def _build_service(transport: FakeTransport) -> TestDataService:
-    return TestDataService(transport)  # type: ignore[arg-type]
+    return TestDataService(transport)
 
 
 class TestCreateSubject:
@@ -56,6 +56,7 @@ class TestCreateSubject:
         )
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert body["subunits"] == [
             {"subjectNip": "1111111111", "description": "Sub 1"},
             {"subjectNip": "2222222222", "description": "Sub 2"},
@@ -74,6 +75,7 @@ class TestCreateSubject:
         )
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert body["createdDate"] == "2025-01-15T12:00:00Z"
 
     def test_all_subject_types(self, fake_transport: FakeTransport) -> None:
@@ -85,6 +87,7 @@ class TestCreateSubject:
             )
 
             body = fake_transport.calls[-1].json
+            assert body is not None
             assert body["subjectType"] == st.value
 
 
@@ -137,6 +140,7 @@ class TestCreatePerson:
         )
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert body["isDeceased"] is True
         assert body["createdDate"] == dt.isoformat()
 
@@ -151,6 +155,7 @@ class TestCreatePerson:
         )
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert body["isBailiff"] is False
         assert "isDeceased" not in body
         assert "createdDate" not in body
@@ -212,6 +217,7 @@ class TestGrantPermissions:
         )
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert body["authorizedIdentifier"]["type"] == "Fingerprint"
 
 

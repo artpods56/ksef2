@@ -27,7 +27,7 @@ _VALID_UNTIL = (datetime.now(tz=timezone.utc) + timedelta(hours=1)).isoformat()
 def _open_session_response(
     ref: str = _REF,
     valid_until: str = _VALID_UNTIL,
-) -> dict:
+) -> dict[str, str]:
     return {"referenceNumber": ref, "validUntil": valid_until}
 
 
@@ -191,6 +191,7 @@ class TestOpenOnline:
         )
 
         body = fake_transport.calls[0].json
+        assert body is not None
         assert "formCode" in body
         assert body["formCode"]["systemCode"] == "FA (3)"
         assert body["formCode"]["schemaVersion"] == "1-0E"
