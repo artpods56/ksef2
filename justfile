@@ -15,6 +15,16 @@ coverage:
     uv run python scripts/api_coverage.py
 
 
+lint:
+    uv run ruff check src/ tests/
+
+format-check:
+    uv run ruff format --check src/ tests/
+
+typecheck:
+    uv run basedpyright
+
+
 fetch-spec:
     wget https://api-test.ksef.mf.gov.pl/docs/v2/openapi.json -O openapi.json
 

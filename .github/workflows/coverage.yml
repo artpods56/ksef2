@@ -1,0 +1,30 @@
+name: Update coverage badge
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+
+      - uses: extractions/setup-just@v2
+
+      - name: Install dependencies
+        run: just sync
+
+      - name: Generate coverage report
+        run: just coverage
+
+      - name: Commit coverage.json if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update coverage.json"
+          file_pattern: coverage.json
