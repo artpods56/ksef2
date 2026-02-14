@@ -28,7 +28,7 @@ def test_list_active_sessions_with_pagination(xades_authenticated_context):
 
     response = client.auth.list_active_sessions(
         access_token=tokens.access_token.token,
-        page_size=15, # must be between 10 and 100
+        page_size=15,  # must be between 10 and 100
     )
 
     assert response is not None
