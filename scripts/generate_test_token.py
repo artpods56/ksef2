@@ -47,8 +47,8 @@ def main() -> int:
 
     try:
         subject_nip = os.environ["KSEF_TEST_SUBJECT_NIP"]
-        person_nip = os.environ["KSEF_TEST_PERSON_NIP"]
-        person_pesel = os.environ["KSEF_TEST_PERSON_PESEL"]
+        _ = os.environ["KSEF_TEST_PERSON_NIP"]
+        _ = os.environ["KSEF_TEST_PERSON_PESEL"]
     except KeyError as e:
         raise ValueError(f"Missing required environment variable: {e}") from e
 

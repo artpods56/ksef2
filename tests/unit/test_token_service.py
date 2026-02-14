@@ -46,7 +46,7 @@ class TestGenerate:
         fake_transport.enqueue(_token_status_response(status="Active"))
         svc = _build_service(fake_transport)
 
-        result = svc.generate(
+        _ = svc.generate(
             access_token=_TOKEN,
             permissions=[TokenPermission.INVOICE_READ, TokenPermission.INVOICE_WRITE],
             description="Test token",
