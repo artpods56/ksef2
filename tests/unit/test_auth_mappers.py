@@ -84,7 +84,9 @@ class TestAuthStatusMapper:
             startDate=_TS,
             authenticationMethod=spec.AuthenticationMethod.Token,
             authenticationMethodInfo=spec.AuthenticationMethodInfo(
-                category=spec.AuthenticationMethodCategory.Token, code="Token", displayName="Token KSeF"
+                category=spec.AuthenticationMethodCategory.Token,
+                code="Token",
+                displayName="Token KSeF",
             ),
             status=spec.StatusInfo(code=200, description="OK"),
         )

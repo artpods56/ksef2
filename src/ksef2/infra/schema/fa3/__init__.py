@@ -6497,7 +6497,8 @@ class Faktura:
 
                 @dataclass(kw_only=True)
                 class Tnaglowek:
-                    kol: list[Faktura.Zalacznik.BlokDanych.Tabela.Tnaglowek.Kol] = field(
+                    kol: list[Faktura.Zalacznik.BlokDanych.Tabela.Tnaglowek.Kol] = (
+                        field(
                             default_factory=list,
                             metadata={
                                 "name": "Kol",
@@ -6506,7 +6507,7 @@ class Faktura:
                                 "max_occurs": 20,
                             },
                         )
-                   
+                    )
 
                     @dataclass(kw_only=True)
                     class Kol:
@@ -7189,7 +7190,6 @@ class TpodmiotDowolny(TpodmiotDowolnyBezAdresu):
     Podstawowy zestaw danych o osobie fizycznej lub niefizycznej.
     """
 
-
     adres_zamieszkania_siedziby: TpodmiotDowolny.AdresZamieszkaniaSiedziby = field(
         metadata={
             "name": "AdresZamieszkaniaSiedziby",
@@ -7218,7 +7218,6 @@ class TpodmiotDowolny1(TpodmiotDowolnyBezAdresu):
     Podstawowy zestaw danych o osobie fizycznej lub niefizycznej - bez
     elementu Poczta w adresie polskim.
     """
-
 
     adres_zamieszkania_siedziby: TpodmiotDowolny1.AdresZamieszkaniaSiedziby = field(
         metadata={
