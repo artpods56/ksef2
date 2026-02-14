@@ -64,12 +64,12 @@ SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas" / "FA3"
 class _LocalSchemaResolver(etree.Resolver):
     """Resolve imported XSD URLs to local copies in schemas/FA3/."""
 
-    def resolve(self, system_url, public_id, context):  # type: ignore[override]
+    def resolve(self, system_url, public_id, context):  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride]
         if system_url and "/" in system_url:
             filename = system_url.rsplit("/", 1)[-1]
             local = SCHEMAS_DIR / filename
             if local.exists():
-                return self.resolve_filename(str(local), context)
+                return self.resolve_filename(str(local), context)  # pyright: ignore[reportAttributeAccessIssue]
         return None
 
 
@@ -84,7 +84,7 @@ def validate_invoice_xml(xml_bytes: bytes) -> None:
     schema = _load_xsd_schema()
     doc = etree.fromstring(xml_bytes)
     if not schema.validate(doc):
-        errors = "\n".join(str(e) for e in schema.error_log)
+        errors = "\n".join(str(e) for e in schema.error_log)  # pyright: ignore[reportGeneralTypeIssues]
         raise ValueError(f"Invoice XML is not valid:\n{errors}")
 
 

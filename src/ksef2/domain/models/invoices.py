@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ksef2.domain.models import KSeFBaseModel
+from ksef2.domain.models.base import KSeFBaseModel
 
 
 class SendInvoiceResponse(KSeFBaseModel):
