@@ -6497,8 +6497,7 @@ class Faktura:
 
                 @dataclass(kw_only=True)
                 class Tnaglowek:
-                    kol: list[Faktura.Zalacznik.BlokDanych.Tabela.Tnaglowek.Kol] = (
-                        field(
+                    kol: list[Faktura.Zalacznik.BlokDanych.Tabela.Tnaglowek.Kol] = field(
                             default_factory=list,
                             metadata={
                                 "name": "Kol",
@@ -6507,7 +6506,7 @@ class Faktura:
                                 "max_occurs": 20,
                             },
                         )
-                    )
+                   
 
                     @dataclass(kw_only=True)
                     class Kol:
@@ -7190,11 +7189,6 @@ class TpodmiotDowolny(TpodmiotDowolnyBezAdresu):
     Podstawowy zestaw danych o osobie fizycznej lub niefizycznej.
     """
 
-    class Meta:
-        name = "TPodmiotDowolny"
-        target_namespace = (
-            "http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/05/eD/DefinicjeTypy/"
-        )
 
     adres_zamieszkania_siedziby: TpodmiotDowolny.AdresZamieszkaniaSiedziby = field(
         metadata={
@@ -7225,11 +7219,6 @@ class TpodmiotDowolny1(TpodmiotDowolnyBezAdresu):
     elementu Poczta w adresie polskim.
     """
 
-    class Meta:
-        name = "TPodmiotDowolny1"
-        target_namespace = (
-            "http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/05/eD/DefinicjeTypy/"
-        )
 
     adres_zamieszkania_siedziby: TpodmiotDowolny1.AdresZamieszkaniaSiedziby = field(
         metadata={
@@ -7259,12 +7248,6 @@ class TpodmiotDowolny2(TpodmiotDowolnyBezAdresu3):
     Podstawowy zestaw danych o osobie fizycznej lub niefizycznej - bez
     elementu Numer REGON oraz bez elementu Poczta w adresie polskim.
     """
-
-    class Meta:
-        name = "TPodmiotDowolny2"
-        target_namespace = (
-            "http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/05/eD/DefinicjeTypy/"
-        )
 
     adres_zamieszkania_siedziby: TpodmiotDowolny2.AdresZamieszkaniaSiedziby = field(
         metadata={

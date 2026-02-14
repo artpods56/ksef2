@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 
-from ksef2.domain.models._deprecated._base import KSeFBaseModel
+from ksef2.domain.models import KSeFBaseModel
 
 
 class TokenPermission(Enum):

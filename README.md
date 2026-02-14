@@ -1,6 +1,6 @@
 <div align="center">
 <a href="https://github.com/artpods56/KUL_Notarius" title="TrendRadar">
-  <img src="docs/assets/logo.png" alt="KSeF Toolkit" width="50%">
+  <img src="https://raw.githubusercontent.com/artpods56/ksef2/master/docs/assets/logo.png" alt="KSeF Toolkit" width="50%">
 </a>
 
 **Python SDK and Tools for Poland's KSeF (Krajowy System e-Faktur) v2.0 API.**

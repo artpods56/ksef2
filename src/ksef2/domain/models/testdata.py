@@ -4,7 +4,7 @@ from enum import StrEnum
 
 from pydantic import AwareDatetime
 
-from ksef2.domain.models._deprecated._base import KSeFBaseModel
+from ksef2.domain.models import KSeFBaseModel
 
 
 class SubjectType(StrEnum):
