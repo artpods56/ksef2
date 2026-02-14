@@ -20,7 +20,7 @@ from pydantic import (
 
 class Ip4Address(RootModel[str]):
     root: Annotated[
-        str, Field(pattern="^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$")
+        str, Field(pattern='^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$')
     ]
 
 
@@ -28,7 +28,7 @@ class Ip4Range(RootModel[str]):
     root: Annotated[
         str,
         Field(
-            pattern="^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}-((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$"
+            pattern='^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}-((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$'
         ),
     ]
 
@@ -37,14 +37,14 @@ class Ip4Mask(RootModel[str]):
     root: Annotated[
         str,
         Field(
-            pattern="^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}\\/(0|[1-9]|1[0-9]|2[0-9]|3[0-2])$"
+            pattern='^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}\\/(0|[1-9]|1[0-9]|2[0-9]|3[0-2])$'
         ),
     ]
 
 
 class AllowedIps(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     ip4Addresses: list[Ip4Address] | None = None
     """
@@ -61,14 +61,14 @@ class AllowedIps(BaseModel):
 
 
 class AmountType(StrEnum):
-    Brutto = "Brutto"
-    Netto = "Netto"
-    Vat = "Vat"
+    Brutto = 'Brutto'
+    Netto = 'Netto'
+    Vat = 'Vat'
 
 
 class ApiRateLimitValuesOverride(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     perSecond: int
     """
@@ -86,7 +86,7 @@ class ApiRateLimitValuesOverride(BaseModel):
 
 class ApiRateLimitsOverride(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     onlineSession: ApiRateLimitValuesOverride
     """
@@ -139,10 +139,10 @@ class ApiRateLimitsOverride(BaseModel):
 
 
 class AuthenticationContextIdentifierType(StrEnum):
-    Nip = "Nip"
-    InternalId = "InternalId"
-    NipVatUe = "NipVatUe"
-    PeppolId = "PeppolId"
+    Nip = 'Nip'
+    InternalId = 'InternalId'
+    NipVatUe = 'NipVatUe'
+    PeppolId = 'PeppolId'
 
 
 class AuthenticationMethod(StrEnum):
@@ -160,13 +160,13 @@ class AuthenticationMethod(StrEnum):
 
     """
 
-    Token = "Token"
-    TrustedProfile = "TrustedProfile"
-    InternalCertificate = "InternalCertificate"
-    QualifiedSignature = "QualifiedSignature"
-    QualifiedSeal = "QualifiedSeal"
-    PersonalSignature = "PersonalSignature"
-    PeppolSignature = "PeppolSignature"
+    Token = 'Token'
+    TrustedProfile = 'TrustedProfile'
+    InternalCertificate = 'InternalCertificate'
+    QualifiedSignature = 'QualifiedSignature'
+    QualifiedSeal = 'QualifiedSeal'
+    PersonalSignature = 'PersonalSignature'
+    PeppolSignature = 'PeppolSignature'
 
 
 class AuthenticationMethodCategory(StrEnum):
@@ -180,15 +180,15 @@ class AuthenticationMethodCategory(StrEnum):
 
     """
 
-    XadesSignature = "XadesSignature"
-    NationalNode = "NationalNode"
-    Token = "Token"
-    Other = "Other"
+    XadesSignature = 'XadesSignature'
+    NationalNode = 'NationalNode'
+    Token = 'Token'
+    Other = 'Other'
 
 
 class AuthenticationMethodInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     category: AuthenticationMethodCategory
     """
@@ -223,16 +223,16 @@ class AuthenticationTokenStatus(StrEnum):
 
     """
 
-    Pending = "Pending"
-    Active = "Active"
-    Revoking = "Revoking"
-    Revoked = "Revoked"
-    Failed = "Failed"
+    Pending = 'Pending'
+    Active = 'Active'
+    Revoking = 'Revoking'
+    Revoked = 'Revoked'
+    Failed = 'Failed'
 
 
 class AuthorizationPolicy(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     allowedIps: AllowedIps | None = None
     """
@@ -242,7 +242,7 @@ class AuthorizationPolicy(BaseModel):
 
 class BatchSessionContextLimitsOverride(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     maxInvoiceSizeInMB: Annotated[int, Field(ge=0, le=5)]
     """
@@ -260,7 +260,7 @@ class BatchSessionContextLimitsOverride(BaseModel):
 
 class BatchSessionEffectiveContextLimits(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     maxInvoiceSizeInMB: Annotated[int, Field(ge=0)]
     """
@@ -287,22 +287,22 @@ class BuyerIdentifierType(StrEnum):
 
     """
 
-    Nip = "Nip"
-    VatUe = "VatUe"
-    Other = "Other"
-    None_ = "None"
+    Nip = 'Nip'
+    VatUe = 'VatUe'
+    Other = 'Other'
+    None_ = 'None'
 
 
 class CertificateEffectiveSubjectLimits(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     maxCertificates: int | None = None
 
 
 class CertificateEnrollmentDataResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     commonName: str
     """
@@ -340,7 +340,7 @@ class CertificateEnrollmentDataResponse(BaseModel):
 
 class CertificateLimit(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     remaining: int
     """
@@ -358,7 +358,7 @@ class CertificateLimitsResponse(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     canRequest: bool
     """
@@ -385,10 +385,10 @@ class CertificateListItemStatus(StrEnum):
 
     """
 
-    Active = "Active"
-    Blocked = "Blocked"
-    Revoked = "Revoked"
-    Expired = "Expired"
+    Active = 'Active'
+    Blocked = 'Blocked'
+    Revoked = 'Revoked'
+    Expired = 'Expired'
 
 
 class CertificateRevocationReason(StrEnum):
@@ -401,27 +401,27 @@ class CertificateRevocationReason(StrEnum):
 
     """
 
-    Unspecified = "Unspecified"
-    Superseded = "Superseded"
-    KeyCompromise = "KeyCompromise"
+    Unspecified = 'Unspecified'
+    Superseded = 'Superseded'
+    KeyCompromise = 'KeyCompromise'
 
 
 class CertificateSubjectIdentifierType(StrEnum):
-    Nip = "Nip"
-    Pesel = "Pesel"
-    Fingerprint = "Fingerprint"
+    Nip = 'Nip'
+    Pesel = 'Pesel'
+    Fingerprint = 'Fingerprint'
 
 
 class CertificateSubjectLimitsOverride(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     maxCertificates: Annotated[int | None, Field(ge=0)] = None
 
 
 class CheckAttachmentPermissionStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     isAttachmentAllowed: bool | None = None
     """
@@ -445,195 +445,195 @@ class CommonSessionStatus(StrEnum):
 
     """
 
-    InProgress = "InProgress"
-    Succeeded = "Succeeded"
-    Failed = "Failed"
-    Cancelled = "Cancelled"
+    InProgress = 'InProgress'
+    Succeeded = 'Succeeded'
+    Failed = 'Failed'
+    Cancelled = 'Cancelled'
 
 
 class CurrencyCode(StrEnum):
-    AED = "AED"
-    AFN = "AFN"
-    ALL = "ALL"
-    AMD = "AMD"
-    ANG = "ANG"
-    AOA = "AOA"
-    ARS = "ARS"
-    AUD = "AUD"
-    AWG = "AWG"
-    AZN = "AZN"
-    BAM = "BAM"
-    BBD = "BBD"
-    BDT = "BDT"
-    BGN = "BGN"
-    BHD = "BHD"
-    BIF = "BIF"
-    BMD = "BMD"
-    BND = "BND"
-    BOB = "BOB"
-    BOV = "BOV"
-    BRL = "BRL"
-    BSD = "BSD"
-    BTN = "BTN"
-    BWP = "BWP"
-    BYN = "BYN"
-    BZD = "BZD"
-    CAD = "CAD"
-    CDF = "CDF"
-    CHE = "CHE"
-    CHF = "CHF"
-    CHW = "CHW"
-    CLF = "CLF"
-    CLP = "CLP"
-    CNY = "CNY"
-    COP = "COP"
-    COU = "COU"
-    CRC = "CRC"
-    CUC = "CUC"
-    CUP = "CUP"
-    CVE = "CVE"
-    CZK = "CZK"
-    DJF = "DJF"
-    DKK = "DKK"
-    DOP = "DOP"
-    DZD = "DZD"
-    EGP = "EGP"
-    ERN = "ERN"
-    ETB = "ETB"
-    EUR = "EUR"
-    FJD = "FJD"
-    FKP = "FKP"
-    GBP = "GBP"
-    GEL = "GEL"
-    GGP = "GGP"
-    GHS = "GHS"
-    GIP = "GIP"
-    GMD = "GMD"
-    GNF = "GNF"
-    GTQ = "GTQ"
-    GYD = "GYD"
-    HKD = "HKD"
-    HNL = "HNL"
-    HRK = "HRK"
-    HTG = "HTG"
-    HUF = "HUF"
-    IDR = "IDR"
-    ILS = "ILS"
-    IMP = "IMP"
-    INR = "INR"
-    IQD = "IQD"
-    IRR = "IRR"
-    ISK = "ISK"
-    JEP = "JEP"
-    JMD = "JMD"
-    JOD = "JOD"
-    JPY = "JPY"
-    KES = "KES"
-    KGS = "KGS"
-    KHR = "KHR"
-    KMF = "KMF"
-    KPW = "KPW"
-    KRW = "KRW"
-    KWD = "KWD"
-    KYD = "KYD"
-    KZT = "KZT"
-    LAK = "LAK"
-    LBP = "LBP"
-    LKR = "LKR"
-    LRD = "LRD"
-    LSL = "LSL"
-    LYD = "LYD"
-    MAD = "MAD"
-    MDL = "MDL"
-    MGA = "MGA"
-    MKD = "MKD"
-    MMK = "MMK"
-    MNT = "MNT"
-    MOP = "MOP"
-    MRU = "MRU"
-    MUR = "MUR"
-    MVR = "MVR"
-    MWK = "MWK"
-    MXN = "MXN"
-    MXV = "MXV"
-    MYR = "MYR"
-    MZN = "MZN"
-    NAD = "NAD"
-    NGN = "NGN"
-    NIO = "NIO"
-    NOK = "NOK"
-    NPR = "NPR"
-    NZD = "NZD"
-    OMR = "OMR"
-    PAB = "PAB"
-    PEN = "PEN"
-    PGK = "PGK"
-    PHP = "PHP"
-    PKR = "PKR"
-    PLN = "PLN"
-    PYG = "PYG"
-    QAR = "QAR"
-    RON = "RON"
-    RSD = "RSD"
-    RUB = "RUB"
-    RWF = "RWF"
-    SAR = "SAR"
-    SBD = "SBD"
-    SCR = "SCR"
-    SDG = "SDG"
-    SEK = "SEK"
-    SGD = "SGD"
-    SHP = "SHP"
-    SLL = "SLL"
-    SOS = "SOS"
-    SRD = "SRD"
-    SSP = "SSP"
-    STN = "STN"
-    SVC = "SVC"
-    SYP = "SYP"
-    SZL = "SZL"
-    THB = "THB"
-    TJS = "TJS"
-    TMT = "TMT"
-    TND = "TND"
-    TOP = "TOP"
-    TRY = "TRY"
-    TTD = "TTD"
-    TWD = "TWD"
-    TZS = "TZS"
-    UAH = "UAH"
-    UGX = "UGX"
-    USD = "USD"
-    USN = "USN"
-    UYI = "UYI"
-    UYU = "UYU"
-    UYW = "UYW"
-    UZS = "UZS"
-    VES = "VES"
-    VND = "VND"
-    VUV = "VUV"
-    WST = "WST"
-    XAF = "XAF"
-    XAG = "XAG"
-    XAU = "XAU"
-    XBA = "XBA"
-    XBB = "XBB"
-    XBC = "XBC"
-    XBD = "XBD"
-    XCD = "XCD"
-    XCG = "XCG"
-    XDR = "XDR"
-    XOF = "XOF"
-    XPD = "XPD"
-    XPF = "XPF"
-    XPT = "XPT"
-    XSU = "XSU"
-    XUA = "XUA"
-    XXX = "XXX"
-    YER = "YER"
-    ZAR = "ZAR"
-    ZMW = "ZMW"
-    ZWL = "ZWL"
+    AED = 'AED'
+    AFN = 'AFN'
+    ALL = 'ALL'
+    AMD = 'AMD'
+    ANG = 'ANG'
+    AOA = 'AOA'
+    ARS = 'ARS'
+    AUD = 'AUD'
+    AWG = 'AWG'
+    AZN = 'AZN'
+    BAM = 'BAM'
+    BBD = 'BBD'
+    BDT = 'BDT'
+    BGN = 'BGN'
+    BHD = 'BHD'
+    BIF = 'BIF'
+    BMD = 'BMD'
+    BND = 'BND'
+    BOB = 'BOB'
+    BOV = 'BOV'
+    BRL = 'BRL'
+    BSD = 'BSD'
+    BTN = 'BTN'
+    BWP = 'BWP'
+    BYN = 'BYN'
+    BZD = 'BZD'
+    CAD = 'CAD'
+    CDF = 'CDF'
+    CHE = 'CHE'
+    CHF = 'CHF'
+    CHW = 'CHW'
+    CLF = 'CLF'
+    CLP = 'CLP'
+    CNY = 'CNY'
+    COP = 'COP'
+    COU = 'COU'
+    CRC = 'CRC'
+    CUC = 'CUC'
+    CUP = 'CUP'
+    CVE = 'CVE'
+    CZK = 'CZK'
+    DJF = 'DJF'
+    DKK = 'DKK'
+    DOP = 'DOP'
+    DZD = 'DZD'
+    EGP = 'EGP'
+    ERN = 'ERN'
+    ETB = 'ETB'
+    EUR = 'EUR'
+    FJD = 'FJD'
+    FKP = 'FKP'
+    GBP = 'GBP'
+    GEL = 'GEL'
+    GGP = 'GGP'
+    GHS = 'GHS'
+    GIP = 'GIP'
+    GMD = 'GMD'
+    GNF = 'GNF'
+    GTQ = 'GTQ'
+    GYD = 'GYD'
+    HKD = 'HKD'
+    HNL = 'HNL'
+    HRK = 'HRK'
+    HTG = 'HTG'
+    HUF = 'HUF'
+    IDR = 'IDR'
+    ILS = 'ILS'
+    IMP = 'IMP'
+    INR = 'INR'
+    IQD = 'IQD'
+    IRR = 'IRR'
+    ISK = 'ISK'
+    JEP = 'JEP'
+    JMD = 'JMD'
+    JOD = 'JOD'
+    JPY = 'JPY'
+    KES = 'KES'
+    KGS = 'KGS'
+    KHR = 'KHR'
+    KMF = 'KMF'
+    KPW = 'KPW'
+    KRW = 'KRW'
+    KWD = 'KWD'
+    KYD = 'KYD'
+    KZT = 'KZT'
+    LAK = 'LAK'
+    LBP = 'LBP'
+    LKR = 'LKR'
+    LRD = 'LRD'
+    LSL = 'LSL'
+    LYD = 'LYD'
+    MAD = 'MAD'
+    MDL = 'MDL'
+    MGA = 'MGA'
+    MKD = 'MKD'
+    MMK = 'MMK'
+    MNT = 'MNT'
+    MOP = 'MOP'
+    MRU = 'MRU'
+    MUR = 'MUR'
+    MVR = 'MVR'
+    MWK = 'MWK'
+    MXN = 'MXN'
+    MXV = 'MXV'
+    MYR = 'MYR'
+    MZN = 'MZN'
+    NAD = 'NAD'
+    NGN = 'NGN'
+    NIO = 'NIO'
+    NOK = 'NOK'
+    NPR = 'NPR'
+    NZD = 'NZD'
+    OMR = 'OMR'
+    PAB = 'PAB'
+    PEN = 'PEN'
+    PGK = 'PGK'
+    PHP = 'PHP'
+    PKR = 'PKR'
+    PLN = 'PLN'
+    PYG = 'PYG'
+    QAR = 'QAR'
+    RON = 'RON'
+    RSD = 'RSD'
+    RUB = 'RUB'
+    RWF = 'RWF'
+    SAR = 'SAR'
+    SBD = 'SBD'
+    SCR = 'SCR'
+    SDG = 'SDG'
+    SEK = 'SEK'
+    SGD = 'SGD'
+    SHP = 'SHP'
+    SLL = 'SLL'
+    SOS = 'SOS'
+    SRD = 'SRD'
+    SSP = 'SSP'
+    STN = 'STN'
+    SVC = 'SVC'
+    SYP = 'SYP'
+    SZL = 'SZL'
+    THB = 'THB'
+    TJS = 'TJS'
+    TMT = 'TMT'
+    TND = 'TND'
+    TOP = 'TOP'
+    TRY = 'TRY'
+    TTD = 'TTD'
+    TWD = 'TWD'
+    TZS = 'TZS'
+    UAH = 'UAH'
+    UGX = 'UGX'
+    USD = 'USD'
+    USN = 'USN'
+    UYI = 'UYI'
+    UYU = 'UYU'
+    UYW = 'UYW'
+    UZS = 'UZS'
+    VES = 'VES'
+    VND = 'VND'
+    VUV = 'VUV'
+    WST = 'WST'
+    XAF = 'XAF'
+    XAG = 'XAG'
+    XAU = 'XAU'
+    XBA = 'XBA'
+    XBB = 'XBB'
+    XBC = 'XBC'
+    XBD = 'XBD'
+    XCD = 'XCD'
+    XCG = 'XCG'
+    XDR = 'XDR'
+    XOF = 'XOF'
+    XPD = 'XPD'
+    XPF = 'XPF'
+    XPT = 'XPT'
+    XSU = 'XSU'
+    XUA = 'XUA'
+    XXX = 'XXX'
+    YER = 'YER'
+    ZAR = 'ZAR'
+    ZMW = 'ZMW'
+    ZWL = 'ZWL'
 
 
 class EffectiveApiRateLimitValues(ApiRateLimitValuesOverride):
@@ -642,7 +642,7 @@ class EffectiveApiRateLimitValues(ApiRateLimitValuesOverride):
 
 class EffectiveApiRateLimits(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     onlineSession: EffectiveApiRateLimitValues
     """
@@ -696,7 +696,7 @@ class EffectiveApiRateLimits(BaseModel):
 
 class EncryptionInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     encryptedSymmetricKey: Base64Str
     """
@@ -712,37 +712,37 @@ class EncryptionInfo(BaseModel):
 
 class EnrollmentEffectiveSubjectLimits(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     maxEnrollments: int | None = None
 
 
 class EnrollmentSubjectLimitsOverride(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     maxEnrollments: Annotated[int | None, Field(ge=0)] = None
 
 
 class EntityAuthorizationPermissionType(StrEnum):
-    SelfInvoicing = "SelfInvoicing"
-    RRInvoicing = "RRInvoicing"
-    TaxRepresentative = "TaxRepresentative"
-    PefInvoicing = "PefInvoicing"
+    SelfInvoicing = 'SelfInvoicing'
+    RRInvoicing = 'RRInvoicing'
+    TaxRepresentative = 'TaxRepresentative'
+    PefInvoicing = 'PefInvoicing'
 
 
 class EntityAuthorizationPermissionsSubjectIdentifierType(StrEnum):
-    Nip = "Nip"
-    PeppolId = "PeppolId"
+    Nip = 'Nip'
+    PeppolId = 'PeppolId'
 
 
 class EntityAuthorizationsAuthorizingEntityIdentifierType(StrEnum):
-    Nip = "Nip"
+    Nip = 'Nip'
 
 
 class EntityByFingerprintDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     fullName: Annotated[str, Field(max_length=100)]
     """
@@ -756,7 +756,7 @@ class EntityByFingerprintDetails(BaseModel):
 
 class EntityDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     fullName: Annotated[str, Field(max_length=90, min_length=5)]
     """
@@ -765,17 +765,17 @@ class EntityDetails(BaseModel):
 
 
 class EntityPermissionType(StrEnum):
-    InvoiceWrite = "InvoiceWrite"
-    InvoiceRead = "InvoiceRead"
+    InvoiceWrite = 'InvoiceWrite'
+    InvoiceRead = 'InvoiceRead'
 
 
 class EntityRoleType(StrEnum):
-    CourtBailiff = "CourtBailiff"
-    EnforcementAuthority = "EnforcementAuthority"
-    LocalGovernmentUnit = "LocalGovernmentUnit"
-    LocalGovernmentSubUnit = "LocalGovernmentSubUnit"
-    VatGroupUnit = "VatGroupUnit"
-    VatGroupSubUnit = "VatGroupSubUnit"
+    CourtBailiff = 'CourtBailiff'
+    EnforcementAuthority = 'EnforcementAuthority'
+    LocalGovernmentUnit = 'LocalGovernmentUnit'
+    LocalGovernmentSubUnit = 'LocalGovernmentSubUnit'
+    VatGroupUnit = 'VatGroupUnit'
+    VatGroupSubUnit = 'VatGroupSubUnit'
 
 
 class EntitySubjectByFingerprintDetailsType(StrEnum):
@@ -786,7 +786,7 @@ class EntitySubjectByFingerprintDetailsType(StrEnum):
 
     """
 
-    EntityByFingerprint = "EntityByFingerprint"
+    EntityByFingerprint = 'EntityByFingerprint'
 
 
 class EntitySubjectByIdentifierDetailsType(StrEnum):
@@ -797,7 +797,7 @@ class EntitySubjectByIdentifierDetailsType(StrEnum):
 
     """
 
-    EntityByIdentifier = "EntityByIdentifier"
+    EntityByIdentifier = 'EntityByIdentifier'
 
 
 class EntitySubjectDetailsType(StrEnum):
@@ -809,16 +809,16 @@ class EntitySubjectDetailsType(StrEnum):
 
     """
 
-    EntityByIdentifier = "EntityByIdentifier"
-    EntityByFingerprint = "EntityByFingerprint"
+    EntityByIdentifier = 'EntityByIdentifier'
+    EntityByFingerprint = 'EntityByFingerprint'
 
 
 class EuEntityAdministrationPermissionsContextIdentifierType(StrEnum):
-    NipVatUe = "NipVatUe"
+    NipVatUe = 'NipVatUe'
 
 
 class EuEntityAdministrationPermissionsSubjectIdentifierType(StrEnum):
-    Fingerprint = "Fingerprint"
+    Fingerprint = 'Fingerprint'
 
 
 class EuEntityDetails(EntityByFingerprintDetails):
@@ -835,26 +835,26 @@ class EuEntityPermissionSubjectDetailsType(StrEnum):
 
     """
 
-    PersonByFingerprintWithIdentifier = "PersonByFingerprintWithIdentifier"
-    PersonByFingerprintWithoutIdentifier = "PersonByFingerprintWithoutIdentifier"
-    EntityByFingerprint = "EntityByFingerprint"
+    PersonByFingerprintWithIdentifier = 'PersonByFingerprintWithIdentifier'
+    PersonByFingerprintWithoutIdentifier = 'PersonByFingerprintWithoutIdentifier'
+    EntityByFingerprint = 'EntityByFingerprint'
 
 
 class EuEntityPermissionsQueryPermissionType(StrEnum):
-    VatUeManage = "VatUeManage"
-    InvoiceWrite = "InvoiceWrite"
-    InvoiceRead = "InvoiceRead"
-    Introspection = "Introspection"
+    VatUeManage = 'VatUeManage'
+    InvoiceWrite = 'InvoiceWrite'
+    InvoiceRead = 'InvoiceRead'
+    Introspection = 'Introspection'
 
 
 class EuEntityPermissionsQueryRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     vatUeIdentifier: Annotated[
         str | None,
         Field(
-            pattern="^(ATU\\d{8}|BE[01]{1}\\d{9}|BG\\d{9,10}|CY\\d{8}[A-Z]|CZ\\d{8,10}|DE\\d{9}|DK\\d{8}|EE\\d{9}|EL\\d{9}|ES([A-Z]\\d{8}|\\d{8}[A-Z]|[A-Z]\\d{7}[A-Z])|FI\\d{8}|FR[A-Z0-9]{2}\\d{9}|HR\\d{11}|HU\\d{8}|IE(\\d{7}[A-Z]{2}|\\d[A-Z0-9+*]\\d{5}[A-Z])|IT\\d{11}|LT(\\d{9}|\\d{12})|LU\\d{8}|LV\\d{11}|MT\\d{8}|NL[A-Z0-9+*]{12}|PT\\d{9}|RO\\d{2,10}|SE\\d{12}|SI\\d{8}|SK\\d{10}|XI((\\d{9}|\\d{12})|(GD|HA)\\d{3}))$"
+            pattern='^(ATU\\d{8}|BE[01]{1}\\d{9}|BG\\d{9,10}|CY\\d{8}[A-Z]|CZ\\d{8,10}|DE\\d{9}|DK\\d{8}|EE\\d{9}|EL\\d{9}|ES([A-Z]\\d{8}|\\d{8}[A-Z]|[A-Z]\\d{7}[A-Z])|FI\\d{8}|FR[A-Z0-9]{2}\\d{9}|HR\\d{11}|HU\\d{8}|IE(\\d{7}[A-Z]{2}|\\d[A-Z0-9+*]\\d{5}[A-Z])|IT\\d{11}|LT(\\d{9}|\\d{12})|LU\\d{8}|LV\\d{11}|MT\\d{8}|NL[A-Z0-9+*]{12}|PT\\d{9}|RO\\d{2,10}|SE\\d{12}|SI\\d{8}|SK\\d{10}|XI((\\d{9}|\\d{12})|(GD|HA)\\d{3}))$'
         ),
     ] = None
     """
@@ -872,7 +872,7 @@ class EuEntityPermissionsQueryRequest(BaseModel):
 
 class ExceptionDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     exceptionCode: int | None = None
     exceptionDescription: str | None = None
@@ -881,7 +881,7 @@ class ExceptionDetails(BaseModel):
 
 class FormCode(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     systemCode: str
     """
@@ -903,7 +903,7 @@ class IdDocument(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: Annotated[str, Field(max_length=20)]
     """
@@ -920,14 +920,14 @@ class IdDocument(BaseModel):
 
 
 class IndirectPermissionType(StrEnum):
-    InvoiceRead = "InvoiceRead"
-    InvoiceWrite = "InvoiceWrite"
+    InvoiceRead = 'InvoiceRead'
+    InvoiceWrite = 'InvoiceWrite'
 
 
 class IndirectPermissionsTargetIdentifierType(StrEnum):
-    Nip = "Nip"
-    AllPartners = "AllPartners"
-    InternalId = "InternalId"
+    Nip = 'Nip'
+    AllPartners = 'AllPartners'
+    InternalId = 'InternalId'
 
 
 class InternalId(RootModel[str]):
@@ -936,7 +936,7 @@ class InternalId(RootModel[str]):
         Field(
             max_length=16,
             min_length=16,
-            pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}-\\d{5}$",
+            pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}-\\d{5}$',
         ),
     ]
     """
@@ -946,7 +946,7 @@ class InternalId(RootModel[str]):
 
 class InvoiceMetadataBuyerIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: BuyerIdentifierType
     """
@@ -966,24 +966,24 @@ class InvoiceMetadataBuyerIdentifier(BaseModel):
 
 
 class InvoicePermissionType(StrEnum):
-    SelfInvoicing = "SelfInvoicing"
-    TaxRepresentative = "TaxRepresentative"
-    RRInvoicing = "RRInvoicing"
-    PefInvoicing = "PefInvoicing"
+    SelfInvoicing = 'SelfInvoicing'
+    TaxRepresentative = 'TaxRepresentative'
+    RRInvoicing = 'RRInvoicing'
+    PefInvoicing = 'PefInvoicing'
 
 
 class InvoiceQueryAmount(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: AmountType
-    from_: Annotated[float | None, Field(alias="from")] = None
+    from_: Annotated[float | None, Field(alias='from')] = None
     to: float | None = None
 
 
 class InvoiceQueryBuyerIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: BuyerIdentifierType
     """
@@ -1012,9 +1012,9 @@ class InvoiceQueryDateType(StrEnum):
 
     """
 
-    Issue = "Issue"
-    Invoicing = "Invoicing"
-    PermanentStorage = "PermanentStorage"
+    Issue = 'Issue'
+    Invoicing = 'Invoicing'
+    PermanentStorage = 'PermanentStorage'
 
 
 class InvoiceQueryFormType(StrEnum):
@@ -1027,9 +1027,9 @@ class InvoiceQueryFormType(StrEnum):
 
     """
 
-    FA = "FA"
-    PEF = "PEF"
-    RR = "RR"
+    FA = 'FA'
+    PEF = 'PEF'
+    RR = 'RR'
 
 
 class InvoiceQuerySubjectType(StrEnum):
@@ -1043,15 +1043,15 @@ class InvoiceQuerySubjectType(StrEnum):
 
     """
 
-    Subject1 = "Subject1"
-    Subject2 = "Subject2"
-    Subject3 = "Subject3"
-    SubjectAuthorized = "SubjectAuthorized"
+    Subject1 = 'Subject1'
+    Subject2 = 'Subject2'
+    Subject3 = 'Subject3'
+    SubjectAuthorized = 'SubjectAuthorized'
 
 
 class InvoiceStatusInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     code: int
     """
@@ -1091,23 +1091,23 @@ class InvoiceType(StrEnum):
 
     """
 
-    Vat = "Vat"
-    Zal = "Zal"
-    Kor = "Kor"
-    Roz = "Roz"
-    Upr = "Upr"
-    KorZal = "KorZal"
-    KorRoz = "KorRoz"
-    VatPef = "VatPef"
-    VatPefSp = "VatPefSp"
-    KorPef = "KorPef"
-    VatRr = "VatRr"
-    KorVatRr = "KorVatRr"
+    Vat = 'Vat'
+    Zal = 'Zal'
+    Kor = 'Kor'
+    Roz = 'Roz'
+    Upr = 'Upr'
+    KorZal = 'KorZal'
+    KorRoz = 'KorRoz'
+    VatPef = 'VatPef'
+    VatPefSp = 'VatPefSp'
+    KorPef = 'KorPef'
+    VatRr = 'VatRr'
+    KorVatRr = 'KorVatRr'
 
 
 class InvoicingMode(StrEnum):
-    Online = "Online"
-    Offline = "Offline"
+    Online = 'Online'
+    Offline = 'Offline'
 
 
 class KsefCertificateType(StrEnum):
@@ -1119,15 +1119,15 @@ class KsefCertificateType(StrEnum):
 
     """
 
-    Authentication = "Authentication"
-    Offline = "Offline"
+    Authentication = 'Authentication'
+    Offline = 'Offline'
 
 
 class Nip(RootModel[str]):
     root: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -1139,7 +1139,7 @@ class NipVatUe(RootModel[str]):
     root: Annotated[
         str,
         Field(
-            pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}-(ATU\\d{8}|BE[01]{1}\\d{9}|BG\\d{9,10}|CY\\d{8}[A-Z]|CZ\\d{8,10}|DE\\d{9}|DK\\d{8}|EE\\d{9}|EL\\d{9}|ES([A-Z]\\d{8}|\\d{8}[A-Z]|[A-Z]\\d{7}[A-Z])|FI\\d{8}|FR[A-Z0-9]{2}\\d{9}|HR\\d{11}|HU\\d{8}|IE(\\d{7}[A-Z]{2}|\\d[A-Z0-9+*]\\d{5}[A-Z])|IT\\d{11}|LT(\\d{9}|\\d{12})|LU\\d{8}|LV\\d{11}|MT\\d{8}|NL[A-Z0-9+*]{12}|PT\\d{9}|RO\\d{2,10}|SE\\d{12}|SI\\d{8}|SK\\d{10}|XI((\\d{9}|\\d{12})|(GD|HA)\\d{3}))$"
+            pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}-(ATU\\d{8}|BE[01]{1}\\d{9}|BG\\d{9,10}|CY\\d{8}[A-Z]|CZ\\d{8,10}|DE\\d{9}|DK\\d{8}|EE\\d{9}|EL\\d{9}|ES([A-Z]\\d{8}|\\d{8}[A-Z]|[A-Z]\\d{7}[A-Z])|FI\\d{8}|FR[A-Z0-9]{2}\\d{9}|HR\\d{11}|HU\\d{8}|IE(\\d{7}[A-Z]{2}|\\d[A-Z0-9+*]\\d{5}[A-Z])|IT\\d{11}|LT(\\d{9}|\\d{12})|LU\\d{8}|LV\\d{11}|MT\\d{8}|NL[A-Z0-9+*]{12}|PT\\d{9}|RO\\d{2,10}|SE\\d{12}|SI\\d{8}|SK\\d{10}|XI((\\d{9}|\\d{12})|(GD|HA)\\d{3}))$'
         ),
     ]
     """
@@ -1157,7 +1157,7 @@ class OnlineSessionEffectiveContextLimits(BatchSessionEffectiveContextLimits):
 
 class OpenOnlineSessionRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     formCode: FormCode
     """
@@ -1180,7 +1180,7 @@ class OpenOnlineSessionRequest(BaseModel):
 
 class PartUploadRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     ordinalNumber: Annotated[int, Field(ge=1)]
     """
@@ -1202,9 +1202,9 @@ class PartUploadRequest(BaseModel):
 
 class PeppolProvider(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
-    id: Annotated[str, Field(max_length=9, min_length=9, pattern="^P[A-Z]{2}[0-9]{6}$")]
+    id: Annotated[str, Field(max_length=9, min_length=9, pattern='^P[A-Z]{2}[0-9]{6}$')]
     """
     Identyfikator dostawcy usług Peppol.
     """
@@ -1219,13 +1219,13 @@ class PeppolProvider(BaseModel):
 
 
 class PermissionState(StrEnum):
-    Active = "Active"
-    Inactive = "Inactive"
+    Active = 'Active'
+    Inactive = 'Inactive'
 
 
 class PermissionsEuEntityDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     fullName: Annotated[str, Field(max_length=100)]
     """
@@ -1239,7 +1239,7 @@ class PermissionsEuEntityDetails(BaseModel):
 
 class PermissionsSubjectEntityByFingerprintDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectDetailsType: EntitySubjectByFingerprintDetailsType
     """
@@ -1261,7 +1261,7 @@ class PermissionsSubjectEntityByFingerprintDetails(BaseModel):
 
 class PermissionsSubjectEntityByIdentifierDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectDetailsType: EntitySubjectByIdentifierDetailsType
     """
@@ -1279,7 +1279,7 @@ class PermissionsSubjectEntityByIdentifierDetails(BaseModel):
 
 class PermissionsSubjectEntityDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectDetailsType: EntitySubjectDetailsType
     """
@@ -1302,7 +1302,7 @@ class PermissionsSubjectEntityDetails(BaseModel):
 
 class PersonByFingerprintWithoutIdentifierDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     firstName: Annotated[str, Field(max_length=30, min_length=2)]
     """
@@ -1324,7 +1324,7 @@ class PersonByFingerprintWithoutIdentifierDetails(BaseModel):
 
 class PersonDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     firstName: Annotated[str, Field(max_length=30, min_length=2)]
     """
@@ -1341,18 +1341,18 @@ class PersonIdentifierType(StrEnum):
     Typ identyfikatora osoby fizycznej.
     """
 
-    Pesel = "Pesel"
-    Nip = "Nip"
+    Pesel = 'Pesel'
+    Nip = 'Nip'
 
 
 class PersonPermissionScope(StrEnum):
-    CredentialsManage = "CredentialsManage"
-    CredentialsRead = "CredentialsRead"
-    InvoiceWrite = "InvoiceWrite"
-    InvoiceRead = "InvoiceRead"
-    Introspection = "Introspection"
-    SubunitManage = "SubunitManage"
-    EnforcementOperations = "EnforcementOperations"
+    CredentialsManage = 'CredentialsManage'
+    CredentialsRead = 'CredentialsRead'
+    InvoiceWrite = 'InvoiceWrite'
+    InvoiceRead = 'InvoiceRead'
+    Introspection = 'Introspection'
+    SubunitManage = 'SubunitManage'
+    EnforcementOperations = 'EnforcementOperations'
 
 
 class PersonPermissionSubjectDetailsType(StrEnum):
@@ -1365,36 +1365,36 @@ class PersonPermissionSubjectDetailsType(StrEnum):
 
     """
 
-    PersonByIdentifier = "PersonByIdentifier"
-    PersonByFingerprintWithIdentifier = "PersonByFingerprintWithIdentifier"
-    PersonByFingerprintWithoutIdentifier = "PersonByFingerprintWithoutIdentifier"
+    PersonByIdentifier = 'PersonByIdentifier'
+    PersonByFingerprintWithIdentifier = 'PersonByFingerprintWithIdentifier'
+    PersonByFingerprintWithoutIdentifier = 'PersonByFingerprintWithoutIdentifier'
 
 
 class PersonPermissionsAuthorIdentifierType(StrEnum):
-    Nip = "Nip"
-    Pesel = "Pesel"
-    Fingerprint = "Fingerprint"
-    System = "System"
+    Nip = 'Nip'
+    Pesel = 'Pesel'
+    Fingerprint = 'Fingerprint'
+    System = 'System'
 
 
 class PersonPermissionsContextIdentifierType(StrEnum):
-    Nip = "Nip"
-    InternalId = "InternalId"
+    Nip = 'Nip'
+    InternalId = 'InternalId'
 
 
 class PersonPermissionsQueryType(StrEnum):
-    PermissionsInCurrentContext = "PermissionsInCurrentContext"
-    PermissionsGrantedInCurrentContext = "PermissionsGrantedInCurrentContext"
+    PermissionsInCurrentContext = 'PermissionsInCurrentContext'
+    PermissionsGrantedInCurrentContext = 'PermissionsGrantedInCurrentContext'
 
 
 class PersonRemoveRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     nip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -1411,19 +1411,19 @@ class PersonSubjectByFingerprintDetailsType(StrEnum):
 
     """
 
-    PersonByFingerprintWithIdentifier = "PersonByFingerprintWithIdentifier"
-    PersonByFingerprintWithoutIdentifier = "PersonByFingerprintWithoutIdentifier"
+    PersonByFingerprintWithIdentifier = 'PersonByFingerprintWithIdentifier'
+    PersonByFingerprintWithoutIdentifier = 'PersonByFingerprintWithoutIdentifier'
 
 
 class PersonalPermissionScope(StrEnum):
-    CredentialsManage = "CredentialsManage"
-    CredentialsRead = "CredentialsRead"
-    InvoiceWrite = "InvoiceWrite"
-    InvoiceRead = "InvoiceRead"
-    Introspection = "Introspection"
-    SubunitManage = "SubunitManage"
-    EnforcementOperations = "EnforcementOperations"
-    VatUeManage = "VatUeManage"
+    CredentialsManage = 'CredentialsManage'
+    CredentialsRead = 'CredentialsRead'
+    InvoiceWrite = 'InvoiceWrite'
+    InvoiceRead = 'InvoiceRead'
+    Introspection = 'Introspection'
+    SubunitManage = 'SubunitManage'
+    EnforcementOperations = 'EnforcementOperations'
+    VatUeManage = 'VatUeManage'
 
 
 class PublicKeyCertificateUsage(StrEnum):
@@ -1435,13 +1435,13 @@ class PublicKeyCertificateUsage(StrEnum):
 
     """
 
-    KsefTokenEncryption = "KsefTokenEncryption"
-    SymmetricKeyEncryption = "SymmetricKeyEncryption"
+    KsefTokenEncryption = 'KsefTokenEncryption'
+    SymmetricKeyEncryption = 'SymmetricKeyEncryption'
 
 
 class QueryCertificatesRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificateSerialNumber: str | None = None
     """
@@ -1479,7 +1479,7 @@ class QueryCertificatesRequest(BaseModel):
 
 class QueryPeppolProvidersResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     peppolProviders: list[PeppolProvider]
     """
@@ -1492,8 +1492,8 @@ class QueryPeppolProvidersResponse(BaseModel):
 
 
 class QueryType(StrEnum):
-    Granted = "Granted"
-    Received = "Received"
+    Granted = 'Granted'
+    Received = 'Received'
 
 
 class ReferenceNumber(RootModel[str]):
@@ -1505,7 +1505,7 @@ class ReferenceNumber(RootModel[str]):
 
 class RetrieveCertificatesListItem(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificate: Base64Str
     """
@@ -1532,7 +1532,7 @@ class RetrieveCertificatesListItem(BaseModel):
 
 class RetrieveCertificatesRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificateSerialNumbers: Annotated[list[str], Field(max_length=10, min_length=1)]
     """
@@ -1542,7 +1542,7 @@ class RetrieveCertificatesRequest(BaseModel):
 
 class RetrieveCertificatesResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificates: list[RetrieveCertificatesListItem]
     """
@@ -1559,7 +1559,7 @@ class RetryAfter(RootModel[int]):
 
 class RevokeCertificateRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     revocationReason: CertificateRevocationReason | None = None
     """
@@ -1575,7 +1575,7 @@ class RevokeCertificateRequest(BaseModel):
 
 class SendInvoiceResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -1592,13 +1592,13 @@ class SessionType(StrEnum):
 
     """
 
-    Online = "Online"
-    Batch = "Batch"
+    Online = 'Online'
+    Batch = 'Batch'
 
 
 class SetRateLimitsRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     rateLimits: ApiRateLimitsOverride
     """
@@ -1608,7 +1608,7 @@ class SetRateLimitsRequest(BaseModel):
 
 class SetSessionLimitsRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     onlineSession: OnlineSessionContextLimitsOverride
     """
@@ -1629,13 +1629,13 @@ class SortOrder(StrEnum):
 
     """
 
-    Asc = "Asc"
-    Desc = "Desc"
+    Asc = 'Asc'
+    Desc = 'Desc'
 
 
 class StatusInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     code: int
     """
@@ -1653,12 +1653,12 @@ class StatusInfo(BaseModel):
 
 class SubjectRemoveRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectNip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -1667,24 +1667,24 @@ class SubjectRemoveRequest(BaseModel):
 
 
 class SubjectType(StrEnum):
-    EnforcementAuthority = "EnforcementAuthority"
-    VatGroup = "VatGroup"
-    JST = "JST"
+    EnforcementAuthority = 'EnforcementAuthority'
+    VatGroup = 'VatGroup'
+    JST = 'JST'
 
 
 class SubordinateEntityRoleType(StrEnum):
-    LocalGovernmentSubUnit = "LocalGovernmentSubUnit"
-    VatGroupSubUnit = "VatGroupSubUnit"
+    LocalGovernmentSubUnit = 'LocalGovernmentSubUnit'
+    VatGroupSubUnit = 'VatGroupSubUnit'
 
 
 class Subunit(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectNip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -1694,22 +1694,22 @@ class Subunit(BaseModel):
 
 
 class SubunitPermissionScope(StrEnum):
-    CredentialsManage = "CredentialsManage"
+    CredentialsManage = 'CredentialsManage'
 
 
 class SubunitPermissionsContextIdentifierType(StrEnum):
-    InternalId = "InternalId"
-    Nip = "Nip"
+    InternalId = 'InternalId'
+    Nip = 'Nip'
 
 
 class TestDataPermissionType(StrEnum):
-    InvoiceRead = "InvoiceRead"
-    InvoiceWrite = "InvoiceWrite"
-    Introspection = "Introspection"
-    CredentialsRead = "CredentialsRead"
-    CredentialsManage = "CredentialsManage"
-    EnforcementOperations = "EnforcementOperations"
-    SubunitManage = "SubunitManage"
+    InvoiceRead = 'InvoiceRead'
+    InvoiceWrite = 'InvoiceWrite'
+    Introspection = 'Introspection'
+    CredentialsRead = 'CredentialsRead'
+    CredentialsManage = 'CredentialsManage'
+    EnforcementOperations = 'EnforcementOperations'
+    SubunitManage = 'SubunitManage'
 
 
 class ThirdSubjectIdentifierType(StrEnum):
@@ -1724,11 +1724,11 @@ class ThirdSubjectIdentifierType(StrEnum):
 
     """
 
-    Nip = "Nip"
-    InternalId = "InternalId"
-    VatUe = "VatUe"
-    Other = "Other"
-    None_ = "None"
+    Nip = 'Nip'
+    InternalId = 'InternalId'
+    VatUe = 'VatUe'
+    Other = 'Other'
+    None_ = 'None'
 
 
 class TokenAuthorIdentifierType(StrEnum):
@@ -1741,14 +1741,14 @@ class TokenAuthorIdentifierType(StrEnum):
 
     """
 
-    Nip = "Nip"
-    Pesel = "Pesel"
-    Fingerprint = "Fingerprint"
+    Nip = 'Nip'
+    Pesel = 'Pesel'
+    Fingerprint = 'Fingerprint'
 
 
 class TokenAuthorIdentifierTypeIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: TokenAuthorIdentifierType
     """
@@ -1777,15 +1777,15 @@ class TokenContextIdentifierType(StrEnum):
 
     """
 
-    Nip = "Nip"
-    InternalId = "InternalId"
-    NipVatUe = "NipVatUe"
-    PeppolId = "PeppolId"
+    Nip = 'Nip'
+    InternalId = 'InternalId'
+    NipVatUe = 'NipVatUe'
+    PeppolId = 'PeppolId'
 
 
 class TokenContextIdentifierTypeIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: TokenContextIdentifierType
     """
@@ -1806,7 +1806,7 @@ class TokenContextIdentifierTypeIdentifier(BaseModel):
 
 class TokenInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     token: str
     """
@@ -1819,17 +1819,17 @@ class TokenInfo(BaseModel):
 
 
 class TokenPermissionType(StrEnum):
-    InvoiceRead = "InvoiceRead"
-    InvoiceWrite = "InvoiceWrite"
-    CredentialsRead = "CredentialsRead"
-    CredentialsManage = "CredentialsManage"
-    SubunitManage = "SubunitManage"
-    EnforcementOperations = "EnforcementOperations"
+    InvoiceRead = 'InvoiceRead'
+    InvoiceWrite = 'InvoiceWrite'
+    CredentialsRead = 'CredentialsRead'
+    CredentialsManage = 'CredentialsManage'
+    SubunitManage = 'SubunitManage'
+    EnforcementOperations = 'EnforcementOperations'
 
 
 class TokenStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -1905,7 +1905,7 @@ class TooManyRequestsResponse(BaseModel):
 
 class UpoPageResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -1928,7 +1928,7 @@ class UpoPageResponse(BaseModel):
 
 class UpoResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     pages: list[UpoPageResponse]
     """
@@ -1942,12 +1942,12 @@ class AttachmentPermissionGrantRequest(PersonRemoveRequest):
 
 class AttachmentPermissionRevokeRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     nip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -1961,7 +1961,7 @@ class AttachmentPermissionRevokeRequest(BaseModel):
 
 class AuthenticationChallengeResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     challenge: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -1979,7 +1979,7 @@ class AuthenticationChallengeResponse(BaseModel):
 
 class AuthenticationContextIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: AuthenticationContextIdentifierType
     """
@@ -1993,7 +1993,7 @@ class AuthenticationContextIdentifier(BaseModel):
 
 class AuthenticationInitResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -2007,7 +2007,7 @@ class AuthenticationInitResponse(BaseModel):
 
 class AuthenticationListItem(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     startDate: AwareDatetime
     """
@@ -2080,7 +2080,7 @@ class AuthenticationListItem(BaseModel):
 
 class AuthenticationListResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     continuationToken: str | None = None
     """
@@ -2094,7 +2094,7 @@ class AuthenticationListResponse(BaseModel):
 
 class AuthenticationOperationStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     startDate: AwareDatetime
     """
@@ -2159,7 +2159,7 @@ class AuthenticationOperationStatusResponse(BaseModel):
 
 class AuthenticationTokenRefreshResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     accessToken: TokenInfo
     """
@@ -2169,7 +2169,7 @@ class AuthenticationTokenRefreshResponse(BaseModel):
 
 class AuthenticationTokensResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     accessToken: TokenInfo
     """
@@ -2185,7 +2185,7 @@ class AuthenticationTokensResponse(BaseModel):
 
 class BatchFilePartInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     ordinalNumber: Annotated[int, Field(ge=1)]
     """
@@ -2203,7 +2203,7 @@ class BatchFilePartInfo(BaseModel):
 
 class CertificateEnrollmentStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     requestDate: AwareDatetime
     """
@@ -2239,7 +2239,7 @@ class CertificateSubjectIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -2253,7 +2253,7 @@ class CertificateSubjectIdentifier(BaseModel):
 
 class EffectiveContextLimits(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     onlineSession: OnlineSessionEffectiveContextLimits
     """
@@ -2267,7 +2267,7 @@ class EffectiveContextLimits(BaseModel):
 
 class EffectiveSubjectLimits(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     enrollment: EnrollmentEffectiveSubjectLimits | None = None
     certificate: CertificateEffectiveSubjectLimits | None = None
@@ -2275,14 +2275,14 @@ class EffectiveSubjectLimits(BaseModel):
 
 class EnrollCertificateRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificateName: Annotated[
         str,
         Field(
             max_length=100,
             min_length=5,
-            pattern="^[a-zA-Z0-9_\\-\\ ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$",
+            pattern='^[a-zA-Z0-9_\\-\\ ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$',
         ),
     ]
     """
@@ -2310,7 +2310,7 @@ class EnrollCertificateRequest(BaseModel):
 
 class EnrollCertificateResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -2332,7 +2332,7 @@ class EntityAuthorizationPermissionsSubjectIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityAuthorizationPermissionsSubjectIdentifierType
     """
@@ -2355,7 +2355,7 @@ class EntityAuthorizationsAuthorIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -2377,7 +2377,7 @@ class EntityAuthorizationsAuthorizedEntityIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityAuthorizationPermissionsSubjectIdentifierType
     """
@@ -2398,7 +2398,7 @@ class EntityAuthorizationsAuthorizingEntityIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityAuthorizationsAuthorizingEntityIdentifierType
     """
@@ -2412,7 +2412,7 @@ class EntityAuthorizationsAuthorizingEntityIdentifier(BaseModel):
 
 class EntityPermission(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityPermissionType
     """
@@ -2433,7 +2433,7 @@ class EntityPermissionsSubjectIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityAuthorizationsAuthorizingEntityIdentifierType
     """
@@ -2454,7 +2454,7 @@ class EntityPermissionsSubordinateEntityIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityAuthorizationsAuthorizingEntityIdentifierType
     """
@@ -2475,7 +2475,7 @@ class EntityRolesParentEntityIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityAuthorizationsAuthorizingEntityIdentifierType
     """
@@ -2496,7 +2496,7 @@ class EuEntityAdministrationPermissionsContextIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EuEntityAdministrationPermissionsContextIdentifierType
     """
@@ -2517,7 +2517,7 @@ class EuEntityAdministrationPermissionsSubjectIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EuEntityAdministrationPermissionsSubjectIdentifierType
     """
@@ -2540,7 +2540,7 @@ class EuEntityPermissionsAuthorIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -2561,7 +2561,7 @@ class EuEntityPermissionsSubjectIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EuEntityAdministrationPermissionsSubjectIdentifierType
     """
@@ -2575,7 +2575,7 @@ class EuEntityPermissionsSubjectIdentifier(BaseModel):
 
 class ExceptionInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     exceptionDetailList: list[ExceptionDetails] | None = None
     referenceNumber: Annotated[str | None, Field(max_length=36, min_length=36)] = None
@@ -2590,14 +2590,14 @@ class ExceptionInfo(BaseModel):
 
 class ExceptionResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     exception: ExceptionInfo | None = None
 
 
 class ExportInvoicesResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -2607,7 +2607,7 @@ class ExportInvoicesResponse(BaseModel):
 
 class GenerateTokenRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     permissions: list[TokenPermissionType]
     """
@@ -2621,7 +2621,7 @@ class GenerateTokenRequest(BaseModel):
 
 class GenerateTokenResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -2644,7 +2644,7 @@ class IndirectPermissionsSubjectIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -2667,7 +2667,7 @@ class IndirectPermissionsTargetIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: IndirectPermissionsTargetIdentifierType
     """
@@ -2681,7 +2681,7 @@ class IndirectPermissionsTargetIdentifier(BaseModel):
 
 class InitTokenAuthenticationRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     challenge: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -2703,12 +2703,12 @@ class InitTokenAuthenticationRequest(BaseModel):
 
 class InvoiceMetadataAuthorizedSubject(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     nip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -2731,7 +2731,7 @@ class InvoiceMetadataAuthorizedSubject(BaseModel):
 
 class InvoiceMetadataBuyer(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     identifier: InvoiceMetadataBuyerIdentifier
     """
@@ -2751,12 +2751,12 @@ class InvoiceMetadataBuyer(BaseModel):
 
 class InvoiceMetadataSeller(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     nip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -2770,7 +2770,7 @@ class InvoiceMetadataSeller(BaseModel):
 
 class InvoiceMetadataThirdSubjectIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: ThirdSubjectIdentifierType
     """
@@ -2792,7 +2792,7 @@ class InvoiceMetadataThirdSubjectIdentifier(BaseModel):
 
 class InvoicePackagePart(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     ordinalNumber: Annotated[int, Field(ge=1)]
     """
@@ -2840,7 +2840,7 @@ class InvoicePackagePart(BaseModel):
 
 class InvoiceQueryDateRange(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     dateType: InvoiceQueryDateType
     """
@@ -2852,7 +2852,7 @@ class InvoiceQueryDateRange(BaseModel):
     | PermanentStorage | Data trwałego zapisu faktury w repozytorium systemu KSeF. |
 
     """
-    from_: Annotated[AwareDatetime, Field(alias="from")]
+    from_: Annotated[AwareDatetime, Field(alias='from')]
     """
     Data początkowa zakresu w formacie ISO-8601 np. 2026-01-03T13:45:00+00:00.
     """
@@ -2872,7 +2872,7 @@ class InvoiceQueryDateRange(BaseModel):
 
 class InvoiceQueryFilters(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectType: InvoiceQuerySubjectType
     """
@@ -2903,7 +2903,7 @@ class InvoiceQueryFilters(BaseModel):
         Field(
             max_length=36,
             min_length=35,
-            pattern="^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$",
+            pattern='^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$',
         ),
     ] = None
     """
@@ -2920,7 +2920,7 @@ class InvoiceQueryFilters(BaseModel):
     sellerNip: Annotated[
         str | None,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ] = None
     """
@@ -2985,7 +2985,7 @@ class InvoiceQueryFilters(BaseModel):
 
 class OpenBatchSessionResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -3016,7 +3016,7 @@ class OpenBatchSessionResponse(BaseModel):
 
 class OpenOnlineSessionResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -3030,7 +3030,7 @@ class OpenOnlineSessionResponse(BaseModel):
 
 class PermissionsOperationResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -3040,7 +3040,7 @@ class PermissionsOperationResponse(BaseModel):
 
 class PermissionsOperationStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     status: StatusInfo
     """
@@ -3062,12 +3062,12 @@ class PermissionsOperationStatusResponse(BaseModel):
 
 class PersonCreateRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     nip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -3078,7 +3078,7 @@ class PersonCreateRequest(BaseModel):
         Field(
             max_length=11,
             min_length=11,
-            pattern="^\\d{2}(?:0[1-9]|1[0-2]|2[1-9]|3[0-2]|4[1-9]|5[0-2]|6[1-9]|7[0-2]|8[1-9]|9[0-2])\\d{7}$",
+            pattern='^\\d{2}(?:0[1-9]|1[0-2]|2[1-9]|3[0-2]|4[1-9]|5[0-2]|6[1-9]|7[0-2]|8[1-9]|9[0-2])\\d{7}$',
         ),
     ]
     """
@@ -3095,7 +3095,7 @@ class PersonCreateRequest(BaseModel):
 
 class PersonIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: PersonIdentifierType
     """
@@ -3119,7 +3119,7 @@ class PersonPermissionsAuthorIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: PersonPermissionsAuthorIdentifierType
     """
@@ -3142,7 +3142,7 @@ class PersonPermissionsAuthorizedIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -3164,7 +3164,7 @@ class PersonPermissionsContextIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: PersonPermissionsContextIdentifierType
     """
@@ -3198,7 +3198,7 @@ class PersonPermissionsTargetIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: IndirectPermissionsTargetIdentifierType
     """
@@ -3219,7 +3219,7 @@ class PersonalPermissionsAuthorizedIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -3241,7 +3241,7 @@ class PersonalPermissionsContextIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: PersonPermissionsContextIdentifierType
     """
@@ -3264,7 +3264,7 @@ class PersonalPermissionsTargetIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: IndirectPermissionsTargetIdentifierType
     """
@@ -3278,7 +3278,7 @@ class PersonalPermissionsTargetIdentifier(BaseModel):
 
 class PublicKeyCertificate(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificate: Base64Str
     """
@@ -3309,7 +3309,7 @@ class QueryTokensResponseItem(TokenStatusResponse):
 
 class SendInvoiceRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     invoiceHash: Annotated[Base64Str, Field(max_length=44, min_length=44)]
     """
@@ -3345,7 +3345,7 @@ class SendInvoiceRequest(BaseModel):
 
 class SessionInvoiceStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     ordinalNumber: Annotated[int, Field(ge=1)]
     """
@@ -3360,7 +3360,7 @@ class SessionInvoiceStatusResponse(BaseModel):
         Field(
             max_length=36,
             min_length=35,
-            pattern="^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$",
+            pattern='^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$',
         ),
     ] = None
     """
@@ -3430,7 +3430,7 @@ class SessionInvoiceStatusResponse(BaseModel):
 
 class SessionInvoicesResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     continuationToken: str | None = None
     """
@@ -3444,7 +3444,7 @@ class SessionInvoicesResponse(BaseModel):
 
 class SessionStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     status: StatusInfo
     """
@@ -3509,7 +3509,7 @@ class SessionStatusResponse(BaseModel):
 
 class SessionsQueryResponseItem(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -3547,7 +3547,7 @@ class SessionsQueryResponseItem(BaseModel):
 
 class SetSubjectLimitsRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifierType: CertificateSubjectIdentifierType | None = None
     enrollment: EnrollmentSubjectLimitsOverride | None = None
@@ -3556,12 +3556,12 @@ class SetSubjectLimitsRequest(BaseModel):
 
 class SubjectCreateRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectNip: Annotated[
         str,
         Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+            max_length=10, min_length=10, pattern='^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$'
         ),
     ]
     """
@@ -3578,7 +3578,7 @@ class SubjectCreateRequest(BaseModel):
 
 class SubordinateEntityRolesQueryRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subordinateEntityIdentifier: EntityPermissionsSubordinateEntityIdentifier | None = (
         None
@@ -3624,7 +3624,7 @@ class SubunitPermissionsAuthorizedIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -3646,7 +3646,7 @@ class SubunitPermissionsContextIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: SubunitPermissionsContextIdentifierType
     """
@@ -3669,7 +3669,7 @@ class SubunitPermissionsSubjectIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     """
@@ -3691,7 +3691,7 @@ class SubunitPermissionsSubunitIdentifier(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: SubunitPermissionsContextIdentifierType
     """
@@ -3705,7 +3705,7 @@ class SubunitPermissionsSubunitIdentifier(BaseModel):
 
 class TestDataAuthenticationContextIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     value: str
     type: AuthenticationContextIdentifierType
@@ -3713,7 +3713,7 @@ class TestDataAuthenticationContextIdentifier(BaseModel):
 
 class TestDataAuthorizedIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: CertificateSubjectIdentifierType
     value: Annotated[str, Field(max_length=64, min_length=10)]
@@ -3721,7 +3721,7 @@ class TestDataAuthorizedIdentifier(BaseModel):
 
 class TestDataContextIdentifier(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     type: EntityAuthorizationsAuthorizingEntityIdentifierType
     value: Annotated[str, Field(max_length=10, min_length=10)]
@@ -3729,7 +3729,7 @@ class TestDataContextIdentifier(BaseModel):
 
 class TestDataPermission(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     description: Annotated[str, Field(max_length=256, min_length=5)]
     permissionType: TestDataPermissionType
@@ -3737,7 +3737,7 @@ class TestDataPermission(BaseModel):
 
 class TestDataPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     contextIdentifier: TestDataContextIdentifier
     authorizedIdentifier: TestDataAuthorizedIdentifier
@@ -3746,7 +3746,7 @@ class TestDataPermissionsGrantRequest(BaseModel):
 
 class TestDataPermissionsRevokeRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     contextIdentifier: TestDataContextIdentifier
     authorizedIdentifier: TestDataAuthorizedIdentifier
@@ -3754,14 +3754,14 @@ class TestDataPermissionsRevokeRequest(BaseModel):
 
 class UnblockContextAuthenticationRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     contextIdentifier: TestDataAuthenticationContextIdentifier | None = None
 
 
 class BatchFileInfo(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     fileSize: Annotated[int, Field(ge=1, le=5000000000)]
     """
@@ -3783,7 +3783,7 @@ class BlockContextAuthenticationRequest(UnblockContextAuthenticationRequest):
 
 class CertificateListItem(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificateSerialNumber: str
     """
@@ -3841,7 +3841,7 @@ class CertificateListItem(BaseModel):
 
 class EntityAuthorizationGrant(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     id: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -3891,7 +3891,7 @@ class EntityAuthorizationGrant(BaseModel):
 
 class EntityAuthorizationPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifier: EntityAuthorizationPermissionsSubjectIdentifier
     """
@@ -3917,7 +3917,7 @@ class EntityAuthorizationPermissionsGrantRequest(BaseModel):
 
 class EntityAuthorizationPermissionsQueryRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     authorizingIdentifier: EntityAuthorizationsAuthorizingEntityIdentifier | None = None
     """
@@ -3950,7 +3950,7 @@ class EntityAuthorizationPermissionsQueryRequest(BaseModel):
 
 class EntityPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifier: EntityPermissionsSubjectIdentifier
     """
@@ -3975,7 +3975,7 @@ class EntityPermissionsGrantRequest(BaseModel):
 
 class EntityRole(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     parentEntityIdentifier: EntityRolesParentEntityIdentifier | None = None
     """
@@ -4000,7 +4000,7 @@ class EntityRole(BaseModel):
 
 class InvoiceExportRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     encryption: EncryptionInfo
     """
@@ -4014,7 +4014,7 @@ class InvoiceExportRequest(BaseModel):
 
 class InvoiceMetadataThirdSubject(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     identifier: InvoiceMetadataThirdSubjectIdentifier
     name: Annotated[str | None, Field(max_length=512)] = None
@@ -4043,7 +4043,7 @@ class InvoiceMetadataThirdSubject(BaseModel):
 
 class InvoicePackage(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     invoiceCount: Annotated[int, Field(ge=0, le=10000)]
     """
@@ -4091,7 +4091,7 @@ class InvoicePackage(BaseModel):
 
 class OpenBatchSessionRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     formCode: FormCode
     """
@@ -4120,7 +4120,7 @@ class OpenBatchSessionRequest(BaseModel):
 
 class PermissionsSubjectPersonByFingerprintDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectDetailsType: PersonSubjectByFingerprintDetailsType
     """
@@ -4155,7 +4155,7 @@ class PermissionsSubjectPersonByFingerprintDetails(BaseModel):
 
 class PermissionsSubjectPersonDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectDetailsType: PersonPermissionSubjectDetailsType
     """
@@ -4191,7 +4191,7 @@ class PermissionsSubjectPersonDetails(BaseModel):
 
 class PersonByFingerprintWithIdentifierDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     firstName: Annotated[str, Field(max_length=30, min_length=2)]
     """
@@ -4209,7 +4209,7 @@ class PersonByFingerprintWithIdentifierDetails(BaseModel):
 
 class PersonPermission(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     id: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -4283,7 +4283,7 @@ class PersonPermission(BaseModel):
 
 class PersonPermissionSubjectDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectDetailsType: PersonPermissionSubjectDetailsType
     """
@@ -4314,7 +4314,7 @@ class PersonPermissionSubjectDetails(BaseModel):
 
 class PersonPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifier: PersonPermissionsSubjectIdentifier
     """
@@ -4341,7 +4341,7 @@ class PersonPermissionsGrantRequest(BaseModel):
 
 class PersonPermissionsQueryRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     authorIdentifier: PersonPermissionsAuthorIdentifier | None = None
     """
@@ -4403,7 +4403,7 @@ class PersonPermissionsQueryRequest(BaseModel):
 
 class PersonalPermission(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     id: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -4465,7 +4465,7 @@ class PersonalPermission(BaseModel):
 
 class PersonalPermissionsQueryRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     contextIdentifier: PersonalPermissionsContextIdentifier | None = None
     """
@@ -4500,7 +4500,7 @@ class PersonalPermissionsQueryRequest(BaseModel):
 
 class QueryCertificatesResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     certificates: list[CertificateListItem]
     """
@@ -4514,7 +4514,7 @@ class QueryCertificatesResponse(BaseModel):
 
 class QueryEntityAuthorizationPermissionsResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     authorizationGrants: list[EntityAuthorizationGrant]
     """
@@ -4528,7 +4528,7 @@ class QueryEntityAuthorizationPermissionsResponse(BaseModel):
 
 class QueryEntityRolesResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     roles: list[EntityRole]
     """
@@ -4542,7 +4542,7 @@ class QueryEntityRolesResponse(BaseModel):
 
 class QueryPersonPermissionsResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     permissions: list[PersonPermission]
     """
@@ -4556,7 +4556,7 @@ class QueryPersonPermissionsResponse(BaseModel):
 
 class QueryPersonalPermissionsResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     permissions: list[PersonalPermission]
     """
@@ -4570,7 +4570,7 @@ class QueryPersonalPermissionsResponse(BaseModel):
 
 class QueryTokensResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     continuationToken: str | None = None
     """
@@ -4584,7 +4584,7 @@ class QueryTokensResponse(BaseModel):
 
 class SessionsQueryResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     continuationToken: str | None = None
     """
@@ -4598,7 +4598,7 @@ class SessionsQueryResponse(BaseModel):
 
 class SubordinateEntityRole(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subordinateEntityIdentifier: SubordinateRoleSubordinateEntityIdentifier
     """
@@ -4623,7 +4623,7 @@ class SubordinateEntityRole(BaseModel):
 
 class SubunitPermission(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     id: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -4679,7 +4679,7 @@ class SubunitPermission(BaseModel):
 
 class SubunitPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifier: SubunitPermissionsSubjectIdentifier
     """
@@ -4714,7 +4714,7 @@ class SubunitPermissionsGrantRequest(BaseModel):
 
 class SubunitPermissionsQueryRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subunitIdentifier: SubunitPermissionsSubunitIdentifier | None = None
     """
@@ -4728,7 +4728,7 @@ class SubunitPermissionsQueryRequest(BaseModel):
 
 class EuEntityPermission(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     id: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -4783,7 +4783,7 @@ class EuEntityPermission(BaseModel):
 
 class EuEntityPermissionSubjectDetails(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectDetailsType: EuEntityPermissionSubjectDetailsType
     """
@@ -4814,7 +4814,7 @@ class EuEntityPermissionSubjectDetails(BaseModel):
 
 class EuEntityPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifier: EuEntityPermissionsSubjectIdentifier
     """
@@ -4839,7 +4839,7 @@ class EuEntityPermissionsGrantRequest(BaseModel):
 
 class IndirectPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifier: IndirectPermissionsSubjectIdentifier
     """
@@ -4875,7 +4875,7 @@ class IndirectPermissionsGrantRequest(BaseModel):
 
 class InvoiceExportStatusResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     status: StatusInfo
     """
@@ -4908,14 +4908,14 @@ class InvoiceExportStatusResponse(BaseModel):
 
 class InvoiceMetadata(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     ksefNumber: Annotated[
         str,
         Field(
             max_length=36,
             min_length=35,
-            pattern="^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$",
+            pattern='^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$',
         ),
     ]
     """
@@ -5032,7 +5032,7 @@ class InvoiceMetadata(BaseModel):
 
 class QueryEuEntityPermissionsResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     permissions: list[EuEntityPermission]
     """
@@ -5046,7 +5046,7 @@ class QueryEuEntityPermissionsResponse(BaseModel):
 
 class QueryInvoicesMetadataResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     hasMore: bool
     """
@@ -5078,7 +5078,7 @@ class QueryInvoicesMetadataResponse(BaseModel):
 
 class QuerySubordinateEntityRolesResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     roles: list[SubordinateEntityRole]
     """
@@ -5092,7 +5092,7 @@ class QuerySubordinateEntityRolesResponse(BaseModel):
 
 class QuerySubunitPermissionsResponse(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     permissions: list[SubunitPermission]
     """
@@ -5106,7 +5106,7 @@ class QuerySubunitPermissionsResponse(BaseModel):
 
 class EuEntityAdministrationPermissionsGrantRequest(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     subjectIdentifier: EuEntityAdministrationPermissionsSubjectIdentifier
     """
