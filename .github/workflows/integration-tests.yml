@@ -1,0 +1,44 @@
+name: Integration Tests
+
+on:
+  schedule:
+    - cron: "0 4 * * *"  # Daily at 4 AM UTC
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - release/**
+    paths:
+      - "src/ksef2/**"
+      - "tests/integration/**"
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+
+      - name: Install Python 3.12
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Run integration tests
+        env:
+          KSEF_TEST_SUBJECT_NIP: ${{ secrets.KSEF_TEST_SUBJECT_NIP }}
+          KSEF_TEST_PERSON_NIP: ${{ secrets.KSEF_TEST_PERSON_NIP }}
+          KSEF_TEST_PERSON_PESEL: ${{ secrets.KSEF_TEST_PERSON_PESEL }}
+          KSEF_TEST_KSEF_TOKEN: ${{ secrets.KSEF_TEST_KSEF_TOKEN }}
+        run: uv run pytest tests/integration/ -v -m integration
+
+      - name: Report success
+        if: success()
+        run: echo "Integration tests passed!"
+
+      - name: Report failure
+        if: failure()
+        run: echo "Integration tests failed!"
