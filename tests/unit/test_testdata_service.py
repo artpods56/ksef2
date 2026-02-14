@@ -80,7 +80,9 @@ class TestCreateSubject:
         for st in SubjectType:
             fake_transport.enqueue(status_code=204)
             svc = _build_service(fake_transport)
-            svc.create_subject(nip="1234567890", subject_type=st, description="Test subject")
+            svc.create_subject(
+                nip="1234567890", subject_type=st, description="Test subject"
+            )
 
             body = fake_transport.calls[-1].json
             assert body["subjectType"] == st.value

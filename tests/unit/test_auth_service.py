@@ -47,7 +47,11 @@ def _status_response(code: int = 200, description: str = "OK") -> dict:
     return {
         "startDate": _NOW.isoformat(),
         "authenticationMethod": "Token",
-        "authenticationMethodInfo": {"category": "Token", "code": "Token", "displayName": "Token KSeF"},
+        "authenticationMethodInfo": {
+            "category": "Token",
+            "code": "Token",
+            "displayName": "Token KSeF",
+        },
         "status": {"code": code, "description": description},
     }
 

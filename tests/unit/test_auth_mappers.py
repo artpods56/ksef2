@@ -83,7 +83,9 @@ class TestAuthStatusMapper:
         dto = spec.AuthenticationOperationStatusResponse(
             startDate=_TS,
             authenticationMethod="Token",
-            authenticationMethodInfo=spec.AuthenticationMethodInfo(category="Token", code="Token", displayName="Token KSeF"),
+            authenticationMethodInfo=spec.AuthenticationMethodInfo(
+                category="Token", code="Token", displayName="Token KSeF"
+            ),
             status=spec.StatusInfo(code=200, description="OK"),
         )
 
@@ -100,7 +102,11 @@ class TestAuthStatusMapper:
         dto = spec.AuthenticationOperationStatusResponse(
             startDate=_TS,
             authenticationMethod="QualifiedSeal",
-            authenticationMethodInfo=spec.AuthenticationMethodInfo(category="XadesSignature", code="QualifiedSeal", displayName="Pieczęć kwalifikowana"),
+            authenticationMethodInfo=spec.AuthenticationMethodInfo(
+                category="XadesSignature",
+                code="QualifiedSeal",
+                displayName="Pieczęć kwalifikowana",
+            ),
             status=spec.StatusInfo(
                 code=415, description="Failed", details=["No permissions"]
             ),
