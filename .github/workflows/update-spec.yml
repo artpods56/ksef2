@@ -35,7 +35,7 @@ jobs:
       - name: Check for changes
         id: diff
         run: |
-          if git diff --quiet; then
+          if git diff --quiet openapi.json src/ksef2/infra/schema/api/spec.py; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -45,6 +45,9 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
+          add-paths: |
+            openapi.json
+            src/ksef2/infra/schema/api/spec.py
           branch: chore/update-openapi-spec
           commit-message: "chore: update OpenAPI spec and regenerate models"
           title: "chore: update OpenAPI spec and regenerate models"
