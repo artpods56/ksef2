@@ -49,7 +49,7 @@ The SDK auto-generates Pydantic models from OpenAPI in `src/ksef2/infra/schema/a
 
 **Search for existing models:**
 ```bash
-grep -n "ModelName" src/ksef2/infra/schema/api/spec.py
+grep -n "ModelName" src/ksef2/infra/schema/api/models.py
 ```
 
 If the model doesn't exist, regenerate the schema:

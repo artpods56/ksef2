@@ -41,6 +41,43 @@ Revoke an existing KSeF token.
 
 ---
 
+## Example
+
+Full token lifecycle — generate, check status, and revoke:
+
+```python
+from ksef2.domain.models.tokens import TokenPermission
+
+# Generate a new KSeF token (requires CREDENTIALS_MANAGE permission)
+result = client.tokens.generate(
+    access_token=access_token,
+    permissions=[
+        TokenPermission.INVOICE_READ,
+        TokenPermission.INVOICE_WRITE,
+    ],
+    description="Example API token",
+)
+print(f"Token:     {result.token[:40]}...")
+print(f"Reference: {result.reference_number}")
+
+# Check token status
+status = client.tokens.status(
+    access_token=access_token,
+    reference_number=result.reference_number,
+)
+print(f"Status: {status.status.value}")
+
+# Revoke the token
+client.tokens.revoke(
+    access_token=access_token,
+    reference_number=result.reference_number,
+)
+```
+
+> Full example: [`scripts/examples/auth/token_management.py`](../../scripts/examples/auth/token_management.py)
+
+---
+
 ## Token Permissions
 
 | Permission | Description |
@@ -57,4 +94,4 @@ Revoke an existing KSeF token.
 
 ## Related
 
-- [Authentication](guides/authentication.md) - Using tokens for authentication
+- [Authentication](authentication.md) - Using tokens for authentication

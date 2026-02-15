@@ -20,15 +20,57 @@ Download an invoice by its KSeF reference number.
 
 ---
 
-## Sessions
+## Example
 
-All invoice operations require an active session:
+All invoice operations require an active session. The example below sets up test data, authenticates, opens a session, and sends an invoice:
 
 ```python
-with client.sessions.open_online(access_token=token) as session:
-    session.send_invoice(...)
-    invoice = session.download_invoice(...)
+from ksef2 import Client, FormSchema, Environment
+from ksef2.core.tools import generate_nip, generate_pesel
+from ksef2.core.xades import generate_test_certificate
+from ksef2.domain.models.testdata import (
+    Identifier, IdentifierType, Permission, PermissionType, SubjectType,
+)
+
+ORG_NIP = generate_nip()
+PERSON_NIP = generate_nip()
+PERSON_PESEL = generate_pesel()
+
+client = Client(environment=Environment.TEST)
+
+with client.testdata.temporal() as temp:
+    temp.create_subject(
+        nip=ORG_NIP,
+        subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+        description="SDK test seller",
+    )
+    temp.create_person(
+        nip=PERSON_NIP, pesel=PERSON_PESEL, description="Example person",
+    )
+    temp.grant_permissions(
+        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        permissions=[
+            Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
+        ],
+    )
+
+    cert, private_key = generate_test_certificate(PERSON_NIP)
+    tokens = client.auth.authenticate_xades(
+        nip=PERSON_NIP, cert=cert, private_key=private_key,
+    )
+
+    with client.sessions.open_online(
+        access_token=tokens.access_token.token,
+        form_code=FormSchema.FA3,
+    ) as session:
+        with open("invoice.xml", "rb") as f:
+            result = session.send_invoice(f.read())
+        print(f"Invoice sent, reference number: {result.reference_number}")
+
 ```
+
+> Full example: [`scripts/examples/invoices/send_invoice.py`](../../scripts/examples/invoices/send_invoice.py)
 
 **Session SDK endpoints:**
 - `POST /sessions/online` - Open session
@@ -38,5 +80,5 @@ with client.sessions.open_online(access_token=token) as session:
 
 ## Related
 
-- [Authentication](guides/authentication.md) - Getting access tokens
-- [Sessions](guides/sessions.md) - Session management
+- [Authentication](authentication.md) - Getting access tokens
+- [Sessions](sessions.md) - Session management

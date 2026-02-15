@@ -15,17 +15,65 @@ For authentication session management, see [Authentication](guides/authenticatio
 
 ### Open Session
 
-Start a new online session for invoice operations.
+Start a new online session for invoice operations. Sessions can be used as context managers for automatic cleanup, or managed manually.
 
 **SDK Endpoint:** `POST /sessions/online`
+
+```python
+from ksef2 import Client, Environment, FormSchema
+
+client = Client(Environment.TEST)
+
+# Context manager (recommended) — session terminates automatically
+with client.sessions.open_online(
+    access_token=tokens.access_token.token,
+    form_code=FormSchema.FA3,
+) as session:
+    with open("invoice.xml", "rb") as f:
+        result = session.send_invoice(f.read())
+    print(result.reference_number)
+
+# Manual management
+session = client.sessions.open_online(
+    access_token=tokens.access_token.token,
+    form_code=FormSchema.FA3,
+)
+try:
+    with open("invoice.xml", "rb") as f:
+        result = session.send_invoice(f.read())
+finally:
+    session.terminate()
+```
 
 ---
 
 ### Resume Session
 
-Resume an existing session from saved state.
+Resume an existing session from saved state. The session state is a Pydantic model that can be serialized/deserialized for passing between processes.
 
 **SDK Endpoint:** Uses stored session state
+
+```python
+from ksef2.domain.models.session import SessionState
+
+# Save session state
+state: SessionState = session.get_state()
+state_json = state.model_dump_json()
+
+# --- Pass state_json to another process (e.g. via database or message queue) ---
+
+# Restore and resume
+restored_state = SessionState.model_validate_json(state_json)
+resumed_session = client.sessions.resume(state=restored_state)
+
+# Use the resumed session as normal
+# resumed_session.send_invoice(invoice_xml)
+
+# Terminate manually when done
+resumed_session.terminate()
+```
+
+> Full example: [`scripts/examples/session/session_resume.py`](../../scripts/examples/session/session_resume.py)
 
 ---
 
@@ -55,5 +103,5 @@ End an active session.
 
 ## Related
 
-- [Invoices](guides/invoices.md) - Invoice operations within sessions
-- [Authentication](guides/authentication.md) - Getting access tokens
+- [Invoices](invoices.md) - Invoice operations within sessions
+- [Authentication](authentication.md) - Getting access tokens

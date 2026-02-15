@@ -2,41 +2,51 @@
 
 Manage API limits and restrictions for the KSeF system.
 
-## Context Limits
+## Querying Limits
+
+### Context Limits
 
 Get the effective limits for the current context (session type limits).
 
 **SDK Endpoint:** `GET /limits/context`
 
 ```python
-response = client.limits.get_context_limits(access_token=token)
-print(response.online_session.max_invoices)
-print(response.batch_session.max_invoices)
+context_limits = client.limits.get_context_limits(access_token=access_token)
+print(f"Online max invoices: {context_limits.online_session.max_invoices}")
+print(f"Online max invoice size (MB): {context_limits.online_session.max_invoice_size_mb}")
+print(f"Online max with attachment (MB): {context_limits.online_session.max_invoice_with_attachment_size_mb}")
+print(f"Batch max invoices: {context_limits.batch_session.max_invoices}")
+print(f"Batch max invoice size (MB): {context_limits.batch_session.max_invoice_size_mb}")
 ```
 
-## Subject Limits
+### Subject Limits
 
 Get the effective limits for the current subject (certificate/enrollment limits).
 
 **SDK Endpoint:** `GET /limits/subject`
 
 ```python
-response = client.limits.get_subject_limits(access_token=token)
-print(response.certificate.max_certificates)
-print(response.enrollment.max_enrollments)
+subject_limits = client.limits.get_subject_limits(access_token=access_token)
+if subject_limits.certificate:
+    print(f"Max certificates: {subject_limits.certificate.max_certificates}")
+if subject_limits.enrollment:
+    print(f"Max enrollments:  {subject_limits.enrollment.max_enrollments}")
 ```
 
-## API Rate Limits
+### API Rate Limits
 
 Get the current API rate limits.
 
 **SDK Endpoint:** `GET /rate-limits`
 
 ```python
-response = client.limits.get_api_rate_limits(access_token=token)
-print(response.online_session.per_second)
-print(response.batch_session.per_minute)
+rate_limits = client.limits.get_api_rate_limits(access_token=access_token)
+print(f"Invoice send: {rate_limits.invoice_send.per_second}/s  {rate_limits.invoice_send.per_minute}/m  {rate_limits.invoice_send.per_hour}/h")
+print(f"Online session: {rate_limits.online_session.per_second}/s  {rate_limits.online_session.per_minute}/m  {rate_limits.online_session.per_hour}/h")
+print(f"Invoice download: {rate_limits.invoice_download.per_second}/s  {rate_limits.invoice_download.per_minute}/m  {rate_limits.invoice_download.per_hour}/h")
 ```
+
+> Full example: [`scripts/examples/limits/limits_query.py`](../../scripts/examples/limits/limits_query.py)
 
 ## Test Environment Only
 
@@ -115,3 +125,5 @@ client.limits.set_api_rate_limits(access_token=token, limits=limits)
 ```python
 client.limits.reset_api_rate_limits(access_token=token)
 ```
+
+> Full example: [`scripts/examples/limits/limits_modify.py`](../../scripts/examples/limits/limits_modify.py)

@@ -14,6 +14,32 @@ Uses a digital certificate to sign an authentication request. Works with self-si
 - Self-signed certificate (TEST only) or qualified certificate (PRODUCTION)
 - Certificate must include appropriate identifiers (NIP/PESEL)
 
+```python
+from ksef2 import Client, Environment
+from ksef2.core.tools import generate_nip
+from ksef2.core.xades import generate_test_certificate
+
+NIP = generate_nip()
+client = Client(environment=Environment.TEST)
+
+# Generate a self-signed certificate (TEST environment only)
+cert, private_key = generate_test_certificate(NIP)
+
+# Authenticate with XAdES signature
+tokens = client.auth.authenticate_xades(
+    nip=NIP,
+    cert=cert,
+    private_key=private_key,
+)
+
+print(f"Access token:  {tokens.access_token.token[:40]}…")
+print(f"  Valid until: {tokens.access_token.valid_until}")
+print(f"Refresh token: {tokens.refresh_token.token[:40]}…")
+print(f"  Valid until: {tokens.refresh_token.valid_until}")
+```
+
+> Full example: [`scripts/examples/auth/auth_xades.py`](../../scripts/examples/auth/auth_xades.py)
+
 ---
 
 ### 2. Token Authentication
@@ -27,6 +53,26 @@ Uses a pre-generated KSeF token (not the access token) for authentication.
   - KSeF portal directly
   - Token generation API (requires `CredentialsManage` permission)
 
+```python
+from ksef2 import Client, Environment
+from ksef2.core.tools import generate_nip
+
+NIP = generate_nip()
+KSEF_TOKEN = "<your-token-here>"
+
+client = Client(environment=Environment.TEST)
+
+tokens = client.auth.authenticate_token(
+    ksef_token=KSEF_TOKEN,
+    nip=NIP,
+)
+
+print(f"Access token:  {tokens.access_token.token[:40]}…")
+print(f"Refresh token: {tokens.refresh_token.token[:40]}…")
+```
+
+> Full example: [`scripts/examples/auth/auth_token.py`](../../scripts/examples/auth/auth_token.py)
+
 ---
 
 ### 3. Token Refresh
@@ -37,6 +83,19 @@ Refresh an expired access token without re-authenticating.
 
 **Requirements:**
 - Valid refresh token from previous authentication
+
+```python
+# After initial authentication...
+refreshed = client.auth.refresh(refresh_token=tokens.refresh_token.token)
+print(f"New access token valid until: {refreshed.access_token.valid_until}")
+
+# The new access token can now be used for API calls
+sessions = client.auth.list_active_sessions(
+    access_token=refreshed.access_token.token,
+)
+```
+
+> Full example: [`scripts/examples/auth/auth_refresh.py`](../../scripts/examples/auth/auth_refresh.py)
 
 ---
 
@@ -65,6 +124,29 @@ Returns a paginated list with:
 **SDK Endpoint:** `DELETE /auth/sessions/{referenceNumber}`
 
 Note: Terminating a session invalidates its refresh token. Active access tokens remain valid until expiration.
+
+```python
+# List active sessions
+sessions = client.auth.list_active_sessions(access_token=access_token)
+
+# Paginated listing
+# sessions = client.auth.list_active_sessions(
+#     access_token=access_token,
+#     page_size=10,
+#     continuation_token=None,  # from previous page
+# )
+
+# Terminate the current session
+client.auth.terminate_current_session(access_token=access_token)
+
+# Terminate a specific session by reference number
+# client.auth.terminate_session(
+#     access_token=access_token,
+#     reference_number="some-reference-number",
+# )
+```
+
+> Full example: [`scripts/examples/session/session_management.py`](../../scripts/examples/session/session_management.py)
 
 ---
 
@@ -119,5 +201,5 @@ Note: Terminating a session invalidates its refresh token. Active access tokens 
 
 ## Related
 
-- [Test Data](guides/testdata.md) - Setting up test subjects
-- [Tokens](guides/tokens.md) - Token generation and management
+- [Test Data](testdata.md) - Setting up test subjects
+- [Tokens](tokens.md) - Token generation and management
