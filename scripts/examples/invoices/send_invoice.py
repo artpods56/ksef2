@@ -18,12 +18,16 @@ PERSON_NIP = generate_nip()
 PERSON_PESEL = generate_pesel()
 
 INVOICE_TEMPLATE_PATH = (
-    repo_root() / "docs" / "assets" / "sample_invoices" / "invoice-template-fa-3-with-custom-subject_2.xml"
+    repo_root()
+    / "docs"
+    / "assets"
+    / "sample_invoices"
+    / "invoice-template-fa-3-with-custom-subject_2.xml"
 )
 
 
 def main() -> None:
-    
+
     client = Client(environment=Environment.TEST)
 
     with client.testdata.temporal() as temp:
