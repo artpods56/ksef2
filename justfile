@@ -28,7 +28,11 @@ typecheck:
     echo "$output" | grep -q "0 errors"
 
 
-fetch-spec:
+sync-openapi-version:
+    uv run python scripts/sync_openapi_version.py
+
+
+fetch-spec: && sync-openapi-version
     wget https://api-test.ksef.mf.gov.pl/docs/v2/openapi.json -O openapi.json
 
 
@@ -49,5 +53,5 @@ regenerate-models:
       --use-field-description \
       --disable-timestamp \
       --target-python-version 3.12 \
-      --output src/ksef2/infra/schema/api/spec.py
-    uv run ruff format src/ksef2/infra/schema/api/spec.py
+      --output src/ksef2/infra/schema/api/models.py
+    uv run ruff format src/ksef2/infra/schema/api/models.py

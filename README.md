@@ -50,7 +50,7 @@ with client.sessions.open_online(
         result = session.send_invoice(f.read())
     print(result.reference_number)
 
-# Sessions also support manual management:
+# Sessions are context managers, and will automatically terminate on exit:
 session = client.sessions.open_online(
     access_token=tokens.access_token.token,
     form_code=FormSchema.FA3,
@@ -62,6 +62,7 @@ try:
 finally:
     session.terminate()
 ```
+> Check out the [`quickstart.py`](scripts/examples/quickstart.py) script and other examples in [`scripts/examples`](scripts/examples)!
 
 ### Token Authentication
 
@@ -70,7 +71,8 @@ For production, or when you have a pre-generated KSeF token:
 ```python
 from ksef2 import Client, Environment
 
-client = Client(Environment.TEST)
+# uses production environment by default
+client = Client()
 
 tokens = client.auth.authenticate_token(
     ksef_token="your-ksef-token",
