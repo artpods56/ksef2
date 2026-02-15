@@ -1,5 +1,5 @@
-from ksef2.infra.schema.api.spec import FormCode
 from ksef2.infra.schema.api.supp.base import BaseSupp
+from ksef2.infra.schema.api.spec.models import FormCode
 
 
 class EncryptionInfo(BaseSupp):

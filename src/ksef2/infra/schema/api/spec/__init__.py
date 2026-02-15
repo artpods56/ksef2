@@ -1,5 +1,3 @@
-# spec/__init__.py
-
 from .models import *  # noqa: F401,F403
 
 from ..supp.session import OpenOnlineSessionRequest, EncryptionInfo
