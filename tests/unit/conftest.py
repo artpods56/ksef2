@@ -32,7 +32,7 @@ def make_session_state(
     valid_until: datetime | None = None,
     form_code: FormSchema = FormSchema.FA3,
 ) -> SessionState:
-    return SessionState(
+    return SessionState.from_encoded(
         reference_number=reference_number,
         aes_key=aes_key or os.urandom(32),
         iv=iv or os.urandom(16),
