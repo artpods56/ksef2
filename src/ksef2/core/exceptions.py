@@ -2,6 +2,22 @@ from __future__ import annotations
 
 from typing import Any
 from pydantic import BaseModel
+from enum import IntEnum
+
+
+class ExceptionCode(IntEnum):
+    """Enumeration of all possible exception codes."""
+
+    UNKNOWN_ERROR = 10000
+    OBJECT_ALREADY_EXISTS = 30001
+    VALIDATION_ERROR = 21405
+
+    @staticmethod
+    def from_code(code: int | None) -> ExceptionCode:
+        try:
+            return ExceptionCode(code)
+        except ValueError:
+            return ExceptionCode.UNKNOWN_ERROR
 
 
 class KSeFException(Exception):
@@ -23,14 +39,16 @@ class KSeFApiError(KSeFException):
     def __init__(
         self,
         status_code: int,
+        exception_code: ExceptionCode,
         message: str,
         response: BaseModel | None = None,
     ) -> None:
         self.status_code = status_code
         self.response = response
+        self.exception_code = exception_code
 
         msg = (
-            f"{self.code}/{status_code}: {message}"
+            f"{self.code}/{status_code}: {message}\n"
             f"Response: {response.model_dump_json(indent=2) if response else '<none>'}"
         )
 
@@ -48,7 +66,7 @@ class KSeFAuthError(KSeFApiError):
         message: str,
         response: BaseModel | None = None,
     ) -> None:
-        super().__init__(status_code, message, response)
+        super().__init__(status_code, ExceptionCode.UNKNOWN_ERROR, message, response)
 
 
 class KSeFRateLimitError(KSeFApiError):
@@ -64,7 +82,7 @@ class KSeFRateLimitError(KSeFApiError):
     ) -> None:
         self.retry_after = retry_after
         self.response = response
-        super().__init__(429, message, response)
+        super().__init__(429, ExceptionCode.UNKNOWN_ERROR, message, response)
 
 
 class KSeFEncryptionError(KSeFException):

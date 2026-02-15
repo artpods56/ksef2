@@ -91,11 +91,13 @@ class TokenService:
             if result.status in (TokenStatus.FAILED, TokenStatus.REVOKED):
                 raise exceptions.KSeFApiError(
                     0,
+                    exceptions.ExceptionCode.UNKNOWN_ERROR,
                     f"Token activation failed: status={result.status.value}",
                 )
             time.sleep(poll_interval)
 
         raise exceptions.KSeFApiError(
             0,
+            exceptions.ExceptionCode.UNKNOWN_ERROR,
             f"Token activation polling timed out after {max_attempts} attempts",
         )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from typing import TYPE_CHECKING, final
 
 from ksef2.core import exceptions
@@ -29,7 +30,11 @@ class OnlineSessionClient:
         self._terminate_endpoint = TerminateSessionEndpoint(transport)
 
     def send_invoice(self, invoice_xml: bytes) -> invoices.SendInvoiceResponse:
-        encrypted = encrypt_invoice(invoice_xml, self._state.aes_key, self._state.iv)
+        encrypted = encrypt_invoice(
+            xml_bytes=invoice_xml,
+            key=base64.b64decode(self._state.aes_key),
+            iv=base64.b64decode(self._state.iv),
+        )
         request_body = SendInvoiceMapper.map_request(invoice_xml, encrypted)
 
         response_dto = self._invoice_endpoint.send(
@@ -51,6 +56,9 @@ class OnlineSessionClient:
             access_token=self._state.access_token,
             reference_number=self._state.reference_number,
         )
+
+    def get_state(self) -> SessionState:
+        return self._state
 
     def __enter__(self) -> OnlineSessionClient:
         return self

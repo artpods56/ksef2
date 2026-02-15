@@ -5,7 +5,8 @@ from datetime import datetime
 from types import TracebackType
 from typing import Self, final
 
-from ksef2.core import protocols
+from ksef2.core import protocols, exceptions
+from ksef2.core.exceptions import ExceptionCode
 from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
@@ -170,14 +171,24 @@ class TemporalTestData:
         subunits: list[SubUnit] | None = None,
         created_date: datetime | None = None,
     ) -> None:
-        self._service.create_subject(
-            nip=nip,
-            subject_type=subject_type,
-            description=description,
-            subunits=subunits,
-            created_date=created_date,
-        )
-        self._subjects.append(nip)
+        if nip not in self._subjects:
+            self._subjects.append(nip)
+
+        try:
+            self._service.create_subject(
+                nip=nip,
+                subject_type=subject_type,
+                description=description,
+                subunits=subunits,
+                created_date=created_date,
+            )
+        except exceptions.KSeFApiError as e:
+            if e.exception_code == ExceptionCode.OBJECT_ALREADY_EXISTS:
+                logger.warning(
+                    f"Subject identified with NIP: `{nip}` already exists, continuing..."
+                )
+            else:
+                raise
 
     def create_person(
         self,
@@ -189,15 +200,24 @@ class TemporalTestData:
         is_deceased: bool = False,
         created_date: datetime | None = None,
     ) -> None:
-        self._service.create_person(
-            nip=nip,
-            pesel=pesel,
-            description=description,
-            is_bailiff=is_bailiff,
-            is_deceased=is_deceased,
-            created_date=created_date,
-        )
-        self._persons.append(nip)
+        if nip not in self._persons:
+            self._persons.append(nip)
+        try:
+            self._service.create_person(
+                nip=nip,
+                pesel=pesel,
+                description=description,
+                is_bailiff=is_bailiff,
+                is_deceased=is_deceased,
+                created_date=created_date,
+            )
+        except exceptions.KSeFApiError as e:
+            if e.exception_code == ExceptionCode.OBJECT_ALREADY_EXISTS:
+                logger.warning(
+                    f"Person identified with NIP: `{nip}` already exists, continuing..."
+                )
+            else:
+                raise
 
     def grant_permissions(
         self,

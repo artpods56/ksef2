@@ -57,7 +57,7 @@ class OpenSessionService:
             self._open_session.send(access_token=access_token, body=body.model_dump())
         )
 
-        state = SessionState(
+        state = SessionState.from_encoded(
             reference_number=session_data.reference_number,
             aes_key=aes_key,
             iv=iv,

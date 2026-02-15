@@ -11,7 +11,7 @@ class SendInvoiceMapper:
         xml_bytes: bytes,
         encrypted_bytes: bytes,
     ) -> spec.SendInvoiceRequest:
-        return spec.SendInvoiceRequest.model_construct(
+        return spec.SendInvoiceRequest(
             invoiceHash=sha256_b64(xml_bytes),
             invoiceSize=len(xml_bytes),
             encryptedInvoiceHash=sha256_b64(encrypted_bytes),

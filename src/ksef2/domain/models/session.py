@@ -1,6 +1,7 @@
+import base64
 from enum import Enum
 
-from pydantic import AwareDatetime
+from pydantic import AwareDatetime, field_validator
 from ksef2.domain.models.base import KSeFBaseModel
 
 
@@ -20,8 +21,44 @@ class FormSchema(Enum):
 
 class SessionState(KSeFBaseModel):
     reference_number: str
-    aes_key: bytes
-    iv: bytes
+    aes_key: str  # base64 encoded
+    iv: str  # base64 encoded
     access_token: str
     valid_until: AwareDatetime
     form_code: FormSchema
+
+    @field_validator("form_code", mode="before")
+    @classmethod
+    def _coerce_form_code(cls, value):
+        """
+        Pydantic serializes Enum values that are tuples as JSON arrays (lists).
+        On restore, convert list -> tuple so Enum validation succeeds.
+        Also accept enum names as a convenience ("FA3", etc.).
+        """
+        if isinstance(value, list):
+            return tuple(value)
+        if isinstance(value, str):
+            try:
+                return FormSchema[value]
+            except KeyError:
+                return value
+        return value
+
+    @classmethod
+    def from_encoded(
+        cls,
+        reference_number: str,
+        aes_key: bytes,
+        iv: bytes,
+        access_token: str,
+        valid_until: AwareDatetime,
+        form_code: FormSchema,
+    ):
+        return cls(
+            reference_number=reference_number,
+            aes_key=base64.b64encode(aes_key).decode(),
+            iv=base64.b64encode(iv).decode(),
+            access_token=access_token,
+            valid_until=valid_until,
+            form_code=form_code,
+        )
