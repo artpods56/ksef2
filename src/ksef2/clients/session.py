@@ -8,8 +8,18 @@ from ksef2.core.crypto import encrypt_invoice
 from ksef2.core import protocols
 from ksef2.domain.models import invoices
 from ksef2.domain.models.session import SessionState
-from ksef2.endpoints.invoices import DownloadInvoiceEndpoint, SendingInvoicesEndpoint
+from ksef2.endpoints.invoices import (
+    DownloadInvoiceEndpoint,
+    GetInvoiceUpoByKsefNumberEndpoint,
+    GetInvoiceUpoByReferenceEndpoint,
+    GetSessionInvoiceStatusEndpoint,
+    GetSessionStatusEndpoint,
+    ListFailedSessionInvoicesEndpoint,
+    ListSessionInvoicesEndpoint,
+    SendingInvoicesEndpoint,
+)
 from ksef2.endpoints.session import TerminateSessionEndpoint
+from ksef2.infra.schema.api import spec as spec
 from ksef2.infra.mappers.invoices import SendInvoiceMapper
 
 if TYPE_CHECKING:
@@ -28,8 +38,14 @@ class OnlineSessionClient:
         self._invoice_endpoint = SendingInvoicesEndpoint(transport)
         self._download_endpoint = DownloadInvoiceEndpoint(transport)
         self._terminate_endpoint = TerminateSessionEndpoint(transport)
+        self._session_status_ep = GetSessionStatusEndpoint(transport)
+        self._list_invoices_ep = ListSessionInvoicesEndpoint(transport)
+        self._invoice_status_ep = GetSessionInvoiceStatusEndpoint(transport)
+        self._failed_invoices_ep = ListFailedSessionInvoicesEndpoint(transport)
+        self._upo_by_ksef_ep = GetInvoiceUpoByKsefNumberEndpoint(transport)
+        self._upo_by_ref_ep = GetInvoiceUpoByReferenceEndpoint(transport)
 
-    def send_invoice(self, invoice_xml: bytes) -> invoices.SendInvoiceResponse:
+    def send_invoice(self, *, invoice_xml: bytes) -> invoices.SendInvoiceResponse:
         encrypted = encrypt_invoice(
             xml_bytes=invoice_xml,
             key=base64.b64decode(self._state.aes_key),
@@ -45,10 +61,65 @@ class OnlineSessionClient:
 
         return SendInvoiceMapper.map_response(response_dto)
 
-    def download_invoice(self, ksef_number: str) -> bytes:
+    def download_invoice(self, *, ksef_number: str) -> bytes:
         return self._download_endpoint.send(
             access_token=self._state.access_token,
             ksef_number=ksef_number,
+        )
+
+    def get_status(self) -> spec.SessionStatusResponse:
+        return self._session_status_ep.send(
+            access_token=self._state.access_token,
+            reference_number=self._state.reference_number,
+        )
+
+    def list_invoices(
+        self,
+        *,
+        page_size: int = 10,
+        continuation_token: str | None = None,
+    ) -> spec.SessionInvoicesResponse:
+        return self._list_invoices_ep.send(
+            access_token=self._state.access_token,
+            reference_number=self._state.reference_number,
+            page_size=page_size,
+            continuation_token=continuation_token,
+        )
+
+    def get_invoice_status(
+        self, invoice_reference_number: str
+    ) -> spec.SessionInvoiceStatusResponse:
+        return self._invoice_status_ep.send(
+            access_token=self._state.access_token,
+            reference_number=self._state.reference_number,
+            invoice_reference_number=invoice_reference_number,
+        )
+
+    def list_failed_invoices(
+        self,
+        *,
+        page_size: int = 10,
+        continuation_token: str | None = None,
+    ) -> spec.SessionInvoicesResponse:
+        return self._failed_invoices_ep.send(
+            access_token=self._state.access_token,
+            reference_number=self._state.reference_number,
+            page_size=page_size,
+            continuation_token=continuation_token,
+        )
+
+    def get_invoice_upo_by_ksef_number(self, ksef_number: str) -> bytes:
+        return self._upo_by_ksef_ep.send(
+            access_token=self._state.access_token,
+            reference_number=self._state.reference_number,
+            ksef_number=ksef_number,
+        )
+
+    def get_invoice_upo_by_reference(self, invoice_reference_number: str) -> bytes:
+        return self._upo_by_ref_ep.send(
+            access_token=self._state.access_token,
+            reference_number=self._state.reference_number,
+            invoice_reference_number=invoice_reference_number,
         )
 
     def terminate(self) -> None:

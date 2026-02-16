@@ -176,7 +176,7 @@ class TestOpenOnline:
         )
 
         call = fake_transport.calls[0]
-        assert call.headers == {"SessionToken": "my-token"}
+        assert call.headers == {"Authorization": "Bearer my-token"}
 
     def test_request_body_contains_form_and_encryption(
         self,

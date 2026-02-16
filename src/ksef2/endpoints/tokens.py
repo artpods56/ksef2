@@ -18,7 +18,7 @@ class GenerateTokenEndpoint:
         return codecs.JsonResponseCodec.parse(
             self._transport.post(
                 self.url,
-                headers=headers.KSeFHeaders.session(access_token),
+                headers=headers.KSeFHeaders.bearer(access_token),
                 json=body,
             ),
             spec.GenerateTokenResponse,
@@ -43,7 +43,7 @@ class TokenStatusEndpoint:
         return codecs.JsonResponseCodec.parse(
             self._transport.get(
                 self.get_url(reference_number=reference_number),
-                headers=headers.KSeFHeaders.session(access_token),
+                headers=headers.KSeFHeaders.bearer(access_token),
             ),
             spec.TokenStatusResponse,
         )
@@ -62,5 +62,5 @@ class RevokeTokenEndpoint:
     def send(self, access_token: str, reference_number: str) -> None:
         _ = self._transport.delete(
             self.get_url(reference_number=reference_number),
-            headers=headers.KSeFHeaders.session(access_token),
+            headers=headers.KSeFHeaders.bearer(access_token),
         )

@@ -1,7 +1,7 @@
 import base64
-from datetime import datetime
 from typing import NamedTuple
 
+from pydantic import AwareDatetime
 
 from ksef2.domain.models import FormSchema
 from ksef2.infra.schema.api import spec as spec
@@ -9,7 +9,7 @@ from ksef2.infra.schema.api import spec as spec
 
 class OpenSessionData(NamedTuple):
     reference_number: str
-    valid_until: datetime
+    valid_until: AwareDatetime
 
 
 class OpenOnlineSessionMapper:

@@ -1,7 +1,11 @@
 import base64
-from enum import Enum
+from datetime import datetime
+from enum import Enum, StrEnum
+from typing import Any
 
-from pydantic import AwareDatetime, field_validator
+from pydantic import AwareDatetime, field_validator, Field, ConfigDict, AliasGenerator
+from pydantic.alias_generators import to_camel
+
 from ksef2.domain.models.base import KSeFBaseModel
 
 
@@ -17,6 +21,50 @@ class FormSchema(Enum):
         self.system_code = system_code
         self.schema_version = schema_version
         self.schema_value = schema_value
+
+
+class SessionType(StrEnum):
+    ONLINE = "Online"
+    BATCH = "Batch"
+
+
+class SessionStatus(StrEnum):
+    IN_PROGRESS = "InProgress"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELLED = "Cancelled"
+
+
+class KSeFBaseParams(KSeFBaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+        alias_generator=AliasGenerator(
+            validation_alias=to_camel,
+            serialization_alias=to_camel,
+        ),
+        use_enum_values=True,
+        serialize_by_alias=True,
+    )
+
+    def to_api_params(self) -> dict[str, Any]:
+        return self.model_dump(
+            exclude_none=True,
+            mode="json",
+        )
+
+
+class QuerySessionsList(KSeFBaseParams):
+    page_size: int = Field(default=10, ge=1, le=100)
+    session_type: SessionType
+    reference_number: str | None = None
+    date_created_from: datetime | None = None
+    date_created_to: datetime | None = None
+    date_closed_from: datetime | None = None
+    date_closed_to: datetime | None = None
+    date_modified_from: datetime | None = None
+    date_modified_to: datetime | None = None
+    statuses: list[SessionStatus] = Field(default_factory=list)
 
 
 class SessionState(KSeFBaseModel):

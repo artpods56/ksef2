@@ -96,3 +96,34 @@ def test_reset_api_rate_limits(xades_authenticated_context):
     token = tokens.access_token.token
 
     client.limits.reset_api_rate_limits(access_token=token)
+
+
+@pytest.mark.integration
+def test_set_subject_limits_roundtrip(xades_authenticated_context):
+    """Fetch subject limits, modify, post back, then reset."""
+    client, tokens = xades_authenticated_context
+    token = tokens.access_token.token
+
+    limits = client.limits.get_subject_limits(access_token=token)
+
+    if limits.certificate is None:
+        pytest.skip("Subject certificate limits not available")
+
+    original_max = limits.certificate.max_certificates
+    limits.certificate.max_certificates = (original_max or 10) + 1
+    client.limits.set_subject_limits(access_token=token, limits=limits)
+
+    updated = client.limits.get_subject_limits(access_token=token)
+    assert updated.certificate is not None
+    assert updated.certificate.max_certificates == (original_max or 10) + 1
+
+    client.limits.reset_subject_limits(access_token=token)
+
+
+@pytest.mark.integration
+def test_reset_subject_limits(xades_authenticated_context):
+    """Reset subject limits back to defaults."""
+    client, tokens = xades_authenticated_context
+    token = tokens.access_token.token
+
+    client.limits.reset_subject_limits(access_token=token)

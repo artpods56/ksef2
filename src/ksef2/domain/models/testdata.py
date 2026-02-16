@@ -22,6 +22,7 @@ class IdentifierType(StrEnum):
 class PermissionType(StrEnum):
     INVOICE_READ = "InvoiceRead"
     INVOICE_WRITE = "InvoiceWrite"
+    PEF_INVOICE_WRITE = "PefInvoiceWrite"
     INTROSPECTION = "Introspection"
     CREDENTIALS_READ = "CredentialsRead"
     CREDENTIALS_MANAGE = "CredentialsManage"

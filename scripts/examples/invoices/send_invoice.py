@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import time
+from datetime import date
+
 from ksef2 import Client, FormSchema, Environment
+from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.testdata import (
@@ -10,7 +14,6 @@ from ksef2.domain.models.testdata import (
     PermissionType,
     SubjectType,
 )
-
 from scripts.examples._common import repo_root
 
 ORG_NIP = generate_nip()
@@ -56,7 +59,7 @@ def main() -> None:
         cert, private_key = generate_test_certificate(PERSON_NIP)
 
         tokens = client.auth.authenticate_xades(
-            nip=PERSON_NIP,
+            nip=ORG_NIP,
             cert=cert,
             private_key=private_key,
         )
@@ -66,12 +69,20 @@ def main() -> None:
             access_token=access_token,
             form_code=FormSchema.FA3,
         ) as session:
-            with open(INVOICE_TEMPLATE_PATH, "rb") as f:
-                result = session.send_invoice(f.read())
-
-                print(
-                    f"Invoice has been sent, reference number: {result.reference_number}"
+            template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
+            result = session.send_invoice(
+                invoice_xml=InvoiceFactory.create(
+                    template_xml,
+                    {
+                        "#nip#": ORG_NIP,
+                        "#subject2nip#": generate_nip(),
+                        "#invoicing_date#": date.today().isoformat(),
+                        "#invoice_number#": str(int(time.time())),
+                    },
                 )
+            )
+
+            print(f"Invoice has been sent, reference number: {result.reference_number}")
 
             downloaded_invoice = session.download_invoice(
                 ksef_number=result.reference_number

@@ -1,6 +1,8 @@
 class KSeFHeaders:
     @staticmethod
-    def session(token: str) -> dict[str, str]:
+    def session(
+        token: str,
+    ) -> dict[str, str]:  # TODO: remove, unused — API uses bearer auth
         return {"SessionToken": token}
 
     @staticmethod

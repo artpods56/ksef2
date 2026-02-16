@@ -10,6 +10,62 @@ Upload a structured invoice to KSeF.
 
 **SDK Endpoint:** `POST /sessions/online/{referenceNumber}/invoices`
 
+```python
+from ksef2.core.invoices import InvoiceFactory
+
+template_xml = "path/to/invoice-template.xml".read_text(encoding="utf-8")
+invoice_xml = InvoiceFactory.create(
+    template_xml,
+    {
+        "#nip#": ORG_NIP,
+        "#invoicing_date#": date.today().isoformat(),
+        "#invoice_number#": "123/2024",
+    },
+)
+invoice_ref = session.send_invoice(invoice_xml=invoice_xml)
+print(f"Invoice sent: {invoice_ref.reference_number}")
+```
+
+---
+
+### List Invoices
+
+List all invoices in the current session.
+
+**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/invoices`
+
+```python
+invoices = session.list_invoices()
+for invoice in invoices.invoices:
+    print(f"KSeF Number: {invoice.ksefNumber}, Status: {invoice.status}")
+```
+
+---
+
+### List Failed Invoices
+
+List invoices that failed processing.
+
+**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/invoices/failed`
+
+```python
+failed = session.list_failed_invoices()
+print(f"Failed invoices: {failed}")
+```
+
+---
+
+### Get UPO
+
+Get the UPO (Urzędowe Poświadczenie Odbioru - Official Receipt Confirmation) for an invoice.
+
+**SDK Endpoint:** `GET /invoices/ksef/{ksefNumber}/upo`
+
+```python
+upo = session.get_invoice_upo_by_ksef_number(ksef_number="KSEF-NUMBER")
+print(f"UPO size: {len(upo)} bytes")
+```
+
 ---
 
 ### Download Invoice

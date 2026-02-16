@@ -21,7 +21,7 @@ class OpenSessionEndpoint:
         return codecs.JsonResponseCodec.parse(
             self._transport.post(
                 self.get_url(),
-                headers=headers.KSeFHeaders.session(access_token),
+                headers=headers.KSeFHeaders.bearer(access_token),
                 json=body,
             ),
             spec.OpenOnlineSessionResponse,
@@ -45,5 +45,5 @@ class TerminateSessionEndpoint:
     ) -> None:
         _ = self._transport.post(
             self.get_url(reference_number=reference_number),
-            headers=headers.KSeFHeaders.session(access_token),
+            headers=headers.KSeFHeaders.bearer(access_token),
         )

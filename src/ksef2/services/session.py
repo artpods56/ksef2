@@ -11,9 +11,11 @@ from ksef2.core import protocols
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models import FormSchema
 from ksef2.domain.models.encryption import CertUsage
-from ksef2.domain.models.session import SessionState
+from ksef2.domain.models.session import SessionState, QuerySessionsList
+from ksef2.endpoints.invoices import ListSessionsEndpoint
 from ksef2.endpoints.session import OpenSessionEndpoint
 from ksef2.infra.mappers.session import OpenOnlineSessionMapper
+from ksef2.infra.schema.api import spec as spec
 
 
 @final
@@ -26,6 +28,7 @@ class OpenSessionService:
         self._transport = transport
         self._certificates = EncryptionClient(transport)
         self._open_session = OpenSessionEndpoint(transport)
+        self._list_sessions_ep = ListSessionsEndpoint(transport)
         self._certificate_store = certificate_store
 
     def open_online(
@@ -67,6 +70,13 @@ class OpenSessionService:
         )
 
         return OnlineSessionClient(transport=self._transport, state=state)
+
+    def list(
+        self, *, access_token: str, query: QuerySessionsList
+    ) -> spec.SessionsQueryResponse:
+        return self._list_sessions_ep.send(
+            access_token=access_token, **query.to_api_params()
+        )
 
     def resume(self, state: SessionState) -> "OnlineSessionClient":
         return OnlineSessionClient(transport=self._transport, state=state)

@@ -47,6 +47,39 @@ finally:
 
 ---
 
+### Get Session Status
+
+Get the current status of an active session.
+
+```python
+status = session.get_status()
+print(f"Status: {status}")
+
+state = session.get_state()
+print(f"Reference: {state.reference_number}")
+print(f"Valid until: {state.valid_until}")
+```
+
+---
+
+### List Sessions
+
+List all active invoice sessions.
+
+**SDK Endpoint:** `GET /sessions`
+
+```python
+from ksef2.domain.models.session import QuerySessionsList, SessionType
+
+sessions = client.sessions.list(
+    access_token=access_token,
+    query=QuerySessionsList(session_type=SessionType.ONLINE),
+)
+print(sessions)
+```
+
+---
+
 ### Resume Session
 
 Resume an existing session from saved state. The session state is a Pydantic model that can be serialized/deserialized for passing between processes.

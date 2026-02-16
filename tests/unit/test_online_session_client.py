@@ -40,7 +40,7 @@ class TestSendInvoice:
         )
         client = _build_client(fake_transport)
 
-        result = client.send_invoice(SAMPLE_XML)
+        result = client.send_invoice(invoice_xml=SAMPLE_XML)
 
         assert isinstance(result, SendInvoiceResponse)
         assert result.reference_number == _INVOICE_REF
@@ -49,7 +49,7 @@ class TestSendInvoice:
         fake_transport.enqueue({"referenceNumber": _INVOICE_REF})
         client = _build_client(fake_transport)
 
-        client.send_invoice(SAMPLE_XML)
+        client.send_invoice(invoice_xml=SAMPLE_XML)
 
         call = fake_transport.calls[0]
         assert call.method == "POST"
@@ -60,10 +60,10 @@ class TestSendInvoice:
         fake_transport.enqueue({"referenceNumber": _INVOICE_REF})
         client = _build_client(fake_transport)
 
-        client.send_invoice(SAMPLE_XML)
+        client.send_invoice(invoice_xml=SAMPLE_XML)
 
         call = fake_transport.calls[0]
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
     def test_request_body_contains_required_fields(
         self, fake_transport: FakeTransport
@@ -71,7 +71,7 @@ class TestSendInvoice:
         fake_transport.enqueue({"referenceNumber": _INVOICE_REF})
         client = _build_client(fake_transport)
 
-        client.send_invoice(SAMPLE_XML)
+        client.send_invoice(invoice_xml=SAMPLE_XML)
 
         body = fake_transport.calls[0].json
         assert body is not None
@@ -87,7 +87,7 @@ class TestSendInvoice:
         fake_transport.enqueue({"referenceNumber": _INVOICE_REF})
         client = _build_client(fake_transport)
 
-        client.send_invoice(SAMPLE_XML)
+        client.send_invoice(invoice_xml=SAMPLE_XML)
 
         body = fake_transport.calls[0].json
         assert body is not None
@@ -99,7 +99,7 @@ class TestSendInvoice:
         fake_transport.enqueue({"referenceNumber": _INVOICE_REF})
         client = _build_client(fake_transport)
 
-        client.send_invoice(SAMPLE_XML)
+        client.send_invoice(invoice_xml=SAMPLE_XML)
 
         body = fake_transport.calls[0].json
         assert body is not None
@@ -116,7 +116,7 @@ class TestDownloadInvoice:
         fake_transport.enqueue(content=SAMPLE_XML)
         client = _build_client(fake_transport)
 
-        result = client.download_invoice("1234567890-INV-001")
+        result = client.download_invoice(ksef_number="1234567890-INV-001")
 
         assert isinstance(result, bytes)
         assert result == SAMPLE_XML
@@ -125,7 +125,7 @@ class TestDownloadInvoice:
         fake_transport.enqueue(content=SAMPLE_XML)
         client = _build_client(fake_transport)
 
-        client.download_invoice("1234567890-INV-001")
+        client.download_invoice(ksef_number="1234567890-INV-001")
 
         call = fake_transport.calls[0]
         assert call.method == "GET"
@@ -135,10 +135,10 @@ class TestDownloadInvoice:
         fake_transport.enqueue(content=SAMPLE_XML)
         client = _build_client(fake_transport)
 
-        client.download_invoice("1234567890-INV-001")
+        client.download_invoice(ksef_number="1234567890-INV-001")
 
         call = fake_transport.calls[0]
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 # ---------------------------------------------------------------------------
@@ -174,7 +174,7 @@ class TestTerminate:
         client.terminate()
 
         call = fake_transport.calls[0]
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 # ---------------------------------------------------------------------------
@@ -219,7 +219,7 @@ class TestContextManager:
         client = _build_client(fake_transport)
 
         with client as session:
-            session.send_invoice(SAMPLE_XML)
+            session.send_invoice(invoice_xml=SAMPLE_XML)
 
         assert len(fake_transport.calls) == 2
         assert fake_transport.calls[0].method == "POST"
