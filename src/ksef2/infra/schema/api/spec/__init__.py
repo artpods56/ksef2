@@ -6,12 +6,14 @@ from ..supp.invoices import (
     SessionInvoiceStatusResponse,
     SessionInvoicesResponse,
 )
+from ..supp.auth import InitTokenAuthenticationRequest
 
 
 __all__ = [
     "OpenOnlineSessionRequest",
     "EncryptionInfo",
     "SendInvoiceRequest",
+    "InitTokenAuthenticationRequest",
     "SessionInvoiceStatusResponse",
     "SessionInvoicesResponse",
 ]

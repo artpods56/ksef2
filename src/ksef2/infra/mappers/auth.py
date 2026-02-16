@@ -8,7 +8,7 @@ from ksef2.domain.models.auth import (
     RefreshedToken,
     TokenCredentials,
 )
-from ksef2.infra.schema.api import spec as spec
+from ksef2.infra.schema.api import spec
 
 
 class ChallengeMapper:
@@ -29,7 +29,7 @@ class AuthInitMapper:
         context_value: str,
         encrypted_token: str,
     ) -> spec.InitTokenAuthenticationRequest:
-        return spec.InitTokenAuthenticationRequest.model_construct(
+        return spec.InitTokenAuthenticationRequest(
             challenge=challenge,
             contextIdentifier=spec.AuthenticationContextIdentifier(
                 type=spec.AuthenticationContextIdentifierType(context_type.value),
