@@ -11,6 +11,8 @@ class ExceptionCode(IntEnum):
     UNKNOWN_ERROR = 10000
     OBJECT_ALREADY_EXISTS = 30001
     VALIDATION_ERROR = 21405
+    UPO_NOT_FOUND = 21178
+    NOT_PROCESSED_YET = 21165
 
     @staticmethod
     def from_code(code: int | None) -> ExceptionCode:
