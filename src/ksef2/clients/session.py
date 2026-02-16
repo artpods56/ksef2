@@ -46,6 +46,7 @@ from ksef2.infra.mappers.invoices import (
     ExportInvoicesMapper,
     ExportStatusMapper,
 )
+from ksef2.services import PermissionsService
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -73,6 +74,7 @@ class OnlineSessionClient:
         self._export_ep = ExportInvoicesEndpoint(transport)
         self._export_status_ep = GetExportStatusEndpoint(transport)
         self._cert_client = EncryptionClient(transport)
+        self._permissions_service = PermissionsService(transport, self._state)
 
     def query_metadata(
         self,
@@ -245,6 +247,10 @@ class OnlineSessionClient:
 
     def get_state(self) -> SessionState:
         return self._state
+
+    @property
+    def permissions(self) -> PermissionsService:
+        return self._permissions_service
 
     def __enter__(self) -> OnlineSessionClient:
         return self

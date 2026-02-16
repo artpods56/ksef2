@@ -117,10 +117,13 @@ class InvoiceQueryBuyerIdentifier(KSeFBaseModel):
     value: str | None = None
 
 
-class InvoiceQueryParams(KSeFBaseParams):
-    sort_order: SortOrder = SortOrder.ASC
+class PaginationParams(KSeFBaseParams):
     page_offset: int = Field(default=0, ge=0)
     page_size: int = Field(default=10, ge=10, le=250)
+
+
+class InvoiceQueryParams(PaginationParams):
+    sort_order: SortOrder = SortOrder.ASC
 
 
 class InvoiceQueryFilters(KSeFBaseModel):

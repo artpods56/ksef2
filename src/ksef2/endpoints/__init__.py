@@ -5,6 +5,7 @@ from ksef2.endpoints import (
     encryption,
     invoices,
     limits,
+    permissions,
     session,
     testdata,
     tokens,
@@ -75,6 +76,35 @@ __tokens_endpoints__ = [
     EndpointRef("DELETE", tokens.RevokeTokenEndpoint.url),
 ]
 
+__permissions_endpoints__ = [
+    EndpointRef("POST", permissions.GrantPersonPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.GrantEntityPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.GrantAuthorizationPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.GrantIndirectPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.GrantSubunitPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.GrantEuEntityPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.GrantEuEntityAdministrationPermissionsEndpoint.url),
+    EndpointRef(
+        "DELETE",
+        permissions.RevokeAuthorizationPermissionsEndpoint.url + "/{permissionId}",
+    ),
+    EndpointRef(
+        "DELETE", permissions.RevokeCommonPermissionsEndpoint.url + "/{permissionId}"
+    ),
+    EndpointRef("GET", permissions.GetAttachmentPermissionStatusEndpoint.url),
+    EndpointRef(
+        "GET",
+        permissions.GetPermissionOperationStatusEndpoint.url + "/{referenceNumber}",
+    ),
+    EndpointRef("GET", permissions.GetEntityRolesEndpoint.url),
+    EndpointRef("POST", permissions.QueryAuthorizationsPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.QueryEuEntitiesPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.QueryPersonalPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.QueryPersonsPermissionsEndpoint.url),
+    EndpointRef("POST", permissions.QuerySubordinateEntitiesRolesEndpoint.url),
+    EndpointRef("POST", permissions.QuerySubunitsPermissionsEndpoint.url),
+]
+
 __limits_endpoints__ = [
     EndpointRef("GET", limits.GetContextLimitsEndpoint.url),
     EndpointRef("GET", limits.GetSubjectLimitsEndpoint.url),
@@ -96,5 +126,6 @@ __all_endpoints__: list[EndpointRef] = [
     *__session_endpoints__,
     *__testdata_endpoints__,
     *__tokens_endpoints__,
+    *__permissions_endpoints__,
     *__limits_endpoints__,
 ]

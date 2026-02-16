@@ -15,6 +15,12 @@ from ..supp.invoices import (
     SessionInvoicesResponse,
 )
 from ..supp.auth import InitTokenAuthenticationRequest
+from ..supp.permissions import (
+    PersonPermissionsAuthorIdentifier,
+    PersonPermissionsAuthorizedIdentifier,
+    # QueryPersonPermissionsResponse,
+    PersonPermissionsQueryRequest,
+)
 
 
 __all__ = [
@@ -32,4 +38,8 @@ __all__ = [
     "InitTokenAuthenticationRequest",
     "SessionInvoiceStatusResponse",
     "SessionInvoicesResponse",
+    "PersonPermissionsAuthorIdentifier",
+    "QueryPersonPermissionsResponse",
+    "PersonPermissionsQueryRequest",
+    "PersonPermissionsAuthorizedIdentifier",
 ]

@@ -17,6 +17,7 @@ class IdentifierType(StrEnum):
     NIP = "Nip"
     PESEL = "Pesel"
     FINGERPRINT = "Fingerprint"
+    System = "System"
 
 
 class PermissionType(StrEnum):
@@ -28,6 +29,7 @@ class PermissionType(StrEnum):
     CREDENTIALS_MANAGE = "CredentialsManage"
     ENFORCEMENT_OPERATIONS = "EnforcementOperations"
     SUBUNIT_MANAGE = "SubunitManage"
+    VAT_UE_MANAGE = "VatUeManage"
 
 
 class SubUnit(KSeFBaseModel):
