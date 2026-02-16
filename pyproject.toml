@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ksef2"
-version = "0.4.1"
+version = "0.5.0"
 description = "Python SDK and Tools for Poland's KSeF (Krajowy System e-Faktur) API"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -15,6 +15,7 @@ dependencies = [
     "httpx[http2]>=0.28.1",
     "structlog>=25.5.0",
     "dotenv>=0.9.9",
+    "requests>=2.32.5",
 ]
 
 [dependency-groups]

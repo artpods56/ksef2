@@ -8,7 +8,13 @@ from ksef2.config import Environment
 from ksef2.core.http import HttpTransport
 from ksef2.core.middleware import KSeFProtocol
 
-from ksef2.services import auth, limits, session, testdata, tokens
+from ksef2.services import (
+    auth,
+    limits,
+    session,
+    testdata,
+    tokens,
+)
 from ksef2.core import stores
 
 

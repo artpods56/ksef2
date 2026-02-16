@@ -15,12 +15,12 @@ class OpenSessionData(NamedTuple):
 class OpenOnlineSessionMapper:
     @staticmethod
     def map_request(
-        encrypted_key: bytes,
+        encrypted_key: str,
         iv: bytes,
         form_code: FormSchema = FormSchema.FA3,
     ) -> spec.OpenOnlineSessionRequest:
         encryption = spec.EncryptionInfo(
-            encryptedSymmetricKey=base64.b64encode(encrypted_key).decode(),
+            encryptedSymmetricKey=encrypted_key,
             initializationVector=base64.b64encode(iv).decode(),
         )
         return spec.OpenOnlineSessionRequest(

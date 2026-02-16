@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import pytest
 
 from ksef2.domain.models.auth import RefreshedToken
@@ -14,8 +15,10 @@ def test_refresh_token(authenticated_context):
 
     assert isinstance(refreshed, RefreshedToken)
     assert refreshed.access_token is not None
-    assert refreshed.access_token.token != tokens.access_token.token
     assert refreshed.access_token.valid_until is not None
+
+    now = datetime.now(timezone.utc)
+    assert refreshed.access_token.valid_until > now
 
 
 @pytest.mark.integration

@@ -19,3 +19,6 @@ wheels/
 # envs
 .env
 .env.test
+
+# temp directory
+/temp

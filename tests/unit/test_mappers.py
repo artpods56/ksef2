@@ -16,7 +16,7 @@ from ksef2.infra.schema.api import spec as spec
 class TestOpenOnlineSessionMapper:
     def test_map_request_form_code(self) -> None:
         result = OpenOnlineSessionMapper.map_request(
-            encrypted_key=b"abc123==",
+            encrypted_key="abc123==",
             iv=b"\x00" * 16,
             form_code=FormSchema.FA3,
         )
@@ -29,19 +29,16 @@ class TestOpenOnlineSessionMapper:
     def test_map_request_encryption_info(self) -> None:
         iv = b"\x01\x02\x03\x04" * 4
         result = OpenOnlineSessionMapper.map_request(
-            encrypted_key=b"key==",
+            encrypted_key="key==",
             iv=iv,
         )
 
-        assert (
-            result.encryption.encryptedSymmetricKey
-            == base64.b64encode(b"key==").decode()
-        )
+        assert result.encryption.encryptedSymmetricKey == "key=="
         assert result.encryption.initializationVector == base64.b64encode(iv).decode()
 
     def test_map_request_pef_schema(self) -> None:
         result = OpenOnlineSessionMapper.map_request(
-            encrypted_key=b"k",
+            encrypted_key="k",
             iv=b"\x00" * 16,
             form_code=FormSchema.PEF3,
         )

@@ -38,6 +38,12 @@ __invoices_endpoints__ = [
     EndpointRef("POST", invoices.SendingInvoicesEndpoint.url),
 ]
 
+__invoices_query_endpoints__ = [
+    EndpointRef("POST", invoices.QueryInvoicesMetadataEndpoint.url),
+    EndpointRef("POST", invoices.ExportInvoicesEndpoint.url),
+    EndpointRef("GET", invoices.GetExportStatusEndpoint.url),
+]
+
 __invoices_status_endpoints__ = [
     EndpointRef("GET", invoices.ListSessionsEndpoint.url),
     EndpointRef("GET", invoices.GetSessionStatusEndpoint.url),
@@ -85,6 +91,7 @@ __all_endpoints__: list[EndpointRef] = [
     *__auth_endpoints__,
     *__encryption_endpoints__,
     *__invoices_endpoints__,
+    *__invoices_query_endpoints__,
     *__invoices_status_endpoints__,
     *__session_endpoints__,
     *__testdata_endpoints__,

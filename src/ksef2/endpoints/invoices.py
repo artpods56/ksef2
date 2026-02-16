@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import final, Any, TypedDict, Unpack, Literal, NotRequired
 from urllib.parse import urlencode
 
@@ -5,6 +6,101 @@ from pydantic import TypeAdapter
 
 from ksef2.core import headers, codecs, protocols
 from ksef2.infra.schema.api import spec as spec
+
+
+# ---------------------------------------------------------------------------
+# Query / Export endpoints
+# ---------------------------------------------------------------------------
+
+
+class SortOrder(StrEnum):
+    ASC = "Asc"
+    DESC = "Desc"
+
+
+QueryInvoicesMetadataQueryParams = TypedDict(
+    "QueryInvoicesMetadataQueryParams",
+    {
+        "sortOrder": NotRequired[SortOrder | None],
+        "pageOffset": NotRequired[int | None],
+        "pageSize": NotRequired[int | None],
+    },
+)
+
+
+@final
+class QueryInvoicesMetadataEndpoint:
+    url: str = "/invoices/query/metadata"
+
+    _adapter = TypeAdapter(QueryInvoicesMetadataQueryParams)
+
+    def __init__(self, transport: protocols.Middleware):
+        self._transport = transport
+
+    def send(
+        self,
+        access_token: str,
+        body: dict[str, Any],
+        **query_params: Unpack[QueryInvoicesMetadataQueryParams],
+    ) -> spec.QueryInvoicesMetadataResponse:
+        valid_params = self._adapter.validate_python(query_params)
+        query_string = urlencode(valid_params)
+        path = f"{self.url}?{query_string}" if query_string else self.url
+
+        return codecs.JsonResponseCodec.parse(
+            self._transport.post(
+                path,
+                headers=headers.KSeFHeaders.bearer(access_token),
+                json=body,
+            ),
+            spec.QueryInvoicesMetadataResponse,
+        )
+
+
+@final
+class ExportInvoicesEndpoint:
+    url: str = "/invoices/exports"
+
+    def __init__(self, transport: protocols.Middleware):
+        self._transport = transport
+
+    def send(
+        self,
+        access_token: str,
+        body: dict[str, Any],
+    ) -> spec.ExportInvoicesResponse:
+        return codecs.JsonResponseCodec.parse(
+            self._transport.post(
+                self.url,
+                headers=headers.KSeFHeaders.bearer(access_token),
+                json=body,
+            ),
+            spec.ExportInvoicesResponse,
+        )
+
+
+@final
+class GetExportStatusEndpoint:
+    url: str = "/invoices/exports/{referenceNumber}"
+
+    def __init__(self, transport: protocols.Middleware):
+        self._transport = transport
+
+    def get_url(self, *, reference_number: str) -> str:
+        return self.url.format(referenceNumber=reference_number)
+
+    def send(
+        self,
+        access_token: str,
+        reference_number: str,
+    ) -> spec.InvoiceExportStatusResponse:
+        return codecs.JsonResponseCodec.parse(
+            self._transport.get(
+                self.get_url(reference_number=reference_number),
+                headers=headers.KSeFHeaders.bearer(access_token),
+            ),
+            spec.InvoiceExportStatusResponse,
+        )
 
 
 @final

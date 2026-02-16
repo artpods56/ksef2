@@ -6,8 +6,17 @@ This guide documents the process for implementing new endpoints in the KSeF SDK.
 
 The SDK follows a layered architecture:
 ```
-Client → Service → Endpoint → HTTP Transport → infra/schema (OpenAPI models)
+Client → Service → Mapper → Endpoint → HTTP Transport
+                     ↕          ↕
+              Domain Models   infra/schema (OpenAPI spec models)
 ```
+
+- **Spec models** (`src/ksef2/infra/schema/api/spec/models.py`): Auto-generated Pydantic models from OpenAPI. Use camelCase field names. Never modify manually.
+- **Domain models** (`src/ksef2/domain/models/`): Python-idiomatic models with snake_case fields, extending `KSeFBaseModel`. These are the public API.
+- **Mappers** (`src/ksef2/infra/mappers/`): Static classes that translate between spec ↔ domain models. Each mapper has `map_request()` and/or `map_response()` methods.
+- **Endpoints** (`src/ksef2/endpoints/`): Thin HTTP wrappers that accept spec models (as dicts) and return spec models.
+- **Services** (`src/ksef2/services/`): Orchestrate mapper + endpoint calls. Accept and return domain models.
+- **Client** (`src/ksef2/clients/base.py`): Entry point that exposes services as cached properties.
 
 ## Process
 
@@ -45,11 +54,11 @@ Client → Service → Endpoint → HTTP Transport → infra/schema (OpenAPI mod
 
 ### Step 2: Check Existing Schema Models
 
-The SDK auto-generates Pydantic models from OpenAPI in `src/ksef2/infra/schema/api/spec.py`.
+The SDK auto-generates Pydantic models from OpenAPI in `src/ksef2/infra/schema/api/spec/models.py`.
 
 **Search for existing models:**
 ```bash
-grep -n "ModelName" src/ksef2/infra/schema/api/models.py
+grep -n "class ModelName" src/ksef2/infra/schema/api/spec/models.py
 ```
 
 If the model doesn't exist, regenerate the schema:
@@ -57,7 +66,71 @@ If the model doesn't exist, regenerate the schema:
 just regenerate-models
 ```
 
-### Step 3: Implement the Endpoint Class
+### Step 3: Create Domain Models
+
+Create or extend domain models in `src/ksef2/domain/models/`. These use snake_case and extend `KSeFBaseModel`:
+
+```python
+from __future__ import annotations
+from enum import StrEnum
+from ksef2.domain.models.base import KSeFBaseModel
+
+
+class TokenStatus(StrEnum):
+    PENDING = "Pending"
+    ACTIVE = "Active"
+    REVOKED = "Revoked"
+
+
+class GenerateTokenResponse(KSeFBaseModel):
+    reference_number: str
+    token: str
+```
+
+**Key rules:**
+- All models extend `KSeFBaseModel` (which sets `extra="forbid"`)
+- Use snake_case field names (unlike spec models which use camelCase)
+- Use Python `StrEnum` for enums
+- Re-export new models from `src/ksef2/domain/models/__init__.py`
+- Reuse existing domain types where possible (e.g., `FormSchema` from `session.py`)
+
+### Step 4: Create Mappers
+
+Add mapper classes in `src/ksef2/infra/mappers/`. Each mapper translates between spec and domain models:
+
+**Example** (from `mappers/tokens.py`):
+```python
+from ksef2.domain.models.tokens import GenerateTokenResponse, TokenPermission
+from ksef2.infra.schema.api import spec as spec
+
+
+class GenerateTokenMapper:
+    @staticmethod
+    def map_request(
+        permissions: list[TokenPermission],
+        description: str,
+    ) -> spec.GenerateTokenRequest:
+        return spec.GenerateTokenRequest(
+            permissions=[spec.TokenPermissionType(p.value) for p in permissions],
+            description=description,
+        )
+
+    @staticmethod
+    def map_response(r: spec.GenerateTokenResponse) -> GenerateTokenResponse:
+        return GenerateTokenResponse(
+            reference_number=r.referenceNumber,
+            token=r.token,
+        )
+```
+
+**Key patterns:**
+- `map_request()`: domain model → spec model (for request bodies)
+- `map_response()`: spec model → domain model (for API responses)
+- All methods are `@staticmethod`
+- Map camelCase (spec) ↔ snake_case (domain)
+- For nested objects, map each level explicitly
+
+### Step 5: Implement the Endpoint Class
 
 Create the endpoint in the appropriate file under `src/ksef2/endpoints/`.
 
@@ -142,7 +215,7 @@ class TerminateAuthSessionEndpoint:
 - Use `codecs.JsonResponseCodec.parse()` to parse responses
 - Return `None` for 204 No Content responses
 
-### Step 4: Register the Endpoint
+### Step 6: Register the Endpoint
 
 Add the endpoint to `src/ksef2/endpoints/__init__.py`:
 
@@ -155,57 +228,57 @@ __auth_endpoints__ = [
 ]
 ```
 
-### Step 5: Add Service Methods (Optional)
+### Step 7: Add Service Methods
 
-If you want the endpoint accessible via the client, add methods to the appropriate Service class:
+Services orchestrate mappers and endpoints. They accept domain models, use mappers to convert, call endpoints, and return domain models.
 
-**Example** (from `services/auth.py`):
+**Example** (from `services/tokens.py`):
 ```python
-from ksef2.endpoints.auth import (
-    ListActiveSessionsEndpoint,
-    TerminateCurrentSessionEndpoint,
-    TerminateAuthSessionEndpoint,
-)
+from typing import final
+from ksef2.core import protocols
+from ksef2.domain.models.tokens import GenerateTokenResponse, TokenPermission
+from ksef2.endpoints.tokens import GenerateTokenEndpoint
+from ksef2.infra.mappers.tokens import GenerateTokenMapper
 
-class AuthService:
-    def __init__(self, ...):
-        # ... existing endpoints ...
-        self._list_sessions_ep = ListActiveSessionsEndpoint(transport)
-        self._terminate_current_ep = TerminateCurrentSessionEndpoint(transport)
-        self._terminate_session_ep = TerminateAuthSessionEndpoint(transport)
 
-    def list_active_sessions(
+@final
+class TokenService:
+    def __init__(self, transport: protocols.Middleware) -> None:
+        self._generate_ep = GenerateTokenEndpoint(transport)
+
+    def generate(
         self,
         *,
         access_token: str,
-        page_size: int | None = None,
-        continuation_token: str | None = None,
-    ):
-        """List active authentication sessions."""
-        return self._list_sessions_ep.send(
-            bearer_token=access_token,
-            page_size=page_size,
-            continuation_token=continuation_token,
+        permissions: list[TokenPermission],
+        description: str,
+    ) -> GenerateTokenResponse:
+        # 1. Map domain → spec (request)
+        body = GenerateTokenMapper.map_request(permissions, description)
+        # 2. Call endpoint with spec model
+        spec_resp = self._generate_ep.send(
+            access_token=access_token,
+            body=body.model_dump(),
         )
-
-    def terminate_current_session(self, *, access_token: str) -> None:
-        """Terminate the current authentication session."""
-        self._terminate_current_ep.send(bearer_token=access_token)
-
-    def terminate_session(
-        self,
-        *,
-        access_token: str,
-        reference_number: str,
-    ) -> None:
-        """Terminate a specific authentication session by reference number."""
-        self._terminate_session_ep.send(
-            bearer_token=access_token,
-            reference_number=reference_number,
-        )
+        # 3. Map spec → domain (response)
+        return GenerateTokenMapper.map_response(spec_resp)
 ```
 
-### Step 6: Write Tests
+**Key pattern:** mapper.map_request() → endpoint.send() → mapper.map_response()
+
+### Step 8: Register on Client
+
+Add the service as a cached property on `src/ksef2/clients/base.py`:
+
+```python
+from ksef2.services import tokens
+
+@cached_property
+def tokens(self) -> tokens.TokenService:
+    return tokens.TokenService(self._transport)
+```
+
+### Step 9: Write Tests
 
 #### Unit Tests
 Add to `tests/unit/test_[feature]_endpoints.py`:
@@ -244,7 +317,7 @@ def test_list_active_sessions(xades_authenticated_context):
 - `xades_authenticated_context` - for XAdES authentication
 - `authenticated_context` - for token authentication (requires `KSEF_TEST_KSEF_TOKEN`)
 
-### Step 7: Run Lint and Typecheck
+### Step 10: Run Lint and Typecheck
 
 ```bash
 # Lint
@@ -254,7 +327,7 @@ uv run ruff check src/ksef2/endpoints/auth.py src/ksef2/services/auth.py
 uv run basedpyright src/ksef2/endpoints/auth.py src/ksef2/services/auth.py
 ```
 
-### Step 8: Update Documentation
+### Step 11: Update Documentation
 
 Update the relevant guide in `docs/guides/`:
 
@@ -314,9 +387,14 @@ path = f"{self.url}?{query_string}" if query_string else self.url
 
 | Component | Location |
 |-----------|----------|
-| Endpoints | `src/ksef2/endpoints/` |
+| Client | `src/ksef2/clients/base.py` |
 | Services | `src/ksef2/services/` |
-| Schema (models) | `src/ksef2/infra/schema/api/spec.py` |
+| Mappers | `src/ksef2/infra/mappers/` |
+| Endpoints | `src/ksef2/endpoints/` |
+| Endpoint registry | `src/ksef2/endpoints/__init__.py` |
+| Domain models | `src/ksef2/domain/models/` |
+| Domain models re-exports | `src/ksef2/domain/models/__init__.py` |
+| Spec models (auto-generated) | `src/ksef2/infra/schema/api/spec/models.py` |
 | Unit tests | `tests/unit/` |
 | Integration tests | `tests/integration/` |
 | Documentation | `docs/guides/` |

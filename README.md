@@ -25,43 +25,51 @@ Requires Python 3.12+.
 ## Quick Start
 
 ```python
+from datetime import datetime, timezone
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.xades import generate_test_certificate
-
-VALID_NIP = "5261040828"
-
-client = Client(Environment.TEST)
-
-# XAdES Authentication (TEST environment) - generates self-signed certificate automatically
-cert, private_key = generate_test_certificate(VALID_NIP)
-tokens = client.auth.authenticate_xades(
-    nip=VALID_NIP,
-    cert=cert,
-    private_key=private_key,
+from ksef2.domain.models import (
+    InvoiceQueryFilters, InvoiceSubjectType, InvoiceQueryDateRange, DateType,
 )
 
-# Send invoice
+NIP = "5261040828"
+client = Client(Environment.TEST)
+
+# Authenticate (XAdES — TEST environment)
+cert, key = generate_test_certificate(NIP)
+tokens = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=key)
+
 with client.sessions.open_online(
     access_token=tokens.access_token.token,
     form_code=FormSchema.FA3,
 ) as session:
-    with open("invoice.xml", "rb") as f:
-        result = session.send_invoice(f.read())
+
+    # Send an invoice
+    result = session.send_invoice(open("invoice.xml", "rb").read())
     print(result.reference_number)
 
-# Sessions are context managers, and will automatically terminate on exit:
-session = client.sessions.open_online(
-    access_token=tokens.access_token.token,
-    form_code=FormSchema.FA3,
-)
-try:
-    with open("invoice.xml", "rb") as f:
-        result = session.send_invoice(f.read())
-    print(result.reference_number)
-finally:
-    session.terminate()
+    # Check processing status
+    status = session.get_invoice_status(result.reference_number)
+
+    # Export invoices matching a query
+    export = session.schedule_invoices_export(
+        filters=InvoiceQueryFilters(
+            subject_type=InvoiceSubjectType.SUBJECT1,
+            date_range=InvoiceQueryDateRange(
+                date_type=DateType.ISSUE,
+                from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
+                to=datetime.now(tz=timezone.utc),
+            ),
+        ),
+    )
+
+    # Download the exported package
+    export_result = session.get_export_status(export.reference_number)
+    if package := export_result.package:
+        for path in session.fetch_package(package=package, target_directory="downloads"):
+            print(f"Downloaded: {path}")
 ```
-> Check out the [`quickstart.py`](scripts/examples/quickstart.py) script and other examples in [`scripts/examples`](scripts/examples)!
+> Full runnable version: [`send_query_export_download.py`](scripts/examples/invoices/send_query_export_download.py) — more examples in [`scripts/examples`](scripts/examples).
 
 ### Token Authentication
 

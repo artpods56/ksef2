@@ -1,12 +1,10 @@
 import base64
 from datetime import datetime
 from enum import Enum, StrEnum
-from typing import Any
 
-from pydantic import AwareDatetime, field_validator, Field, ConfigDict, AliasGenerator
-from pydantic.alias_generators import to_camel
+from pydantic import AwareDatetime, field_validator, Field
 
-from ksef2.domain.models.base import KSeFBaseModel
+from ksef2.domain.models.base import KSeFBaseModel, KSeFBaseParams
 
 
 class FormSchema(Enum):
@@ -33,25 +31,6 @@ class SessionStatus(StrEnum):
     SUCCEEDED = "Succeeded"
     FAILED = "Failed"
     CANCELLED = "Cancelled"
-
-
-class KSeFBaseParams(KSeFBaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-        populate_by_name=True,
-        alias_generator=AliasGenerator(
-            validation_alias=to_camel,
-            serialization_alias=to_camel,
-        ),
-        use_enum_values=True,
-        serialize_by_alias=True,
-    )
-
-    def to_api_params(self) -> dict[str, Any]:
-        return self.model_dump(
-            exclude_none=True,
-            mode="json",
-        )
 
 
 class QuerySessionsList(KSeFBaseParams):

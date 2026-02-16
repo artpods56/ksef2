@@ -3,13 +3,14 @@ from __future__ import annotations
 import base64
 import hashlib
 import os
+
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.x509 import load_der_x509_certificate
 
-from ksef2.infra.schema.api.spec import PublicKeyCertificate
 from ksef2.core.exceptions import KSeFEncryptionError
+from ksef2.domain.models.encryption import PublicKeyCertificate, CertUsage
 
 
 def _load_public_key(cert_b64: str):
@@ -25,8 +26,7 @@ def _load_public_key(cert_b64: str):
 
 
 def select_certificate(
-    certificates: list[PublicKeyCertificate],
-    usage: str,
+    certificates: list[PublicKeyCertificate], usage: CertUsage
 ) -> PublicKeyCertificate:
     """Select the first valid certificate matching *usage*.
 
@@ -62,7 +62,7 @@ def generate_session_key() -> tuple[bytes, bytes]:
     return os.urandom(32), os.urandom(16)
 
 
-def encrypt_symmetric_key(key: bytes, cert_b64: str) -> bytes:
+def encrypt_symmetric_key(key: bytes, cert_b64: str) -> str:
     """RSA-OAEP encrypt the AES key and return Base64."""
     public_key = _load_public_key(cert_b64)
     assert isinstance(public_key, rsa.RSAPublicKey), "Expected RSA public key"
@@ -77,7 +77,7 @@ def encrypt_symmetric_key(key: bytes, cert_b64: str) -> bytes:
         )
     except Exception as exc:
         raise KSeFEncryptionError(f"Symmetric key encryption failed: {exc}") from exc
-    return ciphertext
+    return base64.b64encode(ciphertext).decode()
 
 
 def encrypt_invoice(xml_bytes: bytes, key: bytes, iv: bytes) -> bytes:
@@ -96,6 +96,29 @@ def encrypt_invoice(xml_bytes: bytes, key: bytes, iv: bytes) -> bytes:
         return encryptor.update(padded) + encryptor.finalize()
     except Exception as exc:
         raise KSeFEncryptionError(f"Invoice encryption failed: {exc}") from exc
+
+
+def decrypt_aes_cbc(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
+    """AES-256-CBC decrypt *ciphertext* and strip PKCS#7 padding.
+
+    Returns the plaintext bytes.
+    """
+    try:
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+        decryptor = cipher.decryptor()
+        decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
+
+        # Strip PKCS#7 padding
+        pad_len = decrypted_padded[-1]
+        if pad_len < 1 or pad_len > 16:
+            raise ValueError(f"Invalid PKCS#7 padding byte: {pad_len}")
+        if decrypted_padded[-pad_len:] != bytes([pad_len] * pad_len):
+            raise ValueError("Invalid PKCS#7 padding")
+        return decrypted_padded[:-pad_len]
+    except KSeFEncryptionError:
+        raise
+    except Exception as exc:
+        raise KSeFEncryptionError(f"AES-CBC decryption failed: {exc}") from exc
 
 
 def sha256_b64(data: bytes) -> str:

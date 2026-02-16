@@ -134,6 +134,88 @@ with client.testdata.temporal() as temp:
 
 ---
 
+### Get Invoice Status
+
+Check the processing status of a sent invoice.
+
+**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/invoices/{invoiceReferenceNumber}/status`
+
+```python
+status = session.get_invoice_status(reference_number="INVOICE-REF")
+print(status.model_dump_json(indent=2))
+```
+
+---
+
+### Schedule Invoices Export
+
+Schedule a bulk export of invoices matching the given filters.
+
+**SDK Endpoint:** `POST /sessions/online/{referenceNumber}/query/invoice/async/init`
+
+```python
+from ksef2.domain.models import (
+    InvoiceQueryFilters,
+    InvoiceSubjectType,
+    InvoiceQueryDateRange,
+    DateType,
+)
+from datetime import datetime, timezone
+
+export = session.schedule_invoices_export(
+    filters=InvoiceQueryFilters(
+        subject_type=InvoiceSubjectType.SUBJECT1,
+        date_range=InvoiceQueryDateRange(
+            date_type=DateType.ISSUE,
+            from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            to=datetime.now(tz=timezone.utc),
+        ),
+    ),
+)
+print(f"Export scheduled: {export.reference_number}")
+```
+
+---
+
+### Get Export Status
+
+Poll the status of a scheduled export.
+
+**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/query/invoice/async/status/{queryReferenceNumber}`
+
+```python
+result = session.get_export_status(reference_number=export.reference_number)
+print(result.model_dump_json(indent=2))
+```
+
+---
+
+### Fetch Export Package
+
+Download the ZIP package produced by a completed export.
+
+**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/query/invoice/async/fetch`
+
+```python
+from pathlib import Path
+
+if package := result.package:
+    for path in session.fetch_package(
+        package=package, target_directory=Path("downloads"),
+    ):
+        print(f"Downloaded: {path} ({len(path.read_bytes())} bytes)")
+```
+
+---
+
+## Full Lifecycle Example
+
+The example below sends an invoice, checks its status, schedules an export, and downloads the results:
+
+> Full example: [`scripts/examples/invoices/send_query_export_download.py`](../../scripts/examples/invoices/send_query_export_download.py)
+
+---
+
 ## Related
 
 - [Authentication](authentication.md) - Getting access tokens
