@@ -38,6 +38,16 @@ __invoices_endpoints__ = [
     EndpointRef("POST", invoices.SendingInvoicesEndpoint.url),
 ]
 
+__invoices_status_endpoints__ = [
+    EndpointRef("GET", invoices.ListSessionsEndpoint.url),
+    EndpointRef("GET", invoices.GetSessionStatusEndpoint.url),
+    EndpointRef("GET", invoices.ListSessionInvoicesEndpoint.url),
+    EndpointRef("GET", invoices.GetSessionInvoiceStatusEndpoint.url),
+    EndpointRef("GET", invoices.ListFailedSessionInvoicesEndpoint.url),
+    EndpointRef("GET", invoices.GetInvoiceUpoByKsefNumberEndpoint.url),
+    EndpointRef("GET", invoices.GetInvoiceUpoByReferenceEndpoint.url),
+]
+
 __session_endpoints__ = [
     EndpointRef("POST", session.OpenSessionEndpoint.url),
     EndpointRef("POST", session.TerminateSessionEndpoint.url),
@@ -75,6 +85,7 @@ __all_endpoints__: list[EndpointRef] = [
     *__auth_endpoints__,
     *__encryption_endpoints__,
     *__invoices_endpoints__,
+    *__invoices_status_endpoints__,
     *__session_endpoints__,
     *__testdata_endpoints__,
     *__tokens_endpoints__,
