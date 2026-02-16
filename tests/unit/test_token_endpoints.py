@@ -25,7 +25,7 @@ class TestGenerateTokenEndpoint:
         call = fake_transport.calls[0]
         assert call.method == "POST"
         assert call.path == "/tokens"
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 class TestTokenStatusEndpoint:
@@ -58,7 +58,7 @@ class TestTokenStatusEndpoint:
         call = fake_transport.calls[0]
         assert call.method == "GET"
         assert _REF in call.path
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 class TestRevokeTokenEndpoint:
@@ -79,4 +79,4 @@ class TestRevokeTokenEndpoint:
         call = fake_transport.calls[0]
         assert call.method == "DELETE"
         assert _REF in call.path
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}

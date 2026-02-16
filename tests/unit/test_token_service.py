@@ -63,7 +63,7 @@ class TestGenerate:
             "permissions": ["InvoiceRead", "InvoiceWrite"],
             "description": "Test token",
         }
-        assert post_call.headers == {"SessionToken": _TOKEN}
+        assert post_call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
     def test_returns_generate_response(self, fake_transport: FakeTransport) -> None:
         fake_transport.enqueue({"referenceNumber": _REF, "token": _KSEF_TOKEN})
@@ -161,7 +161,7 @@ class TestStatus:
         call = fake_transport.calls[0]
         assert call.method == "GET"
         assert _REF in call.path
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
     def test_maps_all_statuses(self, fake_transport: FakeTransport) -> None:
         for status in TokenStatus:
@@ -184,4 +184,4 @@ class TestRevoke:
         call = fake_transport.calls[0]
         assert call.method == "DELETE"
         assert _REF in call.path
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}

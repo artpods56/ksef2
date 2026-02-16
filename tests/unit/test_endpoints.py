@@ -30,7 +30,7 @@ class TestOpenSessionEndpoint:
         call = fake_transport.calls[0]
         assert call.method == "POST"
         assert call.path == "/sessions/online"
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 class TestTerminateSessionEndpoint:
@@ -51,7 +51,7 @@ class TestTerminateSessionEndpoint:
         call = fake_transport.calls[0]
         assert call.method == "POST"
         assert _REF in call.path
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 class TestDownloadInvoiceEndpoint:
@@ -74,7 +74,7 @@ class TestDownloadInvoiceEndpoint:
         call = fake_transport.calls[0]
         assert call.method == "GET"
         assert "INV-123" in call.path
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 class TestSendingInvoicesEndpoint:
@@ -97,7 +97,7 @@ class TestSendingInvoicesEndpoint:
 
         call = fake_transport.calls[0]
         assert call.method == "POST"
-        assert call.headers == {"SessionToken": _TOKEN}
+        assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
 
 
 class TestCertificateEndpoint:
