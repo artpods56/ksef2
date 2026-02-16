@@ -103,7 +103,7 @@ def test_get_entity_roles(permissions_context: PermissionContext):
     """Get entity roles."""
     session = permissions_context["session"]
 
-    response = session.permissions.get_entity_roles(page_offset=0, page_size=10)
+    response = session.permissions.get_entity_roles()
 
     assert response is not None
     assert hasattr(response, "roles")

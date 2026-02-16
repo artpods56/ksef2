@@ -288,13 +288,11 @@ class PermissionsService:
     def get_entity_roles(
         self,
         *,
-        page_offset: int = 0,
-        page_size: int = 10,
+        params: PaginationParams | None = None,
     ) -> EntityRolesResponse:
         spec_resp = self._entity_roles_ep.send(
             access_token=self._state.access_token,
-            page_offset=page_offset,
-            page_size=page_size,
+            **params.to_api_params() if params else PaginationParams().to_api_params(),
         )
         return PermissionsMapper.map_entity_roles_response(spec_resp)
 

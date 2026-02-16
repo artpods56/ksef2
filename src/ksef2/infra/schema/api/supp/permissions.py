@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import Field, field_validator
 
-from ksef2.infra.schema.api.spec import (
+from ksef2.infra.schema.api.spec.models import (
     PersonPermissionsAuthorIdentifierType,
     CertificateSubjectIdentifierType,
     PersonPermissionsContextIdentifier,
