@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum
-from xsdata.models.datatype import XmlDate, XmlDateTime  # noqa: F401
+from xsdata.models.datatype import XmlDate, XmlDateTime  # noqa: F401 pyright: ignore [reportMissingImports] 
 
 
 class KolTyp(Enum):
