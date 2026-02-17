@@ -35,8 +35,8 @@ PERSON_PESEL = generate_pesel()
 def main() -> None:
     client = Client(environment=Environment.TEST)
 
-    # Set up and authenticate
-    print("Setting up and authenticating ...")
+    # Set up test data
+    print("Setting up test data ...")
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=ORG_NIP,
@@ -60,68 +60,69 @@ def main() -> None:
             ],
         )
 
-        cert, private_key = generate_test_certificate(PERSON_NIP)
-        tokens = client.auth.authenticate_xades(
-            nip=PERSON_NIP,
+        cert, private_key = generate_test_certificate(ORG_NIP)
+
+        # Authenticate and get an AuthenticatedClient
+        print("Authenticating ...")
+        auth = client.auth.authenticate_xades(
+            nip=ORG_NIP,
             cert=cert,
             private_key=private_key,
         )
-        access_token = tokens.access_token.token
 
         # --- Modify session limits ---
-        print("Modifying session limits ...")
-        limits = client.limits.get_context_limits(access_token=access_token)
+        print("\nModifying session limits ...")
+        limits = auth.limits.get_context_limits()
         original_max = limits.online_session.max_invoices
         limits.online_session.max_invoices = 5000
-        client.limits.set_session_limits(access_token=access_token, limits=limits)
-        print(f"  max_invoices: {original_max} → 5000")
+        auth.limits.set_session_limits(limits)
+        print(f"  max_invoices: {original_max} -> 5000")
 
         # Reset session limits back to defaults
         print("  Resetting session limits ...")
-        client.limits.reset_session_limits(access_token=access_token)
+        auth.limits.reset_session_limits()
 
         # --- Modify subject limits ---
-        print("Modifying subject limits ...")
-        subject_limits = client.limits.get_subject_limits(access_token=access_token)
+        print("\nModifying subject limits ...")
+        subject_limits = auth.limits.get_subject_limits()
         if subject_limits.certificate:
             subject_limits.certificate.max_certificates = 10
-            client.limits.set_subject_limits(
-                access_token=access_token, limits=subject_limits
-            )
-            print("  max_certificates → 10")
+            auth.limits.set_subject_limits(subject_limits)
+            print("  max_certificates -> 10")
 
         # Reset subject limits back to defaults
         print("  Resetting subject limits ...")
-        client.limits.reset_subject_limits(access_token=access_token)
+        auth.limits.reset_subject_limits()
 
         # --- Modify API rate limits ---
-        print("Modifying API rate limits ...")
-        rate_limits = client.limits.get_api_rate_limits(access_token=access_token)
+        print("\nModifying API rate limits ...")
+        rate_limits = auth.limits.get_api_rate_limits()
         rate_limits.invoice_send.per_second = 50
         rate_limits.invoice_send.per_minute = 200
-        client.limits.set_api_rate_limits(access_token=access_token, limits=rate_limits)
-        print("  invoice_send: 100/s, 500/m")
+        auth.limits.set_api_rate_limits(rate_limits)
+        print("  invoice_send: 50/s, 200/m")
 
         # Reset rate limits back to defaults
         print("  Resetting API rate limits ...")
-        client.limits.reset_api_rate_limits(access_token=access_token)
+        auth.limits.reset_api_rate_limits()
 
         # --- Set production rate limits ---
-        print("Setting production rate limits ...")
-        client.limits.set_production_rate_limits(access_token=access_token)
+        print("\nSetting production rate limits ...")
+        auth.limits.set_production_rate_limits()
         print("  Rate limits set to production values")
 
         # Check the new limits
-        prod_limits = client.limits.get_api_rate_limits(access_token=access_token)
+        prod_limits = auth.limits.get_api_rate_limits()
+        inv = prod_limits.invoice_send
         print(
-            f"  invoice_send: {prod_limits.invoice_send.per_second}/s, {prod_limits.invoice_send.per_minute}/m, {prod_limits.invoice_send.per_hour}/h"
+            f"  invoice_send: {inv.per_second}/s, {inv.per_minute}/m, {inv.per_hour}/h"
         )
 
         # Reset back to test defaults
         print("  Resetting to test defaults ...")
-        client.limits.reset_api_rate_limits(access_token=access_token)
+        auth.limits.reset_api_rate_limits()
 
-        print("All limits reset to defaults.")
+        print("\nAll limits reset to defaults.")
 
     print("Test data cleaned up.")
 

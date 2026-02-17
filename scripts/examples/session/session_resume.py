@@ -48,10 +48,10 @@ def main() -> None:
 
         # we are using self-signed certificate here, this will only work in test environment
         cert, private_key = generate_test_certificate(PERSON_NIP)
-        tokens = client.auth.authenticate_xades(
+        auth = client.auth.authenticate_xades(
             nip=PERSON_NIP, cert=cert, private_key=private_key
         )
-        access_token = tokens.access_token.token
+        access_token = auth.access_token
 
         # Open a session WITHOUT context manager (manual lifecycle)
         print("Opening session (manual mode) ...")

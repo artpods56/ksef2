@@ -13,35 +13,30 @@ def main() -> None:
     # Authenticate
     print("Authenticating ...")
     cert, private_key = generate_test_certificate(NIP)
-    tokens = client.auth.authenticate_xades(
+    auth = client.auth.authenticate_xades(
         nip=NIP,
         cert=cert,
         private_key=private_key,
     )
-    access_token = tokens.access_token.token
 
     # List active sessions
     print("Listing active authentication sessions ...")
-    sessions = client.auth.list_active_sessions(access_token=access_token)
+    sessions = auth.sessions.list()
     print(f"  Response: {sessions}")
 
     # Paginated listing (if many sessions exist)
-    # sessions = client.auth.list_active_sessions(
-    #     access_token=access_token,
+    # sessions = auth.sessions.list(
     #     page_size=10,
     #     continuation_token=None,  # from previous page
     # )
 
     # Terminate the current session
     print("Terminating current session ...")
-    client.auth.terminate_current_session(access_token=access_token)
+    auth.sessions.terminate_current()
     print("  Current session terminated.")
 
     # To terminate a specific session by reference number:
-    # client.auth.terminate_session(
-    #     access_token=access_token,
-    #     reference_number="some-reference-number",
-    # )
+    # auth.sessions.terminate(reference_number="some-reference-number")
     print("Session management complete.")
 
 

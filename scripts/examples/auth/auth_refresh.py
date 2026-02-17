@@ -13,25 +13,27 @@ def main() -> None:
     # First, authenticate to get initial tokens
     print("Authenticating via XAdES ...")
     cert, private_key = generate_test_certificate(NIP)
-    tokens = client.auth.authenticate_xades(
+    auth = client.auth.authenticate_xades(
         nip=NIP,
         cert=cert,
         private_key=private_key,
     )
-    print(f"  Access token valid until:  {tokens.access_token.valid_until}")
-    print(f"  Refresh token valid until: {tokens.refresh_token.valid_until}")
+    print(f"  Access token valid until:  {auth.auth_tokens.access_token.valid_until}")
+    print(f"  Refresh token valid until: {auth.auth_tokens.refresh_token.valid_until}")
+
+    # List active sessions using the authenticated client
+    print("Listing active sessions ...")
+    sessions = auth.sessions.list()
+    print(f"  Active sessions: {len(sessions.items)} found")
 
     # Refresh the access token
     print("Refreshing access token ...")
-    refreshed = client.auth.refresh(refresh_token=tokens.refresh_token.token)
+    refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
     print(f"  New access token valid until: {refreshed.access_token.valid_until}")
 
-    # The new access token can now be used for API calls
-    print("Using refreshed token to list active sessions ...")
-    sessions = client.auth.list_active_sessions(
-        access_token=refreshed.access_token.token,
-    )
-    print(f"  Active sessions response: {sessions}")
+    # Note: The refreshed token can be used to create a new authenticated context
+    # if needed, but typically you'd use the original auth object which still has
+    # valid session access.
 
 
 if __name__ == "__main__":

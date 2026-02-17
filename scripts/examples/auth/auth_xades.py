@@ -16,17 +16,17 @@ def main() -> None:
 
     # Authenticate with XAdES signature
     print("Authenticating via XAdES ...")
-    tokens = client.auth.authenticate_xades(
+    auth = client.auth.authenticate_xades(
         nip=NIP,
         cert=cert,
         private_key=private_key,
         # verify_chain=False is the default — required for self-signed certs
     )
 
-    print(f"Access token:  {tokens.access_token.token[:40]}…")
-    print(f"  Valid until: {tokens.access_token.valid_until}")
-    print(f"Refresh token: {tokens.refresh_token.token[:40]}…")
-    print(f"  Valid until: {tokens.refresh_token.valid_until}")
+    print(f"Access token:  {auth.access_token[:40]}…")
+    print(f"  Valid until: {auth.auth_tokens.access_token.valid_until}")
+    print(f"Refresh token: {auth.refresh_token[:40]}…")
+    print(f"  Valid until: {auth.auth_tokens.refresh_token.valid_until}")
 
 
 if __name__ == "__main__":

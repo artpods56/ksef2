@@ -42,17 +42,15 @@ def main() -> None:
         # Authenticate
         print("Authenticating ...")
         cert, private_key = generate_test_certificate(NIP)
-        tokens = client.auth.authenticate_xades(
+        auth = client.auth.authenticate_xades(
             nip=NIP,
             cert=cert,
             private_key=private_key,
         )
-        access_token = tokens.access_token.token
 
         # Generate a new KSeF token
         print("Generating KSeF token ...")
-        result = client.tokens.generate(
-            access_token=access_token,
+        result = auth.tokens.generate(
             permissions=[
                 TokenPermission.INVOICE_READ,
                 TokenPermission.INVOICE_WRITE,
@@ -64,23 +62,20 @@ def main() -> None:
 
         # Check token status
         print("Checking token status ...")
-        status = client.tokens.status(
-            access_token=access_token,
+        status = auth.tokens.status(
             reference_number=result.reference_number,
         )
         print(f"  Status: {status.status.value}")
 
         # Revoke the token
         print("Revoking token ...")
-        client.tokens.revoke(
-            access_token=access_token,
+        auth.tokens.revoke(
             reference_number=result.reference_number,
         )
 
         # Verify it's revoked
         print("Verifying revocation ...")
-        status = client.tokens.status(
-            access_token=access_token,
+        status = auth.tokens.status(
             reference_number=result.reference_number,
         )
         print(f"  Status: {status.status.value}")

@@ -19,15 +19,15 @@ def main() -> None:
     client = Client(environment=Environment.TEST)
 
     print("Authenticating via KSeF token ...")
-    tokens = client.auth.authenticate_token(
+    auth = client.auth.authenticate_token(
         ksef_token=KSEF_TOKEN,
         nip=NIP,
     )
 
-    print(f"Access token:  {tokens.access_token.token[:40]}…")
-    print(f"  Valid until: {tokens.access_token.valid_until}")
-    print(f"Refresh token: {tokens.refresh_token.token[:40]}…")
-    print(f"  Valid until: {tokens.refresh_token.valid_until}")
+    print(f"Access token:  {auth.access_token[:40]}…")
+    print(f"  Valid until: {auth.auth_tokens.access_token.valid_until}")
+    print(f"Refresh token: {auth.refresh_token[:40]}…")
+    print(f"  Valid until: {auth.auth_tokens.refresh_token.valid_until}")
 
 
 if __name__ == "__main__":
