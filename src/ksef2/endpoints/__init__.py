@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from ksef2.endpoints import (
     auth,
+    certificates,
     encryption,
     invoices,
     limits,
@@ -122,8 +123,19 @@ __limits_endpoints__ = [
     EndpointRef("POST", limits.SetProductionRateLimitsEndpoint.url),
 ]
 
+__certificates_endpoints__ = [
+    EndpointRef("GET", certificates.CertificateLimitsEndpoint.url),
+    EndpointRef("GET", certificates.CertificateEnrollmentDataEndpoint.url),
+    EndpointRef("POST", certificates.EnrollCertificateEndpoint.url),
+    EndpointRef("GET", certificates.CertificateEnrollmentStatusEndpoint.url),
+    EndpointRef("POST", certificates.RetrieveCertificatesEndpoint.url),
+    EndpointRef("POST", certificates.RevokeCertificateEndpoint.url),
+    EndpointRef("POST", certificates.QueryCertificatesEndpoint.url),
+]
+
 __all_endpoints__: list[EndpointRef] = [
     *__auth_endpoints__,
+    *__certificates_endpoints__,
     *__encryption_endpoints__,
     *__invoices_endpoints__,
     *__invoices_query_endpoints__,

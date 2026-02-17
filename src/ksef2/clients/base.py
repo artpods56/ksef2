@@ -10,6 +10,7 @@ from ksef2.core.middleware import KSeFProtocol
 
 from ksef2.services import (
     auth,
+    certificates,
     limits,
     session,
     testdata,
@@ -61,3 +62,7 @@ class Client:
     @cached_property
     def limits(self) -> limits.LimitsService:
         return limits.LimitsService(self._transport)
+
+    @cached_property
+    def certificates(self) -> certificates.CertificateService:
+        return certificates.CertificateService(self._transport)

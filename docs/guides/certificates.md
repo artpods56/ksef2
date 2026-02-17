@@ -1,0 +1,273 @@
+# Certificates
+
+Manage KSeF certificates for authentication and offline invoice signing.
+
+## Certificate Types
+
+| Type | Description |
+|------|-------------|
+| `AUTHENTICATION` | Certificate used for authentication in the KSeF system |
+| `OFFLINE` | Certificate used for confirming authenticity and integrity of offline invoices |
+
+---
+
+## Operations
+
+### Get Certificate Limits
+
+Get information about certificate limits and whether you can request a new certificate.
+
+**SDK Endpoint:** `GET /certificates/limits`
+
+```python
+limits = client.certificates.get_limits(access_token=access_token)
+
+print(f"Can request new certificate: {limits.can_request}")
+print(f"Enrollment limit: {limits.enrollment.remaining}/{limits.enrollment.limit}")
+print(f"Certificate limit: {limits.certificate.remaining}/{limits.certificate.limit}")
+```
+
+---
+
+### Get Enrollment Data
+
+Get data required for preparing a PKCS#10 Certificate Signing Request (CSR).
+
+**SDK Endpoint:** `GET /certificates/enrollments/data`
+
+**Note:** This endpoint requires authentication with a qualified certificate (not self-signed).
+
+```python
+enrollment_data = client.certificates.get_enrollment_data(access_token=access_token)
+
+print(f"Common Name: {enrollment_data.common_name}")
+print(f"Country: {enrollment_data.country_name}")
+print(f"Organization: {enrollment_data.organization_name}")
+print(f"Unique ID: {enrollment_data.unique_identifier}")
+```
+
+---
+
+### Enroll Certificate
+
+Submit a certificate enrollment request.
+
+**SDK Endpoint:** `POST /certificates/enrollments`
+
+**Requirements:**
+- Authentication with a qualified certificate
+- Available enrollment quota
+
+```python
+from ksef2.domain.models.certificates import CertificateType
+
+# Submit enrollment with your CSR (Base64-encoded DER format)
+result = client.certificates.enroll(
+    access_token=access_token,
+    certificate_name="My Authentication Certificate",
+    certificate_type=CertificateType.AUTHENTICATION,
+    csr=base64_encoded_csr,
+    valid_from=None,  # Optional: defaults to immediate validity
+)
+
+print(f"Reference number: {result.reference_number}")
+print(f"Submitted at: {result.timestamp}")
+```
+
+---
+
+### Get Enrollment Status
+
+Check the status of a certificate enrollment request.
+
+**SDK Endpoint:** `GET /certificates/enrollments/{referenceNumber}`
+
+**Status Codes:**
+| Code | Description |
+|------|-------------|
+| 100 | Request accepted for processing |
+| 200 | Request processed (certificate generated) |
+| 400 | Request rejected |
+| 500 | Unknown error |
+| 550 | Operation cancelled by system |
+
+```python
+status = client.certificates.get_enrollment_status(
+    access_token=access_token,
+    reference_number=result.reference_number,
+)
+
+print(f"Request date: {status.request_date}")
+print(f"Status: {status.status.code} - {status.status.description}")
+if status.certificate_serial_number:
+    print(f"Certificate serial: {status.certificate_serial_number}")
+```
+
+---
+
+### Query Certificates
+
+Query certificates matching specified criteria.
+
+**SDK Endpoint:** `POST /certificates/query`
+
+```python
+from ksef2.domain.models.certificates import CertificateStatus, CertificateType
+
+# Query all certificates
+response = client.certificates.query(access_token=access_token)
+
+for cert in response.certificates:
+    print(f"{cert.certificate_serial_number}: {cert.name} ({cert.status.value})")
+
+# Filter by status
+response = client.certificates.query(
+    access_token=access_token,
+    status=CertificateStatus.ACTIVE,
+)
+
+# Filter by type
+response = client.certificates.query(
+    access_token=access_token,
+    certificate_type=CertificateType.AUTHENTICATION,
+)
+
+# Filter by name (partial match)
+response = client.certificates.query(
+    access_token=access_token,
+    name="My Cert",
+)
+
+# With pagination
+response = client.certificates.query(
+    access_token=access_token,
+    page_size=20,
+    page_offset=0,
+)
+```
+
+---
+
+### Retrieve Certificates
+
+Download certificates by their serial numbers.
+
+**SDK Endpoint:** `POST /certificates/retrieve`
+
+```python
+# Retrieve up to 10 certificates
+response = client.certificates.retrieve(
+    access_token=access_token,
+    certificate_serial_numbers=["0321C82DA41B4362", "0321F21DA462A362"],
+)
+
+for cert in response.certificates:
+    print(f"{cert.certificate_serial_number}: {cert.certificate_name}")
+    print(f"Type: {cert.certificate_type.value}")
+    # cert.certificate contains Base64-encoded DER data
+```
+
+---
+
+### Revoke Certificate
+
+Revoke a certificate by its serial number.
+
+**SDK Endpoint:** `POST /certificates/{certificateSerialNumber}/revoke`
+
+```python
+from ksef2.domain.models.certificates import CertificateRevocationReason
+
+# Revoke without reason
+client.certificates.revoke(
+    access_token=access_token,
+    certificate_serial_number="0321C82DA41B4362",
+)
+
+# Revoke with reason
+client.certificates.revoke(
+    access_token=access_token,
+    certificate_serial_number="0321C82DA41B4362",
+    revocation_reason=CertificateRevocationReason.KEY_COMPROMISE,
+)
+```
+
+---
+
+## Certificate Statuses
+
+| Status | Description |
+|--------|-------------|
+| `ACTIVE` | Certificate is active and can be used |
+| `BLOCKED` | Certificate is blocked (transitional state during revocation) |
+| `REVOKED` | Certificate has been revoked |
+| `EXPIRED` | Certificate has expired |
+
+---
+
+## Revocation Reasons
+
+| Reason | Description |
+|--------|-------------|
+| `UNSPECIFIED` | No specific reason |
+| `SUPERSEDED` | Certificate replaced by another |
+| `KEY_COMPROMISE` | Private key has been compromised |
+
+---
+
+## Subject Identifier Types
+
+| Type | Description |
+|------|-------------|
+| `NIP` | Polish tax identification number (10 digits) |
+| `PESEL` | Polish personal identification number (11 digits) |
+| `FINGERPRINT` | Certificate fingerprint |
+
+---
+
+## Full Example
+
+Complete certificate lifecycle — query, check limits, and manage certificates:
+
+```python
+from ksef2.domain.models.certificates import (
+    CertificateStatus,
+    CertificateType,
+    CertificateRevocationReason,
+)
+
+# Check certificate limits
+limits = client.certificates.get_limits(access_token=access_token)
+print(f"Can request: {limits.can_request}")
+print(f"Certificates remaining: {limits.certificate.remaining}/{limits.certificate.limit}")
+
+# Query active authentication certificates
+response = client.certificates.query(
+    access_token=access_token,
+    status=CertificateStatus.ACTIVE,
+    certificate_type=CertificateType.AUTHENTICATION,
+)
+print(f"Found {len(response.certificates)} active auth certificates")
+
+for cert in response.certificates:
+    print(f"  {cert.name}")
+    print(f"    Serial: {cert.certificate_serial_number}")
+    print(f"    Valid: {cert.valid_from} to {cert.valid_to}")
+    print(f"    Last used: {cert.last_use_date}")
+
+# Download certificate data if needed
+if response.certificates:
+    serial = response.certificates[0].certificate_serial_number
+    certs = client.certificates.retrieve(
+        access_token=access_token,
+        certificate_serial_numbers=[serial],
+    )
+    print(f"Downloaded {len(certs.certificates)} certificate(s)")
+```
+
+---
+
+## Related
+
+- [Authentication](authentication.md) - Using certificates for authentication
+- [Limits](limits.md) - Managing certificate and enrollment limits

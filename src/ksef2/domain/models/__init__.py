@@ -100,6 +100,23 @@ from ksef2.domain.models.auth import (
     ContextIdentifierType,
     TokenCredentials,
 )
+from ksef2.domain.models.certificates import (
+    CertificateEnrollmentData,
+    CertificateEnrollmentStatus,
+    CertificateInfo,
+    CertificateLimit,
+    CertificateLimitsResponse,
+    CertificateRevocationReason,
+    CertificateStatus,
+    CertificateSubjectIdentifier,
+    CertificateSubjectIdentifierType,
+    CertificateType,
+    EnrollCertificateResponse,
+    QueryCertificatesResponse,
+    RetrieveCertificatesResponse,
+    RetrievedCertificate,
+    StatusInfo,
+)
 
 __all__ = [
     # base
@@ -201,4 +218,20 @@ __all__ = [
     "AuthOperationStatus",
     "ContextIdentifierType",
     "TokenCredentials",
+    # certificates
+    "CertificateEnrollmentData",
+    "CertificateEnrollmentStatus",
+    "CertificateInfo",
+    "CertificateLimit",
+    "CertificateLimitsResponse",
+    "CertificateRevocationReason",
+    "CertificateStatus",
+    "CertificateSubjectIdentifier",
+    "CertificateSubjectIdentifierType",
+    "CertificateType",
+    "EnrollCertificateResponse",
+    "QueryCertificatesResponse",
+    "RetrieveCertificatesResponse",
+    "RetrievedCertificate",
+    "StatusInfo",
 ]
