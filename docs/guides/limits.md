@@ -126,4 +126,18 @@ client.limits.set_api_rate_limits(access_token=token, limits=limits)
 client.limits.reset_api_rate_limits(access_token=token)
 ```
 
+### Set Production Rate Limits
+
+Set API rate limits to production values. This is useful for testing with production-like constraints.
+
+**SDK Endpoint:** `POST /testdata/rate-limits/production`
+
+```python
+# Set production rate limits
+client.limits.set_production_rate_limits(access_token=token)
+
+# Later, reset back to test defaults
+client.limits.reset_api_rate_limits(access_token=token)
+```
+
 > Full example: [`scripts/examples/limits/limits_modify.py`](../../scripts/examples/limits/limits_modify.py)
