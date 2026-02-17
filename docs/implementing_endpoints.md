@@ -303,11 +303,9 @@ Add to `tests/integration/test_[feature].py`:
 @pytest.mark.integration
 def test_list_active_sessions(xades_authenticated_context):
     """List active authentication sessions."""
-    client, tokens = xades_authenticated_context
+    client, auth = xades_authenticated_context
 
-    response = client.auth.list_active_sessions(
-        access_token=tokens.access_token.token,
-    )
+    response = auth.sessions.list()
 
     assert response is not None
     assert hasattr(response, "items")

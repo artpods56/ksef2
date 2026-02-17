@@ -1,6 +1,6 @@
 # Limits and Restrictions
 
-Manage API limits and restrictions for the KSeF system.
+Manage API limits and restrictions for the KSeF system. All limits operations are accessed through the authenticated client via `auth.limits`.
 
 ## Querying Limits
 
@@ -11,7 +11,10 @@ Get the effective limits for the current context (session type limits).
 **SDK Endpoint:** `GET /limits/context`
 
 ```python
-context_limits = client.limits.get_context_limits(access_token=access_token)
+# After authenticating:
+auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=private_key)
+
+context_limits = auth.limits.get_context_limits()
 print(f"Online max invoices: {context_limits.online_session.max_invoices}")
 print(f"Online max invoice size (MB): {context_limits.online_session.max_invoice_size_mb}")
 print(f"Online max with attachment (MB): {context_limits.online_session.max_invoice_with_attachment_size_mb}")
@@ -26,7 +29,7 @@ Get the effective limits for the current subject (certificate/enrollment limits)
 **SDK Endpoint:** `GET /limits/subject`
 
 ```python
-subject_limits = client.limits.get_subject_limits(access_token=access_token)
+subject_limits = auth.limits.get_subject_limits()
 if subject_limits.certificate:
     print(f"Max certificates: {subject_limits.certificate.max_certificates}")
 if subject_limits.enrollment:
@@ -40,7 +43,7 @@ Get the current API rate limits.
 **SDK Endpoint:** `GET /rate-limits`
 
 ```python
-rate_limits = client.limits.get_api_rate_limits(access_token=access_token)
+rate_limits = auth.limits.get_api_rate_limits()
 print(f"Invoice send: {rate_limits.invoice_send.per_second}/s  {rate_limits.invoice_send.per_minute}/m  {rate_limits.invoice_send.per_hour}/h")
 print(f"Online session: {rate_limits.online_session.per_second}/s  {rate_limits.online_session.per_minute}/m  {rate_limits.online_session.per_hour}/h")
 print(f"Invoice download: {rate_limits.invoice_download.per_second}/s  {rate_limits.invoice_download.per_minute}/m  {rate_limits.invoice_download.per_hour}/h")
@@ -60,14 +63,14 @@ The recommended workflow is to **fetch** the current limits, **modify** the valu
 
 ```python
 # Fetch current limits
-limits = client.limits.get_context_limits(access_token=token)
+limits = auth.limits.get_context_limits()
 
 # Modify what you need
 limits.online_session.max_invoices = 5000
 limits.batch_session.max_invoice_size_mb = 5
 
 # Push back
-client.limits.set_session_limits(access_token=token, limits=limits)
+auth.limits.set_session_limits(limits)
 ```
 
 ### Reset Session Limits
@@ -75,7 +78,7 @@ client.limits.set_session_limits(access_token=token, limits=limits)
 **SDK Endpoint:** `DELETE /testdata/limits/context/session`
 
 ```python
-client.limits.reset_session_limits(access_token=token)
+auth.limits.reset_session_limits()
 ```
 
 ### Set Subject Limits
@@ -84,13 +87,13 @@ client.limits.reset_session_limits(access_token=token)
 
 ```python
 # Fetch current limits
-limits = client.limits.get_subject_limits(access_token=token)
+limits = auth.limits.get_subject_limits()
 
 # Modify what you need
 limits.certificate.max_certificates = 5
 
 # Push back
-client.limits.set_subject_limits(access_token=token, limits=limits)
+auth.limits.set_subject_limits(limits)
 ```
 
 ### Reset Subject Limits
@@ -98,7 +101,7 @@ client.limits.set_subject_limits(access_token=token, limits=limits)
 **SDK Endpoint:** `DELETE /testdata/limits/subject/certificate`
 
 ```python
-client.limits.reset_subject_limits(access_token=token)
+auth.limits.reset_subject_limits()
 ```
 
 ### Set API Rate Limits
@@ -107,7 +110,7 @@ client.limits.reset_subject_limits(access_token=token)
 
 ```python
 # Fetch current rate limits
-limits = client.limits.get_api_rate_limits(access_token=token)
+limits = auth.limits.get_api_rate_limits()
 
 # Modify what you need
 limits.invoice_send.per_second = 100
@@ -115,7 +118,7 @@ limits.invoice_send.per_minute = 500
 limits.online_session.per_hour = 1200
 
 # Push back
-client.limits.set_api_rate_limits(access_token=token, limits=limits)
+auth.limits.set_api_rate_limits(limits)
 ```
 
 ### Reset API Rate Limits
@@ -123,7 +126,7 @@ client.limits.set_api_rate_limits(access_token=token, limits=limits)
 **SDK Endpoint:** `DELETE /testdata/rate-limits`
 
 ```python
-client.limits.reset_api_rate_limits(access_token=token)
+auth.limits.reset_api_rate_limits()
 ```
 
 ### Set Production Rate Limits
@@ -134,10 +137,10 @@ Set API rate limits to production values. This is useful for testing with produc
 
 ```python
 # Set production rate limits
-client.limits.set_production_rate_limits(access_token=token)
+auth.limits.set_production_rate_limits()
 
 # Later, reset back to test defaults
-client.limits.reset_api_rate_limits(access_token=token)
+auth.limits.reset_api_rate_limits()
 ```
 
 > Full example: [`scripts/examples/limits/limits_modify.py`](../../scripts/examples/limits/limits_modify.py)

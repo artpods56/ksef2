@@ -11,7 +11,7 @@ Grant permissions to a person identified by PESEL or NIP.
 ```python
 from ksef2.domain.models import IdentifierType, PermissionType
 
-result = session.permissions.grant_person(
+result = auth.permissions.grant_person(
     subject_identifier=IdentifierType.PESEL,
     subject_value="12345678901",
     permissions=[PermissionType.INVOICE_READ, PermissionType.INVOICE_WRITE],
@@ -31,7 +31,7 @@ Grant permissions to an entity (organization) identified by NIP. Entity permissi
 ```python
 from ksef2.domain.models import EntityPermission, EntityPermissionType
 
-result = session.permissions.grant_entity(
+result = auth.permissions.grant_entity(
     subject_value=PARTNER_NIP,
     permissions=[
         EntityPermission(
@@ -57,7 +57,7 @@ from ksef2.domain.models import (
     AuthorizationSubjectIdentifierType,
 )
 
-result = session.permissions.grant_authorization(
+result = auth.permissions.grant_authorization(
     subject_type=AuthorizationSubjectIdentifierType.NIP,
     subject_value=PARTNER_NIP,
     permission=AuthorizationPermissionType.SELF_INVOICING,
@@ -80,14 +80,14 @@ from ksef2.domain.models.permissions import (
 from ksef2.domain.models import PermissionType
 
 # All person permissions in current context
-resp = session.permissions.query_persons(
+resp = auth.permissions.query_persons(
     query=PersonPermissionsQueryRequest(
         query_type=PermissionsQueryType.PERMISSIONS_IN_CURRENT_CONTEXT,
     ),
 )
 
 # Filtered by permission type
-resp = session.permissions.query_persons(
+resp = auth.permissions.query_persons(
     query=PersonPermissionsQueryRequest(
         query_type=PermissionsQueryType.PERMISSIONS_IN_CURRENT_CONTEXT,
         permission_types=[PermissionType.CREDENTIALS_MANAGE],
@@ -106,17 +106,17 @@ from ksef2.domain.models.permissions import (
     AuthorizationPermissionsQueryRequest,
     QueryType,
 )
-from ksef2.domain.models.invoices import PaginationParams
+from ksef2.domain.models.pagination import PaginationParams
 
 # Granted authorizations
-resp = session.permissions.query_authorizations(
+resp = auth.permissions.query_authorizations(
     query=AuthorizationPermissionsQueryRequest(
         query_type=QueryType.GRANTED,
     ),
 )
 
 # Received authorizations with pagination
-resp = session.permissions.query_authorizations(
+resp = auth.permissions.query_authorizations(
     query=AuthorizationPermissionsQueryRequest(
         query_type=QueryType.RECEIVED,
     ),
@@ -137,12 +137,12 @@ from ksef2.domain.models.permissions import (
 )
 
 # All personal permissions
-resp = session.permissions.query_personal(
+resp = auth.permissions.query_personal(
     query=PersonalPermissionsQueryRequest(),
 )
 
 # Only active permissions
-resp = session.permissions.query_personal(
+resp = auth.permissions.query_personal(
     query=PersonalPermissionsQueryRequest(
         permission_state=PermissionState.ACTIVE,
     ),
@@ -158,7 +158,7 @@ Query permissions for EU entities.
 ```python
 from ksef2.domain.models.permissions import EuEntityPermissionsQueryRequest
 
-resp = session.permissions.query_eu_entities(
+resp = auth.permissions.query_eu_entities(
     query=EuEntityPermissionsQueryRequest(),
 )
 ```
@@ -172,7 +172,7 @@ Query roles assigned to subordinate entities.
 ```python
 from ksef2.domain.models.permissions import SubordinateEntityRolesQueryRequest
 
-resp = session.permissions.query_subordinate_entities(
+resp = auth.permissions.query_subordinate_entities(
     query=SubordinateEntityRolesQueryRequest(),
 )
 ```
@@ -186,7 +186,7 @@ Query permissions assigned to subunits.
 ```python
 from ksef2.domain.models.permissions import SubunitPermissionsQueryRequest
 
-resp = session.permissions.query_subunits(
+resp = auth.permissions.query_subunits(
     query=SubunitPermissionsQueryRequest(),
 )
 ```
@@ -195,10 +195,10 @@ resp = session.permissions.query_subunits(
 
 ## Example
 
-All permissions operations require an active session. The example below sets up test data, authenticates, opens a session, and grants permissions to a person and an entity:
+All permissions operations require an authenticated client. The example below sets up test data, authenticates, and grants permissions to a person and an entity:
 
 ```python
-from ksef2 import Client, Environment, FormSchema
+from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models import (
@@ -240,36 +240,35 @@ with client.testdata.temporal() as temp:
     )
 
     cert, private_key = generate_test_certificate(ORG_NIP)
-    tokens = client.auth.authenticate_xades(
+
+    # Authenticate and get an AuthenticatedClient
+    auth = client.auth.authenticate_xades(
         nip=ORG_NIP, cert=cert, private_key=private_key,
     )
 
-    with client.sessions.open_online(
-        access_token=tokens.access_token.token,
-        form_code=FormSchema.FA3,
-    ) as session:
-        result = session.permissions.grant_person(
-            subject_identifier=IdentifierType.PESEL,
-            subject_value=PERSON_PESEL,
-            permissions=[PermissionType.INVOICE_READ, PermissionType.INVOICE_WRITE],
-            description="Test person permissions",
-            first_name="John",
-            last_name="Doe",
-        )
-        print(f"Person permissions granted: {result.reference_number}")
+    # Grant permissions directly from authenticated client (no session needed!)
+    result = auth.permissions.grant_person(
+        subject_identifier=IdentifierType.PESEL,
+        subject_value=PERSON_PESEL,
+        permissions=[PermissionType.INVOICE_READ, PermissionType.INVOICE_WRITE],
+        description="Test person permissions",
+        first_name="John",
+        last_name="Doe",
+    )
+    print(f"Person permissions granted: {result.reference_number}")
 
-        result = session.permissions.grant_entity(
-            subject_value=ORG_NIP,
-            permissions=[
-                EntityPermission(
-                    type=EntityPermissionType.INVOICE_READ,
-                    can_delegate=True,
-                ),
-            ],
-            description="Test entity permissions",
-            entity_name="Test Entity",
-        )
-        print(f"Entity permissions granted: {result.reference_number}")
+    result = auth.permissions.grant_entity(
+        subject_value=ORG_NIP,
+        permissions=[
+            EntityPermission(
+                type=EntityPermissionType.INVOICE_READ,
+                can_delegate=True,
+            ),
+        ],
+        description="Test entity permissions",
+        entity_name="Test Entity",
+    )
+    print(f"Entity permissions granted: {result.reference_number}")
 ```
 
 > Full examples: [`scripts/examples/permissions/grant_permissions.py`](../../scripts/examples/permissions/grant_permissions.py), [`scripts/examples/permissions/query_permissions.py`](../../scripts/examples/permissions/query_permissions.py)

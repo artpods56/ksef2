@@ -26,16 +26,16 @@ client = Client(environment=Environment.TEST)
 cert, private_key = generate_test_certificate(NIP)
 
 # Authenticate with XAdES signature
-tokens = client.auth.authenticate_xades(
+auth = client.auth.authenticate_xades(
     nip=NIP,
     cert=cert,
     private_key=private_key,
 )
 
-print(f"Access token:  {tokens.access_token.token[:40]}…")
-print(f"  Valid until: {tokens.access_token.valid_until}")
-print(f"Refresh token: {tokens.refresh_token.token[:40]}…")
-print(f"  Valid until: {tokens.refresh_token.valid_until}")
+print(f"Access token:  {auth.access_token[:40]}…")
+print(f"  Valid until: {auth.auth_tokens.access_token.valid_until}")
+print(f"Refresh token: {auth.refresh_token[:40]}…")
+print(f"  Valid until: {auth.auth_tokens.refresh_token.valid_until}")
 ```
 
 > Full example: [`scripts/examples/auth/auth_xades.py`](../../scripts/examples/auth/auth_xades.py)
@@ -62,13 +62,13 @@ KSEF_TOKEN = "<your-token-here>"
 
 client = Client(environment=Environment.TEST)
 
-tokens = client.auth.authenticate_token(
+auth = client.auth.authenticate_token(
     ksef_token=KSEF_TOKEN,
     nip=NIP,
 )
 
-print(f"Access token:  {tokens.access_token.token[:40]}…")
-print(f"Refresh token: {tokens.refresh_token.token[:40]}…")
+print(f"Access token:  {auth.access_token[:40]}…")
+print(f"Refresh token: {auth.refresh_token[:40]}…")
 ```
 
 > Full example: [`scripts/examples/auth/auth_token.py`](../../scripts/examples/auth/auth_token.py)
@@ -86,13 +86,11 @@ Refresh an expired access token without re-authenticating.
 
 ```python
 # After initial authentication...
-refreshed = client.auth.refresh(refresh_token=tokens.refresh_token.token)
-print(f"New access token valid until: {refreshed.access_token.valid_until}")
+refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
+print(f"New access token valid until: {refreshed.auth_tokens.access_token.valid_until}")
 
-# The new access token can now be used for API calls
-sessions = client.auth.list_active_sessions(
-    access_token=refreshed.access_token.token,
-)
+# The AuthenticatedClient can now be used for API calls
+sessions = refreshed.sessions.list()
 ```
 
 > Full example: [`scripts/examples/auth/auth_refresh.py`](../../scripts/examples/auth/auth_refresh.py)
@@ -127,23 +125,19 @@ Note: Terminating a session invalidates its refresh token. Active access tokens 
 
 ```python
 # List active sessions
-sessions = client.auth.list_active_sessions(access_token=access_token)
+sessions = auth.sessions.list()
 
 # Paginated listing
-# sessions = client.auth.list_active_sessions(
-#     access_token=access_token,
+# sessions = auth.sessions.list(
 #     page_size=10,
 #     continuation_token=None,  # from previous page
 # )
 
 # Terminate the current session
-client.auth.terminate_current_session(access_token=access_token)
+auth.sessions.terminate_current()
 
 # Terminate a specific session by reference number
-# client.auth.terminate_session(
-#     access_token=access_token,
-#     reference_number="some-reference-number",
-# )
+# auth.sessions.terminate(reference_number="some-reference-number")
 ```
 
 > Full example: [`scripts/examples/session/session_management.py`](../../scripts/examples/session/session_management.py)

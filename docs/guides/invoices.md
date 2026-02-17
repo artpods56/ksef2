@@ -112,12 +112,12 @@ with client.testdata.temporal() as temp:
     )
 
     cert, private_key = generate_test_certificate(PERSON_NIP)
-    tokens = client.auth.authenticate_xades(
+    auth = client.auth.authenticate_xades(
         nip=PERSON_NIP, cert=cert, private_key=private_key,
     )
 
     with client.sessions.open_online(
-        access_token=tokens.access_token.token,
+        access_token=auth.access_token,
         form_code=FormSchema.FA3,
     ) as session:
         with open("invoice.xml", "rb") as f:

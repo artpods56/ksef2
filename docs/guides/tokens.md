@@ -26,8 +26,7 @@ Create a new KSeF token for future authentication.
 ```python
 from ksef2.domain.models.tokens import TokenPermission
 
-result = client.tokens.generate(
-    access_token=access_token,
+result = auth.tokens.generate(
     permissions=[
         TokenPermission.INVOICE_READ,
         TokenPermission.INVOICE_WRITE,
@@ -50,27 +49,24 @@ List all generated tokens with optional filtering.
 from ksef2.domain.models.tokens import TokenStatus
 
 # List all tokens
-response = client.tokens.list(access_token=access_token)
+response = auth.tokens.list()
 for token in response.tokens:
     print(f"{token.reference_number}: {token.status.value} - {token.description}")
 
 # Filter by status
-response = client.tokens.list(
-    access_token=access_token,
+response = auth.tokens.list(
     status=[TokenStatus.ACTIVE],
 )
 
 # Filter by description (min 3 chars, case-insensitive)
-response = client.tokens.list(
-    access_token=access_token,
+response = auth.tokens.list(
     description="API token",
 )
 
 # Filter by author
 from ksef2.domain.models.tokens import TokenAuthorIdentifier, TokenAuthorIdentifierType
 
-response = client.tokens.list(
-    access_token=access_token,
+response = auth.tokens.list(
     author_filter=TokenAuthorIdentifier(
         type=TokenAuthorIdentifierType.NIP,
         value="1234567890",
@@ -78,13 +74,11 @@ response = client.tokens.list(
 )
 
 # Pagination
-response = client.tokens.list(
-    access_token=access_token,
+response = auth.tokens.list(
     page_size=20,
 )
 if response.continuation_token:
-    next_page = client.tokens.list(
-        access_token=access_token,
+    next_page = auth.tokens.list(
         continuation_token=response.continuation_token,
     )
 ```
@@ -98,8 +92,7 @@ Check the status of a token generation request.
 **SDK Endpoint:** `GET /tokens/{referenceNumber}`
 
 ```python
-status = client.tokens.status(
-    access_token=access_token,
+status = auth.tokens.status(
     reference_number=result.reference_number,
 )
 print(f"Status: {status.status.value}")
@@ -114,8 +107,7 @@ Revoke an existing KSeF token.
 **SDK Endpoint:** `DELETE /tokens/{referenceNumber}`
 
 ```python
-client.tokens.revoke(
-    access_token=access_token,
+auth.tokens.revoke(
     reference_number=result.reference_number,
 )
 ```
@@ -130,8 +122,7 @@ Full token lifecycle — generate, list, check status, and revoke:
 from ksef2.domain.models.tokens import TokenPermission, TokenStatus
 
 # Generate a new KSeF token (requires CREDENTIALS_MANAGE permission)
-result = client.tokens.generate(
-    access_token=access_token,
+result = auth.tokens.generate(
     permissions=[
         TokenPermission.INVOICE_READ,
         TokenPermission.INVOICE_WRITE,
@@ -142,22 +133,19 @@ print(f"Token:     {result.token[:40]}...")
 print(f"Reference: {result.reference_number}")
 
 # List all active tokens
-response = client.tokens.list(
-    access_token=access_token,
+response = auth.tokens.list(
     status=[TokenStatus.ACTIVE],
 )
 print(f"Active tokens: {len(response.tokens)}")
 
 # Check token status
-status = client.tokens.status(
-    access_token=access_token,
+status = auth.tokens.status(
     reference_number=result.reference_number,
 )
 print(f"Status: {status.status.value}")
 
 # Revoke the token
-client.tokens.revoke(
-    access_token=access_token,
+auth.tokens.revoke(
     reference_number=result.reference_number,
 )
 ```
