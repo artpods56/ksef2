@@ -28,6 +28,15 @@ uv add ksef2
 
 Requires Python 3.12+.
 
+## Features
+
+- **Type-Safe** — Full type annotations with Pydantic models, excellent IDE support and autocomplete
+- **Pythonic API** — Context managers for sessions, clean interfaces, intuitive method chaining
+- **Both Auth Methods** — XAdES (certificate-based) and token authentication supported
+- **Automatic Encryption** — Invoice encryption/decryption handled transparently (AES-CBC, RSA-OAEP)
+- **Session Resume** — Serialize session state and resume later, perfect for worker processes and long-running exports
+- **Test Environment Support** — Self-signed certificates, test data setup with automatic cleanup via `temporal()` context manager
+
 ## Quick Start
 
 ```python
