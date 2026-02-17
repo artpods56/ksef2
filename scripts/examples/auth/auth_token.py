@@ -15,7 +15,6 @@ KSEF_TOKEN = "<your-token-here>"
 
 
 def main() -> None:
-
     # you should be able to use any environment here
     client = Client(environment=Environment.TEST)
 

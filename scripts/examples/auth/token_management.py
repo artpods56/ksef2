@@ -16,7 +16,6 @@ NIP = generate_nip()
 
 
 def main() -> None:
-
     client = Client(environment=Environment.TEST)
 
     # Set up: create subject with CREDENTIALS_MANAGE permission

@@ -12,6 +12,7 @@ from ksef2.services import (
     auth,
     certificates,
     limits,
+    peppol,
     session,
     testdata,
     tokens,
@@ -66,3 +67,7 @@ class Client:
     @cached_property
     def certificates(self) -> certificates.CertificateService:
         return certificates.CertificateService(self._transport)
+
+    @cached_property
+    def peppol(self) -> peppol.PeppolService:
+        return peppol.PeppolService(self._transport)

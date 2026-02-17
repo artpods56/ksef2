@@ -2,7 +2,7 @@ from typing import Any, Protocol
 
 import httpx
 
-from ksef2.domain.models.session import SessionState
+from ksef2.domain.models.session import OnlineSessionState
 
 
 class Endpoint(Protocol):
@@ -14,7 +14,7 @@ class Endpoint(Protocol):
 
     def send(
         self,
-        state: SessionState,
+        state: OnlineSessionState,
         body: dict[str, Any],
     ) -> httpx.Response: ...
 

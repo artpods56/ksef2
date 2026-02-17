@@ -305,7 +305,6 @@ class PermissionsMapper:
     def map_person_query_request(
         request: PersonPermissionsQueryRequest,
     ) -> spec.PersonPermissionsQueryRequest:
-
         identifier = None
         if author_identifier := request.author_identifier:
             identifier = spec.PersonPermissionsAuthorIdentifier(

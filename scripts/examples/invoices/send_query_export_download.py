@@ -54,7 +54,6 @@ DOWNLOAD_DIR = repo_root() / "downloads"
 
 
 def main() -> None:
-
     client = Client(environment=Environment.TEST)
 
     with client.testdata.temporal() as temp:

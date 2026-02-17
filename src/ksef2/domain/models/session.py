@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import base64
 from datetime import datetime
 from enum import Enum, StrEnum
+from typing import Self
 
-from pydantic import AwareDatetime, field_validator, Field
+from pydantic import AwareDatetime, Field, field_validator
 
 from ksef2.domain.models.base import KSeFBaseModel, KSeFBaseParams
 
@@ -46,17 +49,32 @@ class QuerySessionsList(KSeFBaseParams):
     statuses: list[SessionStatus] = Field(default_factory=list)
 
 
-class SessionState(KSeFBaseModel):
+class BaseSessionState(KSeFBaseModel):
+    """Base class for session state with common fields.
+
+    This class contains fields shared between online and batch sessions.
+    It provides serialization/deserialization support and helper methods
+    for accessing the encryption keys.
+    """
+
     reference_number: str
-    aes_key: str  # base64 encoded
-    iv: str  # base64 encoded
+    """Reference number of the session."""
+
+    aes_key: str
+    """AES key for encrypting data, Base64 encoded."""
+
+    iv: str
+    """Initialization vector for AES encryption, Base64 encoded."""
+
     access_token: str
-    valid_until: AwareDatetime
+    """Bearer token for API authentication."""
+
     form_code: FormSchema
+    """Invoice schema used for this session."""
 
     @field_validator("form_code", mode="before")
     @classmethod
-    def _coerce_form_code(cls, value):
+    def _coerce_form_code(cls, value: list[str] | tuple[str, ...]) -> object:
         """
         Pydantic serializes Enum values that are tuples as JSON arrays (lists).
         On restore, convert list -> tuple so Enum validation succeeds.
@@ -71,6 +89,25 @@ class SessionState(KSeFBaseModel):
                 return value
         return value
 
+    def get_aes_key_bytes(self) -> bytes:
+        """Get the AES key as raw bytes."""
+        return base64.b64decode(self.aes_key)
+
+    def get_iv_bytes(self) -> bytes:
+        """Get the initialization vector as raw bytes."""
+        return base64.b64decode(self.iv)
+
+
+class OnlineSessionState(BaseSessionState):
+    """Serializable state of an online session.
+
+    This class holds all information needed to resume an online session.
+    Can be serialized to JSON for persistence.
+    """
+
+    valid_until: AwareDatetime
+    """Expiration time of the session."""
+
     @classmethod
     def from_encoded(
         cls,
@@ -80,7 +117,20 @@ class SessionState(KSeFBaseModel):
         access_token: str,
         valid_until: AwareDatetime,
         form_code: FormSchema,
-    ):
+    ) -> Self:
+        """Create state from raw bytes (aes_key, iv).
+
+        Args:
+            reference_number: Session reference number.
+            aes_key: Raw AES key bytes.
+            iv: Raw initialization vector bytes.
+            access_token: Bearer token for authentication.
+            valid_until: Session expiration time.
+            form_code: Invoice schema for this session.
+
+        Returns:
+            SessionState with Base64-encoded key and IV.
+        """
         return cls(
             reference_number=reference_number,
             aes_key=base64.b64encode(aes_key).decode(),

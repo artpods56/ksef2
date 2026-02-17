@@ -87,16 +87,16 @@ Resume an existing session from saved state. The session state is a Pydantic mod
 **SDK Endpoint:** Uses stored session state
 
 ```python
-from ksef2.domain.models.session import SessionState
+from ksef2.domain.models.session import OnlineSessionState
 
 # Save session state
-state: SessionState = session.get_state()
+state: OnlineSessionState = session.get_state()
 state_json = state.model_dump_json()
 
 # --- Pass state_json to another process (e.g. via database or message queue) ---
 
 # Restore and resume
-restored_state = SessionState.model_validate_json(state_json)
+restored_state = OnlineSessionState.model_validate_json(state_json)
 resumed_session = client.sessions.resume(state=restored_state)
 
 # Use the resumed session as normal

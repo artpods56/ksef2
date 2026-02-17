@@ -178,7 +178,6 @@ class ListSessionsEndpoint:
         continuation_token: str | None = None,
         **query_params: Unpack[ListSessionEndpointQueryParams],
     ) -> spec.SessionsQueryResponse:
-
         valid_params = self._adapter.validate_python(query_params)
 
         path = f"{self.url}?{urlencode(valid_params, doseq=True)}"
@@ -247,7 +246,6 @@ class ListSessionInvoicesEndpoint:
         page_size: int,
         continuation_token: str | None = None,
     ) -> spec.SessionInvoicesResponse:
-
         valid_params = self._adapter.validate_python({"pageSize": page_size})
 
         query_string = urlencode(valid_params)

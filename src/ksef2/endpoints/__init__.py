@@ -6,6 +6,7 @@ from ksef2.endpoints import (
     encryption,
     invoices,
     limits,
+    peppol,
     permissions,
     session,
     testdata,
@@ -59,6 +60,9 @@ __invoices_status_endpoints__ = [
 __session_endpoints__ = [
     EndpointRef("POST", session.OpenSessionEndpoint.url),
     EndpointRef("POST", session.TerminateSessionEndpoint.url),
+    EndpointRef("GET", session.GetSessionUpoEndpoint.url),
+    EndpointRef("POST", session.OpenBatchSessionEndpoint.url),
+    EndpointRef("POST", session.CloseBatchSessionEndpoint.url),
 ]
 
 __testdata_endpoints__ = [
@@ -133,6 +137,10 @@ __certificates_endpoints__ = [
     EndpointRef("POST", certificates.QueryCertificatesEndpoint.url),
 ]
 
+__peppol_endpoints__ = [
+    EndpointRef("GET", peppol.QueryPeppolProvidersEndpoint.url),
+]
+
 __all_endpoints__: list[EndpointRef] = [
     *__auth_endpoints__,
     *__certificates_endpoints__,
@@ -140,6 +148,7 @@ __all_endpoints__: list[EndpointRef] = [
     *__invoices_endpoints__,
     *__invoices_query_endpoints__,
     *__invoices_status_endpoints__,
+    *__peppol_endpoints__,
     *__session_endpoints__,
     *__testdata_endpoints__,
     *__tokens_endpoints__,

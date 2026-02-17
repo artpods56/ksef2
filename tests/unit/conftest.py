@@ -11,7 +11,7 @@ import httpx
 import pytest
 
 from ksef2.domain.models.encryption import CertUsage, PublicKeyCertificate
-from ksef2.domain.models.session import FormSchema, SessionState
+from ksef2.domain.models.session import FormSchema, OnlineSessionState
 
 
 # ---------------------------------------------------------------------------
@@ -31,8 +31,8 @@ def make_session_state(
     access_token: str = _TOKEN,
     valid_until: datetime | None = None,
     form_code: FormSchema = FormSchema.FA3,
-) -> SessionState:
-    return SessionState.from_encoded(
+) -> OnlineSessionState:
+    return OnlineSessionState.from_encoded(
         reference_number=reference_number,
         aes_key=aes_key or os.urandom(32),
         iv=iv or os.urandom(16),
@@ -147,5 +147,5 @@ def fake_transport() -> FakeTransport:
 
 
 @pytest.fixture
-def session_state() -> SessionState:
+def session_state() -> OnlineSessionState:
     return make_session_state()

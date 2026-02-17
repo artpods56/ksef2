@@ -20,7 +20,7 @@ from ksef2.clients.session import OnlineSessionClient
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import SessionState
+from ksef2.domain.models.session import OnlineSessionState
 from ksef2.domain.models.testdata import (
     Identifier,
     IdentifierType,
@@ -134,7 +134,7 @@ def test_get_state_returns_session_state(workflow_context):
 
     state = session.get_state()
 
-    assert isinstance(state, SessionState)
+    assert isinstance(state, OnlineSessionState)
     assert state.reference_number
     assert state.access_token
     assert state.aes_key
@@ -217,7 +217,7 @@ def test_resume_session_from_state(workflow_context):
 
     # Round-trip through JSON serialization
     state_json = state.model_dump_json()
-    restored_state = SessionState.model_validate_json(state_json)
+    restored_state = OnlineSessionState.model_validate_json(state_json)
 
     resumed = client.sessions.resume(state=restored_state)
 
@@ -227,3 +227,41 @@ def test_resume_session_from_state(workflow_context):
     status = resumed.get_status()
     assert isinstance(status, spec.SessionStatusResponse)
     assert status.status is not None
+
+
+# ---------------------------------------------------------------------------
+# GetSessionUpoEndpoint - collective UPO for session
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.integration
+@pytest.mark.skip(
+    reason="Session UPO requires completed session with UPO reference number"
+)
+def test_get_session_upo_by_reference(workflow_context):
+    """Test getting collective UPO for a session by UPO reference number.
+
+    Note: This test is skipped because:
+    1. The session UPO is only available after the session is closed
+    2. We need a valid upoReferenceNumber from the session status
+    3. The workflow_context keeps the session open for other tests
+
+    The endpoint (GET /sessions/{referenceNumber}/upo/{upoReferenceNumber})
+    returns the collective UPO XML for the entire session, which is different
+    from the per-invoice UPO endpoints.
+    """
+    _ = workflow_context  # noqa: F841 - context used in real implementation
+
+    # In a real scenario, you would:
+    # 1. Close the session
+    # 2. Get the session status which includes upoReferenceNumber
+    # 3. Call GetSessionUpoEndpoint with both reference numbers
+
+    # This is the endpoint structure (not actually callable in this test):
+    # endpoint = GetSessionUpoEndpoint(client._transport)
+    # upo_xml = endpoint.send(
+    #     access_token=workflow_context["access_token"],
+    #     reference_number=session.reference_number,
+    #     upo_reference_number="<upo-ref-from-session-status>",
+    # )
+    pass

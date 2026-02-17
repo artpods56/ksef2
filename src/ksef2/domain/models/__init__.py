@@ -1,5 +1,16 @@
-from ksef2.domain.models.base import KSeFBaseModel
-from ksef2.domain.models.session import FormSchema
+from ksef2.domain.models.base import KSeFBaseModel, KSeFBaseParams
+from ksef2.domain.models.session import (
+    BaseSessionState,
+    FormSchema,
+    OnlineSessionState,
+)
+from ksef2.domain.models.batch import (
+    BatchFileInfo,
+    BatchFilePart,
+    BatchSessionState,
+    OpenBatchSessionResponse,
+    PartUploadRequest,
+)
 from ksef2.domain.models.invoices import (
     AmountType,
     BuyerIdentifierType,
@@ -117,12 +128,25 @@ from ksef2.domain.models.certificates import (
     RetrievedCertificate,
     StatusInfo,
 )
+from ksef2.domain.models.peppol import (
+    PeppolProvider,
+    QueryPeppolProvidersResponse,
+)
 
 __all__ = [
     # base
     "KSeFBaseModel",
-    # common
+    "KSeFBaseParams",
+    # session
+    "BaseSessionState",
     "FormSchema",
+    "OnlineSessionState",
+    # batch
+    "BatchFileInfo",
+    "BatchFilePart",
+    "BatchSessionState",
+    "OpenBatchSessionResponse",
+    "PartUploadRequest",
     # invoices
     "AmountType",
     "BuyerIdentifierType",
@@ -234,4 +258,7 @@ __all__ = [
     "RetrieveCertificatesResponse",
     "RetrievedCertificate",
     "StatusInfo",
+    # peppol
+    "PeppolProvider",
+    "QueryPeppolProvidersResponse",
 ]

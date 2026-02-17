@@ -30,7 +30,6 @@ INVOICE_TEMPLATE_PATH = (
 
 
 def main() -> None:
-
     client = Client(environment=Environment.TEST)
 
     with client.testdata.temporal() as temp:

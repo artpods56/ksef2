@@ -1,6 +1,11 @@
 from .models import *  # noqa: F401,F403
 
 from ..supp.session import OpenOnlineSessionRequest, EncryptionInfo
+from ..supp.batch import (
+    BatchFileInfo,
+    BatchFilePartInfo,
+    OpenBatchSessionRequest,
+)
 from ..supp.invoices import (
     InvoiceExportRequest,
     InvoiceExportStatusResponse,
@@ -25,6 +30,9 @@ from ..supp.permissions import (
 __all__ = [
     "OpenOnlineSessionRequest",
     "EncryptionInfo",
+    "BatchFileInfo",
+    "BatchFilePartInfo",
+    "OpenBatchSessionRequest",
     "InvoiceExportRequest",
     "InvoiceExportStatusResponse",
     "InvoiceMetadata",

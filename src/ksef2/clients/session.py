@@ -23,7 +23,7 @@ from ksef2.domain.models.invoices import (
     InvoiceExportStatusResponse,
     InvoicePackage,
 )
-from ksef2.domain.models.session import SessionState
+from ksef2.domain.models.session import OnlineSessionState
 from ksef2.endpoints.invoices import (
     DownloadInvoiceEndpoint,
     GetInvoiceUpoByKsefNumberEndpoint,
@@ -58,7 +58,7 @@ logger = get_logger(__name__)
 
 @final
 class OnlineSessionClient:
-    def __init__(self, transport: protocols.Middleware, state: SessionState):
+    def __init__(self, transport: protocols.Middleware, state: OnlineSessionState):
         self._transport = transport
         self._state = state
         self._invoice_endpoint = SendingInvoicesEndpoint(transport)
@@ -95,7 +95,6 @@ class OnlineSessionClient:
     def fetch_package(
         self, package: InvoicePackage, target_directory: Path | str = Path(".")
     ) -> list[Path]:
-
         target_path = Path(target_directory)
         target_path.mkdir(parents=True, exist_ok=True)
 
@@ -128,7 +127,6 @@ class OnlineSessionClient:
         *,
         filters: InvoiceQueryFilters,
     ) -> ExportInvoicesResponse:
-
         certificate = select_certificate(
             # [TODO]: client should use shared cert store to fetch certs
             certificates=self._cert_client.get_certificates(),
@@ -245,7 +243,7 @@ class OnlineSessionClient:
             reference_number=self._state.reference_number,
         )
 
-    def get_state(self) -> SessionState:
+    def get_state(self) -> OnlineSessionState:
         return self._state
 
     @property

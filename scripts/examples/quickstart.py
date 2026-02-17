@@ -15,7 +15,6 @@ INVOICE_TEMPLATE_PATH = (
 
 
 def main() -> None:
-
     client = Client(Environment.TEST)
 
     cert, private_key = generate_test_certificate(VALID_NIP)

@@ -4,7 +4,7 @@ from __future__ import annotations
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import SessionState
+from ksef2.domain.models.session import OnlineSessionState
 from ksef2.domain.models.testdata import (
     Identifier,
     IdentifierType,
@@ -19,7 +19,6 @@ PERSON_PESEL = generate_pesel()
 
 
 def main() -> None:
-
     client = Client(environment=Environment.TEST)
 
     with client.testdata.temporal() as temp:
@@ -62,7 +61,7 @@ def main() -> None:
         )
 
         # Save the session state, its a pydantic model so we can easly serialize it
-        state: SessionState = (
+        state: OnlineSessionState = (
             session.get_state()
         )  # [TODO] state should probably be secured somehow
         state_json = state.model_dump_json()
@@ -76,7 +75,7 @@ def main() -> None:
 
         # Resume the session from saved state
         print("Resuming session from saved state ...")
-        restored_state = SessionState.model_validate_json(state_json)
+        restored_state = OnlineSessionState.model_validate_json(state_json)
         resumed_session = client.sessions.resume(state=restored_state)
 
         # The resumed session can send invoices, download, etc. as long as it is valid

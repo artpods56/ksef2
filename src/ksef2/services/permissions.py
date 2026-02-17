@@ -28,7 +28,7 @@ from ksef2.domain.models.permissions import (
     SubunitPermissionsQueryRequest,
     SubunitPermissionsQueryResponse,
 )
-from ksef2.domain.models.session import SessionState
+from ksef2.domain.models.session import OnlineSessionState
 from ksef2.domain.models.testdata import IdentifierType, PermissionType
 from ksef2.endpoints.permissions import (
     GetAttachmentPermissionStatusEndpoint,
@@ -55,7 +55,9 @@ from ksef2.infra.mappers.permissions import PermissionsMapper
 
 @final
 class PermissionsService:
-    def __init__(self, transport: protocols.Middleware, state: SessionState) -> None:
+    def __init__(
+        self, transport: protocols.Middleware, state: OnlineSessionState
+    ) -> None:
         self._state = state
         self._person_ep = GrantPersonPermissionsEndpoint(transport)
         self._entity_ep = GrantEntityPermissionsEndpoint(transport)
