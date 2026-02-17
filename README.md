@@ -37,10 +37,10 @@ client = Client(Environment.TEST)
 
 # Authenticate (XAdES — TEST environment)
 cert, key = generate_test_certificate(NIP)
-tokens = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=key)
+auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=key)
 
 with client.sessions.open_online(
-    access_token=tokens.access_token.token,
+    access_token=auth.access_token,
     form_code=FormSchema.FA3,
 ) as session:
 
@@ -76,16 +76,47 @@ with client.sessions.open_online(
 For production, or when you have a pre-generated KSeF token:
 
 ```python
-from ksef2 import Client, Environment
+from ksef2 import Client
 
-# uses production environment by default
-client = Client()
+client = Client()  # uses production environment by default
 
-tokens = client.auth.authenticate_token(
-    ksef_token="your-ksef-token",
-    nip=VALID_NIP,
+auth = client.auth.authenticate_token(ksef_token="your-ksef-token", nip=NIP)
+print(auth.access_token)
+```
+
+## Authenticated Operations
+
+After authentication, you get an `AuthenticatedClient` with access to various services — no need to open an invoice session for these operations:
+
+```python
+auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=key)
+
+# Manage KSeF authorization tokens
+token = auth.tokens.generate(
+    permissions=[TokenPermission.INVOICE_READ, TokenPermission.INVOICE_WRITE],
+    description="API integration token",
 )
-print(tokens.access_token.token)
+print(f"Generated token: {token.token}")
+
+# Query and modify API limits (TEST environment)
+limits = auth.limits.get_context_limits()
+print(f"Max invoices per session: {limits.online_session.max_invoices}")
+
+# Manage permissions
+auth.permissions.grant_person(
+    subject_identifier=IdentifierType.PESEL,
+    subject_value="12345678901",
+    permissions=[PermissionType.INVOICE_READ],
+    description="Read access for accountant",
+    first_name="Jan", last_name="Kowalski",
+)
+
+# List and terminate authentication sessions
+sessions = auth.sessions.list()
+auth.sessions.terminate_current()
+
+# Manage KSeF certificates
+certs = auth.certificates.query(status=CertificateStatus.ACTIVE)
 ```
 
 ## Development
@@ -106,14 +137,16 @@ just fetch-spec     # Fetch latest OpenAPI spec from KSeF
 
 ## API Coverage
 
-The SDK currently covers **33 of 77** KSeF API endpoints (43%). Calculated via `scripts/api_coverage.py`. See individual feature docs for endpoint details:
+The SDK covers **77 of 77** KSeF API endpoints (100%). See feature docs for details:
 
-- [Authentication](docs/guides/authentication.md)
-- [Invoices](docs/guides/invoices.md)
-- [Sessions](docs/guides/sessions.md)
-- [Tokens](docs/guides/tokens.md)
-- [Test Data](docs/guides/testdata.md)
-- [Limits](docs/guides/limits.md)
+- [Authentication](docs/guides/authentication.md) — XAdES, token auth, session management
+- [Invoices](docs/guides/invoices.md) — send, download, query, export
+- [Sessions](docs/guides/sessions.md) — online/batch sessions, resume support
+- [Tokens](docs/guides/tokens.md) — generate and manage KSeF authorization tokens
+- [Permissions](docs/guides/permissions.md) — grant/query permissions for persons and entities
+- [Certificates](docs/guides/certificates.md) — enroll, query, revoke KSeF certificates
+- [Limits](docs/guides/limits.md) — query and modify API rate limits
+- [Test Data](docs/guides/testdata.md) — create test subjects, manage test environment
 
 ## License
 
