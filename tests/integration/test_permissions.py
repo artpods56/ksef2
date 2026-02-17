@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Generator, TypedDict
 import pytest
 
 from ksef2 import Client, FormSchema
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.clients.session import OnlineSessionClient
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
@@ -39,8 +40,8 @@ PermissionContext = TypedDict(
     "PermissionContext",
     {
         "client": Client,
+        "auth": AuthenticatedClient,
         "session": OnlineSessionClient,
-        "access_token": str,
         "seller_nip": str,
     },
 )
@@ -54,26 +55,25 @@ def permissions_context(
     """Create an authenticated session using existing credentials.
 
     Uses the subject from ksef_credentials to authenticate.
-    Yields a dict with client, access_token, session, seller_nip.
+    Yields a dict with client, auth, session, seller_nip.
     """
     client = real_client
     seller_nip = ksef_credentials.subject_nip
 
     cert, private_key = generate_test_certificate(seller_nip)
-    tokens = client.auth.authenticate_xades(
+    auth = client.auth.authenticate_xades(
         nip=seller_nip,
         cert=cert,
         private_key=private_key,
     )
-    access_token = tokens.access_token.token
 
     with client.sessions.open_online(
-        access_token=access_token,
+        access_token=auth.access_token,
         form_code=FormSchema.FA3,
     ) as session:
         context: PermissionContext = {
             "client": client,
-            "access_token": access_token,
+            "auth": auth,
             "session": session,
             "seller_nip": seller_nip,
         }
@@ -89,9 +89,9 @@ def permissions_context(
 @pytest.mark.integration
 def test_get_attachment_permission_status(permissions_context: PermissionContext):
     """Get attachment permission status."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
-    response = session.permissions.get_attachment_permission_status()
+    response = auth.permissions.get_attachment_permission_status()
 
     assert response is not None
     assert hasattr(response, "is_attachment_allowed")
@@ -101,9 +101,9 @@ def test_get_attachment_permission_status(permissions_context: PermissionContext
 @pytest.mark.integration
 def test_get_entity_roles(permissions_context: PermissionContext):
     """Get entity roles."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
-    response = session.permissions.get_entity_roles()
+    response = auth.permissions.get_entity_roles()
 
     assert response is not None
     assert hasattr(response, "roles")
@@ -126,13 +126,13 @@ def test_query_authorizations(permissions_context: PermissionContext):
         QueryType,
     )
 
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
     query = AuthorizationPermissionsQueryRequest(
         query_type=QueryType.GRANTED,
     )
 
-    response = session.permissions.query_authorizations(query=query)
+    response = auth.permissions.query_authorizations(query=query)
 
     assert isinstance(response, AuthorizationPermissionsQueryResponse)
     assert isinstance(response.authorization_grants, list)
@@ -147,11 +147,11 @@ def test_query_eu_entities(permissions_context: PermissionContext):
         EuEntityPermissionsQueryResponse,
     )
 
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
     query = EuEntityPermissionsQueryRequest()
 
-    response = session.permissions.query_eu_entities(query=query)
+    response = auth.permissions.query_eu_entities(query=query)
 
     assert isinstance(response, EuEntityPermissionsQueryResponse)
     assert isinstance(response.permissions, list)
@@ -166,11 +166,11 @@ def test_query_personal(permissions_context: PermissionContext):
         PersonalPermissionsQueryResponse,
     )
 
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
     query = PersonalPermissionsQueryRequest()
 
-    response = session.permissions.query_personal(query=query)
+    response = auth.permissions.query_personal(query=query)
 
     assert isinstance(response, PersonalPermissionsQueryResponse)
     assert isinstance(response.permissions, list)
@@ -187,13 +187,13 @@ def test_query_persons(permissions_context: PermissionContext):
         PermissionsQueryType,
     )
 
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
     query = PersonPermissionsQueryRequest(
         query_type=PermissionsQueryType.PERMISSIONS_IN_CURRENT_CONTEXT,
     )
 
-    response = session.permissions.query_persons(query=query)
+    response = auth.permissions.query_persons(query=query)
 
     assert isinstance(response, PersonPermissionsQueryResponse)
     assert isinstance(response.permissions, list)
@@ -219,11 +219,11 @@ def test_query_subordinate_entities(permissions_context: PermissionContext):
         SubordinateEntityRolesQueryResponse,
     )
 
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
     query = SubordinateEntityRolesQueryRequest()
 
-    response = session.permissions.query_subordinate_entities(query=query)
+    response = auth.permissions.query_subordinate_entities(query=query)
 
     assert isinstance(response, SubordinateEntityRolesQueryResponse)
     assert isinstance(response.roles, list)
@@ -238,11 +238,11 @@ def test_query_subunits(permissions_context: PermissionContext):
         SubunitPermissionsQueryResponse,
     )
 
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
 
     query = SubunitPermissionsQueryRequest()
 
-    response = session.permissions.query_subunits(query=query)
+    response = auth.permissions.query_subunits(query=query)
 
     assert isinstance(response, SubunitPermissionsQueryResponse)
     assert isinstance(response.permissions, list)
@@ -257,10 +257,10 @@ def test_query_subunits(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_grant_entity_permission(permissions_context: PermissionContext):
     """Grant permission to an entity."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
     buyer_nip = generate_nip()
 
-    response = session.permissions.grant_entity(
+    response = auth.permissions.grant_entity(
         subject_value=buyer_nip,
         permissions=[
             EntityPermission(
@@ -277,7 +277,7 @@ def test_grant_entity_permission(permissions_context: PermissionContext):
 
     time.sleep(3)
 
-    operation_status = session.permissions.get_operation_status(
+    operation_status = auth.permissions.get_operation_status(
         reference_number=response.reference_number,
     )
 
@@ -289,10 +289,10 @@ def test_grant_entity_permission(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_grant_authorization_permission(permissions_context: PermissionContext):
     """Grant authorization permission."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
     buyer_nip = generate_nip()
 
-    response = session.permissions.grant_authorization(
+    response = auth.permissions.grant_authorization(
         subject_type=AuthorizationSubjectIdentifierType.NIP,
         subject_value=buyer_nip,
         permission=AuthorizationPermissionType.SELF_INVOICING,
@@ -308,10 +308,10 @@ def test_grant_authorization_permission(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_grant_person_permission(permissions_context: PermissionContext):
     """Grant permission to a person."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
     person_nip = generate_nip()
 
-    response = session.permissions.grant_person(
+    response = auth.permissions.grant_person(
         subject_identifier=IdentifierType.NIP,
         subject_value=person_nip,
         permissions=[PermissionType.INVOICE_READ],
@@ -328,10 +328,10 @@ def test_grant_person_permission(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_grant_subunit_permission(permissions_context: PermissionContext):
     """Grant permission to a subunit."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
     seller_nip = permissions_context["seller_nip"]
 
-    response = session.permissions.grant_subunit(
+    response = auth.permissions.grant_subunit(
         subject_identifier=IdentifierType.NIP,
         subject_value=seller_nip,
         context_identifier=SubunitIdentifierType.NIP,
@@ -354,11 +354,11 @@ def test_grant_subunit_permission(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_revoke_authorization_permission(permissions_context: PermissionContext):
     """Grant and then revoke an authorization permission."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
     buyer_nip = generate_nip()
 
     # First, grant an authorization permission
-    grant_response = session.permissions.grant_authorization(
+    grant_response = auth.permissions.grant_authorization(
         subject_type=AuthorizationSubjectIdentifierType.NIP,
         subject_value=buyer_nip,
         permission=AuthorizationPermissionType.SELF_INVOICING,
@@ -376,9 +376,9 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
         AuthorizationPermissionsQueryRequest,
         QueryType,
     )
-    from ksef2.domain.models.invoices import PaginationParams
+    from ksef2.domain.models.pagination import PaginationParams
 
-    query_response = session.permissions.query_authorizations(
+    query_response = auth.permissions.query_authorizations(
         query=AuthorizationPermissionsQueryRequest(query_type=QueryType.GRANTED),
         params=PaginationParams(page_size=100),
     )
@@ -392,7 +392,7 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
 
     # If we found the permission, revoke it
     if permission_id:
-        revoke_response = session.permissions.revoke_authorization(
+        revoke_response = auth.permissions.revoke_authorization(
             permission_id=permission_id,
         )
 
@@ -410,11 +410,11 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
 @pytest.mark.integration
 def test_revoke_common_permission(permissions_context: PermissionContext):
     """Grant and then revoke a common permission."""
-    session = permissions_context["session"]
+    auth = permissions_context["auth"]
     buyer_nip = generate_nip()
 
     # First, grant an entity permission
-    grant_response = session.permissions.grant_entity(
+    grant_response = auth.permissions.grant_entity(
         subject_value=buyer_nip,
         permissions=[
             EntityPermission(
@@ -429,15 +429,15 @@ def test_revoke_common_permission(permissions_context: PermissionContext):
 
     time.sleep(5)
 
-    _ = session.permissions.get_operation_status(
+    _ = auth.permissions.get_operation_status(
         reference_number=grant_response.reference_number,
     )
 
     # Query personal permissions to find the one we just created
     from ksef2.domain.models.permissions import PersonalPermissionsQueryRequest
-    from ksef2.domain.models.invoices import PaginationParams
+    from ksef2.domain.models.pagination import PaginationParams
 
-    query_response = session.permissions.query_personal(
+    query_response = auth.permissions.query_personal(
         query=PersonalPermissionsQueryRequest(),
         params=PaginationParams(page_size=100),
     )
@@ -451,7 +451,7 @@ def test_revoke_common_permission(permissions_context: PermissionContext):
 
     # If we found the permission, revoke it
     if permission_id:
-        revoke_response = session.permissions.revoke_common(
+        revoke_response = auth.permissions.revoke_common(
             permission_id=permission_id,
         )
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from ksef2 import Client, Environment
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.testdata import (
@@ -33,7 +34,7 @@ from ksef2.domain.models.tokens import (
 def token_context():
     """Create subject with CredentialsManage, authenticate, generate a token.
 
-    Yields (client, access_token, generated_token).
+    Yields (client, auth, generated_token).
     """
     client = Client(environment=Environment.TEST)
 
@@ -72,26 +73,24 @@ def token_context():
         )
 
         cert, private_key = generate_test_certificate(org_nip)
-        tokens = client.auth.authenticate_xades(
+        auth = client.auth.authenticate_xades(
             nip=org_nip,
             cert=cert,
             private_key=private_key,
         )
-        access_token = tokens.access_token.token
 
-        generated = client.tokens.generate(
-            access_token=access_token,
+        generated = auth.tokens.generate(
             permissions=[TokenPermission.INVOICE_READ],
             description="Integration test token",
         )
 
-        yield client, access_token, generated
+        yield client, auth, generated
 
 
 @pytest.mark.integration
 def test_generate_token(token_context):
     """Generate returns a token with reference number."""
-    _client, _access_token, generated = token_context
+    _client, _auth, generated = token_context
 
     assert isinstance(generated, GenerateTokenResponse)
     assert generated.reference_number
@@ -101,10 +100,11 @@ def test_generate_token(token_context):
 @pytest.mark.integration
 def test_token_status(token_context):
     """Check status of a generated token."""
-    client, access_token, generated = token_context
+    _client, auth, generated = token_context
 
-    status = client.tokens.status(
-        access_token=access_token,
+    assert isinstance(auth, AuthenticatedClient)
+
+    status = auth.tokens.status(
         reference_number=generated.reference_number,
     )
 
@@ -116,15 +116,13 @@ def test_token_status(token_context):
 @pytest.mark.integration
 def test_revoke_token(token_context):
     """Revoke a generated token and verify status changes."""
-    client, access_token, generated = token_context
+    _client, auth, generated = token_context
 
-    client.tokens.revoke(
-        access_token=access_token,
+    auth.tokens.revoke(
         reference_number=generated.reference_number,
     )
 
-    status = client.tokens.status(
-        access_token=access_token,
+    status = auth.tokens.status(
         reference_number=generated.reference_number,
     )
 
@@ -134,9 +132,9 @@ def test_revoke_token(token_context):
 @pytest.mark.integration
 def test_list_tokens(token_context):
     """List tokens and verify the generated token appears."""
-    client, access_token, generated = token_context
+    _client, auth, generated = token_context
 
-    response = client.tokens.list(access_token=access_token)
+    response = auth.tokens.list()
 
     assert isinstance(response, QueryTokensResponse)
     assert isinstance(response.tokens, list)
@@ -149,11 +147,10 @@ def test_list_tokens(token_context):
 @pytest.mark.integration
 def test_list_tokens_with_status_filter(token_context):
     """List tokens filtered by status."""
-    client, access_token, _generated = token_context
+    _client, auth, _generated = token_context
 
     # Filter by ACTIVE and REVOKED statuses
-    response = client.tokens.list(
-        access_token=access_token,
+    response = auth.tokens.list(
         status=[TokenStatus.ACTIVE, TokenStatus.REVOKED],
     )
 
@@ -166,10 +163,9 @@ def test_list_tokens_with_status_filter(token_context):
 @pytest.mark.integration
 def test_list_tokens_with_description_filter(token_context):
     """List tokens filtered by description."""
-    client, access_token, _generated = token_context
+    _client, auth, _generated = token_context
 
-    response = client.tokens.list(
-        access_token=access_token,
+    response = auth.tokens.list(
         description="Integration test",
     )
 
@@ -182,10 +178,10 @@ def test_list_tokens_with_description_filter(token_context):
 @pytest.mark.integration
 def test_list_tokens_with_author_filter(token_context):
     """List tokens filtered by author identifier."""
-    client, access_token, _generated = token_context
+    _client, auth, _generated = token_context
 
     # First, get all tokens to find an author NIP
-    all_tokens = client.tokens.list(access_token=access_token)
+    all_tokens = auth.tokens.list()
     if not all_tokens.tokens:
         pytest.skip("No tokens available to test author filter")
 
@@ -197,8 +193,7 @@ def test_list_tokens_with_author_filter(token_context):
         value=first_author.value,
     )
 
-    response = client.tokens.list(
-        access_token=access_token,
+    response = auth.tokens.list(
         author_filter=author_filter,
     )
 

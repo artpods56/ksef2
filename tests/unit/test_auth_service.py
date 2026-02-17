@@ -8,9 +8,10 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core import exceptions
 from ksef2.core.stores import CertificateStore
-from ksef2.domain.models.auth import AuthTokens, RefreshedToken
+from ksef2.domain.models.auth import RefreshedToken
 from ksef2.domain.models.encryption import CertUsage
 from ksef2.services.auth import AuthService
 
@@ -144,9 +145,9 @@ class TestAuthenticateToken:
             poll_interval=0,
         )
 
-        assert isinstance(result, AuthTokens)
-        assert result.access_token.token == "access-jwt"
-        assert result.refresh_token.token == "refresh-jwt"
+        assert isinstance(result, AuthenticatedClient)
+        assert result.access_token == "access-jwt"
+        assert result.refresh_token == "refresh-jwt"
 
     def test_fetches_certificates_when_store_empty(
         self,
@@ -197,7 +198,7 @@ class TestAuthenticateToken:
             poll_interval=0,
         )
 
-        assert isinstance(result, AuthTokens)
+        assert isinstance(result, AuthenticatedClient)
         # 2 (challenge + init) + 3 (polls) + 1 (redeem) = 6
         assert len(fake_transport.calls) == 6
 
@@ -212,7 +213,7 @@ class TestAuthenticateToken:
 
         with pytest.raises(exceptions.KSeFAuthError):
             _build_service(fake_transport, loaded_store).authenticate_token(
-                ksef_token="bad-token",
+                ksef_token="invalid-token",
                 nip="1234567890",
                 poll_interval=0,
             )
@@ -269,7 +270,7 @@ class TestAuthenticateXades:
             poll_interval=0,
         )
 
-        assert isinstance(result, AuthTokens)
+        assert isinstance(result, AuthenticatedClient)
         mock_build.assert_called_once_with("c" * 36, "1234567890")
         mock_sign.assert_called_once_with(b"<AuthTokenRequest/>", cert_mock, key_mock)
 

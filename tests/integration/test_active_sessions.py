@@ -4,17 +4,17 @@ from __future__ import annotations
 import pytest
 
 from ksef2 import Client
-from ksef2.domain.models.auth import AuthTokens
+from ksef2.clients.authenticated import AuthenticatedClient
 
 
 @pytest.mark.integration
-def test_list_active_sessions(xades_authenticated_context: tuple[Client, AuthTokens]):
+def test_list_active_sessions(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+):
     """List active authentication sessions."""
-    client, tokens = xades_authenticated_context
+    client, auth = xades_authenticated_context
 
-    response = client.auth.list_active_sessions(
-        access_token=tokens.access_token.token,
-    )
+    response = auth.sessions.list()
 
     assert response is not None
     assert hasattr(response, "items")
@@ -24,12 +24,9 @@ def test_list_active_sessions(xades_authenticated_context: tuple[Client, AuthTok
 @pytest.mark.integration
 def test_list_active_sessions_with_pagination(xades_authenticated_context):
     """List active sessions with pagination."""
-    client, tokens = xades_authenticated_context
+    client, auth = xades_authenticated_context
 
-    response = client.auth.list_active_sessions(
-        access_token=tokens.access_token.token,
-        page_size=15,  # must be between 10 and 100
-    )
+    response = auth.sessions.list(page_size=15)  # must be between 10 and 100
 
     assert response is not None
     assert len(response.items) <= 15
@@ -38,26 +35,19 @@ def test_list_active_sessions_with_pagination(xades_authenticated_context):
 @pytest.mark.integration
 def test_terminate_current_session(xades_authenticated_context):
     """Terminate the current authentication session."""
-    client, tokens = xades_authenticated_context
+    client, auth = xades_authenticated_context
 
-    client.auth.terminate_current_session(
-        access_token=tokens.access_token.token,
-    )
+    auth.sessions.terminate_current()
 
 
 @pytest.mark.integration
 def test_terminate_specific_session(xades_authenticated_context):
     """Terminate a specific authentication session by reference number."""
-    client, tokens = xades_authenticated_context
+    client, auth = xades_authenticated_context
 
-    sessions_response = client.auth.list_active_sessions(
-        access_token=tokens.access_token.token,
-    )
+    sessions_response = auth.sessions.list()
 
     if sessions_response.items:
         ref_to_delete = sessions_response.items[0].referenceNumber
 
-        client.auth.terminate_session(
-            access_token=tokens.access_token.token,
-            reference_number=ref_to_delete,
-        )
+        auth.sessions.terminate(reference_number=ref_to_delete)

@@ -14,10 +14,9 @@ from ksef2.domain.models.certificates import (
 @pytest.mark.integration
 def test_get_certificate_limits(xades_authenticated_context):
     """Fetch certificate limits for the authenticated subject."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    result = client.certificates.get_limits(access_token=token)
+    result = auth.certificates.get_limits()
 
     assert isinstance(result, CertificateLimitsResponse)
     assert isinstance(result.can_request, bool)
@@ -34,11 +33,10 @@ def test_get_enrollment_data(xades_authenticated_context):
     Note: This endpoint may fail with self-signed certs because it requires
     a specific authentication method (qualified certificate).
     """
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
     try:
-        result = client.certificates.get_enrollment_data(access_token=token)
+        result = auth.certificates.get_enrollment_data()
 
         assert isinstance(result, CertificateEnrollmentData)
         assert result.common_name
@@ -53,10 +51,9 @@ def test_get_enrollment_data(xades_authenticated_context):
 @pytest.mark.integration
 def test_query_certificates_no_filters(xades_authenticated_context):
     """Query all certificates without filters."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    result = client.certificates.query(access_token=token)
+    result = auth.certificates.query()
 
     assert isinstance(result, QueryCertificatesResponse)
     assert isinstance(result.certificates, list)
@@ -66,13 +63,9 @@ def test_query_certificates_no_filters(xades_authenticated_context):
 @pytest.mark.integration
 def test_query_certificates_with_status_filter(xades_authenticated_context):
     """Query certificates filtering by status."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    result = client.certificates.query(
-        access_token=token,
-        status=CertificateStatus.ACTIVE,
-    )
+    result = auth.certificates.query(status=CertificateStatus.ACTIVE)
 
     assert isinstance(result, QueryCertificatesResponse)
     # All returned certificates should be active
@@ -83,13 +76,9 @@ def test_query_certificates_with_status_filter(xades_authenticated_context):
 @pytest.mark.integration
 def test_query_certificates_with_type_filter(xades_authenticated_context):
     """Query certificates filtering by type."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    result = client.certificates.query(
-        access_token=token,
-        certificate_type=CertificateType.AUTHENTICATION,
-    )
+    result = auth.certificates.query(certificate_type=CertificateType.AUTHENTICATION)
 
     assert isinstance(result, QueryCertificatesResponse)
     # All returned certificates should be authentication type
@@ -100,15 +89,10 @@ def test_query_certificates_with_type_filter(xades_authenticated_context):
 @pytest.mark.integration
 def test_query_certificates_with_pagination(xades_authenticated_context):
     """Query certificates with pagination parameters."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
     # Query with small page size
-    result = client.certificates.query(
-        access_token=token,
-        page_size=10,
-        page_offset=0,
-    )
+    result = auth.certificates.query(page_size=10, page_offset=0)
 
     assert isinstance(result, QueryCertificatesResponse)
     assert len(result.certificates) <= 10
@@ -117,11 +101,10 @@ def test_query_certificates_with_pagination(xades_authenticated_context):
 @pytest.mark.integration
 def test_query_certificates_with_name_filter(xades_authenticated_context):
     """Query certificates with partial name match."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
     # First get all certificates to find a name to search for
-    all_certs = client.certificates.query(access_token=token)
+    all_certs = auth.certificates.query()
 
     if not all_certs.certificates:
         pytest.skip("No certificates available to test name filtering")
@@ -133,10 +116,7 @@ def test_query_certificates_with_name_filter(xades_authenticated_context):
 
     search_term = first_cert_name[:3]
 
-    result = client.certificates.query(
-        access_token=token,
-        name=search_term,
-    )
+    result = auth.certificates.query(name=search_term)
 
     assert isinstance(result, QueryCertificatesResponse)
     # All returned certificates should contain the search term in their name

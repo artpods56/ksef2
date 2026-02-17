@@ -16,10 +16,10 @@ from pathlib import Path
 import pytest
 
 from ksef2 import Client, FormSchema, Environment
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.auth import AuthTokens
 from ksef2.domain.models.session import QuerySessionsList, SessionType, SessionStatus
 from ksef2.domain.models.testdata import (
     Identifier,
@@ -84,12 +84,12 @@ def session_with_invoice():
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
-        tokens = client.auth.authenticate_xades(
+        auth = client.auth.authenticate_xades(
             nip=seller_nip,
             cert=cert,
             private_key=private_key,
         )
-        access_token = tokens.access_token.token
+        access_token = auth.access_token
 
         with client.sessions.open_online(
             access_token=access_token,
@@ -118,10 +118,10 @@ def session_with_invoice():
 
 
 @pytest.mark.integration
-def test_list_sessions(xades_authenticated_context: tuple[Client, AuthTokens]):
+def test_list_sessions(xades_authenticated_context: tuple[Client, AuthenticatedClient]):
     """List sessions filtered by type."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
+    token = auth.access_token
 
     response = client.sessions.list(
         access_token=token,
@@ -134,10 +134,12 @@ def test_list_sessions(xades_authenticated_context: tuple[Client, AuthTokens]):
 
 
 @pytest.mark.integration
-def test_list_sessions_batch(xades_authenticated_context: tuple[Client, AuthTokens]):
+def test_list_sessions_batch(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+):
     """List batch sessions."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
+    token = auth.access_token
 
     response = client.sessions.list(
         access_token=token,
@@ -149,11 +151,11 @@ def test_list_sessions_batch(xades_authenticated_context: tuple[Client, AuthToke
 
 @pytest.mark.integration
 def test_list_sessions_with_status_filter(
-    xades_authenticated_context: tuple[Client, AuthTokens],
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
 ):
     """List sessions filtered by statuses."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
+    token = auth.access_token
 
     response = client.sessions.list(
         access_token=token,

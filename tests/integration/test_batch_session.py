@@ -3,7 +3,7 @@
 import pytest
 
 from ksef2 import Client
-from ksef2.domain.models.auth import AuthTokens
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.domain.models.batch import (
     BatchFileInfo,
     BatchFilePart,
@@ -27,7 +27,7 @@ class TestBatchSession:
     )
     def test_open_batch_session(
         self,
-        xades_authenticated_context: tuple[Client, AuthTokens],
+        xades_authenticated_context: tuple[Client, AuthenticatedClient],
     ) -> None:
         """Test opening a batch session.
 
@@ -39,7 +39,7 @@ class TestBatchSession:
         The test demonstrates the API structure but would fail without
         real batch file preparation.
         """
-        client, tokens = xades_authenticated_context
+        client, auth = xades_authenticated_context
 
         # Example batch file info - would fail validation without real data
         batch_file = BatchFileInfo(
@@ -56,7 +56,7 @@ class TestBatchSession:
 
         # This would open a batch session
         batch_session = client.sessions.open_batch(
-            access_token=tokens.access_token.token,
+            access_token=auth.access_token,
             batch_file=batch_file,
         )
 

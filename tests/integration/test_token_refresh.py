@@ -9,9 +9,9 @@ from ksef2.domain.models.auth import RefreshedToken
 @pytest.mark.integration
 def test_refresh_token(authenticated_context):
     """Exchange refresh token for new access token."""
-    client, tokens = authenticated_context
+    client, auth = authenticated_context
 
-    refreshed = client.auth.refresh(refresh_token=tokens.refresh_token.token)
+    refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
 
     assert isinstance(refreshed, RefreshedToken)
     assert refreshed.access_token is not None
@@ -24,8 +24,8 @@ def test_refresh_token(authenticated_context):
 @pytest.mark.integration
 def test_refreshed_token_works(authenticated_context):
     """Verify the refreshed token can be used for API calls."""
-    client, tokens = authenticated_context
+    client, auth = authenticated_context
 
-    refreshed = client.auth.refresh(refresh_token=tokens.refresh_token.token)
+    refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
 
     assert refreshed.access_token.token is not None

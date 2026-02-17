@@ -39,7 +39,7 @@ def _token_status_response(
 
 
 def _build_service(transport: FakeTransport) -> TokenService:
-    return TokenService(transport)
+    return TokenService(transport, _TOKEN)
 
 
 class TestGenerate:
@@ -49,7 +49,6 @@ class TestGenerate:
         svc = _build_service(fake_transport)
 
         _ = svc.generate(
-            access_token=_TOKEN,
             permissions=[TokenPermission.INVOICE_READ, TokenPermission.INVOICE_WRITE],
             description="Test token",
             poll_interval=0,
@@ -71,7 +70,6 @@ class TestGenerate:
         svc = _build_service(fake_transport)
 
         result = svc.generate(
-            access_token=_TOKEN,
             permissions=[TokenPermission.INVOICE_READ],
             description="Test token",
             poll_interval=0,
@@ -89,7 +87,6 @@ class TestGenerate:
         svc = _build_service(fake_transport)
 
         result = svc.generate(
-            access_token=_TOKEN,
             permissions=[TokenPermission.INVOICE_READ],
             description="Test token",
             poll_interval=0,
@@ -106,7 +103,6 @@ class TestGenerate:
 
         with pytest.raises(exceptions.KSeFApiError, match="Failed"):
             svc.generate(
-                access_token=_TOKEN,
                 permissions=[TokenPermission.INVOICE_READ],
                 description="Test token",
                 poll_interval=0,
@@ -119,7 +115,6 @@ class TestGenerate:
 
         with pytest.raises(exceptions.KSeFApiError, match="Revoked"):
             svc.generate(
-                access_token=_TOKEN,
                 permissions=[TokenPermission.INVOICE_READ],
                 description="Test token",
                 poll_interval=0,
@@ -133,7 +128,6 @@ class TestGenerate:
 
         with pytest.raises(exceptions.KSeFApiError, match="timed out"):
             svc.generate(
-                access_token=_TOKEN,
                 permissions=[TokenPermission.INVOICE_READ],
                 description="Test token",
                 poll_interval=0,
@@ -146,7 +140,7 @@ class TestStatus:
         fake_transport.enqueue(_token_status_response(status="Active"))
         svc = _build_service(fake_transport)
 
-        result = svc.status(access_token=_TOKEN, reference_number=_REF)
+        result = svc.status(reference_number=_REF)
 
         assert isinstance(result, TokenStatusResponse)
         assert result.reference_number == _REF
@@ -156,7 +150,7 @@ class TestStatus:
         fake_transport.enqueue(_token_status_response())
         svc = _build_service(fake_transport)
 
-        svc.status(access_token=_TOKEN, reference_number=_REF)
+        svc.status(reference_number=_REF)
 
         call = fake_transport.calls[0]
         assert call.method == "GET"
@@ -170,7 +164,7 @@ class TestStatus:
         svc = _build_service(fake_transport)
 
         for status in TokenStatus:
-            result = svc.status(access_token=_TOKEN, reference_number=_REF)
+            result = svc.status(reference_number=_REF)
             assert result.status == status
 
 
@@ -179,7 +173,7 @@ class TestRevoke:
         fake_transport.enqueue(status_code=200)
         svc = _build_service(fake_transport)
 
-        svc.revoke(access_token=_TOKEN, reference_number=_REF)
+        svc.revoke(reference_number=_REF)
 
         call = fake_transport.calls[0]
         assert call.method == "DELETE"

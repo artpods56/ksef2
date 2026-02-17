@@ -3,8 +3,8 @@ from __future__ import annotations
 import pytest
 
 from ksef2 import Client
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.exceptions import KSeFAuthError
-from ksef2.domain.models.auth import AuthTokens
 
 
 @pytest.mark.integration
@@ -18,14 +18,14 @@ def test_full_auth_flow(authenticated_context):
         - Refresh token is returned
         - Tokens are different (not the same JWT)
     """
-    client, tokens = authenticated_context
+    client, auth = authenticated_context
 
-    assert isinstance(tokens, AuthTokens)
-    assert tokens.access_token is not None
-    assert tokens.refresh_token is not None
-    assert tokens.access_token.token != tokens.refresh_token.token
-    assert tokens.access_token.valid_until is not None
-    assert tokens.refresh_token.valid_until is not None
+    assert isinstance(auth, AuthenticatedClient)
+    assert auth.access_token is not None
+    assert auth.refresh_token is not None
+    assert auth.access_token != auth.refresh_token
+    assert auth.auth_tokens.access_token.valid_until is not None
+    assert auth.auth_tokens.refresh_token.valid_until is not None
 
 
 @pytest.mark.integration

@@ -69,11 +69,10 @@ def test_block_context_repeated(xades_authenticated_context, ksef_credentials):
 @pytest.mark.integration
 def test_set_production_rate_limits(xades_authenticated_context):
     """Set API rate limits to production values."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
     # Set production rate limits
-    client.limits.set_production_rate_limits(access_token=token)
+    auth.limits.set_production_rate_limits()
 
     # Reset back to test defaults
-    client.limits.reset_api_rate_limits(access_token=token)
+    auth.limits.reset_api_rate_limits()

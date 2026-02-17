@@ -11,7 +11,7 @@ from ksef2 import Client
 from ksef2.config import Environment
 from ksef2.core.exceptions import KSeFApiError
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.auth import AuthTokens
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.domain.models.testdata import (
     SubjectType,
 )
@@ -126,7 +126,7 @@ def xades_authenticated_context(
     real_client: Client,
     ksef_credentials: KSeFCredentials,
     test_context: TemporalTestData,
-) -> Generator[tuple[Client, AuthTokens], None, None]:
+) -> Generator[tuple[Client, AuthenticatedClient], None, None]:
     """Create an authenticated context using XAdES with self-signed certificate.
 
     This is the entry point for tests that don't have a KSeF token yet.
@@ -165,7 +165,7 @@ def authenticated_context(
     real_client: Client,
     ksef_credentials: KSeFCredentials,
     test_context: TemporalTestData,
-) -> Generator[tuple[Client, AuthTokens], None, None]:
+) -> Generator[tuple[Client, AuthenticatedClient], None, None]:
     """Create an authenticated context using XAdES authentication.
 
     Note: We use XAdES instead of KSeF token authentication because:

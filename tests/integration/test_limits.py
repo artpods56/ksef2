@@ -8,10 +8,9 @@ from ksef2.domain.models.limits import ApiRateLimits, ContextLimits, SubjectLimi
 @pytest.mark.integration
 def test_get_context_limits(xades_authenticated_context):
     """Fetch effective context limits."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    result = client.limits.get_context_limits(access_token=token)
+    result = auth.limits.get_context_limits()
 
     assert isinstance(result, ContextLimits)
     assert result.online_session.max_invoices > 0
@@ -21,10 +20,9 @@ def test_get_context_limits(xades_authenticated_context):
 @pytest.mark.integration
 def test_get_subject_limits(xades_authenticated_context):
     """Fetch effective subject limits."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    result = client.limits.get_subject_limits(access_token=token)
+    result = auth.limits.get_subject_limits()
 
     assert isinstance(result, SubjectLimits)
 
@@ -32,10 +30,9 @@ def test_get_subject_limits(xades_authenticated_context):
 @pytest.mark.integration
 def test_get_api_rate_limits(xades_authenticated_context):
     """Fetch effective API rate limits."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    result = client.limits.get_api_rate_limits(access_token=token)
+    result = auth.limits.get_api_rate_limits()
 
     assert isinstance(result, ApiRateLimits)
     assert result.online_session.per_second > 0
@@ -45,85 +42,79 @@ def test_get_api_rate_limits(xades_authenticated_context):
 @pytest.mark.integration
 def test_set_session_limits_roundtrip(xades_authenticated_context):
     """Fetch session limits, modify, post back, then reset."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    limits = client.limits.get_context_limits(access_token=token)
+    limits = auth.limits.get_context_limits()
     original_max = limits.online_session.max_invoices
 
     limits.online_session.max_invoices = original_max + 1
-    client.limits.set_session_limits(access_token=token, limits=limits)
+    auth.limits.set_session_limits(limits)
 
-    updated = client.limits.get_context_limits(access_token=token)
+    updated = auth.limits.get_context_limits()
     assert updated.online_session.max_invoices == original_max + 1
 
-    client.limits.reset_session_limits(access_token=token)
+    auth.limits.reset_session_limits()
 
 
 @pytest.mark.integration
 def test_set_api_rate_limits_roundtrip(xades_authenticated_context):
     """Fetch rate limits, modify, post back, then reset."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    limits = client.limits.get_api_rate_limits(access_token=token)
+    limits = auth.limits.get_api_rate_limits()
     original_per_second = limits.invoice_send.per_second
 
     limits.invoice_send.per_second = (
         original_per_second - 50
     )  # has to be between 1 and 100
-    client.limits.set_api_rate_limits(access_token=token, limits=limits)
+    auth.limits.set_api_rate_limits(limits)
 
-    updated = client.limits.get_api_rate_limits(access_token=token)
+    updated = auth.limits.get_api_rate_limits()
     assert updated.invoice_send.per_second == original_per_second - 50
 
-    client.limits.reset_api_rate_limits(access_token=token)
+    auth.limits.reset_api_rate_limits()
 
 
 @pytest.mark.integration
 def test_reset_session_limits(xades_authenticated_context):
     """Reset session limits back to defaults."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    client.limits.reset_session_limits(access_token=token)
+    auth.limits.reset_session_limits()
 
 
 @pytest.mark.integration
 def test_reset_api_rate_limits(xades_authenticated_context):
     """Reset API rate limits back to defaults."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    client.limits.reset_api_rate_limits(access_token=token)
+    auth.limits.reset_api_rate_limits()
 
 
 @pytest.mark.integration
 def test_set_subject_limits_roundtrip(xades_authenticated_context):
     """Fetch subject limits, modify, post back, then reset."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    limits = client.limits.get_subject_limits(access_token=token)
+    limits = auth.limits.get_subject_limits()
 
     if limits.certificate is None:
         pytest.skip("Subject certificate limits not available")
 
     original_max = limits.certificate.max_certificates
     limits.certificate.max_certificates = (original_max or 10) + 1
-    client.limits.set_subject_limits(access_token=token, limits=limits)
+    auth.limits.set_subject_limits(limits)
 
-    updated = client.limits.get_subject_limits(access_token=token)
+    updated = auth.limits.get_subject_limits()
     assert updated.certificate is not None
     assert updated.certificate.max_certificates == (original_max or 10) + 1
 
-    client.limits.reset_subject_limits(access_token=token)
+    auth.limits.reset_subject_limits()
 
 
 @pytest.mark.integration
 def test_reset_subject_limits(xades_authenticated_context):
     """Reset subject limits back to defaults."""
-    client, tokens = xades_authenticated_context
-    token = tokens.access_token.token
+    client, auth = xades_authenticated_context
 
-    client.limits.reset_subject_limits(access_token=token)
+    auth.limits.reset_subject_limits()

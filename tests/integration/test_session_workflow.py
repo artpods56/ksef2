@@ -85,12 +85,12 @@ def workflow_context():
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
-        tokens = client.auth.authenticate_xades(
+        auth = client.auth.authenticate_xades(
             nip=seller_nip,
             cert=cert,
             private_key=private_key,
         )
-        access_token = tokens.access_token.token
+        access_token = auth.access_token
 
         with client.sessions.open_online(
             access_token=access_token,
