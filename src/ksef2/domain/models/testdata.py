@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from enum import StrEnum
 
 from pydantic import AwareDatetime
@@ -18,6 +19,13 @@ class IdentifierType(StrEnum):
     PESEL = "Pesel"
     FINGERPRINT = "Fingerprint"
     System = "System"
+
+
+class AuthContextIdentifierType(StrEnum):
+    NIP = "Nip"
+    INTERNAL_ID = "InternalId"
+    NIP_VAT_UE = "NipVatUe"
+    PEPPOL_ID = "PeppolId"
 
 
 class PermissionType(StrEnum):
@@ -42,6 +50,11 @@ class Identifier(KSeFBaseModel):
     value: str
 
 
+class AuthContextIdentifier(KSeFBaseModel):
+    type: AuthContextIdentifierType
+    value: str
+
+
 class Permission(KSeFBaseModel):
     type: PermissionType
     description: str
@@ -53,3 +66,8 @@ class CreateSubjectRequest(KSeFBaseModel):
     description: str
     subunits: list[SubUnit] | None = None
     created_date: AwareDatetime | None = None
+
+
+class RevokeAttachmentsRequest(KSeFBaseModel):
+    nip: str
+    expected_end_date: date | None = None

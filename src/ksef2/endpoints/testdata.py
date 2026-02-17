@@ -78,3 +78,36 @@ class EnableAttachmentsEndpoint:
 
     def send(self, body: dict[str, Any]) -> None:
         _ = self._transport.post(self.url, json=body)
+
+
+@final
+class RevokeAttachmentsEndpoint:
+    url: str = "/testdata/attachment/revoke"
+
+    def __init__(self, transport: protocols.Middleware):
+        self._transport = transport
+
+    def send(self, body: dict[str, Any]) -> None:
+        _ = self._transport.post(self.url, json=body)
+
+
+@final
+class BlockContextEndpoint:
+    url: str = "/testdata/context/block"
+
+    def __init__(self, transport: protocols.Middleware):
+        self._transport = transport
+
+    def send(self, body: dict[str, Any]) -> None:
+        _ = self._transport.post(self.url, json=body)
+
+
+@final
+class UnblockContextEndpoint:
+    url: str = "/testdata/context/unblock"
+
+    def __init__(self, transport: protocols.Middleware):
+        self._transport = transport
+
+    def send(self, body: dict[str, Any]) -> None:
+        _ = self._transport.post(self.url, json=body)

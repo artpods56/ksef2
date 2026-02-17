@@ -68,6 +68,9 @@ __testdata_endpoints__ = [
     EndpointRef("POST", testdata.GrantPermissionsEndpoint.url),
     EndpointRef("POST", testdata.RevokePermissionsEndpoint.url),
     EndpointRef("POST", testdata.EnableAttachmentsEndpoint.url),
+    EndpointRef("POST", testdata.RevokeAttachmentsEndpoint.url),
+    EndpointRef("POST", testdata.BlockContextEndpoint.url),
+    EndpointRef("POST", testdata.UnblockContextEndpoint.url),
 ]
 
 __tokens_endpoints__ = [
@@ -115,6 +118,7 @@ __limits_endpoints__ = [
     EndpointRef("DELETE", limits.ResetSubjectLimitsEndpoint.url),
     EndpointRef("POST", limits.SetApiRateLimitsEndpoint.url),
     EndpointRef("DELETE", limits.ResetApiRateLimitsEndpoint.url),
+    EndpointRef("POST", limits.SetProductionRateLimitsEndpoint.url),
 ]
 
 __all_endpoints__: list[EndpointRef] = [

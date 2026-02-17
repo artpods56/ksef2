@@ -152,3 +152,17 @@ class ResetApiRateLimitsEndpoint:
             self.url,
             headers=headers.KSeFHeaders.bearer(bearer_token),
         )
+
+
+@final
+class SetProductionRateLimitsEndpoint:
+    url: str = "/testdata/rate-limits/production"
+
+    def __init__(self, transport: protocols.Middleware):
+        self._transport = transport
+
+    def send(self, bearer_token: str) -> None:
+        _ = self._transport.post(
+            self.url,
+            headers=headers.KSeFHeaders.bearer(bearer_token),
+        )

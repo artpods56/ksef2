@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from types import TracebackType
 from typing import Self, final
 
 from ksef2.core import protocols, exceptions
 from ksef2.core.exceptions import ExceptionCode
 from ksef2.domain.models.testdata import (
+    AuthContextIdentifier,
     Identifier,
     Permission,
     SubjectType,
@@ -15,13 +16,16 @@ from ksef2.domain.models.testdata import (
     CreateSubjectRequest,
 )
 from ksef2.endpoints.testdata import (
+    BlockContextEndpoint,
     CreatePersonEndpoint,
     CreateSubjectEndpoint,
     DeletePersonEndpoint,
     DeleteSubjectEndpoint,
     EnableAttachmentsEndpoint,
     GrantPermissionsEndpoint,
+    RevokeAttachmentsEndpoint,
     RevokePermissionsEndpoint,
+    UnblockContextEndpoint,
 )
 from ksef2.infra.mappers.testdata import TestDataMapper, TestDataMapperv2
 
@@ -38,6 +42,9 @@ class TestDataService:
         self._grant_permissions_ep = GrantPermissionsEndpoint(transport)
         self._revoke_permissions_ep = RevokePermissionsEndpoint(transport)
         self._enable_attachments_ep = EnableAttachmentsEndpoint(transport)
+        self._revoke_attachments_ep = RevokeAttachmentsEndpoint(transport)
+        self._block_context_ep = BlockContextEndpoint(transport)
+        self._unblock_context_ep = UnblockContextEndpoint(transport)
 
     def create_subject(
         self,
@@ -117,6 +124,25 @@ class TestDataService:
 
     def enable_attachments(self, *, nip: str) -> None:
         self._enable_attachments_ep.send(TestDataMapper.enable_attachments(nip=nip))
+
+    def revoke_attachments(
+        self, *, nip: str, expected_end_date: date | None = None
+    ) -> None:
+        self._revoke_attachments_ep.send(
+            TestDataMapper.revoke_attachments(
+                nip=nip, expected_end_date=expected_end_date
+            )
+        )
+
+    def block_context(self, *, context_identifier: AuthContextIdentifier) -> None:
+        self._block_context_ep.send(
+            TestDataMapper.block_context(context_identifier=context_identifier)
+        )
+
+    def unblock_context(self, *, context_identifier: AuthContextIdentifier) -> None:
+        self._unblock_context_ep.send(
+            TestDataMapper.unblock_context(context_identifier=context_identifier)
+        )
 
     def temporal(self) -> TemporalTestData:
         return TemporalTestData(self)

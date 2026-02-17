@@ -314,8 +314,11 @@ def test_list_active_sessions(xades_authenticated_context):
 ```
 
 **Note:** Integration tests use fixtures from `tests/integration/conftest.py`:
-- `xades_authenticated_context` - for XAdES authentication
-- `authenticated_context` - for token authentication (requires `KSEF_TEST_KSEF_TOKEN`)
+- `xades_authenticated_context` - for XAdES authentication with self-signed certificate
+- `authenticated_context` - same as above (both use self-signed XAdES certificates)
+
+Both fixtures use `generate_test_certificate()` to create self-signed certificates on-the-fly.
+No real credentials are needed - only test NIP/PESEL identifiers from `.env.test`.
 
 ### Step 10: Run Lint and Typecheck
 
@@ -406,9 +409,38 @@ path = f"{self.url}?{query_string}" if query_string else self.url
 # Unit tests
 uv run pytest tests/unit/ -v
 
-# Integration tests (requires .env.test with credentials)
-source .env.test && uv run pytest tests/integration/ -v -m integration
+# Integration tests (requires .env.test with test NIP/PESEL identifiers)
+uv run pytest tests/integration/ -v -m integration
 
 # Single test
 uv run pytest tests/unit/test_auth_endpoints.py::test_name -v
+```
+
+## Endpoints Without Response Bodies
+
+Some endpoints return `200 OK` with no response body (e.g., testdata endpoints like `block_context`, `unblock_context`, `revoke_attachments`). For these:
+
+1. **No response model needed** - Don't create domain models for the response
+2. **No response mapper needed** - Skip the `map_response()` method
+3. **Endpoint returns `None`** or ignores the response:
+
+```python
+@final
+class BlockContextEndpoint:
+    url: str = "/testdata/context/block"
+
+    def __init__(self, transport: middleware.KSeFProtocol):
+        self._transport = transport
+
+    def send(self, body: dict[str, Any]) -> None:
+        _ = self._transport.post(self.url, json=body)
+```
+
+4. **Service method returns `None`**:
+
+```python
+def block_context(self, *, context_identifier: AuthContextIdentifier) -> None:
+    self._block_context_ep.send(
+        TestDataMapper.block_context(context_identifier=context_identifier)
+    )
 ```

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from ksef2.domain.models.testdata import (
+    AuthContextIdentifier,
     Identifier,
     Permission,
     SubjectType,
@@ -127,3 +128,30 @@ class TestDataMapper:
     @staticmethod
     def enable_attachments(*, nip: str) -> dict[str, Any]:
         return {"nip": nip}
+
+    @staticmethod
+    def revoke_attachments(
+        *, nip: str, expected_end_date: date | None = None
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {"nip": nip}
+        if expected_end_date is not None:
+            body["expectedEndDate"] = expected_end_date.isoformat()
+        return body
+
+    @staticmethod
+    def block_context(*, context_identifier: AuthContextIdentifier) -> dict[str, Any]:
+        return {
+            "contextIdentifier": {
+                "type": context_identifier.type.value,
+                "value": context_identifier.value,
+            }
+        }
+
+    @staticmethod
+    def unblock_context(*, context_identifier: AuthContextIdentifier) -> dict[str, Any]:
+        return {
+            "contextIdentifier": {
+                "type": context_identifier.type.value,
+                "value": context_identifier.value,
+            }
+        }

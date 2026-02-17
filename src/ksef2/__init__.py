@@ -2,7 +2,7 @@ from ksef2.clients.base import Client
 from ksef2.domain.models import FormSchema
 from ksef2.config import Environment
 
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 
 from ksef2._openapi import __openapi_version__
 

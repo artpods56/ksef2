@@ -74,10 +74,13 @@ from ksef2.domain.models.permissions import (
     SubunitPermissionsQueryResponse,
 )
 from ksef2.domain.models.testdata import (
+    AuthContextIdentifier,
+    AuthContextIdentifierType,
     Identifier,
     IdentifierType,
     Permission,
     PermissionType,
+    RevokeAttachmentsRequest,
     SubjectType,
     SubUnit,
 )
@@ -169,10 +172,13 @@ __all__ = [
     "SubunitPermissionsQueryRequest",
     "SubunitPermissionsQueryResponse",
     # testdata
+    "AuthContextIdentifier",
+    "AuthContextIdentifierType",
     "Identifier",
     "IdentifierType",
     "Permission",
     "PermissionType",
+    "RevokeAttachmentsRequest",
     "SubjectType",
     "SubUnit",
     # tokens

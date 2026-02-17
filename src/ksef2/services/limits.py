@@ -10,6 +10,7 @@ from ksef2.endpoints.limits import (
     ResetSessionLimitsEndpoint,
     ResetSubjectLimitsEndpoint,
     SetApiRateLimitsEndpoint,
+    SetProductionRateLimitsEndpoint,
     SetSessionLimitsEndpoint,
     SetSubjectLimitsEndpoint,
 )
@@ -33,6 +34,7 @@ class LimitsService:
         self._reset_subject_limits_ep = ResetSubjectLimitsEndpoint(transport)
         self._set_api_rate_limits_ep = SetApiRateLimitsEndpoint(transport)
         self._reset_api_rate_limits_ep = ResetApiRateLimitsEndpoint(transport)
+        self._set_production_rate_limits_ep = SetProductionRateLimitsEndpoint(transport)
 
     def get_context_limits(self, *, access_token: str) -> ContextLimits:
         return ContextLimitsMapper.map_response(
@@ -71,3 +73,7 @@ class LimitsService:
 
     def reset_api_rate_limits(self, *, access_token: str) -> None:
         self._reset_api_rate_limits_ep.send(bearer_token=access_token)
+
+    def set_production_rate_limits(self, *, access_token: str) -> None:
+        """Set API rate limits to production values (test environment only)."""
+        self._set_production_rate_limits_ep.send(bearer_token=access_token)
