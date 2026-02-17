@@ -1,0 +1,448 @@
+# ksef2 - Python SDK for Poland's KSeF API
+
+> ksef2 is a Python SDK for integrating with Poland's National e-Invoice System (Krajowy System e-Faktur, KSeF) v2.0 API. It provides 100% coverage of all 77 KSeF API endpoints.
+
+## Installation
+
+```bash
+pip install ksef2
+# or
+uv add ksef2
+```
+
+Requires Python 3.12+.
+
+## Core Concepts
+
+### Client Hierarchy
+
+1. **Client** - Entry point for all operations
+   - `client.auth` - Authentication methods (XAdES, token, refresh)
+   - `client.sessions` - Invoice session management (open, resume, list)
+   - `client.testdata` - Test environment data setup (TEST env only)
+
+2. **AuthenticatedClient** - Returned after authentication, provides:
+   - `auth.access_token` - JWT access token string
+   - `auth.refresh_token` - JWT refresh token string
+   - `auth.tokens` - KSeF token management (generate, list, revoke)
+   - `auth.limits` - API rate limits (query, modify on TEST)
+   - `auth.permissions` - Permission management (grant, query)
+   - `auth.certificates` - Certificate management (enroll, query, revoke)
+   - `auth.sessions` - Authentication session management (list, terminate)
+
+3. **OnlineSessionClient** - Returned when opening an invoice session:
+   - `session.send_invoice()` - Send structured invoices
+   - `session.download_invoice()` - Download by KSeF number
+   - `session.list_invoices()` - List session invoices
+   - `session.get_invoice_status()` - Check processing status
+   - `session.schedule_invoices_export()` - Bulk export
+   - `session.get_export_status()` - Check export progress
+   - `session.fetch_package()` - Download exported ZIP
+   - `session.terminate()` - End session
+
+### Environments
+
+```python
+from ksef2 import Client, Environment
+
+client = Client(Environment.TEST)       # Test environment (self-signed certs OK)
+client = Client(Environment.PRODUCTION) # Production (qualified certs required)
+client = Client(Environment.DEMO)       # Demo environment
+client = Client()                       # Defaults to PRODUCTION
+```
+
+## Authentication
+
+### XAdES Authentication (Certificate-based)
+
+For TEST environment with self-signed certificates:
+
+```python
+from ksef2 import Client, Environment
+from ksef2.core.xades import generate_test_certificate
+
+NIP = "5261040828"
+client = Client(Environment.TEST)
+
+# Generate test certificate (TEST only)
+cert, private_key = generate_test_certificate(NIP)
+
+# Authenticate
+auth = client.auth.authenticate_xades(
+    nip=NIP,
+    cert=cert,
+    private_key=private_key,
+)
+
+print(auth.access_token)  # JWT access token
+print(auth.refresh_token) # JWT refresh token
+```
+
+### Token Authentication
+
+For production or with pre-generated KSeF tokens:
+
+```python
+auth = client.auth.authenticate_token(
+    ksef_token="your-ksef-token",
+    nip=NIP,
+)
+```
+
+### Token Refresh
+
+```python
+refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
+```
+
+## Invoice Sessions
+
+### Open Session and Send Invoice
+
+```python
+from ksef2 import FormSchema
+
+with client.sessions.open_online(
+    access_token=auth.access_token,
+    form_code=FormSchema.FA3,  # Invoice schema version
+) as session:
+    # Send invoice
+    result = session.send_invoice(invoice_xml=open("invoice.xml", "rb").read())
+    print(result.reference_number)
+    
+    # Check status
+    status = session.get_invoice_status(result.reference_number)
+    
+    # Download invoice by KSeF number
+    xml_bytes = session.download_invoice(ksef_number="KSEF-NUMBER")
+```
+
+### Export and Download Invoices
+
+```python
+from datetime import datetime, timezone
+from ksef2.domain.models import (
+    InvoiceQueryFilters, InvoiceSubjectType, 
+    InvoiceQueryDateRange, DateType,
+)
+
+with client.sessions.open_online(
+    access_token=auth.access_token,
+    form_code=FormSchema.FA3,
+) as session:
+    # Schedule export
+    export = session.schedule_invoices_export(
+        filters=InvoiceQueryFilters(
+            subject_type=InvoiceSubjectType.SUBJECT1,
+            date_range=InvoiceQueryDateRange(
+                date_type=DateType.ISSUE,
+                from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
+                to=datetime.now(tz=timezone.utc),
+            ),
+        ),
+    )
+    
+    # Poll for completion
+    result = session.get_export_status(reference_number=export.reference_number)
+    
+    # Download when ready
+    if package := result.package:
+        paths = session.fetch_package(package=package, target_directory="downloads")
+```
+
+### Session Resume
+
+Sessions can be serialized and resumed later:
+
+```python
+from ksef2.domain.models.session import OnlineSessionState
+
+# Save session state
+state = session.get_state()
+state_json = state.model_dump_json()
+
+# Later: restore and resume
+restored_state = OnlineSessionState.model_validate_json(state_json)
+resumed = client.sessions.resume(state=restored_state)
+```
+
+## Authenticated Operations (No Session Required)
+
+After authentication, many operations don't require an invoice session:
+
+### Token Management
+
+```python
+from ksef2.domain.models.tokens import TokenPermission, TokenStatus
+
+# Generate KSeF token
+result = auth.tokens.generate(
+    permissions=[TokenPermission.INVOICE_READ, TokenPermission.INVOICE_WRITE],
+    description="API integration token",
+)
+print(result.token)
+
+# List tokens
+response = auth.tokens.list(status=[TokenStatus.ACTIVE])
+
+# Check status
+status = auth.tokens.status(reference_number=result.reference_number)
+
+# Revoke
+auth.tokens.revoke(reference_number=result.reference_number)
+```
+
+### Permissions
+
+```python
+from ksef2.domain.models import IdentifierType, PermissionType
+
+# Grant to person
+auth.permissions.grant_person(
+    subject_identifier=IdentifierType.PESEL,
+    subject_value="12345678901",
+    permissions=[PermissionType.INVOICE_READ],
+    description="Read access",
+    first_name="Jan",
+    last_name="Kowalski",
+)
+
+# Grant to entity
+from ksef2.domain.models import EntityPermission, EntityPermissionType
+
+auth.permissions.grant_entity(
+    subject_value=PARTNER_NIP,
+    permissions=[EntityPermission(type=EntityPermissionType.INVOICE_READ, can_delegate=True)],
+    description="Entity access",
+    entity_name="Partner Company",
+)
+
+# Query permissions
+from ksef2.domain.models.permissions import PersonPermissionsQueryRequest, PermissionsQueryType
+
+resp = auth.permissions.query_persons(
+    query=PersonPermissionsQueryRequest(
+        query_type=PermissionsQueryType.PERMISSIONS_IN_CURRENT_CONTEXT,
+    ),
+)
+```
+
+### Certificates
+
+```python
+from ksef2.domain.models.certificates import CertificateStatus, CertificateType
+
+# Get limits
+limits = auth.certificates.get_limits()
+
+# Query certificates
+response = auth.certificates.query(
+    status=CertificateStatus.ACTIVE,
+    certificate_type=CertificateType.AUTHENTICATION,
+)
+
+# Retrieve certificate data
+certs = auth.certificates.retrieve(certificate_serial_numbers=["SERIAL123"])
+
+# Revoke
+auth.certificates.revoke(certificate_serial_number="SERIAL123")
+```
+
+### API Limits
+
+```python
+# Query limits
+context_limits = auth.limits.get_context_limits()
+print(context_limits.online_session.max_invoices)
+
+rate_limits = auth.limits.get_api_rate_limits()
+print(rate_limits.invoice_send.per_second)
+
+# Modify limits (TEST environment only)
+context_limits.online_session.max_invoices = 5000
+auth.limits.set_session_limits(context_limits)
+
+# Reset to defaults
+auth.limits.reset_session_limits()
+```
+
+### Session Management
+
+```python
+# List authentication sessions
+sessions = auth.sessions.list(page_size=20)
+
+# Terminate current session
+auth.sessions.terminate_current()
+
+# Terminate specific session
+auth.sessions.terminate(reference_number="session-ref")
+```
+
+## Test Data Setup (TEST Environment Only)
+
+```python
+from ksef2.domain.models.testdata import (
+    Identifier, IdentifierType, Permission, PermissionType, SubjectType,
+)
+
+# Automatic cleanup with context manager
+with client.testdata.temporal() as temp:
+    temp.create_subject(
+        nip=ORG_NIP,
+        subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+        description="Test organization",
+    )
+    temp.create_person(
+        nip=PERSON_NIP,
+        pesel=PERSON_PESEL,
+        description="Test person",
+    )
+    temp.grant_permissions(
+        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        permissions=[
+            Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
+        ],
+    )
+    
+    # ... run tests ...
+# Automatic cleanup on exit
+
+# Manual operations
+client.testdata.create_subject(nip=NIP, subject_type=SubjectType.ENFORCEMENT_AUTHORITY)
+client.testdata.delete_subject(nip=NIP)
+client.testdata.block_context(context_identifier=context_id)
+client.testdata.unblock_context(context_identifier=context_id)
+```
+
+## Utility Functions
+
+### Generate Test Identifiers
+
+```python
+from ksef2.core.tools import generate_nip, generate_pesel
+
+nip = generate_nip()    # Valid Polish NIP
+pesel = generate_pesel() # Valid Polish PESEL
+```
+
+### Invoice Factory
+
+```python
+from ksef2.core.invoices import InvoiceFactory
+
+template_xml = open("template.xml").read()
+invoice_xml = InvoiceFactory.create(
+    template_xml,
+    {
+        "#nip#": "1234567890",
+        "#invoice_number#": "FV/2026/001",
+        "#date#": "2026-02-17",
+    },
+)
+```
+
+## Key Domain Models
+
+### Authentication
+- `AuthTokens` - Contains access_token and refresh_token with validity dates
+- `TokenCredentials` - Single token with `.token` string and `.valid_until`
+
+### Invoices
+- `InvoiceQueryFilters` - Filters for querying/exporting invoices
+- `InvoiceSubjectType` - SUBJECT1 (seller), SUBJECT2 (buyer), etc.
+- `DateType` - ISSUE, ACQUISITION, CREATION
+- `InvoicePackage` - Export package with download URLs
+
+### Sessions
+- `OnlineSessionState` - Serializable session state for resume
+- `FormSchema` - Invoice schema versions (FA3, etc.)
+
+### Permissions
+- `PermissionType` - INVOICE_READ, INVOICE_WRITE, CREDENTIALS_MANAGE, etc.
+- `EntityPermissionType` - Entity-specific permissions with delegation
+- `IdentifierType` - NIP, PESEL, FINGERPRINT
+
+### Tokens
+- `TokenPermission` - Permissions for generated tokens
+- `TokenStatus` - PENDING, ACTIVE, REVOKED, etc.
+
+### Certificates
+- `CertificateType` - AUTHENTICATION, OFFLINE
+- `CertificateStatus` - ACTIVE, BLOCKED, REVOKED, EXPIRED
+
+## Error Handling
+
+```python
+from ksef2.core import exceptions
+
+try:
+    auth = client.auth.authenticate_xades(...)
+except exceptions.KSeFAuthenticationError as e:
+    print(f"Authentication failed: {e}")
+except exceptions.KSeFAPIError as e:
+    print(f"API error: {e.status_code} - {e.message}")
+except exceptions.KSeFException as e:
+    print(f"General error: {e}")
+```
+
+## Complete Workflow Example
+
+```python
+from ksef2 import Client, Environment, FormSchema
+from ksef2.core.tools import generate_nip, generate_pesel
+from ksef2.core.xades import generate_test_certificate
+from ksef2.domain.models.testdata import (
+    Identifier, IdentifierType, Permission, PermissionType, SubjectType,
+)
+
+# Setup
+ORG_NIP = generate_nip()
+PERSON_NIP = generate_nip()
+PERSON_PESEL = generate_pesel()
+client = Client(Environment.TEST)
+
+# Create test data
+with client.testdata.temporal() as temp:
+    temp.create_subject(nip=ORG_NIP, subject_type=SubjectType.ENFORCEMENT_AUTHORITY)
+    temp.create_person(nip=PERSON_NIP, pesel=PERSON_PESEL)
+    temp.grant_permissions(
+        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        permissions=[Permission(type=PermissionType.INVOICE_WRITE)],
+    )
+
+    # Authenticate
+    cert, key = generate_test_certificate(PERSON_NIP)
+    auth = client.auth.authenticate_xades(nip=PERSON_NIP, cert=cert, private_key=key)
+
+    # Send invoice
+    with client.sessions.open_online(
+        access_token=auth.access_token,
+        form_code=FormSchema.FA3,
+    ) as session:
+        result = session.send_invoice(invoice_xml=open("invoice.xml", "rb").read())
+        print(f"Sent: {result.reference_number}")
+```
+
+## API Coverage Summary
+
+| Category | Endpoints | Description |
+|----------|-----------|-------------|
+| Authentication | 9 | Challenge, XAdES, token, refresh, status |
+| Sessions | 12 | Open, close, status, list, resume |
+| Invoices | 15 | Send, download, query, export, UPO |
+| Tokens | 4 | Generate, list, status, revoke |
+| Permissions | 9 | Grant, revoke, query (persons, entities, authorizations) |
+| Certificates | 7 | Enroll, query, retrieve, revoke, limits |
+| Limits | 9 | Query and modify rate/session limits |
+| Test Data | 12 | Subject, person, permissions setup |
+
+**Total: 77/77 endpoints (100% coverage)**
+
+## Resources
+
+- GitHub: https://github.com/artpods56/ksef2
+- PyPI: https://pypi.org/project/ksef2/
+- Official KSeF API Docs: https://www.podatki.gov.pl/ksef/
