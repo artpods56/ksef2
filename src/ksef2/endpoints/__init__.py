@@ -75,6 +75,7 @@ __testdata_endpoints__ = [
 
 __tokens_endpoints__ = [
     EndpointRef("POST", tokens.GenerateTokenEndpoint.url),
+    EndpointRef("GET", tokens.ListTokensEndpoint.url),
     EndpointRef("GET", tokens.TokenStatusEndpoint.url),
     EndpointRef("DELETE", tokens.RevokeTokenEndpoint.url),
 ]

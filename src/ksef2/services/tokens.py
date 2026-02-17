@@ -7,22 +7,30 @@ from ksef2.core import exceptions
 from ksef2.core import protocols
 from ksef2.domain.models.tokens import (
     GenerateTokenResponse,
+    QueryTokensResponse,
+    TokenAuthorIdentifier,
     TokenPermission,
     TokenStatus,
     TokenStatusResponse,
 )
 from ksef2.endpoints.tokens import (
     GenerateTokenEndpoint,
+    ListTokensEndpoint,
     RevokeTokenEndpoint,
     TokenStatusEndpoint,
 )
-from ksef2.infra.mappers.tokens import GenerateTokenMapper, TokenStatusMapper
+from ksef2.infra.mappers.tokens import (
+    GenerateTokenMapper,
+    QueryTokensMapper,
+    TokenStatusMapper,
+)
 
 
 @final
 class TokenService:
     def __init__(self, transport: protocols.Middleware) -> None:
         self._generate_ep = GenerateTokenEndpoint(transport)
+        self._list_ep = ListTokensEndpoint(transport)
         self._status_ep = TokenStatusEndpoint(transport)
         self._revoke_ep = RevokeTokenEndpoint(transport)
 
@@ -49,6 +57,27 @@ class TokenService:
             max_attempts=max_poll_attempts,
         )
         return result
+
+    def list(
+        self,
+        *,
+        access_token: str,
+        status: list[TokenStatus] | None = None,
+        description: str | None = None,
+        author_filter: TokenAuthorIdentifier | None = None,
+        page_size: int | None = None,
+        continuation_token: str | None = None,
+    ) -> QueryTokensResponse:
+        spec_resp = self._list_ep.send(
+            access_token=access_token,
+            status=[s.value for s in status] if status else None,
+            description=description,
+            author_identifier=author_filter.value if author_filter else None,
+            author_identifier_type=author_filter.type.value if author_filter else None,
+            page_size=page_size,
+            continuation_token=continuation_token,
+        )
+        return QueryTokensMapper.map_response(spec_resp)
 
     def status(
         self,

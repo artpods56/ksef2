@@ -20,6 +20,9 @@ from ksef2.domain.models.testdata import (
 )
 from ksef2.domain.models.tokens import (
     GenerateTokenResponse,
+    QueryTokensResponse,
+    TokenAuthorIdentifier,
+    TokenAuthorIdentifierType,
     TokenPermission,
     TokenStatus,
     TokenStatusResponse,
@@ -126,3 +129,80 @@ def test_revoke_token(token_context):
     )
 
     assert status.status in (TokenStatus.REVOKING, TokenStatus.REVOKED)
+
+
+@pytest.mark.integration
+def test_list_tokens(token_context):
+    """List tokens and verify the generated token appears."""
+    client, access_token, generated = token_context
+
+    response = client.tokens.list(access_token=access_token)
+
+    assert isinstance(response, QueryTokensResponse)
+    assert isinstance(response.tokens, list)
+
+    # Find the generated token in the list
+    ref_numbers = [t.reference_number for t in response.tokens]
+    assert generated.reference_number in ref_numbers
+
+
+@pytest.mark.integration
+def test_list_tokens_with_status_filter(token_context):
+    """List tokens filtered by status."""
+    client, access_token, _generated = token_context
+
+    # Filter by ACTIVE and REVOKED statuses
+    response = client.tokens.list(
+        access_token=access_token,
+        status=[TokenStatus.ACTIVE, TokenStatus.REVOKED],
+    )
+
+    assert isinstance(response, QueryTokensResponse)
+    # All returned tokens should have ACTIVE or REVOKED status
+    for token in response.tokens:
+        assert token.status in (TokenStatus.ACTIVE, TokenStatus.REVOKED)
+
+
+@pytest.mark.integration
+def test_list_tokens_with_description_filter(token_context):
+    """List tokens filtered by description."""
+    client, access_token, _generated = token_context
+
+    response = client.tokens.list(
+        access_token=access_token,
+        description="Integration test",
+    )
+
+    assert isinstance(response, QueryTokensResponse)
+    # All returned tokens should contain "integration test" in description (case-insensitive)
+    for token in response.tokens:
+        assert "integration test" in token.description.lower()
+
+
+@pytest.mark.integration
+def test_list_tokens_with_author_filter(token_context):
+    """List tokens filtered by author identifier."""
+    client, access_token, _generated = token_context
+
+    # First, get all tokens to find an author NIP
+    all_tokens = client.tokens.list(access_token=access_token)
+    if not all_tokens.tokens:
+        pytest.skip("No tokens available to test author filter")
+
+    # Use the first token's author for filtering
+    first_author = all_tokens.tokens[0].author_identifier
+
+    author_filter = TokenAuthorIdentifier(
+        type=TokenAuthorIdentifierType(first_author.type.value),
+        value=first_author.value,
+    )
+
+    response = client.tokens.list(
+        access_token=access_token,
+        author_filter=author_filter,
+    )
+
+    assert isinstance(response, QueryTokensResponse)
+    # All returned tokens should have the same author
+    for token in response.tokens:
+        assert token.author_identifier.value == first_author.value
