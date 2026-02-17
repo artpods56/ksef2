@@ -17,6 +17,12 @@
 ## Installation
 
 ```bash
+pip install ksef2
+```
+
+Or with [uv](https://docs.astral.sh/uv/):
+
+```bash
 uv add ksef2
 ```
 
