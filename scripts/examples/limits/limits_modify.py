@@ -7,10 +7,11 @@ Demonstrates:
   - Modifying session limits
   - Modifying subject limits
   - Modifying API rate limits
+  - Setting production rate limits
   - Resetting limits to defaults
 
 Usage:
-    uv run python examples/limits_modify.py
+    uv run python scripts/examples/limits/limits_modify.py
 """
 
 from __future__ import annotations
@@ -103,6 +104,21 @@ def main() -> None:
 
         # Reset rate limits back to defaults
         print("  Resetting API rate limits ...")
+        client.limits.reset_api_rate_limits(access_token=access_token)
+
+        # --- Set production rate limits ---
+        print("Setting production rate limits ...")
+        client.limits.set_production_rate_limits(access_token=access_token)
+        print("  Rate limits set to production values")
+
+        # Check the new limits
+        prod_limits = client.limits.get_api_rate_limits(access_token=access_token)
+        print(
+            f"  invoice_send: {prod_limits.invoice_send.per_second}/s, {prod_limits.invoice_send.per_minute}/m, {prod_limits.invoice_send.per_hour}/h"
+        )
+
+        # Reset back to test defaults
+        print("  Resetting to test defaults ...")
         client.limits.reset_api_rate_limits(access_token=access_token)
 
         print("All limits reset to defaults.")
