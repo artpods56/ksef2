@@ -28,7 +28,32 @@ from ksef2.infra.mappers.tokens import (
 
 @final
 class TokenService:
-    def __init__(self, transport: protocols.Middleware) -> None:
+    """Service for managing KSeF authorization tokens.
+
+    This service manages tokens used for KSeF authentication. It stores
+    the access_token internally, so you don't need to pass it to every method.
+
+    Typical usage:
+        auth = client.auth.authenticate_xades(nip=nip, cert=cert, private_key=key)
+
+        # Generate a new KSeF token
+        result = auth.tokens.generate(
+            permissions=[TokenPermission.INVOICE_READ],
+            description="My API token",
+        )
+
+        # List tokens
+        tokens = auth.tokens.list()
+
+        # Check status
+        status = auth.tokens.status(reference_number=result.reference_number)
+
+        # Revoke a token
+        auth.tokens.revoke(reference_number=result.reference_number)
+    """
+
+    def __init__(self, transport: protocols.Middleware, access_token: str) -> None:
+        self._access_token = access_token
         self._generate_ep = GenerateTokenEndpoint(transport)
         self._list_ep = ListTokensEndpoint(transport)
         self._status_ep = TokenStatusEndpoint(transport)
@@ -37,21 +62,33 @@ class TokenService:
     def generate(
         self,
         *,
-        access_token: str,
         permissions: list[TokenPermission],
         description: str,
         poll_interval: float = 1.0,
         max_poll_attempts: int = 60,
     ) -> GenerateTokenResponse:
+        """Generate a new KSeF authorization token.
+
+        Args:
+            permissions: List of permissions to grant to the token.
+            description: Human-readable description for the token.
+            poll_interval: Seconds between status polls (default: 1.0).
+            max_poll_attempts: Maximum polling attempts (default: 60).
+
+        Returns:
+            GenerateTokenResponse with the token details.
+
+        Raises:
+            KSeFApiError: If token generation or activation fails.
+        """
         body = GenerateTokenMapper.map_request(permissions, description)
         spec_resp = self._generate_ep.send(
-            access_token=access_token,
+            access_token=self._access_token,
             body=body.model_dump(),
         )
         result = GenerateTokenMapper.map_response(spec_resp)
 
         _ = self._poll_until_active(
-            access_token=access_token,
             reference_number=result.reference_number,
             poll_interval=poll_interval,
             max_attempts=max_poll_attempts,
@@ -61,15 +98,26 @@ class TokenService:
     def list(
         self,
         *,
-        access_token: str,
         status: list[TokenStatus] | None = None,
         description: str | None = None,
         author_filter: TokenAuthorIdentifier | None = None,
         page_size: int | None = None,
         continuation_token: str | None = None,
     ) -> QueryTokensResponse:
+        """List KSeF authorization tokens.
+
+        Args:
+            status: Filter by token status(es).
+            description: Filter by description substring.
+            author_filter: Filter by token author identifier.
+            page_size: Number of results per page.
+            continuation_token: Token for fetching next page.
+
+        Returns:
+            QueryTokensResponse with the list of tokens.
+        """
         spec_resp = self._list_ep.send(
-            access_token=access_token,
+            access_token=self._access_token,
             status=[s.value for s in status] if status else None,
             description=description,
             author_identifier=author_filter.value if author_filter else None,
@@ -82,11 +130,18 @@ class TokenService:
     def status(
         self,
         *,
-        access_token: str,
         reference_number: str,
     ) -> TokenStatusResponse:
+        """Check the status of a KSeF token.
+
+        Args:
+            reference_number: The token's reference number.
+
+        Returns:
+            TokenStatusResponse with current status.
+        """
         spec_resp = self._status_ep.send(
-            access_token=access_token,
+            access_token=self._access_token,
             reference_number=reference_number,
         )
         return TokenStatusMapper.map_response(spec_resp)
@@ -94,25 +149,27 @@ class TokenService:
     def revoke(
         self,
         *,
-        access_token: str,
         reference_number: str,
     ) -> None:
+        """Revoke a KSeF authorization token.
+
+        Args:
+            reference_number: The token's reference number.
+        """
         self._revoke_ep.send(
-            access_token=access_token,
+            access_token=self._access_token,
             reference_number=reference_number,
         )
 
     def _poll_until_active(
         self,
         *,
-        access_token: str,
         reference_number: str,
         poll_interval: float,
         max_attempts: int,
     ) -> TokenStatusResponse:
         for _ in range(max_attempts):
             result = self.status(
-                access_token=access_token,
                 reference_number=reference_number,
             )
             if result.status == TokenStatus.ACTIVE:

@@ -10,12 +10,9 @@ from ksef2.core.middleware import KSeFProtocol
 
 from ksef2.services import (
     auth,
-    certificates,
-    limits,
     peppol,
     session,
     testdata,
-    tokens,
 )
 from ksef2.core import stores
 
@@ -47,10 +44,6 @@ class Client:
         )
 
     @cached_property
-    def tokens(self) -> tokens.TokenService:
-        return tokens.TokenService(self._transport)
-
-    @cached_property
     def testdata(self) -> testdata.TestDataService:
         base_url = self._environment.testdata_base_url
         if base_url is None:
@@ -59,14 +52,6 @@ class Client:
             HttpTransport(client=httpx.Client(base_url=base_url)),
         )
         return testdata.TestDataService(transport)
-
-    @cached_property
-    def limits(self) -> limits.LimitsService:
-        return limits.LimitsService(self._transport)
-
-    @cached_property
-    def certificates(self) -> certificates.CertificateService:
-        return certificates.CertificateService(self._transport)
 
     @cached_property
     def peppol(self) -> peppol.PeppolService:

@@ -1,20 +1,11 @@
-from typing import Any, TypedDict, NotRequired, final, Unpack
+from typing import Any, final, Unpack
 from urllib.parse import urlencode
 
 from pydantic import TypeAdapter
 
 from ksef2.core import headers, codecs, protocols
+from ksef2.domain.models.pagination import PaginationQueryParams
 from ksef2.infra.schema.api import spec as spec
-
-
-PaginationQueryParams = TypedDict(
-    "PaginationQueryParams",
-    {
-        "pageOffset": NotRequired[int | None],
-        "pageSize": NotRequired[int | None],
-    },
-)
-
 
 PAGINATION_PARAMS_ADAPTER = TypeAdapter(PaginationQueryParams)
 

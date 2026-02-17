@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import date
 from enum import StrEnum
 
-from pydantic import AwareDatetime, AnyUrl, Field
+from pydantic import AwareDatetime, AnyUrl
 
-from ksef2.domain.models.base import KSeFBaseModel, KSeFBaseParams
+from ksef2.domain.models.base import KSeFBaseModel
 
 
 class SortOrder(StrEnum):
@@ -115,15 +115,6 @@ class InvoiceQueryAmount(KSeFBaseModel):
 class InvoiceQueryBuyerIdentifier(KSeFBaseModel):
     type: BuyerIdentifierType
     value: str | None = None
-
-
-class PaginationParams(KSeFBaseParams):
-    page_offset: int = Field(default=0, ge=0)
-    page_size: int = Field(default=10, ge=10, le=250)
-
-
-class InvoiceQueryParams(PaginationParams):
-    sort_order: SortOrder = SortOrder.ASC
 
 
 class InvoiceQueryFilters(KSeFBaseModel):

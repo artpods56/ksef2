@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, final
 
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.clients.encryption import EncryptionClient
 from ksef2.core import exceptions
 from ksef2.core.crypto import encrypt_token
@@ -18,11 +19,8 @@ from ksef2.domain.models.encryption import CertUsage
 from ksef2.endpoints.auth import (
     AuthStatusEndpoint,
     ChallengeEndpoint,
-    ListActiveSessionsEndpoint,
     RedeemTokenEndpoint,
     RefreshTokenEndpoint,
-    TerminateAuthSessionEndpoint,
-    TerminateCurrentSessionEndpoint,
     TokenAuthEndpoint,
     XAdESAuthEndpoint,
 )
@@ -41,6 +39,34 @@ if TYPE_CHECKING:
 
 @final
 class AuthService:
+    """Service for authenticating with KSeF.
+
+    This service handles authentication flows and returns an AuthenticatedClient
+    that provides access to authenticated operations.
+
+    Typical usage:
+        client = Client(environment=Environment.TEST)
+
+        # Authenticate via XAdES
+        auth = client.auth.authenticate_xades(
+            nip=nip,
+            cert=cert,
+            private_key=private_key,
+        )
+
+        # Or authenticate via KSeF token
+        auth = client.auth.authenticate_token(
+            ksef_token=token,
+            nip=nip,
+        )
+
+        # Now use auth.* for authenticated operations
+        auth.limits.get_context_limits()
+        auth.tokens.generate(...)
+        auth.sessions.list()
+        auth.permissions.query_personal(...)
+    """
+
     def __init__(
         self,
         transport: protocols.Middleware,
@@ -55,9 +81,6 @@ class AuthService:
         self._status_ep = AuthStatusEndpoint(transport)
         self._redeem_ep = RedeemTokenEndpoint(transport)
         self._refresh_ep = RefreshTokenEndpoint(transport)
-        self._list_sessions_ep = ListActiveSessionsEndpoint(transport)
-        self._terminate_current_ep = TerminateCurrentSessionEndpoint(transport)
-        self._terminate_session_ep = TerminateAuthSessionEndpoint(transport)
 
     def authenticate_token(
         self,
@@ -67,7 +90,12 @@ class AuthService:
         context_type: ContextIdentifierType = ContextIdentifierType.NIP,
         poll_interval: float = 1.0,
         max_poll_attempts: int = 60,
-    ) -> AuthTokens:
+    ) -> AuthenticatedClient:
+        """Authenticate using a KSeF token.
+
+        Returns:
+            AuthenticatedClient with access to authenticated services like limits.
+        """
         self._ensure_certificates()
 
         challenge = ChallengeMapper.map_response(self._challenge_ep.send())
@@ -97,7 +125,11 @@ class AuthService:
             max_attempts=max_poll_attempts,
         )
 
-        return self._redeem(init_resp.authentication_token.token)
+        auth_tokens = self._redeem(init_resp.authentication_token.token)
+        return AuthenticatedClient(
+            transport=self._transport,
+            auth_tokens=auth_tokens,
+        )
 
     def authenticate_xades(
         self,
@@ -108,7 +140,12 @@ class AuthService:
         verify_chain: bool = False,
         poll_interval: float = 1.0,
         max_poll_attempts: int = 60,
-    ) -> AuthTokens:
+    ) -> AuthenticatedClient:
+        """Authenticate using XAdES signature.
+
+        Returns:
+            AuthenticatedClient with access to authenticated services like limits.
+        """
         from ksef2.core.xades import build_auth_token_request_xml, sign_xades
 
         challenge = ChallengeMapper.map_response(self._challenge_ep.send())
@@ -127,41 +164,23 @@ class AuthService:
             max_attempts=max_poll_attempts,
         )
 
-        return self._redeem(init_resp.authentication_token.token)
+        auth_tokens = self._redeem(init_resp.authentication_token.token)
+        return AuthenticatedClient(
+            transport=self._transport,
+            auth_tokens=auth_tokens,
+        )
 
     def refresh(self, *, refresh_token: str) -> RefreshedToken:
+        """Refresh an access token using a refresh token.
+
+        Args:
+            refresh_token: The refresh token string.
+
+        Returns:
+            RefreshedToken with a new access token.
+        """
         return RefreshTokenMapper.map_response(
             self._refresh_ep.send(bearer_token=refresh_token)
-        )
-
-    def list_active_sessions(
-        self,
-        *,
-        access_token: str,
-        page_size: int | None = None,
-        continuation_token: str | None = None,
-    ):
-        """List active authentication sessions."""
-        return self._list_sessions_ep.send(
-            bearer_token=access_token,
-            page_size=page_size,
-            continuation_token=continuation_token,
-        )
-
-    def terminate_current_session(self, *, access_token: str) -> None:
-        """Terminate the current authentication session."""
-        self._terminate_current_ep.send(bearer_token=access_token)
-
-    def terminate_session(
-        self,
-        *,
-        access_token: str,
-        reference_number: str,
-    ) -> None:
-        """Terminate a specific authentication session by reference number."""
-        self._terminate_session_ep.send(
-            bearer_token=access_token,
-            reference_number=reference_number,
         )
 
     def _ensure_certificates(self) -> None:

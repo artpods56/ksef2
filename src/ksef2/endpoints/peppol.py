@@ -1,11 +1,12 @@
 """Peppol endpoints for querying Peppol service providers."""
 
-from typing import final, TypedDict, NotRequired
+from typing import final, TypedDict, NotRequired, Unpack, Any
 from urllib.parse import urlencode
 
 from pydantic import TypeAdapter
 
 from ksef2.core import codecs, protocols
+from ksef2.domain.models.pagination import PaginationQueryParams
 from ksef2.infra.schema.api import spec as spec
 
 
@@ -32,21 +33,13 @@ class QueryPeppolProvidersEndpoint:
     def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
+    def get_url(self, params: dict[str, Any]) -> str:
+        return f"{self.url}?{urlencode(params)}"
+
     def send(
-        self,
-        *,
-        page_offset: int | None = None,
-        page_size: int | None = None,
+        self, **params: Unpack[PaginationQueryParams]
     ) -> spec.QueryPeppolProvidersResponse:
-        params: QueryPeppolProvidersQueryParams = {
-            "pageOffset": page_offset,
-            "pageSize": page_size,
-        }
-        valid_params = self._adapter.validate_python(params)
-        # Filter out None values
-        filtered_params = {k: v for k, v in valid_params.items() if v is not None}
-        query_string = urlencode(filtered_params)
-        path = f"{self.url}?{query_string}" if query_string else self.url
+        path = self.get_url({**self._adapter.validate_python(params)})
 
         return codecs.JsonResponseCodec.parse(
             self._transport.get(path),

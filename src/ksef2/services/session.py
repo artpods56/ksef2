@@ -80,7 +80,8 @@ class OpenSessionService:
         self, *, access_token: str, query: QuerySessionsList
     ) -> spec.SessionsQueryResponse:
         return self._list_sessions_ep.send(
-            access_token=access_token, **query.to_api_params()
+            access_token=access_token,
+            **query.model_dump(by_alias=True, exclude_none=True),
         )
 
     def resume(self, state: OnlineSessionState) -> "OnlineSessionClient":
