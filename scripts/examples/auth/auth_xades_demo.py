@@ -8,13 +8,15 @@ Prerequisites
 -------------
 1. Log into MCU with your Profil Zaufany or electronic seal.
 2. Generate a **signing** certificate (not just a login certificate).
-3. Download the certificate file (.pem / .crt) and the matching private key (.pem / .key).
+3. Download the two files provided by KSEF:
+   - certificate: ``<NIP>.pem``  (the ``.pem`` file)
+   - private key: ``<NIP>.key``  (the ``.key`` file)
 
 Usage
 -----
 Set the environment variables before running::
 
-    KSEF_NIP=1234567890 KSEF_CERT=cert.pem KSEF_KEY=key.pem python auth_xades_demo.py
+    KSEF_NIP=1234567890 KSEF_CERT=1234567890.pem KSEF_KEY=1234567890.key python auth_xades_demo.py
 
 Or edit the constants below directly.
 """
@@ -27,8 +29,8 @@ from ksef2 import Client, Environment
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
 
 NIP = os.environ.get("KSEF_NIP", "1234567890")
-CERT_PATH = os.environ.get("KSEF_CERT", "cert.pem")
-KEY_PATH = os.environ.get("KSEF_KEY", "key.pem")
+CERT_PATH = os.environ.get("KSEF_CERT", f"{NIP}.pem")   # certificate — .pem from KSEF
+KEY_PATH = os.environ.get("KSEF_KEY", f"{NIP}.key")     # private key  — .key from KSEF
 # KEY_PASSWORD = b"secret"  # uncomment if the key file is encrypted
 
 

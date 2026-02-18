@@ -49,14 +49,16 @@ issued by MCU (Ministerstwo Finansów):
 1. Log into MCU at <https://ap-demo.ksef.mf.gov.pl/web/> (DEMO) or the
    production portal with your Profil Zaufany or electronic seal.
 2. Generate a **signing certificate** (separate from the login certificate).
-3. Download the `.pem` / `.crt` file and the matching private key.
+3. Download the two files provided by KSEF:
+   - **`<NIP>.pem`** — the certificate (`.pem` extension)
+   - **`<NIP>.key`** — the private key (`.key` extension)
 
 ```python
 from ksef2 import Client, Environment
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
 
-cert = load_certificate_from_pem("cert.pem")          # path or raw bytes
-key  = load_private_key_from_pem("key.pem")           # password= if encrypted
+cert = load_certificate_from_pem("1234567890.pem")    # .pem — certificate from KSEF
+key  = load_private_key_from_pem("1234567890.key")    # .key — private key from KSEF
 
 auth = Client(Environment.DEMO).auth.authenticate_xades(
     nip="1234567890",
