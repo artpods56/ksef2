@@ -3,13 +3,7 @@ from __future__ import annotations
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import SubjectType
 from ksef2.domain.models.tokens import TokenPermission
 
 NIP = generate_nip()
@@ -25,18 +19,6 @@ def main() -> None:
             nip=NIP,
             subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
             description="Token management test",
-        )
-        td.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=NIP),
-            permissions=[
-                Permission(
-                    type=PermissionType.INVOICE_WRITE, description="Sending invoices"
-                ),
-                Permission(
-                    type=PermissionType.CREDENTIALS_MANAGE, description="Manage creds"
-                ),
-            ],
         )
 
         # Authenticate

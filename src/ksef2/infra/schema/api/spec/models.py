@@ -3125,7 +3125,7 @@ class PersonPermissionsAuthorIdentifier(BaseModel):
     """
     Typ identyfikatora.
     """
-    value: Annotated[str | None, Field(max_length=64, min_length=10)] = None
+    value: Annotated[str | None, Field(max_length=64, min_length=1)] = None
     """
     Wartość identyfikatora. W przypadku typu System należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
     """

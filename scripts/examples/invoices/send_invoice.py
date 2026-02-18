@@ -5,20 +5,12 @@ from datetime import date
 
 from ksef2 import Client, FormSchema, Environment
 from ksef2.core.invoices import InvoiceFactory
-from ksef2.core.tools import generate_nip, generate_pesel
+from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import SubjectType
 from scripts.examples._common import repo_root
 
 ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
 
 INVOICE_TEMPLATE_PATH = (
     repo_root()
@@ -38,24 +30,7 @@ def main() -> None:
             subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
             description="SDK test seller",
         )
-        temp.create_person(
-            nip=PERSON_NIP,
-            pesel=PERSON_PESEL,
-            description="Example person",
-        )
-
-        temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            permissions=[
-                Permission(
-                    type=PermissionType.INVOICE_WRITE,
-                    description="Send invoices",
-                ),
-            ],
-        )
-
-        cert, private_key = generate_test_certificate(PERSON_NIP)
+        cert, private_key = generate_test_certificate(ORG_NIP)
 
         auth = client.auth.authenticate_xades(
             nip=ORG_NIP,
@@ -83,10 +58,15 @@ def main() -> None:
 
             print(f"Invoice has been sent, reference number: {result.reference_number}")
 
-            downloaded_invoice = session.download_invoice(
-                ksef_number=result.reference_number
-            )
-            print(f"Downloaded invoice of size {len(downloaded_invoice)} bytes")
+            # KSeF assigns a ksefNumber after processing — wait briefly then fetch it
+            time.sleep(5)
+            status = session.get_invoice_status(result.reference_number)
+
+            if status.ksefNumber:
+                downloaded_invoice = session.download_invoice(
+                    ksef_number=status.ksefNumber
+                )
+                print(f"Downloaded invoice of size {len(downloaded_invoice)} bytes")
 
 
 if __name__ == "__main__":
