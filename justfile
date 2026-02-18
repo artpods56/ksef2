@@ -2,6 +2,10 @@
 integration:
     source .env.test && uv run pytest tests/integration/ -v -m integration
 
+# Run end-to-end example tests only (requires KSEF credentials in .env)
+e2e:
+    source .env.test && uv run pytest tests/integration/test_examples.py -v -m integration
+
 
 sync:
     uv sync --all-groups
