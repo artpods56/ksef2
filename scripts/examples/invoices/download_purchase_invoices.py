@@ -24,7 +24,7 @@ Edit the constants below to match your setup.
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from ksef2 import Client, Environment, FormSchema
@@ -50,9 +50,11 @@ NIPS = [
 CERT_DIR = Path("certs")       # directory with .pem / .key files from MCU/KSEF
 DOWNLOAD_DIR = Path("downloads")  # invoices will be saved here, one sub-dir per NIP
 
-# Date range for purchase invoices to download
-DATE_FROM = datetime(2025, 1, 1, tzinfo=timezone.utc)
+# Date range for purchase invoices to download.
+# KSeF enforces a maximum window of 3 months per export request.
+# For longer periods run the script multiple times with adjusted dates.
 DATE_TO = datetime.now(tz=timezone.utc)
+DATE_FROM = DATE_TO - timedelta(days=90)
 
 # Seconds to wait between export-status polls
 POLL_INTERVAL = 3.0
@@ -97,7 +99,9 @@ def download_for_nip(client: Client, nip: str) -> None:
         # Poll until the package is ready
         package = None
         for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
-            status = session.get_export_status(export.reference_number)
+            status = session.get_export_status(
+                reference_number=export.reference_number
+            )
             if status.package:
                 package = status.package
                 break

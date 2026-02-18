@@ -23,7 +23,7 @@ Run::
 from __future__ import annotations
 
 import time
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
@@ -39,7 +39,7 @@ from ksef2.domain.models import (
     InvoiceQueryFilters,
     InvoiceSubjectType,
 )
-from ksef2.domain.models.testdata import Identifier, IdentifierType, SubjectType
+from ksef2.domain.models.testdata import SubjectType
 from scripts.examples._common import repo_root
 
 # ── configuration ────────────────────────────────────────────────────────────
@@ -97,10 +97,7 @@ def send_invoices(
                     },
                 )
                 result = session.send_invoice(invoice_xml=invoice_xml)
-                print(
-                    f"[seller] Sent invoice #{i + 1} to buyer {buyer_nip}"
-                    f" → {result.reference_number}"
-                )
+                print(f"[seller] Sent invoice #{i + 1} to buyer {buyer_nip} → {result.reference_number}")
 
     print("[seller] All invoices sent, waiting for KSeF to process …")
     time.sleep(8)
@@ -133,7 +130,7 @@ def download_for_buyer(
                 subject_type=InvoiceSubjectType.SUBJECT2,  # buyer perspective
                 date_range=InvoiceQueryDateRange(
                     date_type=DateType.ISSUE,
-                    from_=datetime(2025, 1, 1, tzinfo=timezone.utc),
+                    from_=datetime.now(tz=timezone.utc) - timedelta(days=90),
                     to=datetime.now(tz=timezone.utc),
                 ),
             ),
@@ -141,14 +138,11 @@ def download_for_buyer(
 
         package = None
         for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
-            status = session.get_export_status(export.reference_number)
+            status = session.get_export_status(reference_number=export.reference_number)
             if status.package:
                 package = status.package
                 break
-            print(
-                f"[buyer {buyer_nip}] Waiting for package …"
-                f" ({attempt}/{MAX_POLL_ATTEMPTS})"
-            )
+            print(f"[buyer {buyer_nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})")
             time.sleep(POLL_INTERVAL)
 
         if package is None:
@@ -157,10 +151,7 @@ def download_for_buyer(
 
         paths = session.fetch_package(package=package, target_directory=target_dir)
         for path in paths:
-            print(
-                f"[buyer {buyer_nip}] Downloaded: {path.name}"
-                f"  ({path.stat().st_size:,} bytes)"
-            )
+            print(f"[buyer {buyer_nip}] Downloaded: {path.name}  ({path.stat().st_size:,} bytes)")
 
 
 def main() -> None:
