@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, AwareDatetime
 
 from ksef2.infra.schema.api.spec.models import (
     PersonPermissionsAuthorIdentifierType,
@@ -10,6 +10,8 @@ from ksef2.infra.schema.api.spec.models import (
     PersonPermissionScope,
     PermissionState,
     PersonPermissionsQueryType,
+    PermissionsSubjectPersonDetails,
+    PermissionsSubjectEntityDetails,
 )
 from ksef2.infra.schema.api.supp.base import BaseSupp
 
@@ -127,4 +129,86 @@ class PersonPermissionsQueryRequest(BaseSupp):
     | --- | --- |
     | PermissionsInCurrentContext | Lista uprawnień obowiązujących w bieżącym kontekście |
     | PermissionsGrantedInCurrentContext | Lista uprawnień nadanych w bieżącym kontekście |
+    """
+
+
+class PersonPermission(BaseSupp):
+    id: Annotated[str, Field(max_length=36, min_length=36)]
+    """
+    Identyfikator uprawnienia.
+    """
+    authorizedIdentifier: PersonPermissionsAuthorizedIdentifier
+    """
+    Identyfikator osoby lub podmiotu uprawnionego.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | Pesel | 11 cyfrowy numer PESEL |
+    | Fingerprint | Odcisk palca certyfikatu |
+    """
+    contextIdentifier: PersonPermissionsContextIdentifier | None = None
+    """
+    Identyfikator kontekstu uprawnienia (dla uprawnień nadanych administratorom jednostek podrzędnych).
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
+    """
+    targetIdentifier: PersonPermissionsTargetIdentifier | None = None
+    """
+    Identyfikator podmiotu docelowego dla uprawnień nadanych pośrednio.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | AllPartners | Identyfikator oznaczający, że uprawnienie nadane w sposób pośredni jest typu generalnego |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
+    """
+    authorIdentifier: PersonPermissionsAuthorIdentifier
+    """
+    Identyfikator osoby lub podmiotu nadającego uprawnienie.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | Pesel | 11 cyfrowy numer PESEL |
+    | Fingerprint | Odcisk palca certyfikatu |
+    | System | Identyfikator systemowy KSeF |
+    """
+    permissionScope: PersonPermissionScope
+    """
+    Rodzaj uprawnienia.
+    """
+    description: Annotated[str, Field(max_length=256, min_length=5)]
+    """
+    Opis uprawnienia.
+    """
+    subjectPersonDetails: PermissionsSubjectPersonDetails | None = None
+    """
+    Dane osoby uprawnionej.
+    """
+    subjectEntityDetails: PermissionsSubjectEntityDetails | None = None
+    """
+    Dane podmiotu uprawnionego.
+    """
+    permissionState: PermissionState
+    """
+    Stan uprawnienia.
+    """
+    startDate: AwareDatetime
+    """
+    Data rozpoczęcia obowiązywania uprawnienia.
+    """
+    canDelegate: bool
+    """
+    Flaga określająca, czy uprawnienie ma być możliwe do dalszego przekazywania.
+    """
+
+
+class QueryPersonPermissionsResponse(BaseSupp):
+    permissions: list[PersonPermission]
+    """
+    Lista odczytanych uprawnień.
+    """
+    hasMore: bool
+    """
+    Flaga informująca o dostępności kolejnej strony wyników.
     """

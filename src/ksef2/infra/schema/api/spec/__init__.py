@@ -23,9 +23,9 @@ from ..supp.auth import InitTokenAuthenticationRequest
 from ..supp.permissions import (
     PersonPermissionsAuthorIdentifier,
     PersonPermissionsAuthorizedIdentifier,
+    QueryPersonPermissionsResponse,
     PersonPermissionsQueryRequest,
 )
-
 
 __all__ = [
     "OpenOnlineSessionRequest",
@@ -48,4 +48,5 @@ __all__ = [
     "PersonPermissionsAuthorIdentifier",
     "PersonPermissionsQueryRequest",
     "PersonPermissionsAuthorizedIdentifier",
+    "QueryPersonPermissionsResponse",
 ]

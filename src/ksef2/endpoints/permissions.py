@@ -5,7 +5,7 @@ from pydantic import TypeAdapter
 
 from ksef2.core import headers, codecs, protocols
 from ksef2.domain.models.pagination import PaginationQueryParams
-from ksef2.infra.schema.api import spec as spec
+from ksef2.infra.schema.api import spec
 
 PAGINATION_PARAMS_ADAPTER = TypeAdapter(PaginationQueryParams)
 

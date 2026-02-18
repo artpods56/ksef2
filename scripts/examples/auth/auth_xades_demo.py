@@ -29,8 +29,8 @@ from ksef2 import Client, Environment
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
 
 NIP = os.environ.get("KSEF_NIP", "1234567890")
-CERT_PATH = os.environ.get("KSEF_CERT", f"{NIP}.pem")   # certificate — .pem from KSEF
-KEY_PATH = os.environ.get("KSEF_KEY", f"{NIP}.key")     # private key  — .key from KSEF
+CERT_PATH = os.environ.get("KSEF_CERT", f"{NIP}.pem")  # certificate — .pem from KSEF
+KEY_PATH = os.environ.get("KSEF_KEY", f"{NIP}.key")  # private key  — .key from KSEF
 # KEY_PASSWORD = b"secret"  # uncomment if the key file is encrypted
 
 

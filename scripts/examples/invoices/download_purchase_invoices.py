@@ -47,7 +47,7 @@ NIPS = [
     # ... add all 25 here
 ]
 
-CERT_DIR = Path("certs")       # directory with .pem / .key files from MCU/KSEF
+CERT_DIR = Path("certs")  # directory with .pem / .key files from MCU/KSEF
 DOWNLOAD_DIR = Path("downloads")  # invoices will be saved here, one sub-dir per NIP
 
 # Date range for purchase invoices to download.
@@ -99,9 +99,7 @@ def download_for_nip(client: Client, nip: str) -> None:
         # Poll until the package is ready
         package = None
         for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
-            status = session.get_export_status(
-                reference_number=export.reference_number
-            )
+            status = session.get_export_status(reference_number=export.reference_number)
             if status.package:
                 package = status.package
                 break

@@ -44,7 +44,7 @@ from scripts.examples._common import repo_root
 
 # ── configuration ────────────────────────────────────────────────────────────
 
-N_BUYERS = 3            # number of buyer entities to create
+N_BUYERS = 3  # number of buyer entities to create
 INVOICES_PER_BUYER = 2  # invoices the seller sends to each buyer
 
 DOWNLOAD_DIR = repo_root() / "downloads" / "test"
@@ -97,7 +97,9 @@ def send_invoices(
                     },
                 )
                 result = session.send_invoice(invoice_xml=invoice_xml)
-                print(f"[seller] Sent invoice #{i + 1} to buyer {buyer_nip} → {result.reference_number}")
+                print(
+                    f"[seller] Sent invoice #{i + 1} to buyer {buyer_nip} → {result.reference_number}"
+                )
 
     print("[seller] All invoices sent, waiting for KSeF to process …")
     time.sleep(8)
@@ -142,7 +144,9 @@ def download_for_buyer(
             if status.package:
                 package = status.package
                 break
-            print(f"[buyer {buyer_nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})")
+            print(
+                f"[buyer {buyer_nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})"
+            )
             time.sleep(POLL_INTERVAL)
 
         if package is None:
@@ -151,7 +155,9 @@ def download_for_buyer(
 
         paths = session.fetch_package(package=package, target_directory=target_dir)
         for path in paths:
-            print(f"[buyer {buyer_nip}] Downloaded: {path.name}  ({path.stat().st_size:,} bytes)")
+            print(
+                f"[buyer {buyer_nip}] Downloaded: {path.name}  ({path.stat().st_size:,} bytes)"
+            )
 
 
 def main() -> None:
