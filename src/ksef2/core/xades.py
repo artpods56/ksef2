@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import datetime
+from pathlib import Path
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509 import Certificate
 from cryptography.x509.oid import NameOID, ObjectIdentifier
 from lxml import etree
@@ -22,6 +24,79 @@ _OID_ORGANIZATION_IDENTIFIER = ObjectIdentifier("2.5.4.97")
 _OID_SERIAL_NUMBER = ObjectIdentifier("2.5.4.5")
 
 _AUTH_TOKEN_NS = "http://ksef.mf.gov.pl/auth/token/2.0"
+
+
+def load_certificate_from_pem(source: bytes | str | Path) -> Certificate:
+    """Load an X.509 certificate from PEM data or a PEM file path.
+
+    Args:
+        source: PEM-encoded bytes, or a path (``str`` / ``Path``) to a ``.pem`` / ``.crt`` file.
+
+    Returns:
+        A :class:`~cryptography.x509.Certificate` ready to pass to :meth:`~ksef2.services.auth.AuthService.authenticate_xades`.
+
+    Example — certificate obtained from MCU (DEMO / PRODUCTION)::
+
+        from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
+        from ksef2 import Client, Environment
+
+        cert = load_certificate_from_pem("cert.pem")
+        key  = load_private_key_from_pem("key.pem")
+
+        auth = Client(Environment.DEMO).auth.authenticate_xades(
+            nip="1234567890", cert=cert, private_key=key
+        )
+    """
+    data = Path(source).read_bytes() if not isinstance(source, bytes) else source
+    return x509.load_pem_x509_certificate(data)
+
+
+def load_private_key_from_pem(
+    source: bytes | str | Path,
+    *,
+    password: bytes | None = None,
+) -> RSAPrivateKey:
+    """Load an RSA private key from PEM data or a PEM file path.
+
+    Args:
+        source: PEM-encoded bytes, or a path (``str`` / ``Path``) to a ``.pem`` / ``.key`` file.
+        password: Decryption password if the key is encrypted, otherwise ``None``.
+
+    Returns:
+        An :class:`~cryptography.hazmat.primitives.asymmetric.rsa.RSAPrivateKey`.
+    """
+    data = Path(source).read_bytes() if not isinstance(source, bytes) else source
+    key = serialization.load_pem_private_key(data, password=password)
+    if not isinstance(key, RSAPrivateKey):
+        raise TypeError(f"Expected RSA private key, got {type(key).__name__}")
+    return key
+
+
+def load_certificate_and_key_from_p12(
+    source: bytes | str | Path,
+    *,
+    password: bytes | None = None,
+) -> tuple[Certificate, RSAPrivateKey]:
+    """Load a certificate and RSA private key from a PKCS#12 (.p12 / .pfx) file.
+
+    Args:
+        source: Raw PKCS#12 bytes, or a path (``str`` / ``Path``) to the ``.p12`` / ``.pfx`` file.
+        password: Decryption password for the archive, or ``None`` if unencrypted.
+
+    Returns:
+        A ``(cert, private_key)`` tuple ready to pass to :meth:`~ksef2.services.auth.AuthService.authenticate_xades`.
+
+    Note:
+        If you have separate ``.pem`` and ``.key`` files downloaded directly from MCU, prefer
+        :func:`load_certificate_from_pem` + :func:`load_private_key_from_pem` — no conversion needed.
+    """
+    data = Path(source).read_bytes() if not isinstance(source, bytes) else source
+    private_key, cert, _ = pkcs12.load_key_and_certificates(data, password)
+    if cert is None:
+        raise ValueError("No certificate found in PKCS#12 archive")
+    if not isinstance(private_key, RSAPrivateKey):
+        raise TypeError(f"Expected RSA private key, got {type(private_key).__name__}")
+    return cert, private_key
 
 
 def generate_test_certificate(nip: str) -> tuple[Certificate, RSAPrivateKey]:

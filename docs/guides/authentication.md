@@ -6,13 +6,14 @@ The SDK supports multiple authentication methods for accessing the KSeF API.
 
 ### 1. XAdES Authentication
 
-Uses a digital certificate to sign an authentication request. Works with self-signed certificates on the TEST environment.
+Uses a digital certificate to sign an authentication request.
 
 **SDK Endpoint:** `POST /auth/xades-signature`
 
-**Requirements:**
-- Self-signed certificate (TEST only) or qualified certificate (PRODUCTION)
-- Certificate must include appropriate identifiers (NIP/PESEL)
+#### TEST environment — self-signed certificate
+
+The SDK can generate a self-signed certificate on the fly. This is the fastest
+way to get started and works exclusively on the TEST environment.
 
 ```python
 from ksef2 import Client, Environment
@@ -25,7 +26,6 @@ client = Client(environment=Environment.TEST)
 # Generate a self-signed certificate (TEST environment only)
 cert, private_key = generate_test_certificate(NIP)
 
-# Authenticate with XAdES signature
 auth = client.auth.authenticate_xades(
     nip=NIP,
     cert=cert,
@@ -39,6 +39,42 @@ print(f"  Valid until: {auth.auth_tokens.refresh_token.valid_until}")
 ```
 
 > Full example: [`scripts/examples/auth/auth_xades.py`](../../scripts/examples/auth/auth_xades.py)
+
+#### DEMO / PRODUCTION — MCU-issued certificate
+
+The DEMO and PRODUCTION environments reject self-signed certificates
+(`exceptionCode 21115 — Nieprawidłowy certyfikat`).  You must use a certificate
+issued by MCU (Ministerstwo Finansów):
+
+1. Log into MCU at <https://ap-demo.ksef.mf.gov.pl/web/> (DEMO) or the
+   production portal with your Profil Zaufany or electronic seal.
+2. Generate a **signing certificate** (separate from the login certificate).
+3. Download the `.pem` / `.crt` file and the matching private key.
+
+```python
+from ksef2 import Client, Environment
+from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
+
+cert = load_certificate_from_pem("cert.pem")          # path or raw bytes
+key  = load_private_key_from_pem("key.pem")           # password= if encrypted
+
+auth = Client(Environment.DEMO).auth.authenticate_xades(
+    nip="1234567890",
+    cert=cert,
+    private_key=key,
+    verify_chain=False,
+)
+```
+
+If your certificate was packaged as a `.p12` / `.pfx` archive:
+
+```python
+from ksef2.core.xades import load_certificate_and_key_from_p12
+
+cert, key = load_certificate_and_key_from_p12("cert.p12", password=b"secret")
+```
+
+> Full example: [`scripts/examples/auth/auth_xades_demo.py`](../../scripts/examples/auth/auth_xades_demo.py)
 
 ---
 
@@ -187,9 +223,9 @@ auth.sessions.terminate_current()
 
 | Environment | Base URL | Self-Signed Cert | Notes |
 |-------------|----------|------------------|-------|
-| PRODUCTION | `api.ksef.mf.gov.pl/v2` | ❌ | Requires qualified cert |
-| TEST | `api-test.ksef.mf.gov.pl/v2` | ✅ | Full test support |
-| DEMO | `api-demo.ksef.mf.gov.pl/v2` | ✅ | Demo environment |
+| PRODUCTION | `api.ksef.mf.gov.pl/v2` | ❌ | MCU-issued cert required |
+| TEST | `api-test.ksef.mf.gov.pl/v2` | ✅ | `generate_test_certificate()` works here |
+| DEMO | `api-demo.ksef.mf.gov.pl/v2` | ❌ | MCU-issued cert required |
 
 ---
 
