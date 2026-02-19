@@ -22,3 +22,6 @@ wheels/
 
 # temp directory
 /temp
+
+# downloads directory
+/downloads
