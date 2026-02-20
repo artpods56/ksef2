@@ -8,7 +8,7 @@ from ksef2.domain.models.auth import (
     AuthenticationMethod,
     ContextIdentifierType,
 )
-from ksef2.infra.mappers.auth import (
+from ksef2.infra.mappers.requests.auth import (
     AuthInitMapper,
     AuthStatusMapper,
     AuthTokensMapper,

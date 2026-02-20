@@ -33,6 +33,12 @@ class KSeFException(Exception):
         self.context["code"] = self.code
 
 
+class KSeFInvoiceRenderingError(KSeFException):
+    """Raised when invoice rendering fails."""
+
+    code: str = "INVOICE_RENDERING_ERROR"
+
+
 class KSeFApiError(KSeFException):
     """Raised on 4xx/5xx responses from the KSeF API."""
 
@@ -121,3 +127,35 @@ class NoCertificateAvailableError(KSeFException):
         message: str,
     ) -> None:
         super().__init__(f"{self.code}: {message}")
+
+
+class KSeFExportTimeoutError(KSeFException):
+    """Raised when polling for an export package exceeds the timeout."""
+
+    code: str = "EXPORT_TIMEOUT"
+
+    def __init__(
+        self,
+        reference_number: str,
+        timeout: float,
+    ) -> None:
+        self.reference_number = reference_number
+        self.timeout = timeout
+        super().__init__(
+            f"Export package {reference_number} not ready after {timeout}s",
+            reference_number=reference_number,
+            timeout=timeout,
+        )
+
+
+class KSeFInvoiceQueryTimeoutError(KSeFException):
+    """Raised when polling for invoices to appear exceeds the timeout."""
+
+    code: str = "INVOICE_QUERY_TIMEOUT"
+
+    def __init__(self, timeout: float) -> None:
+        self.timeout = timeout
+        super().__init__(
+            f"No invoices found after polling for {timeout}s",
+            timeout=timeout,
+        )

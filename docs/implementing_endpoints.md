@@ -233,35 +233,36 @@ __auth_endpoints__ = [
 Services orchestrate mappers and endpoints. They accept domain models, use mappers to convert, call endpoints, and return domain models.
 
 **Example** (from `services/tokens.py`):
+
 ```python
 from typing import final
 from ksef2.core import protocols
 from ksef2.domain.models.tokens import GenerateTokenResponse, TokenPermission
 from ksef2.endpoints.tokens import GenerateTokenEndpoint
-from ksef2.infra.mappers.tokens import GenerateTokenMapper
+from ksef2.infra.mappers.requests.tokens import GenerateTokenMapper
 
 
 @final
 class TokenService:
-    def __init__(self, transport: protocols.Middleware) -> None:
-        self._generate_ep = GenerateTokenEndpoint(transport)
+   def __init__(self, transport: protocols.Middleware) -> None:
+      self._generate_ep = GenerateTokenEndpoint(transport)
 
-    def generate(
-        self,
-        *,
-        access_token: str,
-        permissions: list[TokenPermission],
-        description: str,
-    ) -> GenerateTokenResponse:
-        # 1. Map domain → spec (request)
-        body = GenerateTokenMapper.map_request(permissions, description)
-        # 2. Call endpoint with spec model
-        spec_resp = self._generate_ep.send(
-            access_token=access_token,
-            body=body.model_dump(),
-        )
-        # 3. Map spec → domain (response)
-        return GenerateTokenMapper.map_response(spec_resp)
+   def generate(
+           self,
+           *,
+           access_token: str,
+           permissions: list[TokenPermission],
+           description: str,
+   ) -> GenerateTokenResponse:
+      # 1. Map domain → spec (request)
+      body = GenerateTokenMapper.map_request(permissions, description)
+      # 2. Call endpoint with spec model
+      spec_resp = self._generate_ep.send(
+         access_token=access_token,
+         body=body.model_dump(),
+      )
+      # 3. Map spec → domain (response)
+      return GenerateTokenMapper.map_response(spec_resp)
 ```
 
 **Key pattern:** mapper.map_request() → endpoint.send() → mapper.map_response()

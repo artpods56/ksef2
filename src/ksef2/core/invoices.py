@@ -10,18 +10,22 @@ class InvoiceFactory:
     """
 
     @staticmethod
-    def create(xml: str | bytes, replacements: dict[str, str]) -> bytes:
+    def create(template_xml: str | bytes, replacements: dict[str, str]) -> bytes:
         """Return invoice XML bytes with *replacements* applied.
 
         Args:
-            xml: Invoice XML template content.
+            template_xml: Invoice XML template content.
             replacements: Mapping of placeholder strings to their values,
                 e.g. ``{"#nip#": "1234567890", "#invoicing_date#": "2026-02-16"}``.
 
         Returns:
             UTF-8-encoded XML bytes.
         """
-        text = xml.decode("utf-8") if isinstance(xml, bytes) else xml
+        text = (
+            template_xml.decode("utf-8")
+            if isinstance(template_xml, bytes)
+            else template_xml
+        )
 
         for placeholder, value in replacements.items():
             text = text.replace(placeholder, value)

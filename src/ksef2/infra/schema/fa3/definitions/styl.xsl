@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:tns="http://crd.gov.pl/wzor/2025/06/25/13775/" version="1.0">
-	<xsl:import href="http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/07/eD/DefinicjeSzablony/WspolneSzablonyWizualizacji_v12-0E.xsl"/>
+	<xsl:import href="WspolneSzablonyWizualizacji_v12-0E.xsl"/>
 	<xsl:output method="html" encoding="UTF-8" indent="yes" version="4.01" doctype-public="-//W3C//DTD HTML 4.01//EN" doctype-system="http://www.w3.org/TR/html4/strict.dtd"/>
 	<xsl:template name="TytulDokumentu">
 		  e-FAKTURA KSeF

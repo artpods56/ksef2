@@ -15,8 +15,8 @@ from ksef2.domain.models.encryption import CertUsage
 from ksef2.domain.models.session import OnlineSessionState, QuerySessionsList
 from ksef2.endpoints.invoices import ListSessionsEndpoint
 from ksef2.endpoints.session import OpenSessionEndpoint, OpenBatchSessionEndpoint
-from ksef2.infra.mappers.batch import BatchSessionMapper
-from ksef2.infra.mappers.session import OpenOnlineSessionMapper
+from ksef2.infra.mappers.requests.batch import BatchSessionMapper
+from ksef2.infra.mappers.requests.session import OpenOnlineSessionMapper
 from ksef2.infra.schema.api import spec as spec
 
 if TYPE_CHECKING:

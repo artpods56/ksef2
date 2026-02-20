@@ -12,6 +12,8 @@ Skipped examples (require external config not available in CI):
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 import scripts.examples.auth.auth_refresh as auth_refresh_example
@@ -151,6 +153,46 @@ def test_example_download_purchase_invoices() -> None:
     authenticate as each buyer → export Subject2 invoices → fetch packages.
     """
     download_example.main()
+
+
+@pytest.mark.integration
+def test_example_download_and_export_to_pdf(tmp_path: Path) -> None:
+    """Send an invoice, download it, and export to PDF.
+
+    Covers: testdata setup → send invoice as seller → authenticate as buyer →
+    wait for invoice → export and download package → render each invoice to PDF.
+    """
+    import scripts.examples.invoices.download_and_export_to_pdf as pdf_export_example
+
+    template_path = (
+        Path(__file__).parents[2]
+        / "docs"
+        / "assets"
+        / "sample_invoices"
+        / "fa3"
+        / "invoice-template-fa-3-with-custom-subject_2.xml"
+    )
+    pdf_export_example.main(
+        template_path=template_path,
+        downloads_dir=tmp_path,
+    )
+
+
+@pytest.mark.integration
+def test_example_batch_export_to_pdf(tmp_path: Path) -> None:
+    """Batch-export all sample FA3 invoices to PDF and HTML.
+
+    Covers: iterate sample XML invoices → XSLT render to HTML → render to PDF.
+    """
+    import scripts.examples.invoices.batch_export_to_pdf as batch_pdf_example
+
+    source_dir = (
+        Path(__file__).parents[2] / "docs" / "assets" / "sample_invoices" / "fa3"
+    )
+    batch_pdf_example.main(
+        source_dir=source_dir,
+        output_dir=tmp_path,
+    )
 
 
 # ── limits ────────────────────────────────────────────────────────────────────
