@@ -59,3 +59,16 @@ regenerate-models:
       --target-python-version 3.12 \
       --output src/ksef2/infra/schema/api/spec/models.py
     uv run ruff format src/ksef2/infra/schema/api/spec/models.py
+
+
+regenerate-fa3-models:
+    xsdata generate schemas/FA3/schemat.xsd \
+      --output pydantic \
+      --unnest-classes \
+      --relative-imports \
+      --package src.ksef2.infra.schema.fa3.models \
+      --structure-style filenames \
+      --generic-collections \
+      --docstring-style Google \
+      --no-wrapper-fields \
+      --ignore-patterns
