@@ -4,6 +4,8 @@ import base64
 from pathlib import Path
 from typing import TYPE_CHECKING, final
 
+from tenacity import RetryError, retry, retry_if_result, stop_after_delay, wait_fixed
+
 
 from ksef2.clients.encryption import EncryptionClient
 from ksef2.core import exceptions
@@ -78,12 +80,12 @@ class OnlineSessionClient:
         self,
         *,
         filters: InvoiceQueryFilters,
-        params: InvoiceQueryParams | None,
+        params: InvoiceQueryParams | None = None,
     ) -> QueryInvoicesMetadataResponse:
         spec_filters = InvoiceQueryFiltersMapper.map_request(filters)
         spec_resp = self._query_metadata_ep.send(
             access_token=self._state.access_token,
-            body=spec_filters.model_dump(by_alias=True, exclude_none=True),
+            body=spec_filters.model_dump(by_alias=True, exclude_none=True, mode="json"),
             **params.to_api_params()
             if params
             else InvoiceQueryParams().to_api_params(),
@@ -119,6 +121,18 @@ class OnlineSessionClient:
             saved_files.append(output_file)
 
         return saved_files
+
+    def fetch_package_bytes(self, package: InvoicePackage) -> list[bytes]:
+        aes_key = base64.b64decode(self._state.aes_key)
+        iv = base64.b64decode(self._state.iv)
+
+        result: list[bytes] = []
+        for part in package.parts:
+            logger.info(f"Downloading part: {part.part_name}")
+            resp = self._transport.get(str(part.url))
+            resp.raise_for_status()
+            result.append(decrypt_aes_cbc(resp.content, key=aes_key, iv=iv))
+        return result
 
     def schedule_invoices_export(
         self,
@@ -240,6 +254,69 @@ class OnlineSessionClient:
             access_token=self._state.access_token,
             reference_number=self._state.reference_number,
         )
+
+    def wait_for_invoices(
+        self,
+        *,
+        filters: InvoiceQueryFilters,
+        timeout: float = 120.0,
+        poll_interval: float = 2.0,
+    ) -> QueryInvoicesMetadataResponse:
+        @retry(
+            stop=stop_after_delay(timeout),
+            wait=wait_fixed(poll_interval),
+            retry=retry_if_result(lambda r: not r.invoices),
+            reraise=True,
+        )
+        def _poll() -> QueryInvoicesMetadataResponse:
+            return self.query_metadata(filters=filters)
+
+        try:
+            return _poll()
+        except RetryError:
+            raise exceptions.KSeFInvoiceQueryTimeoutError(timeout=timeout)
+
+    def wait_for_export_package(
+        self,
+        *,
+        reference_number: str,
+        timeout: float = 120.0,
+        poll_interval: float = 2.0,
+    ) -> InvoicePackage:
+
+        @retry(
+            stop=stop_after_delay(timeout),
+            wait=wait_fixed(poll_interval),
+            retry=retry_if_result(lambda s: not (s.package and s.package.parts)),
+            reraise=True,
+        )
+        def _poll() -> InvoiceExportStatusResponse:
+            return self.get_export_status(reference_number=reference_number)
+
+        try:
+            status = _poll()
+        except RetryError:
+            raise exceptions.KSeFExportTimeoutError(
+                reference_number=reference_number,
+                timeout=timeout,
+            )
+        assert status.package is not None  # guaranteed by retry condition
+        return status.package
+
+    def export_and_download(
+        self,
+        *,
+        filters: InvoiceQueryFilters,
+        timeout: float = 120.0,
+        poll_interval: float = 2.0,
+    ) -> list[bytes]:
+        export = self.schedule_invoices_export(filters=filters)
+        package = self.wait_for_export_package(
+            reference_number=export.reference_number,
+            timeout=timeout,
+            poll_interval=poll_interval,
+        )
+        return self.fetch_package_bytes(package=package)
 
     def get_state(self) -> OnlineSessionState:
         return self._state

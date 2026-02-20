@@ -2,10 +2,24 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 from dataclasses import dataclass
 from typing import Generator
 
 import pytest
+
+# WeasyPrint (used by InvoicePDFExporter) needs native glib/pango libraries.
+# On macOS with Homebrew these live under /opt/homebrew/lib and the dynamic
+# linker only finds them when DYLD_FALLBACK_LIBRARY_PATH includes that path.
+# Interactive shells typically pick this up from .zshrc, but pytest and CI
+# runners often don't source the user profile, so we set it explicitly.
+if sys.platform == "darwin":
+    _brew_lib = "/opt/homebrew/lib"
+    _cur = os.environ.get("DYLD_FALLBACK_LIBRARY_PATH", "")
+    if _brew_lib not in _cur:
+        os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = (
+            f"{_brew_lib}:{_cur}" if _cur else _brew_lib
+        )
 
 from ksef2 import Client
 from ksef2.config import Environment

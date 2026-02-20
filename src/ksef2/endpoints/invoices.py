@@ -37,6 +37,9 @@ class QueryInvoicesMetadataEndpoint:
     def __init__(self, transport: protocols.Middleware):
         self._transport = transport
 
+    def get_url(self, params: QueryInvoicesMetadataQueryParams) -> str:
+        return f"{self.url}?{urlencode(params)}"
+
     def send(
         self,
         access_token: str,
@@ -44,8 +47,7 @@ class QueryInvoicesMetadataEndpoint:
         **query_params: Unpack[QueryInvoicesMetadataQueryParams],
     ) -> spec.QueryInvoicesMetadataResponse:
         valid_params = self._adapter.validate_python(query_params)
-        query_string = urlencode(valid_params)
-        path = f"{self.url}?{query_string}" if query_string else self.url
+        path = self.get_url(valid_params)
 
         return codecs.JsonResponseCodec.parse(
             self._transport.post(

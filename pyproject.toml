@@ -17,6 +17,8 @@ dependencies = [
     "dotenv>=0.9.9",
     "requests>=2.32.5",
     "xsdata-pydantic>=24.5",
+    "weasyprint>=63.0",
+    "tenacity>=9.0",
 ]
 
 [dependency-groups]

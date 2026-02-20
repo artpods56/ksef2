@@ -1,0 +1,62 @@
+"""PDF exporter for FA3 invoices using XSLT transformation and WeasyPrint."""
+
+from pathlib import Path
+from typing import final
+
+from ksef2.services.renderers.xslt import InvoiceXSLTRenderer
+from ksef2.infra.schema.fa3 import DEFAULT_CSS_OVERRIDES
+from weasyprint import CSS, HTML
+
+
+@final
+class InvoicePDFExporter:
+    def __init__(
+        self,
+        stylesheet_path: str | Path | None = None,
+        enable_code_lookups: bool = False,
+        html_overrides: str | None = None,
+    ):
+        self._xslt_renderer = InvoiceXSLTRenderer(
+            stylesheet_path=stylesheet_path,
+            enable_code_lookups=enable_code_lookups,
+        )
+        self._html_overrides = (
+            html_overrides if html_overrides else DEFAULT_CSS_OVERRIDES
+        )
+
+    @property
+    def stylesheet_path(self) -> Path:
+        """Return the path to the XSL stylesheet being used."""
+        return self._xslt_renderer.stylesheet_path
+
+    def _render_html(self, html_content: str) -> bytes:
+        stylesheets = [CSS(string=self._html_overrides)]
+
+        pdf_bytes = HTML(
+            string=html_content, base_url=str(self.stylesheet_path.parent)
+        ).write_pdf(stylesheets=stylesheets)
+
+        if pdf_bytes is None:
+            raise RuntimeError("Failed to generate PDF document from provided XML.")
+        return pdf_bytes
+
+    def export_from_path(self, invoice_xml_path: str | Path) -> bytes:
+        html_content = self._xslt_renderer.render_from_path(invoice_xml_path)
+        return self._render_html(html_content)
+
+    def export_from_string(self, invoice_xml: str | bytes) -> bytes:
+        html_content = self._xslt_renderer.render_from_string(invoice_xml)
+        return self._render_html(html_content)
+
+    def export_to_file(
+        self,
+        invoice_xml_path: str | Path,
+        output_pdf_path: str | Path,
+    ) -> Path:
+        output_pdf_path = Path(output_pdf_path)
+        output_pdf_path.parent.mkdir(parents=True, exist_ok=True)
+
+        pdf_bytes = self.export_from_path(invoice_xml_path)
+        output_pdf_path.write_bytes(pdf_bytes)
+
+        return output_pdf_path
