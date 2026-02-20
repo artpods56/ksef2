@@ -39,7 +39,7 @@ from ksef2.endpoints.invoices import (
 )
 from ksef2.endpoints.session import TerminateSessionEndpoint
 from ksef2.infra.schema.api import spec as spec
-from ksef2.infra.mappers.invoices import (
+from ksef2.infra.mappers.requests.invoices import (
     SendInvoiceMapper,
     InvoiceQueryFiltersMapper,
     QueryInvoicesMetadataMapper,

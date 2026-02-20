@@ -19,7 +19,7 @@ from ksef2.endpoints.tokens import (
     RevokeTokenEndpoint,
     TokenStatusEndpoint,
 )
-from ksef2.infra.mappers.tokens import (
+from ksef2.infra.mappers.requests.tokens import (
     GenerateTokenMapper,
     QueryTokensMapper,
     TokenStatusMapper,

@@ -49,7 +49,7 @@ from ksef2.endpoints.permissions import (
     RevokeAuthorizationPermissionsEndpoint,
     RevokeCommonPermissionsEndpoint,
 )
-from ksef2.infra.mappers.permissions import PermissionsMapper
+from ksef2.infra.mappers.requests.permissions import PermissionsMapper
 
 
 @final

@@ -24,7 +24,7 @@ from ksef2.endpoints.certificates import (
     RetrieveCertificatesEndpoint,
     RevokeCertificateEndpoint,
 )
-from ksef2.infra.mappers.certificates import (
+from ksef2.infra.mappers.requests.certificates import (
     CertificateEnrollmentDataMapper,
     CertificateEnrollmentStatusMapper,
     CertificateLimitsMapper,

@@ -16,7 +16,7 @@ from ksef2.endpoints.limits import (
     SetSessionLimitsEndpoint,
     SetSubjectLimitsEndpoint,
 )
-from ksef2.infra.mappers.limits import (
+from ksef2.infra.mappers.requests.limits import (
     ApiRateLimitsMapper,
     ContextLimitsMapper,
     SubjectLimitsMapper,

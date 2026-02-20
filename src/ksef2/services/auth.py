@@ -24,7 +24,7 @@ from ksef2.endpoints.auth import (
     TokenAuthEndpoint,
     XAdESAuthEndpoint,
 )
-from ksef2.infra.mappers.auth import (
+from ksef2.infra.mappers.requests.auth import (
     AuthInitMapper,
     AuthStatusMapper,
     AuthTokensMapper,

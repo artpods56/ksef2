@@ -2,7 +2,7 @@ from typing import final
 from ksef2.core import protocols
 from ksef2.domain.models.encryption import PublicKeyCertificate
 from ksef2.endpoints import encryption
-from ksef2.infra.mappers.encryption import PublicKeyCertificateMapper
+from ksef2.infra.mappers.requests.encryption import PublicKeyCertificateMapper
 
 
 @final

@@ -6,7 +6,7 @@ from ksef2.core import protocols
 from ksef2.domain.models.pagination import PaginationParams
 from ksef2.domain.models.peppol import QueryPeppolProvidersResponse
 from ksef2.endpoints.peppol import QueryPeppolProvidersEndpoint
-from ksef2.infra.mappers.peppol import PeppolProviderMapper
+from ksef2.infra.mappers.requests.peppol import PeppolProviderMapper
 
 
 @final

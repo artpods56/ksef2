@@ -27,7 +27,7 @@ from ksef2.endpoints.testdata import (
     RevokePermissionsEndpoint,
     UnblockContextEndpoint,
 )
-from ksef2.infra.mappers.testdata import TestDataMapper, TestDataMapperv2
+from ksef2.infra.mappers.requests.testdata import TestDataMapper, TestDataMapperv2
 
 logger = logging.getLogger(__name__)
 
