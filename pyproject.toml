@@ -41,6 +41,3 @@ addopts = "-m 'not integration'"
 markers = [
     "integration: tests that hit the real KSeF TEST environment",
 ]
-
-[tool.pyright]
-exclude = ["src/ksef2/infra/schema"]

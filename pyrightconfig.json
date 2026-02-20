@@ -1,0 +1,4 @@
+{
+  "include": ["src"],
+  "exclude": [".venv","src/ksef2/infra/schema/api/spec", "src/ksef2/infra/schema/fa3/models"]
+}
