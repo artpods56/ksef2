@@ -21,7 +21,12 @@ PERSON_NIP = generate_nip()
 PERSON_PESEL = generate_pesel()
 
 INVOICE_TEMPLATE_PATH = (
-    repo_root() / "docs" / "assets" / "sample_invoices" / "invoice-template_v3.xml"
+    repo_root()
+    / "docs"
+    / "assets"
+    / "sample_invoices"
+    / "fa3"
+    / "invoice-template_v3.xml"
 )
 
 client = Client(environment=Environment.TEST)

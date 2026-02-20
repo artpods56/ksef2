@@ -35,6 +35,7 @@ INVOICE_TEMPLATE_PATH = (
     / "docs"
     / "assets"
     / "sample_invoices"
+    / "fa3"
     / "invoice-template-fa-3-with-custom-subject_2.xml"
 )
 

@@ -169,6 +169,7 @@ def test_example_download_and_export_to_pdf(tmp_path: Path) -> None:
         / "docs"
         / "assets"
         / "sample_invoices"
+        / "fa3"
         / "invoice-template-fa-3-with-custom-subject_2.xml"
     )
     pdf_export_example.main(
@@ -186,8 +187,7 @@ def test_example_batch_export_to_pdf(tmp_path: Path) -> None:
     import scripts.examples.invoices.batch_export_to_pdf as batch_pdf_example
 
     source_dir = (
-        Path(__file__).parents[2]
-        / "docs" / "assets" / "sample_invoices" / "fa3"
+        Path(__file__).parents[2] / "docs" / "assets" / "sample_invoices" / "fa3"
     )
     batch_pdf_example.main(
         source_dir=source_dir,

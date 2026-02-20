@@ -90,7 +90,7 @@ def download_and_export(
 
         zip_parts = session.export_and_download(filters=query_filters)
 
-        DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        downloads_dir.mkdir(parents=True, exist_ok=True)
         exporter = InvoicePDFExporter()
 
         for invoice in PackageReader(zip_parts):

@@ -13,14 +13,13 @@ def main(source_dir: Path, output_dir: Path):
 
     for path in source_dir.glob("*.xml"):
         print(f"Exporting {path.name} ...")
-        
-        
+
         print("Exporting to HTML ...")
         exported_html_path = html_exporter.render_to_file(
             path, output_dir / f"{path.stem}.html"
         )
         print(f"  Saved to: {exported_html_path}")
-         
+
         print("Exporting to PDF ...")
         exported_file_path = exporter.export_to_file(
             path, output_dir / f"{path.stem}.pdf"

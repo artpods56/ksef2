@@ -10,7 +10,12 @@ from scripts.examples._common import repo_root
 VALID_NIP = generate_nip()
 
 INVOICE_TEMPLATE_PATH = (
-    repo_root() / "docs" / "assets" / "sample_invoices" / "invoice-template_v3.xml"
+    repo_root()
+    / "docs"
+    / "assets"
+    / "sample_invoices"
+    / "fa3"
+    / "invoice-template_v3.xml"
 )
 
 
