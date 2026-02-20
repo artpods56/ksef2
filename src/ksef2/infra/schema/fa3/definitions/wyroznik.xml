@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="http://crd.gov.pl/wzor/2008/05/09/1/styl.xsl"?><wyr:Dokument xmlns:adr="http://crd.gov.pl/xml/schematy/adres/2008/05/09/" xmlns:inst="http://crd.gov.pl/xml/schematy/instytucja/2008/05/09/" xmlns:meta="http://crd.gov.pl/xml/schematy/meta/2008/05/09/" xmlns:oso="http://crd.gov.pl/xml/schematy/osoba/2008/05/09/" xmlns:str="http://crd.gov.pl/xml/schematy/struktura/2008/05/09/" xmlns:wyr="http://crd.gov.pl/wzor/2008/05/09/1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://crd.gov.pl/wzor/2008/05/09/1/ http://crd.gov.pl/wzor/2008/05/09/1/schemat.xsd">
+	<wyr:OpisDokumentu>
+		<meta:Data typDaty="opublikowany">
+			</meta:Data>
+		<meta:Identyfikator typIdentyfikatora="JednolityIdentyfikator">
+			<meta:Wartosc>http://crd.gov.pl/wzor/2025/06/25/13775/wyroznik.xml</meta:Wartosc>
+		</meta:Identyfikator>
+		<meta:Dostep>
+			<meta:Dostepnosc>wszystko</meta:Dostepnosc>
+			<meta:Uwagi></meta:Uwagi>
+		</meta:Dostep>
+		<meta:RodzajDokumentu>
+			<meta:Kategoria>tekst</meta:Kategoria>
+			<meta:RodzajKategorii>Podatek VAT</meta:RodzajKategorii>
+		</meta:RodzajDokumentu>
+		<meta:Relacja>
+			<meta:Identyfikator typIdentyfikatora="URIXSD">
+				<meta:Wartosc>http://crd.gov.pl/wzor/2025/06/25/13775/schemat.xsd</meta:Wartosc>
+			</meta:Identyfikator>
+			<meta:RodzajRelacji>maCzesc</meta:RodzajRelacji>
+		</meta:Relacja>
+		<meta:Relacja>
+			<meta:Identyfikator typIdentyfikatora="URIXSL">
+				<meta:Wartosc>http://crd.gov.pl/wzor/2025/06/25/13775/styl.xsl</meta:Wartosc>
+			</meta:Identyfikator>
+			<meta:RodzajRelacji>maCzesc</meta:RodzajRelacji>
+		</meta:Relacja>
+		<meta:Jezyk kodJezyka="pol">polski</meta:Jezyk>
+	</wyr:OpisDokumentu>
+	<wyr:DaneDokumentu>
+		<str:Naglowek>
+			<str:NazwaDokumentu>FA - Wyróżnik wzoru ustrukturyzowanej faktury VAT</str:NazwaDokumentu>
+		</str:Naglowek>
+		<str:Nadawcy>
+			<meta:Podmiot typPodmiotu="Tworca Wzoru Dokumentu Elektronicznego">
+				<inst:Instytucja>
+					<inst:IdInstytucji>
+						<inst:NIP>5260250274</inst:NIP>
+					</inst:IdInstytucji>
+					<inst:NazwaInstytucji>Ministerstwo Finansów</inst:NazwaInstytucji>
+					<adr:Adres>
+						<adr:KodPocztowy>00-916</adr:KodPocztowy>
+						<adr:Poczta>Warszawa</adr:Poczta>
+						<adr:Miejscowosc>Warszawa</adr:Miejscowosc>
+						<adr:Ulica rodzajUlicy="ulica">Świętokrzyska</adr:Ulica>
+						<adr:Budynek>12</adr:Budynek>
+						<adr:Lokal></adr:Lokal>
+						<adr:Kraj>PL</adr:Kraj>
+						<adr:Wojewodztwo>mazowieckie</adr:Wojewodztwo>
+					</adr:Adres>
+				</inst:Instytucja>
+			</meta:Podmiot>
+		</str:Nadawcy>
+	</wyr:DaneDokumentu>
+	<wyr:TrescDokumentu format="text/xml" kodowanie="XML">
+		<wyr:Wartosc>
+			<wyr:NazwaDokumentu>FA USTRUKTURYZOWANA FAKTURA VAT</wyr:NazwaDokumentu>
+			<wyr:RodzajDokumentu>faktura</wyr:RodzajDokumentu>
+			<wyr:PodstawaPrawna>
+				<wyr:NazwaPodstawy>Art. 16b ust. 1 ustawy z dnia 17 lutego 2005 r. o informatyzacji działalności podmiotów realizujących zadania publiczne (Dz. U. z 2024 r. poz. 1557 i 1717)</wyr:NazwaPodstawy>
+				<wyr:JednolityIdentyfikatorPodstawy>URI://Dziennik_Ustaw/2024/1557/16b/1</wyr:JednolityIdentyfikatorPodstawy>
+			</wyr:PodstawaPrawna>
+			<wyr:WaznoscWzoru typDaty="waznosci">
+				<meta:Od>2026-02-01</meta:Od>
+			</wyr:WaznoscWzoru>
+			<wyr:OpisWzoru>FA(3) USTRUKTURYZOWANA FAKTURA VAT</wyr:OpisWzoru>
+		</wyr:Wartosc>
+	</wyr:TrescDokumentu>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="id-053a2041746ff3e0636344e264256162"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"></ds:SignatureMethod><ds:Reference Id="ID-b3afa7f3c46061370d1773964a8a6c4e" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/TR/1999/REC-xpath-19991116"><ds:XPath>not(ancestor-or-self::ds:Signature)</ds:XPath></ds:Transform></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></ds:DigestMethod><ds:DigestValue>JvkMgEONXlFp6TkR8k2HfAl46jJcSIWNf6BtTGGkQsE=</ds:DigestValue></ds:Reference><ds:Reference Id="ID-8ccfb053e8027aaa2eae05d93f2514b2" URI="schemat.xsd"><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></ds:DigestMethod><ds:DigestValue>tka2tSX1Gt8bslRfER/Iym56pt0vmJSPFmfTaVwG2Vg=</ds:DigestValue></ds:Reference><ds:Reference Id="ID-0c92f3393567f4b5bbb6997798541385" URI="styl.xsl"><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></ds:DigestMethod><ds:DigestValue>pBTUkf42i+HKBMIhxo1uo+7+z8LBlsh0+BpimieSd5E=</ds:DigestValue></ds:Reference><ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#xades-id-053a2041746ff3e0636344e264256162"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"></ds:Transform></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></ds:DigestMethod><ds:DigestValue>lVOGcdv5AZIh8IEzF3I3W1uE1i2W1e7UZFsW8eTrT+0=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="value-id-053a2041746ff3e0636344e264256162">DPO5ctBfzX3RUQ8nM/UmEnRJbpAfSrCBgyVDUC2YJebu1yRIyZ+MlmJN8FkY9CsgWLTlBVkeoQtusCTqDuTOkR20LYZD0HgPK+EC0j6+PckIa2IbK1bq4yyCAkKQqw3xE/PIZr0gQD34KM7jFhxg4a/Dykat2Du1S5nnhSQ4M6AKBxoz8Ri4x9Fbt2/XjV6xDcOomuy3SNiBxgVgVPapGuiFHIeUoA5qphzWROFKZ1uv5P1Cw5mN1ZV0sPDr7Gk9TvhGImcMi1ekEVDe5V4it5531wFNcReD2CZ06vj63P7rGgVUal0wIA4Xg3e0h0/fBQ3sCB+w7VMkrix6u4pmOA==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIIVTCCBj2gAwIBAgITALzvYVycMGaaa8ng0pNv9SZ/wjANBgkqhkiG9w0BAQsFADBvMRkwFwYDVQRhDBBWQVRQTC05NTEyMzUyMzc5MQswCQYDVQQGEwJQTDEcMBoGA1UECgwTRXVyb0NlcnQgU3AuIHogby5vLjEnMCUGA1UEAwweQ2VudHJ1bSBLd2FsaWZpa293YW5lIEV1cm9DZXJ0MB4XDTI0MDgxOTEzMTExNVoXDTI3MDgxOTEzMTExNVowgdgxCzAJBgNVBAYTAlBMMRQwEgYDVQQIDAtNYXpvd2llY2tpZTERMA8GA1UEBwwIV2Fyc3phd2ExSDBGBgNVBAoMP01pbmlzdGVyc3R3byBDeWZyeXphY2ppLCBNaW5pc3RlciB3xYJhxZtjaXd5IGRzLiBJbmZvcm1hdHl6YWNqaTESMBAGA1UEAwwJZVBVQVAgQ1JXMRYwFAYDVQQJDA1LcsOzbGV3c2thIDI3MQ8wDQYDVQQRDAYwMC0wNjAxGTAXBgNVBGEMEFZBVFBMLTUyNTI5NTUwMzcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCrGdhm+yUSxFN7krrAlMqYdlrZhkfGPP5okwfmsnSTlV4N8bGf+5p+1NonQijh8Nhgtm2rLp8HpJQbQenmY1FE7q0YnVemRflj/rFMsnyPNoTfKGN0YwDbzGVINGFCkHzNNvihPOGCEt3zkiUHe/i49rf6saGEggHNDfZfXqlQSbqDrygMnLEYps+4wAkLQyMy84LPIHoKEotXLGl2wjn+F3CpX6roMyaCe1JehUXUz/uj+XV7Auay2HDqmeC6P34PXh46fetMhc0sFXTIJk9enRqZqOzLAkfcWTA+T2Wl+VX22747++MGv2p3qoYpj0uOkeFJczNbX/NTBHZkWoA5AgMBAAGjggN+MIIDejAfBgNVHSMEGDAWgBR0YnCZ/xtgO8RktYQfoxUMXMtfvTAdBgNVHQ4EFgQUvqQZ+k+ts5W3nkxMfGyUkJIt21gwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCBkAwMgYDVR0fBCswKTAnoCWgI4YhaHR0cHM6Ly9jcmwuZXVyb2NlcnQucGwvcWNhMDMuY3JsMHwGCCsGAQUFBwEBBHAwbjApBggrBgEFBQcwAYYdaHR0cHM6Ly9jcmwuZXVyb2NlcnQucGwvT0NTUC8wQQYIKwYBBQUHMAKGNWh0dHBzOi8vZXVyb2NlcnQucGwvcHViL1ByYXdvL1FDQTAzX0V1cm9jZXJ0XzIwMTcuZGVyMDcGCCsGAQUFBwEDBCswKTAIBgYEAI5GAQEwCAYGBACORgEEMBMGBgQAjkYBBjAJBgcEAI5GAQYCMIICLQYDVR0gBIICJDCCAiAwggIRBgoqhGgBhvh/AQIDMIICATAwBggrBgEFBQcCARYkaHR0cDovL3d3dy5ldXJvY2VydC5wbC9yZXBvenl0b3JpdW0vMIIBywYIKwYBBQUHAgIwggG9DIIBuUNlcnR5ZmlrYXQgd3lzdGF3aW9ueSB6Z29kbmllIHogYWt0dWFsbnltIGRva3VtZW50ZW06IFBvbGl0eWthIENlcnR5ZmlrYWNqaSBpIEtvZGVrcyBQb3N0ZXBvd2FuaWEgQ2VydHlmaWthY3lqbmVnbyBLd2FsaWZpa293YW55Y2ggVXNsdWcgWmF1ZmFuaWEgRXVyb0NlcnQsIHpuYWpkdWphY3ltIHNpZSB3IHJlcG96eXRvcml1bTogaHR0cDovL3d3dy5ldXJvY2VydC5wbC9yZXBvenl0b3JpdW0vLlRoaXMgY2VydGlmaWNhdGUgd2FzIGlzc3VlZCBhY2NvcmRpbmcgdG8gdGhlIGN1cnJlbnQgZG9jdW1lbnQ6IENlcnRpZmljYXRlIFBvbGljeSBhbmQgQ2VydGlmaWNhdGlvbiBQcmFjdGljZSBTdGF0ZW1lbnQgb2YgRXVyb0NlcnQgUXVhbGlmaWVkIFRydXN0IFNlcnZpY2VzLCB3aGljaCBjYW4gYmUgZm91bmQgYXQgaHR0cDovL3d3dy5ldXJvY2VydC5wbC9yZXBvenl0b3JpdW0vLjAJBgcEAIvsQAEDMA0GCSqGSIb3DQEBCwUAA4ICAQCNm7DUNwr7ZV9ua0MRHVkIY68OeIM5xaEis0svycoUJOGfTa+3PQRN6n74xH3g2MAIFPmtBy8bh11yG38KfLp/67/yGkKPb9J9QZWcGNtPjXH4DpX0Gtbr4vZPu5+3f0GIaetkJeFihFgitWlNGky6WOxDw2zZaS4IW0r6a8cbUKQYMrFhyQO93qQnM/wmYtQFksbQ76ihoUbUDvnKF+PEw3gkxaTQZydoAYkIAiNggBQByZtj9hdaLP4f/OwcfpME6BzpPvld9cjWOmdQ3CdUEdMMgIZHyGZ8ydMWmgDrbMs35AML4QOgm5VRcEDP7TVAHnD8U03pXp1BBM0UUygtI4JbdjWBvWwE2mXmefvjbXvd+XZZBQgv40Equy0bQrR+tKIx0QkrDsPfxN35V8fwDpkVSLLkCNgMoI10fePbc8raUMat77ltRdt9BRam4qUrY6LTeEX68dFz2iZMQ5QalhXV0ORuq7mILCvRdXz+al3R3wukWYyGebEw4xW/GjEJTCjDu5WyT/ZCjaBn/oL4+YPG3wgAUDRGgM990j6xdjCubUAYl+GSN92IN2dkAXQngx1QRx8QI8ef2ctp8EkZfz9Ha7UrOGGu3HXdw+8rnq/oewoIsm3+FmZVufsNareXnj8N3Sb0WbwawUC55KjHnOtVbCcpa1Rki6ZSuyl/Dw==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#id-053a2041746ff3e0636344e264256162"><xades:SignedProperties Id="xades-id-053a2041746ff3e0636344e264256162"><xades:SignedSignatureProperties><xades:SigningTime>2025-06-25T05:35:25Z</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></ds:DigestMethod><ds:DigestValue>TxVK/tpPeUZiDOxO14w1Xgp6lXo=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=Centrum Kwalifikowane EuroCert,O=EuroCert Sp. z o.o.,C=PL,2.5.4.97=#0c10564154504c2d39353132333532333739</ds:X509IssuerName><ds:X509SerialNumber>16458566656839823388501793613331793034248130</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#ID-b3afa7f3c46061370d1773964a8a6c4e"><xades:MimeType>text/xml</xades:MimeType></xades:DataObjectFormat><xades:DataObjectFormat ObjectReference="#ID-8ccfb053e8027aaa2eae05d93f2514b2"><xades:MimeType>application/octet-stream</xades:MimeType></xades:DataObjectFormat><xades:DataObjectFormat ObjectReference="#ID-0c92f3393567f4b5bbb6997798541385"><xades:MimeType>application/octet-stream</xades:MimeType></xades:DataObjectFormat><xades:CommitmentTypeIndication><xades:CommitmentTypeId><xades:Identifier>http://uri.etsi.org/01903/v1.2.2#ProofOfApproval</xades:Identifier></xades:CommitmentTypeId><xades:AllSignedDataObjects></xades:AllSignedDataObjects></xades:CommitmentTypeIndication></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></wyr:Dokument>
