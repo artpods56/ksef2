@@ -17,7 +17,7 @@ from ksef2.domain.models.invoices import (
     InvoicingMode,
     InvoiceSubjectType,
 )
-from ksef2.infra.mappers.invoices import (
+from ksef2.infra.mappers.requests.invoices import (
     ExportInvoicesMapper,
     ExportStatusMapper,
     InvoiceQueryFiltersMapper,

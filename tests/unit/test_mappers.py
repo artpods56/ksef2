@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 
 from ksef2.core.crypto import sha256_b64
 from ksef2.domain.models.session import FormSchema
-from ksef2.infra.mappers.encryption import PublicKeyCertificateMapper
-from ksef2.infra.mappers.invoices import SendInvoiceMapper
-from ksef2.infra.mappers.session import OpenOnlineSessionMapper
+from ksef2.infra.mappers.requests.encryption import PublicKeyCertificateMapper
+from ksef2.infra.mappers.requests.invoices import SendInvoiceMapper
+from ksef2.infra.mappers.requests.session import OpenOnlineSessionMapper
 from ksef2.infra.schema.api import spec as spec
 
 
