@@ -16,6 +16,7 @@ dependencies = [
     "structlog>=25.5.0",
     "dotenv>=0.9.9",
     "requests>=2.32.5",
+    "xsdata-pydantic>=24.5",
 ]
 
 [dependency-groups]
@@ -28,11 +29,16 @@ dev = [
 ]
 codegen = [
     "datamodel-code-generator[ruff]>=0.53.0",
+    "xsdata-pydantic[cli,lxml,soap]>=24.5",
     "xsdata[cli,lxml]>=24.0",
 ]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 addopts = "-m 'not integration'"
 markers = [
     "integration: tests that hit the real KSeF TEST environment",
 ]
+
+[tool.pyright]
+exclude = ["src/ksef2/infra/schema"]

@@ -446,7 +446,7 @@ wheels = [
 
 [[package]]
 name = "ksef2"
-version = "0.7.0"
+version = "0.7.1"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
@@ -456,12 +456,14 @@ dependencies = [
     { name = "requests" },
     { name = "signxml" },
     { name = "structlog" },
+    { name = "xsdata-pydantic" },
 ]
 
 [package.dev-dependencies]
 codegen = [
     { name = "datamodel-code-generator", extra = ["ruff"] },
     { name = "xsdata", extra = ["cli", "lxml"] },
+    { name = "xsdata-pydantic", extra = ["cli", "lxml", "soap"] },
 ]
 dev = [
     { name = "basedpyright" },
@@ -480,12 +482,14 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.5" },
     { name = "signxml", specifier = ">=4.0" },
     { name = "structlog", specifier = ">=25.5.0" },
+    { name = "xsdata-pydantic", specifier = ">=24.5" },
 ]
 
 [package.metadata.requires-dev]
 codegen = [
     { name = "datamodel-code-generator", extras = ["ruff"], specifier = ">=0.53.0" },
     { name = "xsdata", extras = ["cli", "lxml"], specifier = ">=24.0" },
+    { name = "xsdata-pydantic", extras = ["cli", "lxml", "soap"], specifier = ">=24.5" },
 ]
 dev = [
     { name = "basedpyright", specifier = ">=1.37.4" },
@@ -1068,4 +1072,28 @@ cli = [
 ]
 lxml = [
     { name = "lxml" },
+]
+
+[[package]]
+name = "xsdata-pydantic"
+version = "24.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "xsdata" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/85/5e/6bc728d70460d9ad3982d05c3765179e3584fee6fa523d57b242e6e4c50f/xsdata_pydantic-24.5.tar.gz", hash = "sha256:e3c8758133195657ece578537eda6c7ebd8419f77abf6b90fd4ced96e348129b", size = 18763, upload-time = "2024-05-08T17:49:48.28Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/7b/785fe71aa1138d7380ab3926cbb9571896d56544901c320953ff8a586926/xsdata_pydantic-24.5-py3-none-any.whl", hash = "sha256:bb6da7d3445d655640096c65c1b11037153b19df533da89553f24247ef352cd0", size = 8891, upload-time = "2024-05-08T17:49:46.408Z" },
+]
+
+[package.optional-dependencies]
+cli = [
+    { name = "xsdata", extra = ["cli"] },
+]
+lxml = [
+    { name = "lxml" },
+]
+soap = [
+    { name = "requests" },
 ]
