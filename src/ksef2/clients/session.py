@@ -283,7 +283,6 @@ class OnlineSessionClient:
         timeout: float = 120.0,
         poll_interval: float = 2.0,
     ) -> InvoicePackage:
-
         @retry(
             stop=stop_after_delay(timeout),
             wait=wait_fixed(poll_interval),

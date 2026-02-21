@@ -5,10 +5,10 @@ Usage examples::
     # Token auth, last 7 days
     python scripts/cli/export_invoices.py --nip 1234567890 --token "abc123" --days 7 --output ./invoices/
 
-    # XAdES auth with PEM cert + key
+    # XAdES auth with PEM cert + key (RSA or EC)
     python scripts/cli/export_invoices.py --nip 1234567890 --cert cert.pem --key key.pem --days 30
 
-    # XAdES auth with PKCS#12 file
+    # XAdES auth with PKCS#12 file (RSA or EC key)
     python scripts/cli/export_invoices.py --nip 1234567890 --p12 creds.p12 --p12-password secret --days 30
 
     # Use demo environment
@@ -63,10 +63,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
     # Auth: XAdES PEM
     _ = parser.add_argument("--cert", help="Path to PEM certificate file")
-    _ = parser.add_argument("--key", help="Path to PEM private key file")
+    _ = parser.add_argument("--key", help="Path to PEM private key file (RSA or EC)")
 
     # Auth: XAdES PKCS#12
-    _ = parser.add_argument("--p12", help="Path to PKCS#12 (.p12/.pfx) file")
+    _ = parser.add_argument(
+        "--p12", help="Path to PKCS#12 (.p12/.pfx) file (RSA or EC key)"
+    )
     _ = parser.add_argument("--p12-password", help="Password for the PKCS#12 file")
 
     _ = parser.add_argument(

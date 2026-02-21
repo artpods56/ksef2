@@ -330,6 +330,114 @@ class TestAuthenticateXades:
 
 
 # ---------------------------------------------------------------------------
+# sign_xades — EC key support
+# ---------------------------------------------------------------------------
+
+
+class TestSignXadesEC:
+    @pytest.fixture(scope="class")
+    def ec_cert_and_key(self):
+        import datetime
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from cryptography.hazmat.primitives import hashes
+        from cryptography import x509
+        from cryptography.x509.oid import NameOID
+
+        key = ec.generate_private_key(ec.SECP256R1())
+        subject = issuer = x509.Name(
+            [x509.NameAttribute(NameOID.COMMON_NAME, "EC Test")]
+        )
+        now = datetime.datetime.now(datetime.timezone.utc)
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(issuer)
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(now - datetime.timedelta(hours=1))
+            .not_valid_after(now + datetime.timedelta(days=365))
+            .sign(key, hashes.SHA256())
+        )
+        return cert, key
+
+    def test_sign_xades_ec_does_not_raise(self, ec_cert_and_key) -> None:
+        from ksef2.core.xades import build_auth_token_request_xml, sign_xades
+
+        cert, key = ec_cert_and_key
+        xml_bytes = build_auth_token_request_xml("c" * 36, "1234567890")
+        signed = sign_xades(xml_bytes, cert, key)
+        assert signed is not None
+        assert b"<" in signed
+
+    def test_sign_xades_ec_produces_ecdsa_signature(self, ec_cert_and_key) -> None:
+        from ksef2.core.xades import build_auth_token_request_xml, sign_xades
+
+        cert, key = ec_cert_and_key
+        xml_bytes = build_auth_token_request_xml("c" * 36, "1234567890")
+        signed = sign_xades(xml_bytes, cert, key)
+        assert b"ecdsa-sha256" in signed.lower() or b"ECDSA" in signed
+
+
+# ---------------------------------------------------------------------------
+# load_certificate_and_key_from_p12 — EC key
+# ---------------------------------------------------------------------------
+
+
+class TestLoadP12EC:
+    @pytest.fixture(scope="class")
+    def ec_p12_bytes(self):
+        import datetime
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from cryptography.hazmat.primitives import hashes, serialization
+        from cryptography.hazmat.primitives.serialization import pkcs12
+        from cryptography import x509
+        from cryptography.x509.oid import NameOID
+
+        key = ec.generate_private_key(ec.SECP256R1())
+        subject = issuer = x509.Name(
+            [x509.NameAttribute(NameOID.COMMON_NAME, "EC P12 Test")]
+        )
+        now = datetime.datetime.now(datetime.timezone.utc)
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(issuer)
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(now - datetime.timedelta(hours=1))
+            .not_valid_after(now + datetime.timedelta(days=365))
+            .sign(key, hashes.SHA256())
+        )
+        return pkcs12.serialize_key_and_certificates(
+            name=b"ec-test",
+            key=key,
+            cert=cert,
+            cas=None,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+
+    def test_loads_ec_key_from_p12(self, ec_p12_bytes: bytes) -> None:
+        from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
+        from ksef2.core.xades import load_certificate_and_key_from_p12
+
+        cert, key = load_certificate_and_key_from_p12(ec_p12_bytes)
+        assert isinstance(key, EllipticCurvePrivateKey)
+
+    def test_ec_key_from_p12_can_sign(self, ec_p12_bytes: bytes) -> None:
+        from ksef2.core.xades import (
+            build_auth_token_request_xml,
+            load_certificate_and_key_from_p12,
+            sign_xades,
+        )
+
+        cert, key = load_certificate_and_key_from_p12(ec_p12_bytes)
+        xml_bytes = build_auth_token_request_xml("c" * 36, "1234567890")
+        signed = sign_xades(xml_bytes, cert, key)
+        assert signed is not None
+        assert b"<" in signed
+
+
+# ---------------------------------------------------------------------------
 # refresh
 # ---------------------------------------------------------------------------
 

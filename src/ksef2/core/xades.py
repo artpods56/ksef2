@@ -6,6 +6,7 @@ from pathlib import Path
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509 import Certificate
@@ -24,6 +25,8 @@ _OID_ORGANIZATION_IDENTIFIER = ObjectIdentifier("2.5.4.97")
 _OID_SERIAL_NUMBER = ObjectIdentifier("2.5.4.5")
 
 _AUTH_TOKEN_NS = "http://ksef.mf.gov.pl/auth/token/2.0"
+
+XAdESPrivateKey = RSAPrivateKey | EllipticCurvePrivateKey
 
 
 def load_certificate_from_pem(source: bytes | str | Path) -> Certificate:
@@ -55,20 +58,21 @@ def load_private_key_from_pem(
     source: bytes | str | Path,
     *,
     password: bytes | None = None,
-) -> RSAPrivateKey:
-    """Load an RSA private key from PEM data or a PEM file path.
+) -> XAdESPrivateKey:
+    """Load an RSA or EC private key from PEM data or a PEM file path.
 
     Args:
         source: PEM-encoded bytes, or a path (``str`` / ``Path``) to a ``.pem`` / ``.key`` file.
         password: Decryption password if the key is encrypted, otherwise ``None``.
 
     Returns:
-        An :class:`~cryptography.hazmat.primitives.asymmetric.rsa.RSAPrivateKey`.
+        An :class:`~cryptography.hazmat.primitives.asymmetric.rsa.RSAPrivateKey` or
+        :class:`~cryptography.hazmat.primitives.asymmetric.ec.EllipticCurvePrivateKey`.
     """
     data = Path(source).read_bytes() if not isinstance(source, bytes) else source
     key = serialization.load_pem_private_key(data, password=password)
-    if not isinstance(key, RSAPrivateKey):
-        raise TypeError(f"Expected RSA private key, got {type(key).__name__}")
+    if not isinstance(key, (RSAPrivateKey, EllipticCurvePrivateKey)):
+        raise TypeError(f"Expected RSA or EC private key, got {type(key).__name__}")
     return key
 
 
@@ -76,8 +80,8 @@ def load_certificate_and_key_from_p12(
     source: bytes | str | Path,
     *,
     password: bytes | None = None,
-) -> tuple[Certificate, RSAPrivateKey]:
-    """Load a certificate and RSA private key from a PKCS#12 (.p12 / .pfx) file.
+) -> tuple[Certificate, XAdESPrivateKey]:
+    """Load a certificate and RSA or EC private key from a PKCS#12 (.p12 / .pfx) file.
 
     Args:
         source: Raw PKCS#12 bytes, or a path (``str`` / ``Path``) to the ``.p12`` / ``.pfx`` file.
@@ -94,8 +98,10 @@ def load_certificate_and_key_from_p12(
     private_key, cert, _ = pkcs12.load_key_and_certificates(data, password)
     if cert is None:
         raise ValueError("No certificate found in PKCS#12 archive")
-    if not isinstance(private_key, RSAPrivateKey):
-        raise TypeError(f"Expected RSA private key, got {type(private_key).__name__}")
+    if not isinstance(private_key, (RSAPrivateKey, EllipticCurvePrivateKey)):
+        raise TypeError(
+            f"Expected RSA or EC private key, got {type(private_key).__name__}"
+        )
     return cert, private_key
 
 
@@ -195,12 +201,16 @@ def build_auth_token_request_xml(
 def sign_xades(
     xml_bytes: bytes,
     cert: Certificate,
-    private_key: RSAPrivateKey,
+    private_key: XAdESPrivateKey,
 ) -> bytes:
-    """Sign XML with an enveloped XAdES-B signature (RSA-SHA256)."""
+    """Sign XML with an enveloped XAdES-B signature (RSA-SHA256 or ECDSA-SHA256)."""
+    if isinstance(private_key, EllipticCurvePrivateKey):
+        sig_alg = SignatureMethod.ECDSA_SHA256
+    else:
+        sig_alg = SignatureMethod.RSA_SHA256
     signer = XAdESSigner(
         method=SignatureConstructionMethod.enveloped,
-        signature_algorithm=SignatureMethod.RSA_SHA256,
+        signature_algorithm=sig_alg,
         digest_algorithm=DigestAlgorithm.SHA256,
     )
     root = etree.fromstring(xml_bytes)  # noqa: S320
@@ -219,7 +229,7 @@ def sign_xades(
 class LocalSigner:
     """A :class:`~ksef2.domain.interfaces.Signer` that signs XML locally."""
 
-    def __init__(self, cert: Certificate, private_key: RSAPrivateKey) -> None:
+    def __init__(self, cert: Certificate, private_key: XAdESPrivateKey) -> None:
         self._cert = cert
         self._private_key = private_key
 

@@ -78,6 +78,40 @@ cert, key = load_certificate_and_key_from_p12("cert.p12", password=b"secret")
 
 > Full example: [`scripts/examples/auth/auth_xades_demo.py`](../../scripts/examples/auth/auth_xades_demo.py)
 
+#### Certificates with EC keys (MCU / qualified certificates)
+
+Qualified certificates issued by MCU (Ministerstwo Cyfryzacji) use **EC keys (secp256r1)**
+instead of RSA. The SDK automatically detects the key type and selects the correct signature
+algorithm — **ECDSA-SHA256** for EC keys, RSA-SHA256 for RSA keys. No extra configuration
+is required.
+
+Both `load_private_key_from_pem` and `load_certificate_and_key_from_p12` accept EC keys
+out of the box:
+
+```python
+from ksef2 import Client, Environment
+from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
+
+# EC private key downloaded from MCU (.key file)
+cert = load_certificate_from_pem("1234567890.pem")
+key  = load_private_key_from_pem("1234567890.key")   # works for both RSA and EC
+
+auth = Client(Environment.PRODUCTION).auth.authenticate_xades(
+    nip="1234567890",
+    cert=cert,
+    private_key=key,
+)
+```
+
+Or using a `.p12` archive containing an EC key:
+
+```python
+from ksef2.core.xades import load_certificate_and_key_from_p12
+
+cert, key = load_certificate_and_key_from_p12("mcu_cert.p12", password=b"secret")
+# key is EllipticCurvePrivateKey — sign_xades picks ECDSA-SHA256 automatically
+```
+
 ---
 
 ### 2. Token Authentication
