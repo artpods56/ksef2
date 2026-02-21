@@ -33,8 +33,8 @@ from ksef2.infra.mappers.requests.auth import (
 )
 
 if TYPE_CHECKING:
-    from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
     from cryptography.x509 import Certificate
+    from ksef2.core.xades import XAdESPrivateKey
 
 
 @final
@@ -136,7 +136,7 @@ class AuthService:
         *,
         nip: str,
         cert: Certificate,
-        private_key: RSAPrivateKey,
+        private_key: XAdESPrivateKey,
         verify_chain: bool = False,
         poll_interval: float = 1.0,
         max_poll_attempts: int = 60,
