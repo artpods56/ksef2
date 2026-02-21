@@ -101,7 +101,6 @@ def download_and_export(
 
 
 def main(template_path: Path, downloads_dir: Path) -> None:
-
     client = Client(environment=Environment.TEST)
     seller_nip, seller_cert, seller_key = generate_test_subject()
     buyer_nip, buyer_cert, buyer_key = generate_test_subject()

@@ -99,7 +99,9 @@ def load_certificate_and_key_from_p12(
     if cert is None:
         raise ValueError("No certificate found in PKCS#12 archive")
     if not isinstance(private_key, (RSAPrivateKey, EllipticCurvePrivateKey)):
-        raise TypeError(f"Expected RSA or EC private key, got {type(private_key).__name__}")
+        raise TypeError(
+            f"Expected RSA or EC private key, got {type(private_key).__name__}"
+        )
     return cert, private_key
 
 

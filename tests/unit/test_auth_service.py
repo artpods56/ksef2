@@ -344,7 +344,9 @@ class TestSignXadesEC:
         from cryptography.x509.oid import NameOID
 
         key = ec.generate_private_key(ec.SECP256R1())
-        subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "EC Test")])
+        subject = issuer = x509.Name(
+            [x509.NameAttribute(NameOID.COMMON_NAME, "EC Test")]
+        )
         now = datetime.datetime.now(datetime.timezone.utc)
         cert = (
             x509.CertificateBuilder()
@@ -392,7 +394,9 @@ class TestLoadP12EC:
         from cryptography.x509.oid import NameOID
 
         key = ec.generate_private_key(ec.SECP256R1())
-        subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "EC P12 Test")])
+        subject = issuer = x509.Name(
+            [x509.NameAttribute(NameOID.COMMON_NAME, "EC P12 Test")]
+        )
         now = datetime.datetime.now(datetime.timezone.utc)
         cert = (
             x509.CertificateBuilder()
@@ -420,7 +424,11 @@ class TestLoadP12EC:
         assert isinstance(key, EllipticCurvePrivateKey)
 
     def test_ec_key_from_p12_can_sign(self, ec_p12_bytes: bytes) -> None:
-        from ksef2.core.xades import build_auth_token_request_xml, load_certificate_and_key_from_p12, sign_xades
+        from ksef2.core.xades import (
+            build_auth_token_request_xml,
+            load_certificate_and_key_from_p12,
+            sign_xades,
+        )
 
         cert, key = load_certificate_and_key_from_p12(ec_p12_bytes)
         xml_bytes = build_auth_token_request_xml("c" * 36, "1234567890")
