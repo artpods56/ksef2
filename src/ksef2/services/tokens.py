@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterator
 from typing import final
 
 from ksef2.core import exceptions
@@ -95,7 +96,7 @@ class TokenService:
         )
         return result
 
-    def list(
+    def list_page(
         self,
         *,
         status: list[TokenStatus] | None = None,
@@ -126,6 +127,18 @@ class TokenService:
             continuation_token=continuation_token,
         )
         return QueryTokensMapper.map_response(spec_resp)
+
+    def list(
+        self,
+        *,
+        page_size: int | None = None,
+    ) -> Iterator[QueryTokensResponse]:
+        response = self.list_page(page_size=page_size)
+        yield response
+
+        while ct := response.continuation_token:
+            response = self.list_page(page_size=page_size, continuation_token=ct)
+            yield response
 
     def status(
         self,

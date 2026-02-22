@@ -24,9 +24,9 @@ class InvoiceSubjectType(StrEnum):
         SubjectAuthorized -> Authorized Subject
     """
 
-    SUBJECT1 = "Subject1"
-    SUBJECT2 = "Subject2"
-    SUBJECT3 = "Subject3"
+    SELLER = "Subject1"
+    BUYER = "Subject2"
+    THIRD_SUBJECT = "Subject3"
     SUBJECT_AUTHORIZED = "SubjectAuthorized"
 
 

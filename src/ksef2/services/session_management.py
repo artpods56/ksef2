@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, final
 
 from ksef2.endpoints.auth import (
@@ -41,7 +42,7 @@ class SessionManagementService:
         self._terminate_current_ep = TerminateCurrentSessionEndpoint(transport)
         self._terminate_ep = TerminateAuthSessionEndpoint(transport)
 
-    def list(
+    def list_page(
         self,
         *,
         page_size: int | None = None,
@@ -62,11 +63,23 @@ class SessionManagementService:
             continuation_token=continuation_token,
         )
 
+    def list(
+        self,
+        *,
+        page_size: int | None = None,
+    ) -> Iterator[spec.AuthenticationListResponse]:
+        response = self.list_page(page_size=page_size)
+        yield response
+
+        while ct := response.continuationToken:  # raw spec uses camelCase
+            response = self.list_page(page_size=page_size, continuation_token=ct)
+            yield response
+
     def terminate_current(self) -> None:
         """Terminate the current authentication session."""
         self._terminate_current_ep.send(bearer_token=self._access_token)
 
-    def terminate(self, *, reference_number: str) -> None:
+    def close(self, *, reference_number: str) -> None:
         """Terminate a specific authentication session.
 
         Args:

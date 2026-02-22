@@ -24,6 +24,7 @@ from ksef2.endpoints.auth import (
     TokenAuthEndpoint,
     XAdESAuthEndpoint,
 )
+from ksef2.endpoints.encryption import CertificateEndpoint
 from ksef2.infra.mappers.requests.auth import (
     AuthInitMapper,
     AuthStatusMapper,
@@ -75,6 +76,7 @@ class AuthService:
         self._transport = transport
         self._certificate_store = certificate_store
         self._certificates = EncryptionClient(transport)
+        self._certificates_ep = CertificateEndpoint(transport)
         self._challenge_ep = ChallengeEndpoint(transport)
         self._token_auth_ep = TokenAuthEndpoint(transport)
         self._xades_auth_ep = XAdESAuthEndpoint(transport)
@@ -82,7 +84,7 @@ class AuthService:
         self._redeem_ep = RedeemTokenEndpoint(transport)
         self._refresh_ep = RefreshTokenEndpoint(transport)
 
-    def authenticate_token(
+    def with_token(
         self,
         *,
         ksef_token: str,
@@ -129,9 +131,10 @@ class AuthService:
         return AuthenticatedClient(
             transport=self._transport,
             auth_tokens=auth_tokens,
+            certificate_store=self._certificate_store,
         )
 
-    def authenticate_xades(
+    def with_xades(
         self,
         *,
         nip: str,
@@ -168,6 +171,7 @@ class AuthService:
         return AuthenticatedClient(
             transport=self._transport,
             auth_tokens=auth_tokens,
+            certificate_store=self._certificate_store,
         )
 
     def refresh(self, *, refresh_token: str) -> RefreshedToken:

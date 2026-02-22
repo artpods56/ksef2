@@ -36,7 +36,7 @@ class SessionStatus(StrEnum):
     CANCELLED = "Cancelled"
 
 
-class QuerySessionsList(KSeFBaseParams):
+class ListSessionsQuery(KSeFBaseParams):
     page_size: int = Field(default=10, ge=1, le=100)
     session_type: SessionType
     reference_number: str | None = None
@@ -46,7 +46,29 @@ class QuerySessionsList(KSeFBaseParams):
     date_closed_to: datetime | None = None
     date_modified_from: datetime | None = None
     date_modified_to: datetime | None = None
-    statuses: list[SessionStatus] = Field(default_factory=list)
+    statuses: list[SessionStatus] | None = None
+
+
+class StatusInfo(KSeFBaseModel):
+    code: int
+    description: str
+    details: list[str] | None = None
+
+
+class SessionSummary(KSeFBaseModel):
+    reference_number: str
+    status: StatusInfo
+    date_created: AwareDatetime
+    date_updated: AwareDatetime
+    valid_until: AwareDatetime | None = None
+    total_invoice_count: int
+    successful_invoice_count: int
+    failed_invoice_count: int
+
+
+class ListSessionsResponse(KSeFBaseModel):
+    continuation_token: str | None = None
+    sessions: list[SessionSummary]
 
 
 class BaseSessionState(KSeFBaseModel):

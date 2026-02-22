@@ -132,14 +132,14 @@ class PermissionsService:
         *,
         subject_type: AuthorizationSubjectIdentifierType,
         subject_value: str,
-        permission: AuthorizationPermissionType,
+        permissions: AuthorizationPermissionType,
         description: str,
         entity_name: str,
     ) -> GrantPermissionsResponse:
         body = PermissionsMapper.map_authorization_grant_request(
             subject_type=subject_type,
             subject_value=subject_value,
-            permission=permission,
+            permission=permissions,
             description=description,
             entity_name=entity_name,
         )

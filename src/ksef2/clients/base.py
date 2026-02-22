@@ -11,7 +11,6 @@ from ksef2.core.middleware import KSeFProtocol
 from ksef2.services import (
     auth,
     peppol,
-    session,
     testdata,
 )
 from ksef2.core import stores
@@ -24,24 +23,18 @@ class Client:
         self._transport = KSeFProtocol(
             HttpTransport(client=httpx.Client(base_url=environment.base_url)),
         )
+        self._certificate_store = stores.CertificateStore()
 
     @cached_property
-    def auth(self) -> auth.AuthService:
+    def authentication(self) -> auth.AuthService:
         return auth.AuthService(
             transport=self._transport,
-            certificate_store=stores.CertificateStore(),
+            certificate_store=self._certificate_store,
         )
 
     @cached_property
     def encryption(self) -> encryption.EncryptionClient:
         return encryption.EncryptionClient(self._transport)
-
-    @cached_property
-    def sessions(self) -> session.OpenSessionService:
-        return session.OpenSessionService(
-            transport=self._transport,
-            certificate_store=stores.CertificateStore(),
-        )
 
     @cached_property
     def testdata(self) -> testdata.TestDataService:

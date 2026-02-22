@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import final, Any, TypedDict, Unpack, Literal, NotRequired
+from typing import final, Any, TypedDict, Unpack, NotRequired
 from urllib.parse import urlencode
 
 from pydantic import TypeAdapter
@@ -146,53 +146,6 @@ class SendingInvoicesEndpoint:
                 json=body,
             ),
             spec.SendInvoiceResponse,
-        )
-
-
-ListSessionEndpointQueryParams = TypedDict(
-    "ListSessionEndpointQueryParams",
-    {
-        "sessionType": Literal["Online", "Batch"],
-        "referenceNumber": NotRequired[str | None],
-        "dateCreatedFrom": NotRequired[str | None],
-        "dateCreatedTo": NotRequired[str | None],
-        "dateClosedFrom": NotRequired[str | None],
-        "dateClosedTo": NotRequired[str | None],
-        "dateModifiedFrom": NotRequired[str | None],
-        "dateModifiedTo": NotRequired[str | None],
-        "statuses": list[Literal["InProgress", "Succeeded", "Failed", "Cancelled"]],
-    },
-)
-
-
-@final
-class ListSessionsEndpoint:
-    url: str = "/sessions"
-
-    _adapter = TypeAdapter(ListSessionEndpointQueryParams)
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        continuation_token: str | None = None,
-        **query_params: Unpack[ListSessionEndpointQueryParams],
-    ) -> spec.SessionsQueryResponse:
-        valid_params = self._adapter.validate_python(query_params)
-
-        path = f"{self.url}?{urlencode(valid_params, doseq=True)}"
-
-        print(path)
-
-        headers_dict = headers.KSeFHeaders.bearer(access_token)
-        if continuation_token:
-            headers_dict["x-continuation-token"] = continuation_token
-
-        return codecs.JsonResponseCodec.parse(
-            self._transport.get(path, headers=headers_dict),
-            spec.SessionsQueryResponse,
         )
 
 

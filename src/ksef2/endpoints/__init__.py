@@ -48,7 +48,7 @@ __invoices_query_endpoints__ = [
 ]
 
 __invoices_status_endpoints__ = [
-    EndpointRef("GET", invoices.ListSessionsEndpoint.url),
+    EndpointRef("GET", session.ListSessionsEndpoint.url),
     EndpointRef("GET", invoices.GetSessionStatusEndpoint.url),
     EndpointRef("GET", invoices.ListSessionInvoicesEndpoint.url),
     EndpointRef("GET", invoices.GetSessionInvoiceStatusEndpoint.url),

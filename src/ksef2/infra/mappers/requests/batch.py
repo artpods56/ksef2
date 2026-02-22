@@ -16,7 +16,7 @@ class BatchSessionMapper:
 
     @staticmethod
     def map_request(
-        encrypted_key: str,
+        encrypted_key: bytes,
         iv: bytes,
         batch_file: BatchFileInfo,
         form_code: FormSchema = FormSchema.FA3,
@@ -35,7 +35,7 @@ class BatchSessionMapper:
             OpenBatchSessionRequest for the API.
         """
         encryption = spec.EncryptionInfo(
-            encryptedSymmetricKey=encrypted_key,
+            encryptedSymmetricKey=base64.b64encode(encrypted_key).decode(),
             initializationVector=base64.b64encode(iv).decode(),
         )
 

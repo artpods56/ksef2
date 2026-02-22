@@ -93,7 +93,7 @@ class OnlineSessionClient:
         return QueryInvoicesMetadataMapper.map_response(spec_resp)
 
     def fetch_package(
-        self, package: InvoicePackage, target_directory: Path | str = Path(".")
+        self, *, package: InvoicePackage, target_directory: Path | str = Path(".")
     ) -> list[Path]:
         target_path = Path(target_directory)
         target_path.mkdir(parents=True, exist_ok=True)
@@ -122,7 +122,7 @@ class OnlineSessionClient:
 
         return saved_files
 
-    def fetch_package_bytes(self, package: InvoicePackage) -> list[bytes]:
+    def fetch_package_bytes(self, *, package: InvoicePackage) -> list[bytes]:
         aes_key = base64.b64decode(self._state.aes_key)
         iv = base64.b64decode(self._state.iv)
 
@@ -152,7 +152,7 @@ class OnlineSessionClient:
 
         spec_request = ExportInvoicesMapper.map_request(
             filters,
-            aes_key,
+            base64.b64encode(aes_key).decode(),
             self._state.iv,
         )
         spec_resp = self._export_ep.send(
@@ -214,7 +214,7 @@ class OnlineSessionClient:
         )
 
     def get_invoice_status(
-        self, invoice_reference_number: str
+        self, *, invoice_reference_number: str
     ) -> spec.SessionInvoiceStatusResponse:
         return self._invoice_status_ep.send(
             access_token=self._state.access_token,
@@ -235,21 +235,21 @@ class OnlineSessionClient:
             continuation_token=continuation_token,
         )
 
-    def get_invoice_upo_by_ksef_number(self, ksef_number: str) -> bytes:
+    def get_invoice_upo_by_ksef_number(self, *, ksef_number: str) -> bytes:
         return self._upo_by_ksef_ep.send(
             access_token=self._state.access_token,
             reference_number=self._state.reference_number,
             ksef_number=ksef_number,
         )
 
-    def get_invoice_upo_by_reference(self, invoice_reference_number: str) -> bytes:
+    def get_invoice_upo_by_reference(self, *, invoice_reference_number: str) -> bytes:
         return self._upo_by_ref_ep.send(
             access_token=self._state.access_token,
             reference_number=self._state.reference_number,
             invoice_reference_number=invoice_reference_number,
         )
 
-    def terminate(self) -> None:
+    def close(self) -> None:
         self._terminate_endpoint.send(
             access_token=self._state.access_token,
             reference_number=self._state.reference_number,
@@ -331,7 +331,7 @@ class OnlineSessionClient:
         exc_tb: TracebackType | None,
     ) -> None:
         try:
-            self.terminate()
+            self.close()
         except exceptions.KSeFException:
             logger.warning("Failed to terminate KSeF session, might be already closed.")
         except Exception:

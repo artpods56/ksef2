@@ -63,7 +63,7 @@ class LimitsService:
             self._get_api_rate_limits_ep.send(bearer_token=self._access_token)
         )
 
-    def set_session_limits(self, limits: ContextLimits) -> None:
+    def set_session_limits(self, *, limits: ContextLimits) -> None:
         """Set session limits (test environment only)."""
         body = ContextLimitsMapper.map_request(limits)
         self._set_session_limits_ep.send(bearer_token=self._access_token, body=body)
@@ -72,7 +72,7 @@ class LimitsService:
         """Reset session limits to defaults (test environment only)."""
         self._reset_session_limits_ep.send(bearer_token=self._access_token)
 
-    def set_subject_limits(self, limits: SubjectLimits) -> None:
+    def set_subject_limits(self, *, limits: SubjectLimits) -> None:
         """Set subject limits (test environment only)."""
         self._set_subject_limits_ep.send(
             bearer_token=self._access_token,
@@ -83,7 +83,7 @@ class LimitsService:
         """Reset subject limits to defaults (test environment only)."""
         self._reset_subject_limits_ep.send(bearer_token=self._access_token)
 
-    def set_api_rate_limits(self, limits: ApiRateLimits) -> None:
+    def set_api_rate_limits(self, *, limits: ApiRateLimits) -> None:
         """Set API rate limits (test environment only)."""
         self._set_api_rate_limits_ep.send(
             bearer_token=self._access_token,
