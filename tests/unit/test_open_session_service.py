@@ -1,4 +1,4 @@
-"""Tests for OpenSessionService — open_online, resume."""
+"""Tests for AuthenticatedClient.online_session — session opening flow."""
 
 from __future__ import annotations
 
@@ -6,22 +6,24 @@ from datetime import datetime, timezone, timedelta
 
 import pytest
 
-from ksef2.clients.session import OnlineSessionClient
+from ksef2.clients.authenticated import AuthenticatedClient
+from ksef2.clients.online import OnlineSessionClient
 from ksef2.core import exceptions
 from ksef2.core.stores import CertificateStore
+from ksef2.domain.models.auth import AuthTokens, TokenCredentials
 from ksef2.domain.models.encryption import CertUsage
 from ksef2.domain.models.session import FormSchema
-from ksef2.services.session import OpenSessionService
 
 from tests.unit.conftest import (
     FakeTransport,
     make_certificate,
-    make_session_state,
     _REF,
 )
 
 
-_VALID_UNTIL = (datetime.now(tz=timezone.utc) + timedelta(hours=1)).isoformat()
+_NOW = datetime.now(tz=timezone.utc)
+_VALID_UNTIL = (_NOW + timedelta(hours=1)).isoformat()
+_REFRESH_UNTIL = (_NOW + timedelta(days=7)).isoformat()
 
 
 def _open_session_response(
@@ -31,12 +33,24 @@ def _open_session_response(
     return {"referenceNumber": ref, "validUntil": valid_until}
 
 
-def _build_service(
+def _make_auth_tokens() -> AuthTokens:
+    return AuthTokens(
+        access_token=TokenCredentials(
+            token="tok", valid_until=_NOW + timedelta(hours=1)
+        ),
+        refresh_token=TokenCredentials(
+            token="refresh", valid_until=_NOW + timedelta(days=7)
+        ),
+    )
+
+
+def _build_client(
     transport: FakeTransport,
     store: CertificateStore | None = None,
-) -> OpenSessionService:
-    return OpenSessionService(
+) -> AuthenticatedClient:
+    return AuthenticatedClient(
         transport=transport,
+        auth_tokens=_make_auth_tokens(),
         certificate_store=store or CertificateStore(),
     )
 
@@ -85,11 +99,11 @@ def loaded_store(rsa_cert_b64: str) -> CertificateStore:
 
 
 # ---------------------------------------------------------------------------
-# open_online
+# online_session
 # ---------------------------------------------------------------------------
 
 
-class TestOpenOnline:
+class TestOnlineSession:
     def test_returns_online_session_client(
         self,
         fake_transport: FakeTransport,
@@ -97,8 +111,7 @@ class TestOpenOnline:
     ) -> None:
         fake_transport.enqueue(_open_session_response())  # POST /sessions/online
 
-        result = _build_service(fake_transport, loaded_store).open_online(
-            access_token="tok",
+        result = _build_client(fake_transport, loaded_store).online_session(
             form_code=FormSchema.FA3,
         )
 
@@ -123,8 +136,7 @@ class TestOpenOnline:
         fake_transport.enqueue(_open_session_response())  # POST /sessions/online
 
         empty_store = CertificateStore()
-        _build_service(fake_transport, empty_store).open_online(
-            access_token="tok",
+        _build_client(fake_transport, empty_store).online_session(
             form_code=FormSchema.FA3,
         )
 
@@ -138,8 +150,7 @@ class TestOpenOnline:
     ) -> None:
         fake_transport.enqueue(_open_session_response())
 
-        _build_service(fake_transport, loaded_store).open_online(
-            access_token="tok",
+        _build_client(fake_transport, loaded_store).online_session(
             form_code=FormSchema.FA3,
         )
 
@@ -158,8 +169,7 @@ class TestOpenOnline:
         )
 
         with pytest.raises(exceptions.NoCertificateAvailableError):
-            _build_service(fake_transport, store).open_online(
-                access_token="tok",
+            _build_client(fake_transport, store).online_session(
                 form_code=FormSchema.FA3,
             )
 
@@ -170,13 +180,12 @@ class TestOpenOnline:
     ) -> None:
         fake_transport.enqueue(_open_session_response())
 
-        _build_service(fake_transport, loaded_store).open_online(
-            access_token="my-token",
+        _build_client(fake_transport, loaded_store).online_session(
             form_code=FormSchema.FA3,
         )
 
         call = fake_transport.calls[0]
-        assert call.headers == {"Authorization": "Bearer my-token"}
+        assert call.headers == {"Authorization": "Bearer tok"}
 
     def test_request_body_contains_form_and_encryption(
         self,
@@ -185,8 +194,7 @@ class TestOpenOnline:
     ) -> None:
         fake_transport.enqueue(_open_session_response())
 
-        _build_service(fake_transport, loaded_store).open_online(
-            access_token="tok",
+        _build_client(fake_transport, loaded_store).online_session(
             form_code=FormSchema.FA3,
         )
 
@@ -199,24 +207,3 @@ class TestOpenOnline:
         assert "encryption" in body
         assert "encryptedSymmetricKey" in body["encryption"]
         assert "initializationVector" in body["encryption"]
-
-
-# ---------------------------------------------------------------------------
-# resume
-# ---------------------------------------------------------------------------
-
-
-class TestResume:
-    def test_returns_online_session_client(self, fake_transport: FakeTransport) -> None:
-        state = make_session_state()
-
-        result = _build_service(fake_transport).resume(state)
-
-        assert isinstance(result, OnlineSessionClient)
-
-    def test_no_http_calls(self, fake_transport: FakeTransport) -> None:
-        state = make_session_state()
-
-        _build_service(fake_transport).resume(state)
-
-        assert len(fake_transport.calls) == 0

@@ -48,7 +48,7 @@ def test_set_session_limits_roundtrip(xades_authenticated_context):
     original_max = limits.online_session.max_invoices
 
     limits.online_session.max_invoices = original_max + 1
-    auth.limits.set_session_limits(limits)
+    auth.limits.set_session_limits(limits=limits)
 
     updated = auth.limits.get_context_limits()
     assert updated.online_session.max_invoices == original_max + 1
@@ -67,7 +67,7 @@ def test_set_api_rate_limits_roundtrip(xades_authenticated_context):
     limits.invoice_send.per_second = (
         original_per_second - 50
     )  # has to be between 1 and 100
-    auth.limits.set_api_rate_limits(limits)
+    auth.limits.set_api_rate_limits(limits=limits)
 
     updated = auth.limits.get_api_rate_limits()
     assert updated.invoice_send.per_second == original_per_second - 50
@@ -103,7 +103,7 @@ def test_set_subject_limits_roundtrip(xades_authenticated_context):
 
     original_max = limits.certificate.max_certificates
     limits.certificate.max_certificates = (original_max or 10) + 1
-    auth.limits.set_subject_limits(limits)
+    auth.limits.set_subject_limits(limits=limits)
 
     updated = auth.limits.get_subject_limits()
     assert updated.certificate is not None

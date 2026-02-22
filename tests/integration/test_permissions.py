@@ -17,7 +17,7 @@ import pytest
 
 from ksef2 import Client, FormSchema
 from ksef2.clients.authenticated import AuthenticatedClient
-from ksef2.clients.session import OnlineSessionClient
+from ksef2.clients.online import OnlineSessionClient
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.permissions import (
@@ -61,16 +61,13 @@ def permissions_context(
     seller_nip = ksef_credentials.subject_nip
 
     cert, private_key = generate_test_certificate(seller_nip)
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=seller_nip,
         cert=cert,
         private_key=private_key,
     )
 
-    with client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with auth.online_session(form_code=FormSchema.FA3) as session:
         context: PermissionContext = {
             "client": client,
             "auth": auth,
@@ -295,7 +292,7 @@ def test_grant_authorization_permission(permissions_context: PermissionContext):
     response = auth.permissions.grant_authorization(
         subject_type=AuthorizationSubjectIdentifierType.NIP,
         subject_value=buyer_nip,
-        permission=AuthorizationPermissionType.SELF_INVOICING,
+        permissions=AuthorizationPermissionType.SELF_INVOICING,
         description="Test authorization grant",
         entity_name="Test Authorization Entity",
     )
@@ -361,7 +358,7 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
     grant_response = auth.permissions.grant_authorization(
         subject_type=AuthorizationSubjectIdentifierType.NIP,
         subject_value=buyer_nip,
-        permission=AuthorizationPermissionType.SELF_INVOICING,
+        permissions=AuthorizationPermissionType.SELF_INVOICING,
         description="Test authorization for revoke",
         entity_name="Test Entity for Revoke",
     )

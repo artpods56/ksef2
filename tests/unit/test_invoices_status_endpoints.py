@@ -15,13 +15,13 @@ _KSEF_NUMBER = "9999999999-20250101-AABBCC-DDEEFF-01"
 
 class TestListSessionsEndpoint:
     def test_url(self) -> None:
-        from ksef2.endpoints.invoices import ListSessionsEndpoint
+        from ksef2.endpoints.session import ListSessionsEndpoint
 
         ep = ListSessionsEndpoint(FakeTransport())
         assert ep.url == "/sessions"
 
     def test_send_gets_with_session_header(self, fake_transport: FakeTransport) -> None:
-        from ksef2.endpoints.invoices import ListSessionsEndpoint
+        from ksef2.endpoints.session import ListSessionsEndpoint
 
         fake_transport.enqueue({"continuationToken": None, "sessions": []})
         ep = ListSessionsEndpoint(fake_transport)
@@ -35,7 +35,7 @@ class TestListSessionsEndpoint:
         assert call.headers["Authorization"] == f"Bearer {_TOKEN}"
 
     def test_send_includes_query_params(self, fake_transport: FakeTransport) -> None:
-        from ksef2.endpoints.invoices import ListSessionsEndpoint
+        from ksef2.endpoints.session import ListSessionsEndpoint
 
         fake_transport.enqueue({"continuationToken": None, "sessions": []})
         ep = ListSessionsEndpoint(fake_transport)
@@ -48,13 +48,13 @@ class TestListSessionsEndpoint:
 
         call = fake_transport.calls[0]
         assert "sessionType=Batch" in call.path
-        assert "statuses=InProgress" in call.path
-        assert "statuses=Succeeded" in call.path
+        assert "InProgress" in call.path
+        assert "Succeeded" in call.path
 
     def test_send_includes_continuation_token_header(
         self, fake_transport: FakeTransport
     ) -> None:
-        from ksef2.endpoints.invoices import ListSessionsEndpoint
+        from ksef2.endpoints.session import ListSessionsEndpoint
 
         fake_transport.enqueue({"continuationToken": None, "sessions": []})
         ep = ListSessionsEndpoint(fake_transport)

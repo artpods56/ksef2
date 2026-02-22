@@ -55,10 +55,7 @@ class TestBatchSession:
         )
 
         # This would open a batch session
-        batch_session = client.sessions.open_batch(
-            access_token=auth.access_token,
-            batch_file=batch_file,
-        )
+        batch_session = auth.batch_session(batch_file=batch_file)
 
         # Verify response structure
         assert batch_session.reference_number

@@ -9,14 +9,14 @@ from ksef2.core.crypto import sha256_b64
 from ksef2.domain.models.session import FormSchema
 from ksef2.infra.mappers.requests.encryption import PublicKeyCertificateMapper
 from ksef2.infra.mappers.requests.invoices import SendInvoiceMapper
-from ksef2.infra.mappers.requests.session import OpenOnlineSessionMapper
+from ksef2.infra.mappers.requests.sessions import OpenOnlineSessionMapper
 from ksef2.infra.schema.api import spec as spec
 
 
 class TestOpenOnlineSessionMapper:
     def test_map_request_form_code(self) -> None:
         result = OpenOnlineSessionMapper.map_request(
-            encrypted_key="abc123==",
+            encrypted_key=b"abc123==",
             iv=b"\x00" * 16,
             form_code=FormSchema.FA3,
         )
@@ -28,17 +28,21 @@ class TestOpenOnlineSessionMapper:
 
     def test_map_request_encryption_info(self) -> None:
         iv = b"\x01\x02\x03\x04" * 4
+        encrypted_key = b"key=="
         result = OpenOnlineSessionMapper.map_request(
-            encrypted_key="key==",
+            encrypted_key=encrypted_key,
             iv=iv,
         )
 
-        assert result.encryption.encryptedSymmetricKey == "key=="
+        assert (
+            result.encryption.encryptedSymmetricKey
+            == base64.b64encode(encrypted_key).decode()
+        )
         assert result.encryption.initializationVector == base64.b64encode(iv).decode()
 
     def test_map_request_pef_schema(self) -> None:
         result = OpenOnlineSessionMapper.map_request(
-            encrypted_key="k",
+            encrypted_key=b"k",
             iv=b"\x00" * 16,
             form_code=FormSchema.PEF3,
         )

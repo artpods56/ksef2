@@ -180,8 +180,6 @@ class TestGrantPermissions:
         svc = _build_service(fake_transport)
 
         svc.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value="1234567890"),
-            authorized=Identifier(type=IdentifierType.PESEL, value="00000000000"),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_READ, description="Read invoices"
@@ -190,6 +188,8 @@ class TestGrantPermissions:
                     type=PermissionType.INVOICE_WRITE, description="Write invoices"
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.PESEL, value="00000000000"),
+            in_context_of=Identifier(type=IdentifierType.NIP, value="1234567890"),
         )
 
         call = fake_transport.calls[0]
@@ -209,11 +209,11 @@ class TestGrantPermissions:
         svc = _build_service(fake_transport)
 
         svc.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value="1234567890"),
-            authorized=Identifier(type=IdentifierType.FINGERPRINT, value="ABC123"),
             permissions=[
                 Permission(type=PermissionType.INTROSPECTION, description="Introspect"),
             ],
+            grant_to=Identifier(type=IdentifierType.FINGERPRINT, value="ABC123"),
+            in_context_of=Identifier(type=IdentifierType.NIP, value="1234567890"),
         )
 
         body = fake_transport.calls[0].json
@@ -227,8 +227,8 @@ class TestRevokePermissions:
         svc = _build_service(fake_transport)
 
         svc.revoke_permissions(
-            context=Identifier(type=IdentifierType.NIP, value="1234567890"),
-            authorized=Identifier(type=IdentifierType.PESEL, value="00000000000"),
+            revoke_from=Identifier(type=IdentifierType.PESEL, value="00000000000"),
+            in_context_of=Identifier(type=IdentifierType.NIP, value="1234567890"),
         )
 
         call = fake_transport.calls[0]

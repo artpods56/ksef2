@@ -42,10 +42,10 @@ def test_block_and_unblock_context(xades_authenticated_context, ksef_credentials
     )
 
     # Block the context
-    client.testdata.block_context(context_identifier=context_id)
+    client.testdata.block_context(context=context_id)
 
     # Unblock the context
-    client.testdata.unblock_context(context_identifier=context_id)
+    client.testdata.unblock_context(context=context_id)
 
 
 @pytest.mark.integration
@@ -59,11 +59,11 @@ def test_block_context_repeated(xades_authenticated_context, ksef_credentials):
     )
 
     # Block twice - second block should still succeed
-    client.testdata.block_context(context_identifier=context_id)
-    client.testdata.block_context(context_identifier=context_id)
+    client.testdata.block_context(context=context_id)
+    client.testdata.block_context(context=context_id)
 
     # Unblock to clean up
-    client.testdata.unblock_context(context_identifier=context_id)
+    client.testdata.unblock_context(context=context_id)
 
 
 @pytest.mark.integration

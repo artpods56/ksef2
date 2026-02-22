@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 
 from ksef2 import Client, FormSchema, Environment
-from ksef2.clients.session import OnlineSessionClient
+from ksef2.clients.online import OnlineSessionClient
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
@@ -71,8 +71,6 @@ def workflow_context():
             description="Workflow test person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=seller_nip),
-            authorized=Identifier(type=IdentifierType.NIP, value=person_nip),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_WRITE,
@@ -83,20 +81,19 @@ def workflow_context():
                     description="Introspect sessions",
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=person_nip),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=seller_nip),
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=seller_nip,
             cert=cert,
             private_key=private_key,
         )
         access_token = auth.access_token
 
-        with client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
             invoice_xml = InvoiceFactory.create(
                 template_xml,
@@ -116,6 +113,7 @@ def workflow_context():
 
             yield {
                 "client": client,
+                "auth": auth,
                 "access_token": access_token,
                 "session": session,
                 "invoice_ref": result.reference_number,
@@ -211,7 +209,9 @@ def test_get_invoice_upo_by_reference(workflow_context):
 @pytest.mark.integration
 def test_resume_session_from_state(workflow_context):
     """Resume a session from serialized state and use it."""
-    client: Client = workflow_context["client"]
+    from ksef2.clients.authenticated import AuthenticatedClient
+
+    auth: AuthenticatedClient = workflow_context["auth"]
     session: OnlineSessionClient = workflow_context["session"]
 
     state = session.get_state()
@@ -220,7 +220,7 @@ def test_resume_session_from_state(workflow_context):
     state_json = state.model_dump_json()
     restored_state = OnlineSessionState.model_validate_json(state_json)
 
-    resumed = client.sessions.resume(state=restored_state)
+    resumed = auth.resume_online_session(state=restored_state)
 
     assert isinstance(resumed, OnlineSessionClient)
 

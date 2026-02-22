@@ -30,7 +30,7 @@ from ksef2.infra.schema.api import spec as spec
 
 def _minimal_domain_filters() -> InvoiceQueryFilters:
     return InvoiceQueryFilters(
-        subject_type=InvoiceSubjectType.SUBJECT1,
+        subject_type=InvoiceSubjectType.SELLER,
         date_range=InvoiceQueryDateRange(
             date_type=DateType.ISSUE,
             from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
@@ -80,7 +80,7 @@ class TestInvoiceQueryFiltersMapper:
 
     def test_maps_optional_fields(self) -> None:
         filters = InvoiceQueryFilters(
-            subject_type=InvoiceSubjectType.SUBJECT2,
+            subject_type=InvoiceSubjectType.BUYER,
             date_range=InvoiceQueryDateRange(
                 date_type=DateType.INVOICING,
                 from_=datetime(2026, 1, 1, tzinfo=timezone.utc),

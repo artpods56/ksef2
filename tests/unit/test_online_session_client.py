@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from ksef2.clients.session import OnlineSessionClient
+from ksef2.clients.online import OnlineSessionClient
 from ksef2.domain.models.invoices import SendInvoiceResponse
 
 from tests.unit.conftest import (
@@ -151,7 +151,7 @@ class TestTerminate:
         fake_transport.enqueue(status_code=200)
         client = _build_client(fake_transport)
 
-        client.terminate()
+        client.close()
 
         call = fake_transport.calls[0]
         assert call.method == "POST"
@@ -162,7 +162,7 @@ class TestTerminate:
         fake_transport.enqueue(status_code=200)
         client = _build_client(fake_transport)
 
-        client.terminate()
+        client.close()
 
         call = fake_transport.calls[0]
         assert _REF in call.path
@@ -171,7 +171,7 @@ class TestTerminate:
         fake_transport.enqueue(status_code=200)
         client = _build_client(fake_transport)
 
-        client.terminate()
+        client.close()
 
         call = fake_transport.calls[0]
         assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}

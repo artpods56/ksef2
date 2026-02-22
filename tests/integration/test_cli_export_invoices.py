@@ -67,13 +67,10 @@ def test_cli_export_invoices_with_pem(tmp_path: Path) -> None:
         )
 
         # Send an invoice as the seller (buyer = Subject2)
-        seller_auth = client.auth.authenticate_xades(
+        seller_auth = client.authentication.with_xades(
             nip=seller_nip, cert=seller_cert, private_key=seller_key
         )
-        with client.sessions.open_online(
-            access_token=seller_auth.access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
+        with seller_auth.online_session(form_code=FormSchema.FA3) as session:
             invoice_xml = InvoiceFactory.create(
                 template_xml=INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8"),
                 replacements={

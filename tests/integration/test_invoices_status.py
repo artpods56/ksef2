@@ -20,7 +20,7 @@ from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import QuerySessionsList, SessionType, SessionStatus
+from ksef2.domain.models.session import SessionType, SessionStatus, ListSessionsResponse
 from ksef2.domain.models.testdata import (
     Identifier,
     IdentifierType,
@@ -70,8 +70,6 @@ def session_with_invoice():
             description="Integration test person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=seller_nip),
-            authorized=Identifier(type=IdentifierType.NIP, value=person_nip),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_WRITE,
@@ -82,20 +80,19 @@ def session_with_invoice():
                     description="Introspect sessions",
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=person_nip),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=seller_nip),
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=seller_nip,
             cert=cert,
             private_key=private_key,
         )
         access_token = auth.access_token
 
-        with client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
             invoice_xml = InvoiceFactory.create(
                 template_xml,
@@ -114,24 +111,22 @@ def session_with_invoice():
 
 
 # ---------------------------------------------------------------------------
-# List sessions (via client.sessions.list — uses QuerySessionsList model)
+# List sessions (via auth.session_log)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.integration
 def test_list_sessions(xades_authenticated_context: tuple[Client, AuthenticatedClient]):
     """List sessions filtered by type."""
-    client, auth = xades_authenticated_context
-    token = auth.access_token
+    _client, auth = xades_authenticated_context
 
-    response = client.sessions.list(
-        access_token=token,
-        query=QuerySessionsList(session_type=SessionType.ONLINE),
+    response = auth.session_log.list_page(
+        session_type=SessionType.ONLINE,
     )
 
-    assert isinstance(response, spec.SessionsQueryResponse)
+    assert isinstance(response, ListSessionsResponse)
     assert hasattr(response, "sessions")
-    assert hasattr(response, "continuationToken")
+    assert hasattr(response, "continuation_token")
 
 
 @pytest.mark.integration
@@ -139,15 +134,13 @@ def test_list_sessions_batch(
     xades_authenticated_context: tuple[Client, AuthenticatedClient],
 ):
     """List batch sessions."""
-    client, auth = xades_authenticated_context
-    token = auth.access_token
+    _client, auth = xades_authenticated_context
 
-    response = client.sessions.list(
-        access_token=token,
-        query=QuerySessionsList(session_type=SessionType.BATCH),
+    response = auth.session_log.list_page(
+        session_type=SessionType.BATCH,
     )
 
-    assert isinstance(response, spec.SessionsQueryResponse)
+    assert isinstance(response, ListSessionsResponse)
 
 
 @pytest.mark.integration
@@ -155,18 +148,14 @@ def test_list_sessions_with_status_filter(
     xades_authenticated_context: tuple[Client, AuthenticatedClient],
 ):
     """List sessions filtered by statuses."""
-    client, auth = xades_authenticated_context
-    token = auth.access_token
+    _client, auth = xades_authenticated_context
 
-    response = client.sessions.list(
-        access_token=token,
-        query=QuerySessionsList(
-            session_type=SessionType.ONLINE,
-            statuses=[SessionStatus.SUCCEEDED, SessionStatus.IN_PROGRESS],
-        ),
+    response = auth.session_log.list_page(
+        session_type=SessionType.ONLINE,
+        statuses=[SessionStatus.SUCCEEDED, SessionStatus.IN_PROGRESS],
     )
 
-    assert isinstance(response, spec.SessionsQueryResponse)
+    assert isinstance(response, ListSessionsResponse)
 
 
 # ---------------------------------------------------------------------------
@@ -203,7 +192,7 @@ def test_get_session_invoice_status(session_with_invoice):
     """Get status of a specific invoice in a session."""
     _client, _token, _session_ref, invoice_ref, session = session_with_invoice
 
-    response = session.get_invoice_status(invoice_ref)
+    response = session.get_invoice_status(invoice_reference_number=invoice_ref)
 
     assert isinstance(response, spec.SessionInvoiceStatusResponse)
     assert response.referenceNumber == invoice_ref

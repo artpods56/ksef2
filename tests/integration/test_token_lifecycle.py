@@ -54,8 +54,6 @@ def token_context():
             description="Token lifecycle person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=org_nip),
-            authorized=Identifier(type=IdentifierType.NIP, value=person_nip),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_WRITE,
@@ -70,10 +68,12 @@ def token_context():
                     description="Manage credentials",
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=person_nip),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=org_nip),
         )
 
         cert, private_key = generate_test_certificate(org_nip)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=org_nip,
             cert=cert,
             private_key=private_key,
@@ -134,7 +134,7 @@ def test_list_tokens(token_context):
     """List tokens and verify the generated token appears."""
     _client, auth, generated = token_context
 
-    response = auth.tokens.list()
+    response = auth.tokens.list_page()
 
     assert isinstance(response, QueryTokensResponse)
     assert isinstance(response.tokens, list)
@@ -150,7 +150,7 @@ def test_list_tokens_with_status_filter(token_context):
     _client, auth, _generated = token_context
 
     # Filter by ACTIVE and REVOKED statuses
-    response = auth.tokens.list(
+    response = auth.tokens.list_page(
         status=[TokenStatus.ACTIVE, TokenStatus.REVOKED],
     )
 
@@ -165,7 +165,7 @@ def test_list_tokens_with_description_filter(token_context):
     """List tokens filtered by description."""
     _client, auth, _generated = token_context
 
-    response = auth.tokens.list(
+    response = auth.tokens.list_page(
         description="Integration test",
     )
 
@@ -181,7 +181,7 @@ def test_list_tokens_with_author_filter(token_context):
     _client, auth, _generated = token_context
 
     # First, get all tokens to find an author NIP
-    all_tokens = auth.tokens.list()
+    all_tokens = auth.tokens.list_page()
     if not all_tokens.tokens:
         pytest.skip("No tokens available to test author filter")
 
@@ -193,7 +193,7 @@ def test_list_tokens_with_author_filter(token_context):
         value=first_author.value,
     )
 
-    response = auth.tokens.list(
+    response = auth.tokens.list_page(
         author_filter=author_filter,
     )
 

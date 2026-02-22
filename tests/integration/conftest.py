@@ -165,7 +165,7 @@ def xades_authenticated_context(
 
     cert, private_key = generate_test_certificate(ksef_credentials.subject_nip)
 
-    tokens = real_client.auth.authenticate_xades(
+    tokens = real_client.authentication.with_xades(
         nip=ksef_credentials.subject_nip,
         cert=cert,
         private_key=private_key,
@@ -201,7 +201,7 @@ def authenticated_context(
 
     cert, private_key = generate_test_certificate(ksef_credentials.subject_nip)
 
-    tokens = real_client.auth.authenticate_xades(
+    tokens = real_client.authentication.with_xades(
         nip=ksef_credentials.subject_nip,
         cert=cert,
         private_key=private_key,

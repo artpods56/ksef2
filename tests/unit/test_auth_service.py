@@ -139,7 +139,7 @@ class TestAuthenticateToken:
         fake_transport.enqueue(_status_response(200))  # GET /auth/{ref}
         fake_transport.enqueue(_tokens_response())  # POST /auth/token/redeem
 
-        result = _build_service(fake_transport, loaded_store).authenticate_token(
+        result = _build_service(fake_transport, loaded_store).with_token(
             ksef_token="my-ksef-token",
             nip="1234567890",
             poll_interval=0,
@@ -171,7 +171,7 @@ class TestAuthenticateToken:
         fake_transport.enqueue(_tokens_response())
 
         empty_store = CertificateStore()
-        _build_service(fake_transport, empty_store).authenticate_token(
+        _build_service(fake_transport, empty_store).with_token(
             ksef_token="tok",
             nip="1234567890",
             poll_interval=0,
@@ -192,7 +192,7 @@ class TestAuthenticateToken:
         fake_transport.enqueue(_status_response(200, "OK"))  # poll 3
         fake_transport.enqueue(_tokens_response())
 
-        result = _build_service(fake_transport, loaded_store).authenticate_token(
+        result = _build_service(fake_transport, loaded_store).with_token(
             ksef_token="tok",
             nip="1234567890",
             poll_interval=0,
@@ -212,7 +212,7 @@ class TestAuthenticateToken:
         fake_transport.enqueue(_status_response(450, "Invalid token"))
 
         with pytest.raises(exceptions.KSeFAuthError):
-            _build_service(fake_transport, loaded_store).authenticate_token(
+            _build_service(fake_transport, loaded_store).with_token(
                 ksef_token="invalid-token",
                 nip="1234567890",
                 poll_interval=0,
@@ -230,7 +230,7 @@ class TestAuthenticateToken:
             fake_transport.enqueue(_status_response(100, "In progress"))
 
         with pytest.raises(exceptions.KSeFAuthError, match="timed out"):
-            _build_service(fake_transport, loaded_store).authenticate_token(
+            _build_service(fake_transport, loaded_store).with_token(
                 ksef_token="tok",
                 nip="1234567890",
                 poll_interval=0,
@@ -263,7 +263,7 @@ class TestAuthenticateXades:
         cert_mock = MagicMock()
         key_mock = MagicMock()
 
-        result = _build_service(fake_transport).authenticate_xades(
+        result = _build_service(fake_transport).with_xades(
             nip="1234567890",
             cert=cert_mock,
             private_key=key_mock,
@@ -290,7 +290,7 @@ class TestAuthenticateXades:
         fake_transport.enqueue(_status_response(200))
         fake_transport.enqueue(_tokens_response())
 
-        _build_service(fake_transport).authenticate_xades(
+        _build_service(fake_transport).with_xades(
             nip="1234567890",
             cert=MagicMock(),
             private_key=MagicMock(),
@@ -317,7 +317,7 @@ class TestAuthenticateXades:
         fake_transport.enqueue(_status_response(200))
         fake_transport.enqueue(_tokens_response())
 
-        _build_service(fake_transport).authenticate_xades(
+        _build_service(fake_transport).with_xades(
             nip="1234567890",
             cert=MagicMock(),
             private_key=MagicMock(),
