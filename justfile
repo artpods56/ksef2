@@ -32,11 +32,11 @@ typecheck:
     echo "$output" | grep -q "0 errors"
 
 
-sync-openapi-version:
-    uv run python scripts/sync_openapi_version.py
+sync-ksef-api-version:
+    uv run python scripts/sync_ksef_api_version.py
 
 
-fetch-spec: && sync-openapi-version
+fetch-spec: && sync-ksef-api-version
     wget https://api-test.ksef.mf.gov.pl/docs/v2/openapi.json -O openapi.json
 
 
