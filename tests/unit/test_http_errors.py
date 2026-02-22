@@ -150,7 +150,9 @@ class Test400Errors:
             transport.get("/bad-request")
 
         assert exc_info.value.status_code == 400
-        assert exc_info.value.response is None
+        assert exc_info.value.response is not None
+        assert isinstance(exc_info.value.response, ExceptionResponse)
+        assert exc_info.value.response.exception.referenceNumber == VALID_REF
 
 
 class TestAuthErrors:
