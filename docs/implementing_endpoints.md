@@ -306,7 +306,7 @@ def test_list_active_sessions(xades_authenticated_context):
     """List active authentication sessions."""
     client, auth = xades_authenticated_context
 
-    response = auth.sessions.list()
+    response = auth.sessions.list_page()
 
     assert response is not None
     assert hasattr(response, "items")
@@ -439,7 +439,7 @@ class BlockContextEndpoint:
 
 ```python
 def block_context(self, *, context_identifier: AuthContextIdentifier) -> None:
-    self._block_context_ep.send(
-        TestDataMapper.block_context(context_identifier=context_identifier)
-    )
+   self._block_context_ep.send(
+      TestDataMapper.block_context(context=context_identifier)
+   )
 ```

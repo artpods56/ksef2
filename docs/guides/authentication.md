@@ -26,7 +26,7 @@ client = Client(environment=Environment.TEST)
 # Generate a self-signed certificate (TEST environment only)
 cert, private_key = generate_test_certificate(NIP)
 
-auth = client.auth.authenticate_xades(
+auth = client.authentication.with_xades(
     nip=NIP,
     cert=cert,
     private_key=private_key,
@@ -57,10 +57,10 @@ issued by MCU (Ministerstwo Finansów):
 from ksef2 import Client, Environment
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
 
-cert = load_certificate_from_pem("1234567890.pem")    # .pem — certificate from KSEF
-key  = load_private_key_from_pem("1234567890.key")    # .key — private key from KSEF
+cert = load_certificate_from_pem("1234567890.pem")  # .pem — certificate from KSEF
+key = load_private_key_from_pem("1234567890.key")  # .key — private key from KSEF
 
-auth = Client(Environment.DEMO).auth.authenticate_xades(
+auth = Client(Environment.DEMO).authentication.with_xades(
     nip="1234567890",
     cert=cert,
     private_key=key,
@@ -100,7 +100,7 @@ KSEF_TOKEN = "<your-token-here>"
 
 client = Client(environment=Environment.TEST)
 
-auth = client.auth.authenticate_token(
+auth = client.authentication.with_token(
     ksef_token=KSEF_TOKEN,
     nip=NIP,
 )
@@ -124,11 +124,11 @@ Refresh an expired access token without re-authenticating.
 
 ```python
 # After initial authentication...
-refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
+refreshed = client.authentication.refresh(refresh_token=auth.refresh_token)
 print(f"New access token valid until: {refreshed.auth_tokens.access_token.valid_until}")
 
 # The AuthenticatedClient can now be used for API calls
-sessions = refreshed.sessions.list()
+sessions = refreshed.sessions.list_page()
 ```
 
 > Full example: [`scripts/examples/auth/auth_refresh.py`](../../scripts/examples/auth/auth_refresh.py)
@@ -163,7 +163,7 @@ Note: Terminating a session invalidates its refresh token. Active access tokens 
 
 ```python
 # List active sessions
-sessions = auth.sessions.list()
+sessions = auth.sessions.list_page()
 
 # Paginated listing
 # sessions = auth.sessions.list(

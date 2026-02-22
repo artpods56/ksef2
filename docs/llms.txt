@@ -18,12 +18,14 @@ Requires Python 3.12+.
 
 1. **Client** - Entry point for all operations
    - `client.auth` - Authentication methods (XAdES, token, refresh)
-   - `client.sessions` - Invoice session management (open, resume, list)
    - `client.testdata` - Test environment data setup (TEST env only)
 
 2. **AuthenticatedClient** - Returned after authentication, provides:
    - `auth.access_token` - JWT access token string
    - `auth.refresh_token` - JWT refresh token string
+   - `auth.online_session()` - Open an online invoice session
+   - `auth.batch_session()` - Open a batch invoice session
+   - `auth.session_log` - Query invoice processing history (list)
    - `auth.tokens` - KSeF token management (generate, list, revoke)
    - `auth.limits` - API rate limits (query, modify on TEST)
    - `auth.permissions` - Permission management (grant, query)
@@ -102,17 +104,14 @@ refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
 ```python
 from ksef2 import FormSchema
 
-with client.sessions.open_online(
-    access_token=auth.access_token,
-    form_code=FormSchema.FA3,  # Invoice schema version
-) as session:
+with auth.online_session(form_code=FormSchema.FA3) as session:
     # Send invoice
     result = session.send_invoice(invoice_xml=open("invoice.xml", "rb").read())
     print(result.reference_number)
-    
+
     # Check status
-    status = session.get_invoice_status(result.reference_number)
-    
+    status = session.get_invoice_status(invoice_reference_number=result.reference_number)
+
     # Download invoice by KSeF number
     xml_bytes = session.download_invoice(ksef_number="KSEF-NUMBER")
 ```
@@ -122,14 +121,11 @@ with client.sessions.open_online(
 ```python
 from datetime import datetime, timezone
 from ksef2.domain.models import (
-    InvoiceQueryFilters, InvoiceSubjectType, 
+    InvoiceQueryFilters, InvoiceSubjectType,
     InvoiceQueryDateRange, DateType,
 )
 
-with client.sessions.open_online(
-    access_token=auth.access_token,
-    form_code=FormSchema.FA3,
-) as session:
+with auth.online_session(form_code=FormSchema.FA3) as session:
     # Schedule export
     export = session.schedule_invoices_export(
         filters=InvoiceQueryFilters(
@@ -163,7 +159,7 @@ state_json = state.model_dump_json()
 
 # Later: restore and resume
 restored_state = OnlineSessionState.model_validate_json(state_json)
-resumed = client.sessions.resume(state=restored_state)
+resumed = auth.resume_online_session(state=restored_state)
 ```
 
 ## Authenticated Operations (No Session Required)
@@ -260,7 +256,7 @@ print(rate_limits.invoice_send.per_second)
 
 # Modify limits (TEST environment only)
 context_limits.online_session.max_invoices = 5000
-auth.limits.set_session_limits(context_limits)
+auth.limits.set_session_limits(limits=context_limits)
 
 # Reset to defaults
 auth.limits.reset_session_limits()
@@ -418,10 +414,7 @@ with client.testdata.temporal() as temp:
     auth = client.auth.authenticate_xades(nip=PERSON_NIP, cert=cert, private_key=key)
 
     # Send invoice
-    with client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with auth.online_session(form_code=FormSchema.FA3) as session:
         result = session.send_invoice(invoice_xml=open("invoice.xml", "rb").read())
         print(f"Sent: {result.reference_number}")
 ```

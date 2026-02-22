@@ -103,23 +103,17 @@ with client.testdata.temporal() as temp:
     temp.create_person(
         nip=PERSON_NIP, pesel=PERSON_PESEL, description="Example person",
     )
-    temp.grant_permissions(
-        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-        permissions=[
-            Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-        ],
-    )
+    temp.grant_permissions(permissions=[
+        Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
+    ], grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
 
     cert, private_key = generate_test_certificate(PERSON_NIP)
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=PERSON_NIP, cert=cert, private_key=private_key,
     )
 
-    with client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with auth.online_session(form_code=FormSchema.FA3) as session:
         with open("invoice.xml", "rb") as f:
             result = session.send_invoice(f.read())
         print(f"Invoice sent, reference number: {result.reference_number}")
@@ -141,7 +135,7 @@ Check the processing status of a sent invoice.
 **SDK Endpoint:** `GET /sessions/online/{referenceNumber}/invoices/{invoiceReferenceNumber}/status`
 
 ```python
-status = session.get_invoice_status(reference_number="INVOICE-REF")
+status = session.get_invoice_status(invoice_reference_number="INVOICE-REF")
 print(status.model_dump_json(indent=2))
 ```
 
@@ -164,7 +158,7 @@ from datetime import datetime, timezone
 
 export = session.schedule_invoices_export(
     filters=InvoiceQueryFilters(
-        subject_type=InvoiceSubjectType.SUBJECT1,
+        subject_type=InvoiceSubjectType.SELLER,
         date_range=InvoiceQueryDateRange(
             date_type=DateType.ISSUE,
             from_=datetime(2026, 1, 1, tzinfo=timezone.utc),

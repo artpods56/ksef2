@@ -12,7 +12,7 @@ Get the effective limits for the current context (session type limits).
 
 ```python
 # After authenticating:
-auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=private_key)
+auth = client.authentication.with_xades(nip=NIP, cert=cert, private_key=private_key)
 
 context_limits = auth.limits.get_context_limits()
 print(f"Online max invoices: {context_limits.online_session.max_invoices}")
@@ -70,7 +70,7 @@ limits.online_session.max_invoices = 5000
 limits.batch_session.max_invoice_size_mb = 5
 
 # Push back
-auth.limits.set_session_limits(limits)
+auth.limits.set_session_limits(limits=limits)
 ```
 
 ### Reset Session Limits
@@ -93,7 +93,7 @@ limits = auth.limits.get_subject_limits()
 limits.certificate.max_certificates = 5
 
 # Push back
-auth.limits.set_subject_limits(limits)
+auth.limits.set_subject_limits(limits=limits)
 ```
 
 ### Reset Subject Limits
@@ -118,7 +118,7 @@ limits.invoice_send.per_minute = 500
 limits.online_session.per_hour = 1200
 
 # Push back
-auth.limits.set_api_rate_limits(limits)
+auth.limits.set_api_rate_limits(limits=limits)
 ```
 
 ### Reset API Rate Limits

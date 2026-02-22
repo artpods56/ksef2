@@ -25,24 +25,18 @@ from ksef2 import Client, Environment, FormSchema
 client = Client(Environment.TEST)
 
 # Context manager (recommended) — session terminates automatically
-with client.sessions.open_online(
-    access_token=auth.access_token,
-    form_code=FormSchema.FA3,
-) as session:
+with auth.online_session(form_code=FormSchema.FA3) as session:
     with open("invoice.xml", "rb") as f:
         result = session.send_invoice(f.read())
     print(result.reference_number)
 
 # Manual management
-session = client.sessions.open_online(
-    access_token=auth.access_token,
-    form_code=FormSchema.FA3,
-)
+session = auth.online_session(form_code=FormSchema.FA3)
 try:
     with open("invoice.xml", "rb") as f:
         result = session.send_invoice(f.read())
 finally:
-    session.terminate()
+    session.close()
 ```
 
 ---
@@ -69,11 +63,10 @@ List all active invoice sessions.
 **SDK Endpoint:** `GET /sessions`
 
 ```python
-from ksef2.domain.models.session import QuerySessionsList, SessionType
+from ksef2.domain.models.session import SessionType
 
-sessions = client.sessions.list(
-    access_token=access_token,
-    query=QuerySessionsList(session_type=SessionType.ONLINE),
+sessions = auth.session_log.list_page(
+    session_type=SessionType.ONLINE,
 )
 print(sessions)
 ```
@@ -97,13 +90,13 @@ state_json = state.model_dump_json()
 
 # Restore and resume
 restored_state = OnlineSessionState.model_validate_json(state_json)
-resumed_session = client.sessions.resume(state=restored_state)
+resumed_session = auth.resume_online_session(state=restored_state)
 
 # Use the resumed session as normal
 # resumed_session.send_invoice(invoice_xml)
 
 # Terminate manually when done
-resumed_session.terminate()
+resumed_session.close()
 ```
 
 > Full example: [`scripts/examples/session/session_resume.py`](../../scripts/examples/session/session_resume.py)

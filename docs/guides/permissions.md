@@ -60,7 +60,7 @@ from ksef2.domain.models import (
 result = auth.permissions.grant_authorization(
     subject_type=AuthorizationSubjectIdentifierType.NIP,
     subject_value=PARTNER_NIP,
-    permission=AuthorizationPermissionType.SELF_INVOICING,
+    permissions=AuthorizationPermissionType.SELF_INVOICING,
     description="Self-invoicing authorization",
     entity_name="Test Partner Entity",
 )
@@ -228,21 +228,18 @@ with client.testdata.temporal() as temp:
         pesel=PERSON_PESEL,
         description="Example person",
     )
-    temp.grant_permissions(
-        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-        permissions=[
-            Permission(
-                type=PermissionType.CREDENTIALS_MANAGE,
-                description="Manage credentials",
-            ),
-        ],
-    )
+    temp.grant_permissions(permissions=[
+        Permission(
+            type=PermissionType.CREDENTIALS_MANAGE,
+            description="Manage credentials",
+        ),
+    ], grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
 
     cert, private_key = generate_test_certificate(ORG_NIP)
 
     # Authenticate and get an AuthenticatedClient
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=ORG_NIP, cert=cert, private_key=private_key,
     )
 

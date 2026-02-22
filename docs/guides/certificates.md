@@ -23,7 +23,7 @@ Get information about certificate limits and whether you can request a new certi
 
 ```python
 # After authenticating:
-auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=private_key)
+auth = client.authentication.with_xades(nip=NIP, cert=cert, private_key=private_key)
 
 limits = auth.certificates.get_limits()
 
@@ -226,7 +226,7 @@ NIP = "1234567890"
 client = Client(environment=Environment.TEST)
 
 cert, private_key = generate_test_certificate(NIP)
-auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=private_key)
+auth = client.authentication.with_xades(nip=NIP, cert=cert, private_key=private_key)
 
 # Check certificate limits
 limits = auth.certificates.get_limits()

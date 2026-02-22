@@ -53,24 +53,20 @@ client = Client(Environment.TEST)
 
 # Authenticate (XAdES — TEST environment)
 cert, key = generate_test_certificate(NIP)
-auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=key)
+auth = client.authentication.with_xades(nip=NIP, cert=cert, private_key=key)
 
-with client.sessions.open_online(
-    access_token=auth.access_token,
-    form_code=FormSchema.FA3,
-) as session:
-
+with auth.online_session(form_code=FormSchema.FA3) as session:
     # Send an invoice
     result = session.send_invoice(open("invoice.xml", "rb").read())
     print(result.reference_number)
 
     # Check processing status
-    status = session.get_invoice_status(result.reference_number)
+    status = session.get_invoice_status(invoice_reference_number=result.reference_number)
 
     # Export invoices matching a query
     export = session.schedule_invoices_export(
         filters=InvoiceQueryFilters(
-            subject_type=InvoiceSubjectType.SUBJECT1,
+            subject_type=InvoiceSubjectType.SELLER,
             date_range=InvoiceQueryDateRange(
                 date_type=DateType.ISSUE,
                 from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
@@ -97,9 +93,9 @@ from ksef2 import Client, Environment
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
 
 cert = load_certificate_from_pem("cert.pem")  # downloaded from MCU
-key  = load_private_key_from_pem("key.pem")
+key = load_private_key_from_pem("key.pem")
 
-auth = Client(Environment.DEMO).auth.authenticate_xades(
+auth = Client(Environment.DEMO).authentication.with_xades(
     nip=NIP, cert=cert, private_key=key, verify_chain=False,
 )
 ```
@@ -115,7 +111,7 @@ from ksef2 import Client
 
 client = Client()  # uses production environment by default
 
-auth = client.auth.authenticate_token(ksef_token="your-ksef-token", nip=NIP)
+auth = client.authentication.with_token(ksef_token="your-ksef-token", nip=NIP)
 print(auth.access_token)
 ```
 
@@ -124,7 +120,7 @@ print(auth.access_token)
 After authentication, you get an `AuthenticatedClient` with access to various services — no need to open an invoice session for these operations:
 
 ```python
-auth = client.auth.authenticate_xades(nip=NIP, cert=cert, private_key=key)
+auth = client.authentication.with_xades(nip=NIP, cert=cert, private_key=key)
 
 # Manage KSeF authorization tokens
 token = auth.tokens.generate(
@@ -147,7 +143,7 @@ auth.permissions.grant_person(
 )
 
 # List and terminate authentication sessions
-sessions = auth.sessions.list()
+sessions = auth.sessions.list_page()
 auth.sessions.terminate_current()
 
 # Manage KSeF certificates

@@ -54,14 +54,11 @@ Grant permissions to a person for a subject context.
 ```python
 from ksef2.domain.models.testdata import Identifier, IdentifierType, Permission, PermissionType
 
-client.testdata.grant_permissions(
-    context=Identifier(type=IdentifierType.NIP, value="1234567890"),
-    authorized=Identifier(type=IdentifierType.NIP, value="0987654321"),
-    permissions=[
-        Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
-        Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-    ],
-)
+client.testdata.grant_permissions(permissions=[
+    Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
+    Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
+], grant_to=Identifier(type=IdentifierType.NIP, value="0987654321"),
+    in_context_of=Identifier(type=IdentifierType.NIP, value="1234567890"))
 ```
 
 ---
@@ -73,10 +70,8 @@ Revoke previously granted permissions.
 **SDK Endpoint:** `POST /testdata/permissions/revoke`
 
 ```python
-client.testdata.revoke_permissions(
-    context=Identifier(type=IdentifierType.NIP, value="1234567890"),
-    authorized=Identifier(type=IdentifierType.NIP, value="0987654321"),
-)
+client.testdata.revoke_permissions(revoke_from=Identifier(type=IdentifierType.NIP, value="0987654321"),
+                                   in_context_of=Identifier(type=IdentifierType.NIP, value="1234567890"))
 ```
 
 ---
@@ -152,7 +147,7 @@ context_id = AuthContextIdentifier(
     value="1234567890",
 )
 
-client.testdata.block_context(context_identifier=context_id)
+client.testdata.block_context(context=context_id)
 ```
 
 ---
@@ -164,7 +159,7 @@ Unblock authentication for a previously blocked context.
 **SDK Endpoint:** `POST /testdata/context/unblock`
 
 ```python
-client.testdata.unblock_context(context_identifier=context_id)
+client.testdata.unblock_context(context=context_id)
 ```
 
 ---
@@ -194,14 +189,11 @@ with client.testdata.temporal() as temp:
     temp.create_person(
         nip=PERSON_NIP, pesel=PERSON_PESEL, description="Example person",
     )
-    temp.grant_permissions(
-        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-        permissions=[
-            Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
-            Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-        ],
-    )
+    temp.grant_permissions(permissions=[
+        Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
+        Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
+    ], grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
 
     # Tests run here
 
@@ -227,20 +219,15 @@ client.testdata.create_subject(
 client.testdata.create_person(
     nip=PERSON_NIP, pesel=PERSON_PESEL, description="Example person",
 )
-client.testdata.grant_permissions(
-    context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-    authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-    permissions=[
-        Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
-        Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-    ],
-)
+client.testdata.grant_permissions(permissions=[
+    Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
+    Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
+], grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+    in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
 
 # Clean up (must be done manually)
-client.testdata.revoke_permissions(
-    context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-    authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-)
+client.testdata.revoke_permissions(revoke_from=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+                                   in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
 client.testdata.delete_person(nip=PERSON_NIP)
 client.testdata.delete_subject(nip=ORG_NIP)
 ```

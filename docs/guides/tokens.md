@@ -49,24 +49,24 @@ List all generated tokens with optional filtering.
 from ksef2.domain.models.tokens import TokenStatus
 
 # List all tokens
-response = auth.tokens.list()
+response = auth.tokens.list_sessions()
 for token in response.tokens:
     print(f"{token.reference_number}: {token.status.value} - {token.description}")
 
 # Filter by status
-response = auth.tokens.list(
+response = auth.tokens.list_sessions(
     status=[TokenStatus.ACTIVE],
 )
 
 # Filter by description (min 3 chars, case-insensitive)
-response = auth.tokens.list(
+response = auth.tokens.list_sessions(
     description="API token",
 )
 
 # Filter by author
 from ksef2.domain.models.tokens import TokenAuthorIdentifier, TokenAuthorIdentifierType
 
-response = auth.tokens.list(
+response = auth.tokens.list_sessions(
     author_filter=TokenAuthorIdentifier(
         type=TokenAuthorIdentifierType.NIP,
         value="1234567890",
@@ -74,11 +74,11 @@ response = auth.tokens.list(
 )
 
 # Pagination
-response = auth.tokens.list(
+response = auth.tokens.list_sessions(
     page_size=20,
 )
 if response.continuation_token:
-    next_page = auth.tokens.list(
+    next_page = auth.tokens.list_sessions(
         continuation_token=response.continuation_token,
     )
 ```
@@ -133,7 +133,7 @@ print(f"Token:     {result.token[:40]}...")
 print(f"Reference: {result.reference_number}")
 
 # List all active tokens
-response = auth.tokens.list(
+response = auth.tokens.list_sessions(
     status=[TokenStatus.ACTIVE],
 )
 print(f"Active tokens: {len(response.tokens)}")
