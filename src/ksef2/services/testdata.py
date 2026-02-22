@@ -97,28 +97,25 @@ class TestDataService:
     def grant_permissions(
         self,
         *,
-        context: Identifier,
-        authorized: Identifier,
         permissions: list[Permission],
+        grant_to: Identifier,
+        in_context_of: Identifier,
     ) -> None:
         self._grant_permissions_ep.send(
             TestDataMapper.grant_permissions(
-                context=context,
-                authorized=authorized,
+                context=in_context_of,
+                authorized=grant_to,
                 permissions=permissions,
             )
         )
 
     def revoke_permissions(
-        self,
-        *,
-        context: Identifier,
-        authorized: Identifier,
+        self, *, revoke_from: Identifier, in_context_of: Identifier
     ) -> None:
         self._revoke_permissions_ep.send(
             TestDataMapper.revoke_permissions(
-                context=context,
-                authorized=authorized,
+                context=in_context_of,
+                authorized=revoke_from,
             )
         )
 
@@ -134,14 +131,14 @@ class TestDataService:
             )
         )
 
-    def block_context(self, *, context_identifier: AuthContextIdentifier) -> None:
+    def block_context(self, *, context: AuthContextIdentifier) -> None:
         self._block_context_ep.send(
-            TestDataMapper.block_context(context_identifier=context_identifier)
+            TestDataMapper.block_context(context_identifier=context)
         )
 
-    def unblock_context(self, *, context_identifier: AuthContextIdentifier) -> None:
+    def unblock_context(self, *, context: AuthContextIdentifier) -> None:
         self._unblock_context_ep.send(
-            TestDataMapper.unblock_context(context_identifier=context_identifier)
+            TestDataMapper.unblock_context(context_identifier=context)
         )
 
     def temporal(self) -> TemporalTestData:
@@ -155,9 +152,50 @@ class TemporalTestData:
         self._subjects: list[str] = []
         self._persons: list[str] = []
         self._permissions: list[tuple[Identifier, Identifier]] = []
+        self._attachments: list[str] = []
+        self._blocked_contexts: list[AuthContextIdentifier] = []
 
     def __enter__(self) -> Self:
         return self
+
+    def _cleanup_blocked_context(self, context: AuthContextIdentifier) -> None:
+        try:
+            self._service.unblock_context(context=context)
+        except Exception:
+            logger.warning("Failed to unblock context %s", context, exc_info=True)
+
+    def _cleanup_attachment(self, nip: str) -> None:
+        try:
+            self._service.revoke_attachments(nip=nip)
+        except Exception:
+            logger.warning("Failed to revoke attachments for %s", nip, exc_info=True)
+
+    def _cleanup_permission(
+        self, in_context_of: Identifier, grant_to: Identifier
+    ) -> None:
+        try:
+            self._service.revoke_permissions(
+                revoke_from=grant_to, in_context_of=in_context_of
+            )
+        except Exception:
+            logger.warning(
+                "Failed to revoke permissions for %s → %s",
+                in_context_of,
+                grant_to,
+                exc_info=True,
+            )
+
+    def _cleanup_person(self, nip: str) -> None:
+        try:
+            self._service.delete_person(nip=nip)
+        except Exception:
+            logger.warning("Failed to delete person %s", nip, exc_info=True)
+
+    def _cleanup_subject(self, nip: str) -> None:
+        try:
+            self._service.delete_subject(nip=nip)
+        except Exception:
+            logger.warning("Failed to delete subject %s", nip, exc_info=True)
 
     def __exit__(
         self,
@@ -165,28 +203,16 @@ class TemporalTestData:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        for context, authorized in reversed(self._permissions):
-            try:
-                self._service.revoke_permissions(context=context, authorized=authorized)
-            except Exception:
-                logger.warning(
-                    "Failed to revoke permissions for %s → %s",
-                    context,
-                    authorized,
-                    exc_info=True,
-                )
-
+        for context in reversed(self._blocked_contexts):
+            self._cleanup_blocked_context(context)
+        for nip in reversed(self._attachments):
+            self._cleanup_attachment(nip)
+        for in_context_of, grant_to in reversed(self._permissions):
+            self._cleanup_permission(in_context_of, grant_to)
         for nip in reversed(self._persons):
-            try:
-                self._service.delete_person(nip=nip)
-            except Exception:
-                logger.warning("Failed to delete person %s", nip, exc_info=True)
-
+            self._cleanup_person(nip)
         for nip in reversed(self._subjects):
-            try:
-                self._service.delete_subject(nip=nip)
-            except Exception:
-                logger.warning("Failed to delete subject %s", nip, exc_info=True)
+            self._cleanup_subject(nip)
 
     def create_subject(
         self,
@@ -248,16 +274,35 @@ class TemporalTestData:
     def grant_permissions(
         self,
         *,
-        context: Identifier,
-        authorized: Identifier,
         permissions: list[Permission],
+        grant_to: Identifier,
+        in_context_of: Identifier,
     ) -> None:
-        self._service.grant_permissions(
-            context=context,
-            authorized=authorized,
-            permissions=permissions,
-        )
-        self._permissions.append((context, authorized))
+        self._permissions.append((in_context_of, grant_to))
+        try:
+            self._service.grant_permissions(
+                permissions=permissions, grant_to=grant_to, in_context_of=in_context_of
+            )
+        except exceptions.KSeFApiError as e:
+            if e.exception_code == ExceptionCode.OBJECT_ALREADY_EXISTS:
+                logger.warning(
+                    f"Permissions for {in_context_of} → {grant_to} already exist, continuing..."
+                )
+            else:
+                raise
 
     def enable_attachments(self, *, nip: str) -> None:
         self._service.enable_attachments(nip=nip)
+        self._attachments.append(nip)
+
+    def revoke_attachments(
+        self, *, nip: str, expected_end_date: date | None = None
+    ) -> None:
+        self._service.revoke_attachments(nip=nip, expected_end_date=expected_end_date)
+
+    def block_context(self, *, context: AuthContextIdentifier) -> None:
+        self._service.block_context(context=context)
+        self._blocked_contexts.append(context)
+
+    def unblock_context(self, *, context: AuthContextIdentifier) -> None:
+        self._service.unblock_context(context=context)
