@@ -53,8 +53,6 @@ def with_automatic_cleanup():
 
         print("Granting permissions ...")
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_READ, description="Read invoices"
@@ -63,6 +61,8 @@ def with_automatic_cleanup():
                     type=PermissionType.INVOICE_WRITE, description="Send invoices"
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
         )
 
         print("Cleanup has been performed automatically.")
@@ -108,20 +108,20 @@ def manual_cleanup():
 
     print("Granting permissions ...")
     client.testdata.grant_permissions(
-        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
         permissions=[
             Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
             Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
         ],
+        grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
     )
 
     print("Cleaning up ...")
 
     print("Revoking permissions ...")
     client.testdata.revoke_permissions(
-        context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-        authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        revoke_from=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
     )
 
     print("Deleting test person ...")

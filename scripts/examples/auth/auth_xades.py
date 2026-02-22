@@ -16,7 +16,7 @@ def main() -> None:
 
     # Authenticate with XAdES signature
     print("Authenticating via XAdES ...")
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=NIP,
         cert=cert,
         private_key=private_key,

@@ -33,17 +33,12 @@ def main() -> None:
         )
         cert, private_key = generate_test_certificate(ORG_NIP)
 
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=ORG_NIP,
             cert=cert,
             private_key=private_key,
         )
-        access_token = auth.access_token
-
-        with client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
             result = session.send_invoice(
                 invoice_xml=InvoiceFactory.create(
@@ -61,7 +56,9 @@ def main() -> None:
 
             # KSeF assigns a ksefNumber after processing — wait briefly then fetch it
             time.sleep(5)
-            status = session.get_invoice_status(result.reference_number)
+            status = session.get_invoice_status(
+                invoice_reference_number=result.reference_number
+            )
 
             if status.ksefNumber:
                 downloaded_invoice = session.download_invoice(

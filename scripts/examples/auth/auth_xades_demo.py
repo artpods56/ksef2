@@ -45,7 +45,7 @@ def main() -> None:
     client = Client(Environment.DEMO)  # or Environment.PRODUCTION
 
     print("Authenticating via XAdES (MCU certificate) ...")
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=NIP,
         cert=cert,
         private_key=key,

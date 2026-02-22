@@ -37,28 +37,23 @@ def main() -> None:
         )
 
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_WRITE, description="Send invoices"
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
         )
 
         # we are using self-signed certificate here, this will only work in test environment
         cert, private_key = generate_test_certificate(PERSON_NIP)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=PERSON_NIP, cert=cert, private_key=private_key
         )
-        access_token = auth.access_token
-
         # Open a session WITHOUT context manager (manual lifecycle)
         print("Opening session (manual mode) ...")
-        session = client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        )
+        session = auth.online_session(form_code=FormSchema.FA3)
 
         # Save the session state, its a pydantic model so we can easly serialize it
         state: OnlineSessionState = (
@@ -76,7 +71,7 @@ def main() -> None:
         # Resume the session from saved state
         print("Resuming session from saved state ...")
         restored_state = OnlineSessionState.model_validate_json(state_json)
-        resumed_session = client.sessions.resume(state=restored_state)
+        resumed_session = auth.resume_online_session(state=restored_state)
 
         # The resumed session can send invoices, download, etc. as long as it is valid
         # Values stored in state should be properly secured
@@ -84,7 +79,7 @@ def main() -> None:
 
         # Terminate manually when done
         print("Terminating session ...")
-        resumed_session.terminate()
+        resumed_session.close()
 
         print("Session terminated.")
 

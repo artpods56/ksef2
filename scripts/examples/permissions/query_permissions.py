@@ -53,8 +53,6 @@ def main():
             description="Example person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
                 Permission(
                     type=PermissionType.CREDENTIALS_MANAGE,
@@ -65,12 +63,14 @@ def main():
                     description="Read invoices",
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)
 
         # Authenticate - no session needed for permission operations
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=ORG_NIP,
             cert=cert,
             private_key=private_key,
@@ -90,7 +90,7 @@ def main():
         _ = auth.permissions.grant_authorization(
             subject_type=AuthorizationSubjectIdentifierType.NIP,
             subject_value=PARTNER_NIP,
-            permission=AuthorizationPermissionType.SELF_INVOICING,
+            permissions=AuthorizationPermissionType.SELF_INVOICING,
             description="Self-invoicing authorization",
             entity_name="Test Partner Entity",
         )

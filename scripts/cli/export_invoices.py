@@ -64,6 +64,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     # Auth: XAdES PEM
     _ = parser.add_argument("--cert", help="Path to PEM certificate file")
     _ = parser.add_argument("--key", help="Path to PEM private key file")
+    _ = parser.add_argument(
+        "--key-password", help="Password for the PEM private key (if encrypted)"
+    )
 
     # Auth: XAdES PKCS#12
     _ = parser.add_argument("--p12", help="Path to PKCS#12 (.p12/.pfx) file")
@@ -113,7 +116,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def authenticate(client: Client, args: argparse.Namespace):
     """Authenticate and return an AuthenticatedClient."""
     if args.token:
-        return client.auth.authenticate_token(ksef_token=args.token, nip=args.nip)
+        return client.authentication.with_token(ksef_token=args.token, nip=args.nip)
 
     if args.p12:
         from ksef2.core.xades import load_certificate_and_key_from_p12
@@ -127,9 +130,10 @@ def authenticate(client: Client, args: argparse.Namespace):
         )
 
         cert = load_certificate_from_pem(args.cert)
-        key = load_private_key_from_pem(args.key)
+        password = args.key_password.encode() if args.key_password else None
+        key = load_private_key_from_pem(args.key, password=password)
 
-    return client.auth.authenticate_xades(nip=args.nip, cert=cert, private_key=key)
+    return client.authentication.with_xades(nip=args.nip, cert=cert, private_key=key)
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -147,7 +151,7 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(1)
 
     query_filters = InvoiceQueryFilters(
-        subject_type=InvoiceSubjectType.SUBJECT2,
+        subject_type=InvoiceSubjectType.BUYER,
         date_range=InvoiceQueryDateRange(
             date_type=DateType.ISSUE,
             from_=datetime.now(tz=timezone.utc) - timedelta(days=args.days),
@@ -156,10 +160,7 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     try:
-        with client.sessions.open_online(
-            access_token=auth.access_token,
-            form_code=form_schema,
-        ) as session:
+        with auth.online_session(form_code=form_schema) as session:
             print(f"Waiting for invoices (last {args.days} days) ...")
             metadata = session.wait_for_invoices(filters=query_filters)
             print(f"Found {len(metadata.invoices)} invoice(s). Exporting ...")

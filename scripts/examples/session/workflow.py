@@ -13,7 +13,7 @@ from ksef2.domain.models import (
     Identifier,
     Permission,
 )
-from ksef2.domain.models.session import QuerySessionsList, SessionType
+from ksef2.domain.models.session import SessionType
 from scripts.examples._common import repo_root
 
 ORG_NIP = generate_nip()
@@ -46,8 +46,6 @@ def main():
         )
 
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_WRITE,
@@ -62,20 +60,18 @@ def main():
                     description="Manage enforcement operations",
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)
 
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=ORG_NIP,
             cert=cert,
             private_key=private_key,
         )
-        access_token = auth.access_token
-
-        with client.sessions.open_online(
-            access_token=access_token, form_code=FormSchema.FA3
-        ) as session:
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             print(session.get_state().model_dump_json(indent=2))
 
             print("Session status:")
@@ -117,9 +113,8 @@ def main():
 
             print("Listing online sessions:")
             print(
-                client.sessions.list(
-                    access_token=access_token,
-                    query=QuerySessionsList(session_type=SessionType.ONLINE),
+                auth.session_log.list_page(
+                    session_type=SessionType.ONLINE,
                 )
             )
 

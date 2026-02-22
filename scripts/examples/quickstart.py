@@ -23,7 +23,7 @@ def main() -> None:
     client = Client(Environment.TEST)
 
     cert, private_key = generate_test_certificate(VALID_NIP)
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=VALID_NIP,
         cert=cert,
         private_key=private_key,
@@ -40,23 +40,17 @@ def main() -> None:
     )
 
     # Sessions are context managers and will automatically terminate on exit
-    with client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with auth.online_session(form_code=FormSchema.FA3) as session:
         result = session.send_invoice(invoice_xml=invoice_xml)
         print(result.reference_number)
 
     # Sessions also support manual management:
-    session = client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    )
+    session = auth.online_session(form_code=FormSchema.FA3)
     try:
         result = session.send_invoice(invoice_xml=invoice_xml)
         print(result.reference_number)
     finally:
-        session.terminate()
+        session.close()
 
 
 if __name__ == "__main__":

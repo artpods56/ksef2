@@ -70,8 +70,6 @@ def main() -> None:
         )
 
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_WRITE,
@@ -82,21 +80,18 @@ def main() -> None:
                     description="Read invoices",
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)
 
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=ORG_NIP,
             cert=cert,
             private_key=private_key,
         )
-        access_token = auth.access_token
-
-        with client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
             # building and sending sample invoice
@@ -116,15 +111,15 @@ def main() -> None:
             time.sleep(5)
 
             print(
-                session.get_invoice_status(result.reference_number).model_dump_json(
-                    indent=2
-                )
+                session.get_invoice_status(
+                    invoice_reference_number=result.reference_number
+                ).model_dump_json(indent=2)
             )
 
             # lets get all invoiced that were issued in the last year
             export = session.schedule_invoices_export(
                 filters=InvoiceQueryFilters(
-                    subject_type=InvoiceSubjectType.SUBJECT1,  # Subject 1  is a seller
+                    subject_type=InvoiceSubjectType.SELLER,  # Subject 1  is a seller
                     date_range=InvoiceQueryDateRange(
                         date_type=DateType.ISSUE,
                         from_=datetime(2026, 1, 1, tzinfo=timezone.utc),

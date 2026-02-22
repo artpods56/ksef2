@@ -70,7 +70,7 @@ def download_for_nip(client: Client, nip: str) -> None:
     cert = load_certificate_from_pem(CERT_DIR / f"{nip}.pem")
     key = load_private_key_from_pem(CERT_DIR / f"{nip}.key")
 
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=nip,
         cert=cert,
         private_key=key,
@@ -80,14 +80,11 @@ def download_for_nip(client: Client, nip: str) -> None:
     target_dir = DOWNLOAD_DIR / nip
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    with client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with auth.online_session(form_code=FormSchema.FA3) as session:
         print(f"[{nip}] Scheduling export of purchase invoices …")
         export = session.schedule_invoices_export(
             filters=InvoiceQueryFilters(
-                subject_type=InvoiceSubjectType.SUBJECT2,  # buyer = purchase invoices
+                subject_type=InvoiceSubjectType.BUYER,  # buyer = purchase invoices
                 date_range=InvoiceQueryDateRange(
                     date_type=DateType.ISSUE,
                     from_=DATE_FROM,

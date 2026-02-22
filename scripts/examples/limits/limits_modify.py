@@ -51,20 +51,20 @@ def main() -> None:
         )
 
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
                 Permission(
                     type=PermissionType.INVOICE_WRITE, description="Sending invoices"
                 ),
             ],
+            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
+            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)
 
         # Authenticate and get an AuthenticatedClient
         print("Authenticating ...")
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=ORG_NIP,
             cert=cert,
             private_key=private_key,
@@ -75,7 +75,7 @@ def main() -> None:
         limits = auth.limits.get_context_limits()
         original_max = limits.online_session.max_invoices
         limits.online_session.max_invoices = 5000
-        auth.limits.set_session_limits(limits)
+        auth.limits.set_session_limits(limits=limits)
         print(f"  max_invoices: {original_max} -> 5000")
 
         # Reset session limits back to defaults
@@ -87,7 +87,7 @@ def main() -> None:
         subject_limits = auth.limits.get_subject_limits()
         if subject_limits.certificate:
             subject_limits.certificate.max_certificates = 10
-            auth.limits.set_subject_limits(subject_limits)
+            auth.limits.set_subject_limits(limits=subject_limits)
             print("  max_certificates -> 10")
 
         # Reset subject limits back to defaults
@@ -99,7 +99,7 @@ def main() -> None:
         rate_limits = auth.limits.get_api_rate_limits()
         rate_limits.invoice_send.per_second = 50
         rate_limits.invoice_send.per_minute = 200
-        auth.limits.set_api_rate_limits(rate_limits)
+        auth.limits.set_api_rate_limits(limits=rate_limits)
         print("  invoice_send: 50/s, 200/m")
 
         # Reset rate limits back to defaults

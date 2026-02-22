@@ -40,14 +40,14 @@ def main() -> None:
 
         # Block the context
         print(f"Blocking context for NIP: {ORG_NIP}")
-        client.testdata.block_context(context_identifier=context_id)
+        client.testdata.block_context(context=context_id)
         print("  Context blocked - authentication is now disabled")
 
         # At this point, any authentication attempt for this NIP would fail
 
         # Unblock the context
         print(f"Unblocking context for NIP: {ORG_NIP}")
-        client.testdata.unblock_context(context_identifier=context_id)
+        client.testdata.unblock_context(context=context_id)
         print("  Context unblocked - authentication is now enabled")
 
     print("Test data cleaned up.")

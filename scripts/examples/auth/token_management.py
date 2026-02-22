@@ -24,7 +24,7 @@ def main() -> None:
         # Authenticate
         print("Authenticating ...")
         cert, private_key = generate_test_certificate(NIP)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=NIP,
             cert=cert,
             private_key=private_key,

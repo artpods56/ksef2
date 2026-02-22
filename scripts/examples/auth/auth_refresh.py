@@ -13,7 +13,7 @@ def main() -> None:
     # First, authenticate to get initial tokens
     print("Authenticating via XAdES ...")
     cert, private_key = generate_test_certificate(NIP)
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=NIP,
         cert=cert,
         private_key=private_key,
@@ -23,12 +23,12 @@ def main() -> None:
 
     # List active sessions using the authenticated client
     print("Listing active sessions ...")
-    sessions = auth.sessions.list()
+    sessions = auth.sessions.list_page()
     print(f"  Active sessions: {len(sessions.items)} found")
 
     # Refresh the access token
     print("Refreshing access token ...")
-    refreshed = client.auth.refresh(refresh_token=auth.refresh_token)
+    refreshed = client.authentication.refresh(refresh_token=auth.refresh_token)
     print(f"  New access token valid until: {refreshed.access_token.valid_until}")
 
     # Note: The refreshed token can be used to create a new authenticated context

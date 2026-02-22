@@ -74,7 +74,7 @@ def send_invoices(
 ) -> None:
     """Authenticate as seller and send INVOICES_PER_BUYER invoices to each buyer."""
     print(f"\n[seller {seller_nip}] Authenticating …")
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=seller_nip,
         cert=seller_cert,
         private_key=seller_key,
@@ -82,10 +82,7 @@ def send_invoices(
 
     template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    with client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with auth.online_session(form_code=FormSchema.FA3) as session:
         for buyer_nip in buyers:
             for i in range(INVOICES_PER_BUYER):
                 invoice_xml = InvoiceFactory.create(
@@ -115,7 +112,7 @@ def download_for_buyer(
 ) -> None:
     """Authenticate as buyer and download all purchase invoices (Subject2)."""
     print(f"\n[buyer {buyer_nip}] Authenticating …")
-    auth = client.auth.authenticate_xades(
+    auth = client.authentication.with_xades(
         nip=buyer_nip,
         cert=buyer_cert,
         private_key=buyer_key,
@@ -123,14 +120,11 @@ def download_for_buyer(
 
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    with client.sessions.open_online(
-        access_token=auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with auth.online_session(form_code=FormSchema.FA3) as session:
         print(f"[buyer {buyer_nip}] Scheduling export of purchase invoices …")
         export = session.schedule_invoices_export(
             filters=InvoiceQueryFilters(
-                subject_type=InvoiceSubjectType.SUBJECT2,  # buyer perspective
+                subject_type=InvoiceSubjectType.BUYER,  # buyer perspective
                 date_range=InvoiceQueryDateRange(
                     date_type=DateType.ISSUE,
                     from_=datetime.now(tz=timezone.utc) - timedelta(days=90),

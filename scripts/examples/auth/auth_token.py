@@ -19,7 +19,7 @@ def main() -> None:
     client = Client(environment=Environment.TEST)
 
     print("Authenticating via KSeF token ...")
-    auth = client.auth.authenticate_token(
+    auth = client.authentication.with_token(
         ksef_token=KSEF_TOKEN,
         nip=NIP,
     )

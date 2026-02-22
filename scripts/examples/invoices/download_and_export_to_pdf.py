@@ -35,16 +35,13 @@ def send_invoice(
     seller_cert: Certificate,
     seller_key: RSAPrivateKey,
 ) -> None:
-    seller_auth = client.auth.authenticate_xades(
+    seller_auth = client.authentication.with_xades(
         nip=seller_nip,
         cert=seller_cert,
         private_key=seller_key,
     )
 
-    with client.sessions.open_online(
-        access_token=seller_auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with seller_auth.online_session(form_code=FormSchema.FA3) as session:
         invoice_xml = InvoiceFactory.create(
             template_xml=template_path.read_text(encoding="utf-8"),
             replacements={
@@ -65,14 +62,14 @@ def download_and_export(
     buyer_cert: Certificate,
     buyer_key: RSAPrivateKey,
 ) -> None:
-    buyer_auth = client.auth.authenticate_xades(
+    buyer_auth = client.authentication.with_xades(
         nip=buyer_nip,
         cert=buyer_cert,
         private_key=buyer_key,
     )
 
     query_filters = InvoiceQueryFilters(
-        subject_type=InvoiceSubjectType.SUBJECT2,
+        subject_type=InvoiceSubjectType.BUYER,
         date_range=InvoiceQueryDateRange(
             date_type=DateType.ISSUE,
             from_=datetime.now(tz=timezone.utc) - timedelta(days=1),
@@ -80,10 +77,7 @@ def download_and_export(
         ),
     )
 
-    with client.sessions.open_online(
-        access_token=buyer_auth.access_token,
-        form_code=FormSchema.FA3,
-    ) as session:
+    with buyer_auth.online_session(form_code=FormSchema.FA3) as session:
         print("Waiting for invoice to appear in KSeF...")
         metadata = session.wait_for_invoices(filters=query_filters)
         print(f"Found {len(metadata.invoices)} invoice(s). Exporting...")
