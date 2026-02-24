@@ -1,16 +1,15 @@
-"""Peppol service for querying Peppol service providers."""
-
+from collections.abc import Iterator
 from typing import final
 
 from ksef2.core import protocols
 from ksef2.domain.models.pagination import PaginationParams
-from ksef2.domain.models.peppol import QueryPeppolProvidersResponse
+from ksef2.domain.models.peppol import ListPeppolProvidersResponse, PeppolProvider
 from ksef2.endpoints.peppol import QueryPeppolProvidersEndpoint
 from ksef2.infra.mappers.requests.peppol import PeppolProviderMapper
 
 
 @final
-class PeppolService:
+class PeppolClient:
     """Service for querying Peppol service providers.
 
     This service provides access to the list of Peppol service providers
@@ -22,11 +21,11 @@ class PeppolService:
         self._transport = transport
         self._query_endpoint = QueryPeppolProvidersEndpoint(transport)
 
-    def query_providers(
+    def query(
         self,
         *,
         params: PaginationParams | None = None,
-    ) -> QueryPeppolProvidersResponse:
+    ) -> ListPeppolProvidersResponse:
         """Query Peppol service providers.
 
         Args:
@@ -36,7 +35,34 @@ class PeppolService:
             QueryPeppolProvidersResponse containing the list of providers
             and pagination info.
         """
+        params = params or PaginationParams()
+
         response = self._query_endpoint.send(
-            **params.to_api_params() if params else PaginationParams().to_api_params()
+            **params.to_api_params()
         )
         return PeppolProviderMapper.map_response(response)
+
+
+
+    def all(self, *, params: PaginationParams | None = None) -> Iterator[PeppolProvider]:
+        """Iterate over all Peppol service providers.
+
+        This method handles pagination internally.
+
+        Args:
+            params: Pagination parameters.
+
+        Returns:
+            Iterator over PeppolProvider objects.
+        """
+        current_params = params or PaginationParams()
+
+        while True:
+            response = self.query(params=current_params)
+            yield from response.providers
+            
+            if not response.has_more:
+                break
+
+            current_params = current_params.next_page()
+            

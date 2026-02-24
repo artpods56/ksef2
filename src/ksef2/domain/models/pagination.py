@@ -14,6 +14,11 @@ class PaginationParams(KSeFBaseParams):
     def to_api_params(self) -> PaginationQueryParams:
         return {"pageOffset": self.page_offset, "pageSize": self.page_size}
 
+    def next_page(self) -> PaginationParams:
+        return PaginationParams(
+            page_offset=self.page_offset + self.page_size, page_size=self.page_size
+        )
+
 
 class InvoiceQueryParams(PaginationParams):
     sort_order: SortOrder = SortOrder.ASC
