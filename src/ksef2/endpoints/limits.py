@@ -1,168 +1,72 @@
+"""Limits endpoints for managing KSeF limits."""
+
 from typing import final
 
-from ksef2.core import headers, codecs, protocols
-from ksef2.infra.schema.api import spec as spec
+from ksef2.core import routes
+from ksef2.endpoints.base import BaseEndpoints
+from ksef2.infra.schema.api import spec
 
 
 @final
-class GetContextLimitsEndpoint:
-    url: str = "/limits/context"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> spec.EffectiveContextLimits:
-        return codecs.JsonResponseCodec.parse(
+class LimitEndpoints(BaseEndpoints):
+    def get_context_limits(self) -> spec.EffectiveContextLimits:
+        return self._parse(
             self._transport.get(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(bearer_token),
+                path=routes.LimitRoutes.GET_CONTEXT_LIMITS,
             ),
             spec.EffectiveContextLimits,
         )
 
-
-@final
-class GetSubjectLimitsEndpoint:
-    url: str = "/limits/subject"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> spec.EffectiveSubjectLimits:
-        return codecs.JsonResponseCodec.parse(
+    def get_subject_limits(self) -> spec.EffectiveSubjectLimits:
+        return self._parse(
             self._transport.get(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(bearer_token),
+                path=routes.LimitRoutes.GET_SUBJECT_LIMITS,
             ),
             spec.EffectiveSubjectLimits,
         )
 
-
-@final
-class GetApiRateLimitsEndpoint:
-    url: str = "/rate-limits"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> spec.EffectiveApiRateLimits:
-        return codecs.JsonResponseCodec.parse(
+    def get_api_rate_limits(self) -> spec.EffectiveApiRateLimits:
+        return self._parse(
             self._transport.get(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(bearer_token),
+                path=routes.LimitRoutes.GET_API_RATE_LIMITS,
             ),
             spec.EffectiveApiRateLimits,
         )
 
-
-@final
-class SetSessionLimitsEndpoint:
-    url: str = "/testdata/limits/context/session"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        bearer_token: str,
-        body: spec.SetSessionLimitsRequest,
-    ) -> None:
+    def set_session_limits(self, body: spec.SetSessionLimitsRequest) -> None:
         _ = self._transport.post(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
-            json=body.model_dump(by_alias=True, exclude_none=True),
+            path=routes.LimitRoutes.SET_SESSION_LIMITS,
+            json=body.model_dump(mode="json"),
         )
 
-
-@final
-class ResetSessionLimitsEndpoint:
-    url: str = "/testdata/limits/context/session"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> None:
+    def reset_session_limits(self) -> None:
         _ = self._transport.delete(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
+            path=routes.LimitRoutes.RESET_SESSION_LIMITS,
         )
 
-
-@final
-class SetSubjectLimitsEndpoint:
-    url: str = "/testdata/limits/subject/certificate"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        bearer_token: str,
-        body: spec.SetSubjectLimitsRequest,
-    ) -> None:
+    def set_subject_limits(self, body: spec.SetSubjectLimitsRequest) -> None:
         _ = self._transport.post(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
-            json=body.model_dump(by_alias=True, exclude_none=True),
+            path=routes.LimitRoutes.SET_SUBJECT_LIMITS,
+            json=body.model_dump(mode="json"),
         )
 
-
-@final
-class ResetSubjectLimitsEndpoint:
-    url: str = "/testdata/limits/subject/certificate"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> None:
+    def reset_subject_limits(self) -> None:
         _ = self._transport.delete(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
+            path=routes.LimitRoutes.RESET_SUBJECT_LIMITS,
         )
 
-
-@final
-class SetApiRateLimitsEndpoint:
-    url: str = "/testdata/rate-limits"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        bearer_token: str,
-        body: spec.SetRateLimitsRequest,
-    ) -> None:
+    def set_api_rate_limits(self, body: spec.SetRateLimitsRequest) -> None:
         _ = self._transport.post(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
-            json=body.model_dump(by_alias=True, exclude_none=True),
+            path=routes.LimitRoutes.SET_API_RATE_LIMITS,
+            json=body.model_dump(mode="json"),
         )
 
-
-@final
-class ResetApiRateLimitsEndpoint:
-    url: str = "/testdata/rate-limits"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> None:
+    def reset_api_rate_limits(self) -> None:
         _ = self._transport.delete(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
+            path=routes.LimitRoutes.RESET_API_RATE_LIMITS,
         )
 
-
-@final
-class SetProductionRateLimitsEndpoint:
-    url: str = "/testdata/rate-limits/production"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> None:
+    def set_production_rate_limits(self) -> None:
         _ = self._transport.post(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
+            path=routes.LimitRoutes.SET_PRODUCTION_RATE_LIMITS,
         )

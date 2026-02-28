@@ -1,429 +1,235 @@
-from typing import Any, final, Unpack
-from urllib.parse import urlencode
+from typing import final, Unpack
 
-from pydantic import TypeAdapter
-
-from ksef2.core import headers, codecs, protocols
-from ksef2.domain.models.pagination import PaginationQueryParams
+from ksef2.core import routes
+from ksef2.endpoints.base import OffsetPaginationQueryParams
+from ksef2.endpoints.base import BaseEndpoints
 from ksef2.infra.schema.api import spec
 
-PAGINATION_PARAMS_ADAPTER = TypeAdapter(PaginationQueryParams)
-
 
 @final
-class GrantPersonPermissionsEndpoint:
-    url: str = "/permissions/persons/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
+class PermissionsGrantEndpoints(BaseEndpoints):
+    def grant_person(
         self,
-        access_token: str,
-        body: dict[str, Any],
+        request: spec.PersonPermissionsGrantRequest,
     ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.GrantPermissionsRoutes.GRANT_PERSON,
+                json=request.model_dump(mode="json"),
+            ),
+            spec.PermissionsOperationResponse,
+        )
+
+    def grant_entity(
+        self, request: spec.EntityPermissionsGrantRequest
+    ) -> spec.PermissionsOperationResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.GrantPermissionsRoutes.GRANT_ENTITY,
+                json=request.model_dump(mode="json"),
+            ),
+            spec.PermissionsOperationResponse,
+        )
+
+    def grant_authorization(
+        self, request: spec.EntityAuthorizationPermissionsGrantRequest
+    ) -> spec.PermissionsOperationResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.GrantPermissionsRoutes.GRANT_AUTHORIZATION,
+                json=request.model_dump(mode="json"),
+            ),
+            spec.PermissionsOperationResponse,
+        )
+
+    def grant_indirect(
+        self, request: spec.IndirectPermissionsGrantRequest
+    ) -> spec.PermissionsOperationResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.GrantPermissionsRoutes.GRANT_INDIRECT,
+                json=request.model_dump(mode="json"),
+            ),
+            spec.PermissionsOperationResponse,
+        )
+
+    def grant_subunit(
+        self, request: spec.SubunitPermissionsGrantRequest
+    ) -> spec.PermissionsOperationResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.GrantPermissionsRoutes.GRANT_SUBUNITS,
+                json=request.model_dump(mode="json"),
+            ),
+            spec.PermissionsOperationResponse,
+        )
+
+    def grant_administered_eu_entity(
+        self, request: spec.EuEntityAdministrationPermissionsGrantRequest
+    ) -> spec.PermissionsOperationResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.GrantPermissionsRoutes.GRANT_ADMINISTERED_EU_ENTITY,
+                json=request.model_dump(mode="json"),
+            ),
+            spec.PermissionsOperationResponse,
+        )
+
+    def grant_eu_entity(
+        self, request: spec.EuEntityPermissionsGrantRequest
+    ) -> spec.PermissionsOperationResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.GrantPermissionsRoutes.GRANT_EU_ENTITY,
+                json=request.model_dump(mode="json"),
             ),
             spec.PermissionsOperationResponse,
         )
 
 
 @final
-class GrantEntityPermissionsEndpoint:
-    url: str = "/permissions/entities/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-    ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.PermissionsOperationResponse,
-        )
-
-
-@final
-class GrantAuthorizationPermissionsEndpoint:
-    url: str = "/permissions/authorizations/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-    ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.PermissionsOperationResponse,
-        )
-
-
-@final
-class GrantIndirectPermissionsEndpoint:
-    url: str = "/permissions/indirect/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-    ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.PermissionsOperationResponse,
-        )
-
-
-@final
-class GrantSubunitPermissionsEndpoint:
-    url: str = "/permissions/subunits/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-    ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.PermissionsOperationResponse,
-        )
-
-
-@final
-class GrantEuEntityPermissionsEndpoint:
-    url: str = "/permissions/eu-entities/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-    ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.PermissionsOperationResponse,
-        )
-
-
-@final
-class GrantEuEntityAdministrationPermissionsEndpoint:
-    url: str = "/permissions/eu-entities/administration/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-    ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.PermissionsOperationResponse,
-        )
-
-
-@final
-class RevokeAuthorizationPermissionsEndpoint:
-    url: str = "/permissions/authorizations/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        permission_id: str,
-    ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
+class RevokePermissionsEndpoints(BaseEndpoints):
+    def revoke_person(self, permission_id: str) -> spec.PermissionsOperationResponse:
+        return self._parse(
             self._transport.delete(
-                f"{self.url}/{permission_id}",
-                headers=headers.KSeFHeaders.bearer(access_token),
+                path=routes.RevokePermissionsRoutes.REVOKE_PERMISSION.format(
+                    permissionId=permission_id
+                ),
             ),
             spec.PermissionsOperationResponse,
         )
 
-
-@final
-class RevokeCommonPermissionsEndpoint:
-    url: str = "/permissions/common/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        permission_id: str,
+    def revoke_authorization(
+        self, permission_id: str
     ) -> spec.PermissionsOperationResponse:
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.delete(
-                f"{self.url}/{permission_id}",
-                headers=headers.KSeFHeaders.bearer(access_token),
+                path=routes.RevokePermissionsRoutes.REVOKE_AUTHORIZATION_PERMISSION.format(
+                    permissionId=permission_id
+                ),
             ),
             spec.PermissionsOperationResponse,
         )
 
 
 @final
-class GetAttachmentPermissionStatusEndpoint:
-    url: str = "/permissions/attachments/status"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, access_token: str) -> spec.CheckAttachmentPermissionStatusResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.get(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-            ),
-            spec.CheckAttachmentPermissionStatusResponse,
-        )
-
-
-@final
-class GetPermissionOperationStatusEndpoint:
-    url: str = "/permissions/operations"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self, access_token: str, reference_number: str
-    ) -> spec.PermissionsOperationStatusResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.get(
-                f"{self.url}/{reference_number}",
-                headers=headers.KSeFHeaders.bearer(access_token),
-            ),
-            spec.PermissionsOperationStatusResponse,
-        )
-
-
-@final
-class GetEntityRolesEndpoint:
-    url: str = "/permissions/query/entities/roles"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
+class QueryPermissionsEndpoints(BaseEndpoints):
+    def query_personal_grants(
         self,
-        access_token: str,
-        **params: Unpack[PaginationQueryParams],
-    ) -> spec.QueryEntityRolesResponse:
-        query_params = PAGINATION_PARAMS_ADAPTER.validate_python(params)
-        query_string = urlencode(query_params)
-        path = f"{self.url}?{query_string}" if query_string else self.url
-
-        return codecs.JsonResponseCodec.parse(
-            self._transport.get(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-            ),
-            spec.QueryEntityRolesResponse,
-        )
-
-
-@final
-class QueryAuthorizationsPermissionsEndpoint:
-    url: str = "/permissions/query/authorizations/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        *,
-        access_token: str,
-        body: dict[str, Any],
-        **params: Unpack[PaginationQueryParams],
-    ) -> spec.QueryEntityAuthorizationPermissionsResponse:
-        query_params = PAGINATION_PARAMS_ADAPTER.validate_python(params)
-        path = f"{self.url}?{urlencode(query_params)}"
-
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.QueryEntityAuthorizationPermissionsResponse,
-        )
-
-
-@final
-class QueryEuEntitiesPermissionsEndpoint:
-    url: str = "/permissions/query/eu-entities/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-        **params: Unpack[PaginationQueryParams],
-    ) -> spec.QueryEuEntityPermissionsResponse:
-        query_params = PAGINATION_PARAMS_ADAPTER.validate_python(params)
-        query_string = urlencode(query_params)
-        path = f"{self.url}?{query_string}" if query_string else self.url
-
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
-            ),
-            spec.QueryEuEntityPermissionsResponse,
-        )
-
-
-@final
-class QueryPersonalPermissionsEndpoint:
-    url: str = "/permissions/query/personal/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
-        **params: Unpack[PaginationQueryParams],
+        request: spec.PersonalPermissionsQueryRequest,
+        **params: Unpack[OffsetPaginationQueryParams],
     ) -> spec.QueryPersonalPermissionsResponse:
-        query_params = PAGINATION_PARAMS_ADAPTER.validate_python(params)
-        query_string = urlencode(query_params)
-        path = f"{self.url}?{query_string}" if query_string else self.url
-
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.post(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.QueryPermissionsRoutes.QUERY_PERSONAL_GRANTS,
+                params=self.build_params(params),
+                json=request.model_dump(mode="json"),
             ),
             spec.QueryPersonalPermissionsResponse,
         )
 
+    def query_attachments_status(self) -> spec.CheckAttachmentPermissionStatusResponse:
+        return self._parse(
+            self._transport.get(
+                path=routes.QueryPermissionsRoutes.QUERY_ATTACHMENTS_STATUS,
+            ),
+            spec.CheckAttachmentPermissionStatusResponse,
+        )
 
-@final
-class QueryPersonsPermissionsEndpoint:
-    url: str = "/permissions/query/persons/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
+    def query_authorizations_grants(
         self,
-        *,
-        access_token: str,
-        body: dict[str, Any],
-        **params: Unpack[PaginationQueryParams],
-    ) -> spec.QueryPersonPermissionsResponse:
-        query_params = PAGINATION_PARAMS_ADAPTER.validate_python(params)
-        path = f"{self.url}?{urlencode(query_params, doseq=True)}"
-
-        return codecs.JsonResponseCodec.parse(
+        request: spec.EntityAuthorizationPermissionsQueryRequest,
+        **params: Unpack[OffsetPaginationQueryParams],
+    ) -> spec.QueryEntityAuthorizationPermissionsResponse:
+        return self._parse(
             self._transport.post(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.QueryPermissionsRoutes.QUERY_AUTHORIZATIONS_GRANTS,
+                params=self.build_params(params),
+                json=request.model_dump(mode="json"),
+            ),
+            spec.QueryEntityAuthorizationPermissionsResponse,
+        )
+
+    def query_eu_entities_grants(
+        self,
+        request: spec.EuEntityPermissionsQueryRequest,
+        **params: Unpack[OffsetPaginationQueryParams],
+    ) -> spec.QueryEuEntityPermissionsResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.QueryPermissionsRoutes.QUERY_EU_ENTITIES_GRANTS,
+                params=self.build_params(params),
+                json=request.model_dump(mode="json"),
+            ),
+            spec.QueryEuEntityPermissionsResponse,
+        )
+
+    def query_persons_grants(
+        self,
+        request: spec.PersonPermissionsQueryRequest,
+        **params: Unpack[OffsetPaginationQueryParams],
+    ) -> spec.QueryPersonPermissionsResponse:
+        return self._parse(
+            self._transport.post(
+                path=routes.QueryPermissionsRoutes.QUERY_PERSONS_GRANTS,
+                params=self.build_params(params),
+                json=request.model_dump(mode="json"),
             ),
             spec.QueryPersonPermissionsResponse,
         )
 
-
-@final
-class QuerySubordinateEntitiesRolesEndpoint:
-    url: str = "/permissions/query/subordinate-entities/roles"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
+    def query_subordinate_entities_roles(
         self,
-        access_token: str,
-        body: dict[str, Any],
-        **params: Unpack[PaginationQueryParams],
+        request: spec.SubordinateEntityRolesQueryRequest,
+        **params: Unpack[OffsetPaginationQueryParams],
     ) -> spec.QuerySubordinateEntityRolesResponse:
-        query_params = PAGINATION_PARAMS_ADAPTER.validate_python(params)
-        query_string = urlencode(query_params)
-        path = f"{self.url}?{query_string}" if query_string else self.url
-
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.post(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.QueryPermissionsRoutes.QUERY_SUBORDINATE_ENTITIES_ROLES,
+                params=self.build_params(params),
+                json=request.model_dump(mode="json"),
             ),
             spec.QuerySubordinateEntityRolesResponse,
         )
 
-
-@final
-class QuerySubunitsPermissionsEndpoint:
-    url: str = "/permissions/query/subunits/grants"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
+    def query_subunits_grants(
         self,
-        access_token: str,
-        body: dict[str, Any],
-        **params: Unpack[PaginationQueryParams],
+        request: spec.SubunitPermissionsQueryRequest,
+        **params: Unpack[OffsetPaginationQueryParams],
     ) -> spec.QuerySubunitPermissionsResponse:
-        query_params = PAGINATION_PARAMS_ADAPTER.validate_python(params)
-        query_string = urlencode(query_params)
-        path = f"{self.url}?{query_string}" if query_string else self.url
-
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.post(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.QueryPermissionsRoutes.QUERY_SUBUNITS_GRANTS,
+                params=self.build_params(params),
+                json=request.model_dump(mode="json"),
             ),
             spec.QuerySubunitPermissionsResponse,
+        )
+
+
+@final
+class GetPermissionsEndpoints(BaseEndpoints):
+    def query_operation_status(
+        self,
+        reference_number: str,
+    ) -> spec.PermissionsOperationStatusResponse:
+        return self._parse(
+            self._transport.get(
+                path=routes.QueryPermissionsRoutes.QUERY_OPERATIONS_STATUS.format(
+                    referenceNumber=reference_number
+                ),
+            ),
+            spec.PermissionsOperationStatusResponse,
+        )
+
+    def query_entity_roles(
+        self,
+        **params: Unpack[OffsetPaginationQueryParams],
+    ) -> spec.QueryEntityRolesResponse:
+        return self._parse(
+            self._transport.get(
+                path=routes.QueryPermissionsRoutes.QUERY_ENTITY_ROLES,
+                params=self.build_params(params),
+            ),
+            spec.QueryEntityRolesResponse,
         )

@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 
 from ksef2.endpoints import (
-    auth,
-    certificates,
-    encryption,
-    invoices,
-    limits,
     peppol,
-    permissions,
-    session,
     testdata,
+    limits,
     tokens,
+    encryption,
+    auth,
+    invoices,
+    certificates,
+    session,
 )
+from ksef2.core import routes
 
 
 @dataclass(frozen=True)
@@ -21,124 +21,122 @@ class EndpointRef:
 
 
 __auth_endpoints__ = [
-    EndpointRef("POST", auth.ChallengeEndpoint.url),
-    EndpointRef("POST", auth.TokenAuthEndpoint.url),
-    EndpointRef("POST", auth.XAdESAuthEndpoint.url),
-    EndpointRef("GET", auth.AuthStatusEndpoint.url),
-    EndpointRef("POST", auth.RedeemTokenEndpoint.url),
-    EndpointRef("POST", auth.RefreshTokenEndpoint.url),
-    EndpointRef("GET", auth.ListActiveSessionsEndpoint.url),
-    EndpointRef("DELETE", auth.TerminateCurrentSessionEndpoint.url),
-    EndpointRef("DELETE", auth.TerminateAuthSessionEndpoint.url),
+    EndpointRef("POST", routes.AuthRoutes.CHALLENGE),
+    EndpointRef("POST", routes.AuthRoutes.TOKEN_AUTH),
+    EndpointRef("POST", routes.AuthRoutes.XADES_SIGNATURE),
+    EndpointRef("GET", routes.AuthRoutes.AUTH_STATUS),
+    EndpointRef("POST", routes.AuthRoutes.REDEEM_TOKEN),
+    EndpointRef("POST", routes.AuthRoutes.REFRESH_TOKEN),
+    EndpointRef("GET", routes.AuthRoutes.LIST_SESSIONS),
+    EndpointRef("DELETE", routes.AuthRoutes.TERMINATE_CURRENT_SESSION),
+    EndpointRef("DELETE", routes.AuthRoutes.TERMINATE_AUTH_SESSION),
 ]
 
 __encryption_endpoints__ = [
-    EndpointRef("GET", encryption.CertificateEndpoint.url),
+    EndpointRef("GET", routes.EncryptionRoutes.PUBLIC_KEY_CERTIFICATES),
 ]
 
 __invoices_endpoints__ = [
-    EndpointRef("GET", invoices.DownloadInvoiceEndpoint.url),
-    EndpointRef("POST", invoices.SendingInvoicesEndpoint.url),
+    EndpointRef("GET", routes.InvoiceRoutes.DOWNLOAD),
+    EndpointRef("POST", routes.InvoiceRoutes.SEND),
 ]
 
 __invoices_query_endpoints__ = [
-    EndpointRef("POST", invoices.QueryInvoicesMetadataEndpoint.url),
-    EndpointRef("POST", invoices.ExportInvoicesEndpoint.url),
-    EndpointRef("GET", invoices.GetExportStatusEndpoint.url),
+    EndpointRef("POST", routes.InvoiceRoutes.QUERY_METADATA),
+    EndpointRef("POST", routes.InvoiceRoutes.EXPORT),
+    EndpointRef("GET", routes.InvoiceRoutes.EXPORT_STATUS),
 ]
 
 __invoices_status_endpoints__ = [
-    EndpointRef("GET", session.ListSessionsEndpoint.url),
-    EndpointRef("GET", invoices.GetSessionStatusEndpoint.url),
-    EndpointRef("GET", invoices.ListSessionInvoicesEndpoint.url),
-    EndpointRef("GET", invoices.GetSessionInvoiceStatusEndpoint.url),
-    EndpointRef("GET", invoices.ListFailedSessionInvoicesEndpoint.url),
-    EndpointRef("GET", invoices.GetInvoiceUpoByKsefNumberEndpoint.url),
-    EndpointRef("GET", invoices.GetInvoiceUpoByReferenceEndpoint.url),
+    EndpointRef("GET", routes.SessionRoutes.LIST_SESSIONS),
+    EndpointRef("GET", routes.InvoiceRoutes.SESSION_STATUS),
+    EndpointRef("GET", routes.InvoiceRoutes.LIST_SESSION_INVOICES),
+    EndpointRef("GET", routes.InvoiceRoutes.SESSION_INVOICE_STATUS),
+    EndpointRef("GET", routes.InvoiceRoutes.LIST_FAILED_SESSION_INVOICES),
+    EndpointRef("GET", routes.InvoiceRoutes.INVOICE_UPO_BY_KSEF),
+    EndpointRef("GET", routes.InvoiceRoutes.INVOICE_UPO_BY_REFERENCE),
 ]
 
 __session_endpoints__ = [
-    EndpointRef("POST", session.OpenSessionEndpoint.url),
-    EndpointRef("POST", session.TerminateSessionEndpoint.url),
-    EndpointRef("GET", session.GetSessionUpoEndpoint.url),
-    EndpointRef("POST", session.OpenBatchSessionEndpoint.url),
-    EndpointRef("POST", session.CloseBatchSessionEndpoint.url),
+    EndpointRef("POST", routes.SessionRoutes.OPEN_ONLINE),
+    EndpointRef("POST", routes.SessionRoutes.TERMINATE_ONLINE),
+    EndpointRef("GET", routes.SessionRoutes.GET_SESSION_UPO),
+    EndpointRef("POST", routes.SessionRoutes.OPEN_BATCH),
+    EndpointRef("POST", routes.SessionRoutes.CLOSE_BATCH),
 ]
 
 __testdata_endpoints__ = [
-    EndpointRef("POST", testdata.CreateSubjectEndpoint.url),
-    EndpointRef("POST", testdata.DeleteSubjectEndpoint.url),
-    EndpointRef("POST", testdata.CreatePersonEndpoint.url),
-    EndpointRef("POST", testdata.DeletePersonEndpoint.url),
-    EndpointRef("POST", testdata.GrantPermissionsEndpoint.url),
-    EndpointRef("POST", testdata.RevokePermissionsEndpoint.url),
-    EndpointRef("POST", testdata.EnableAttachmentsEndpoint.url),
-    EndpointRef("POST", testdata.RevokeAttachmentsEndpoint.url),
-    EndpointRef("POST", testdata.BlockContextEndpoint.url),
-    EndpointRef("POST", testdata.UnblockContextEndpoint.url),
+    EndpointRef("POST", routes.TestDataRoutes.CREATE_SUBJECT),
+    EndpointRef("POST", routes.TestDataRoutes.DELETE_SUBJECT),
+    EndpointRef("POST", routes.TestDataRoutes.CREATE_PERSON),
+    EndpointRef("POST", routes.TestDataRoutes.DELETE_PERSON),
+    EndpointRef("POST", routes.TestDataRoutes.GRANT_PERMISSIONS),
+    EndpointRef("POST", routes.TestDataRoutes.REVOKE_PERMISSIONS),
+    EndpointRef("POST", routes.TestDataRoutes.ENABLE_ATTACHMENTS),
+    EndpointRef("POST", routes.TestDataRoutes.REVOKE_ATTACHMENTS),
+    EndpointRef("POST", routes.TestDataRoutes.BLOCK_CONTEXT),
+    EndpointRef("POST", routes.TestDataRoutes.UNBLOCK_CONTEXT),
 ]
 
 __tokens_endpoints__ = [
-    EndpointRef("POST", tokens.GenerateTokenEndpoint.url),
-    EndpointRef("GET", tokens.ListTokensEndpoint.url),
-    EndpointRef("GET", tokens.TokenStatusEndpoint.url),
-    EndpointRef("DELETE", tokens.RevokeTokenEndpoint.url),
+    EndpointRef("POST", routes.TokenRoutes.GENERATE_TOKEN),
+    EndpointRef("GET", routes.TokenRoutes.LIST_TOKENS),
+    EndpointRef("GET", routes.TokenRoutes.TOKEN_STATUS),
+    EndpointRef("DELETE", routes.TokenRoutes.REVOKE_TOKEN),
 ]
 
 __permissions_endpoints__ = [
-    EndpointRef("POST", permissions.GrantPersonPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.GrantEntityPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.GrantAuthorizationPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.GrantIndirectPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.GrantSubunitPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.GrantEuEntityPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.GrantEuEntityAdministrationPermissionsEndpoint.url),
+    EndpointRef("POST", routes.GrantPermissionsRoutes.GRANT_PERSON),
+    EndpointRef("POST", routes.GrantPermissionsRoutes.GRANT_ENTITY),
+    EndpointRef("POST", routes.GrantPermissionsRoutes.GRANT_AUTHORIZATION),
+    EndpointRef("POST", routes.GrantPermissionsRoutes.GRANT_INDIRECT),
+    EndpointRef("POST", routes.GrantPermissionsRoutes.GRANT_SUBUNITS),
+    EndpointRef("POST", routes.GrantPermissionsRoutes.GRANT_EU_ENTITY),
+    EndpointRef("POST", routes.GrantPermissionsRoutes.GRANT_ADMINISTERED_EU_ENTITY),
     EndpointRef(
         "DELETE",
-        permissions.RevokeAuthorizationPermissionsEndpoint.url + "/{permissionId}",
+        routes.RevokePermissionsRoutes.REVOKE_AUTHORIZATION_PERMISSION,
     ),
-    EndpointRef(
-        "DELETE", permissions.RevokeCommonPermissionsEndpoint.url + "/{permissionId}"
-    ),
-    EndpointRef("GET", permissions.GetAttachmentPermissionStatusEndpoint.url),
+    EndpointRef("DELETE", routes.RevokePermissionsRoutes.REVOKE_PERMISSION),
+    EndpointRef("GET", routes.QueryPermissionsRoutes.QUERY_ATTACHMENTS_STATUS),
     EndpointRef(
         "GET",
-        permissions.GetPermissionOperationStatusEndpoint.url + "/{referenceNumber}",
+        routes.QueryPermissionsRoutes.QUERY_OPERATIONS_STATUS,
     ),
-    EndpointRef("GET", permissions.GetEntityRolesEndpoint.url),
-    EndpointRef("POST", permissions.QueryAuthorizationsPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.QueryEuEntitiesPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.QueryPersonalPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.QueryPersonsPermissionsEndpoint.url),
-    EndpointRef("POST", permissions.QuerySubordinateEntitiesRolesEndpoint.url),
-    EndpointRef("POST", permissions.QuerySubunitsPermissionsEndpoint.url),
+    EndpointRef("GET", routes.QueryPermissionsRoutes.QUERY_ENTITY_ROLES),
+    EndpointRef("POST", routes.QueryPermissionsRoutes.QUERY_AUTHORIZATIONS_GRANTS),
+    EndpointRef("POST", routes.QueryPermissionsRoutes.QUERY_EU_ENTITIES_GRANTS),
+    EndpointRef("POST", routes.QueryPermissionsRoutes.QUERY_PERSONAL_GRANTS),
+    EndpointRef("POST", routes.QueryPermissionsRoutes.QUERY_PERSONS_GRANTS),
+    EndpointRef("POST", routes.QueryPermissionsRoutes.QUERY_SUBORDINATE_ENTITIES_ROLES),
+    EndpointRef("POST", routes.QueryPermissionsRoutes.QUERY_SUBUNITS_GRANTS),
 ]
 
 __limits_endpoints__ = [
-    EndpointRef("GET", limits.GetContextLimitsEndpoint.url),
-    EndpointRef("GET", limits.GetSubjectLimitsEndpoint.url),
-    EndpointRef("GET", limits.GetApiRateLimitsEndpoint.url),
-    EndpointRef("POST", limits.SetSessionLimitsEndpoint.url),
-    EndpointRef("DELETE", limits.ResetSessionLimitsEndpoint.url),
-    EndpointRef("POST", limits.SetSubjectLimitsEndpoint.url),
-    EndpointRef("DELETE", limits.ResetSubjectLimitsEndpoint.url),
-    EndpointRef("POST", limits.SetApiRateLimitsEndpoint.url),
-    EndpointRef("DELETE", limits.ResetApiRateLimitsEndpoint.url),
-    EndpointRef("POST", limits.SetProductionRateLimitsEndpoint.url),
+    EndpointRef("GET", routes.LimitRoutes.GET_CONTEXT_LIMITS),
+    EndpointRef("GET", routes.LimitRoutes.GET_SUBJECT_LIMITS),
+    EndpointRef("GET", routes.LimitRoutes.GET_API_RATE_LIMITS),
+    EndpointRef("POST", routes.LimitRoutes.SET_SESSION_LIMITS),
+    EndpointRef("DELETE", routes.LimitRoutes.RESET_SESSION_LIMITS),
+    EndpointRef("POST", routes.LimitRoutes.SET_SUBJECT_LIMITS),
+    EndpointRef("DELETE", routes.LimitRoutes.RESET_SUBJECT_LIMITS),
+    EndpointRef("POST", routes.LimitRoutes.SET_API_RATE_LIMITS),
+    EndpointRef("DELETE", routes.LimitRoutes.RESET_API_RATE_LIMITS),
+    EndpointRef("POST", routes.LimitRoutes.SET_PRODUCTION_RATE_LIMITS),
 ]
 
 __certificates_endpoints__ = [
-    EndpointRef("GET", certificates.CertificateLimitsEndpoint.url),
-    EndpointRef("GET", certificates.CertificateEnrollmentDataEndpoint.url),
-    EndpointRef("POST", certificates.EnrollCertificateEndpoint.url),
-    EndpointRef("GET", certificates.CertificateEnrollmentStatusEndpoint.url),
-    EndpointRef("POST", certificates.RetrieveCertificatesEndpoint.url),
-    EndpointRef("POST", certificates.RevokeCertificateEndpoint.url),
-    EndpointRef("POST", certificates.QueryCertificatesEndpoint.url),
+    EndpointRef("GET", routes.CertificateRoutes.LIMITS),
+    EndpointRef("GET", routes.CertificateRoutes.ENROLLMENT_DATA),
+    EndpointRef("POST", routes.CertificateRoutes.ENROLLMENT),
+    EndpointRef("GET", routes.CertificateRoutes.ENROLLMENT_STATUS),
+    EndpointRef("POST", routes.CertificateRoutes.RETRIEVE),
+    EndpointRef("POST", routes.CertificateRoutes.REVOKE),
+    EndpointRef("POST", routes.CertificateRoutes.QUERY),
 ]
 
 __peppol_endpoints__ = [
-    EndpointRef("GET", peppol.QueryPeppolProvidersEndpoint.url),
+    EndpointRef("GET", routes.PeppolRoutes.QUERY_PROVIDERS),
 ]
 
 __all_endpoints__: list[EndpointRef] = [

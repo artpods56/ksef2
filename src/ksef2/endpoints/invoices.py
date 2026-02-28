@@ -1,349 +1,178 @@
-from enum import StrEnum
-from typing import final, Any, TypedDict, Unpack, NotRequired
-from urllib.parse import urlencode
+from typing import NotRequired, TypedDict, Unpack, final
 
 from pydantic import TypeAdapter
 
-from ksef2.core import headers, codecs, protocols
-from ksef2.infra.schema.api import spec as spec
+from ksef2.core import routes
+from ksef2.endpoints.base import BaseEndpoints
+from ksef2.infra.schema.api import spec
+from ksef2.infra.schema.api.supp.invoices import (
+    InvoiceExportRequest,
+    QueryInvoicesMetadataRequest,
+    SendInvoiceRequest,
+)
 
-
-# ---------------------------------------------------------------------------
-# Query / Export endpoints
-# ---------------------------------------------------------------------------
-
-
-class SortOrder(StrEnum):
-    ASC = "Asc"
-    DESC = "Desc"
-
-
-QueryInvoicesMetadataQueryParams = TypedDict(
-    "QueryInvoicesMetadataQueryParams",
+InvoiceMetadataQueryParams = TypedDict(
+    "InvoiceMetadataQueryParams",
     {
-        "sortOrder": NotRequired[SortOrder | None],
+        "sortOrder": NotRequired[str | None],
         "pageOffset": NotRequired[int | None],
         "pageSize": NotRequired[int | None],
     },
 )
+SessionInvoiceListQueryParams = TypedDict(
+    "SessionInvoiceListQueryParams",
+    {
+        "pageSize": int,
+    },
+)
 
 
 @final
-class QueryInvoicesMetadataEndpoint:
-    url: str = "/invoices/query/metadata"
+class InvoiceEndpoints(BaseEndpoints):
+    _METADATA_PARAMS = TypeAdapter(InvoiceMetadataQueryParams)
 
-    _adapter = TypeAdapter(QueryInvoicesMetadataQueryParams)
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, params: QueryInvoicesMetadataQueryParams) -> str:
-        return f"{self.url}?{urlencode(params)}"
-
-    def send(
+    def query_metadata(
         self,
-        access_token: str,
-        body: dict[str, Any],
-        **query_params: Unpack[QueryInvoicesMetadataQueryParams],
+        body: QueryInvoicesMetadataRequest,
+        **params: Unpack[InvoiceMetadataQueryParams],
     ) -> spec.QueryInvoicesMetadataResponse:
-        valid_params = self._adapter.validate_python(query_params)
-        path = self.get_url(valid_params)
-
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.post(
-                path,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.InvoiceRoutes.QUERY_METADATA,
+                params=self.build_params(params, self._METADATA_PARAMS),
+                json=body.model_dump(mode="json"),
             ),
             spec.QueryInvoicesMetadataResponse,
         )
 
+    _SESSION_LIST_PARAMS = TypeAdapter(SessionInvoiceListQueryParams)
 
-@final
-class ExportInvoicesEndpoint:
-    url: str = "/invoices/exports"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
+    def list_session_invoices(
         self,
-        access_token: str,
-        body: dict[str, Any],
-    ) -> spec.ExportInvoicesResponse:
-        return codecs.JsonResponseCodec.parse(
+        reference_number: str,
+        continuation_token: str | None = None,
+        **params: Unpack[SessionInvoiceListQueryParams],
+    ) -> spec.SessionInvoicesResponse:
+        headers = (
+            {"x-continuation-token": continuation_token} if continuation_token else None
+        )
+
+        return self._parse(
+            self._transport.get(
+                path=routes.InvoiceRoutes.LIST_SESSION_INVOICES.format(
+                    referenceNumber=reference_number
+                ),
+                params=self.build_params(params, self._SESSION_LIST_PARAMS),
+                headers=headers,
+            ),
+            spec.SessionInvoicesResponse,
+        )
+
+    def list_failed_session_invoices(
+        self,
+        reference_number: str,
+        continuation_token: str | None = None,
+        **params: Unpack[SessionInvoiceListQueryParams],
+    ) -> spec.SessionInvoicesResponse:
+        headers = (
+            {"x-continuation-token": continuation_token} if continuation_token else None
+        )
+
+        return self._parse(
+            self._transport.get(
+                path=routes.InvoiceRoutes.LIST_FAILED_SESSION_INVOICES.format(
+                    referenceNumber=reference_number
+                ),
+                params=self.build_params(params, self._SESSION_LIST_PARAMS),
+                headers=headers,
+            ),
+            spec.SessionInvoicesResponse,
+        )
+
+    def export(self, body: InvoiceExportRequest) -> spec.ExportInvoicesResponse:
+        return self._parse(
             self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.InvoiceRoutes.EXPORT,
+                json=body.model_dump(mode="json"),
             ),
             spec.ExportInvoicesResponse,
         )
 
-
-@final
-class GetExportStatusEndpoint:
-    url: str = "/invoices/exports/{referenceNumber}"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(
-        self,
-        access_token: str,
-        reference_number: str,
+    def get_export_status(
+        self, reference_number: str
     ) -> spec.InvoiceExportStatusResponse:
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.get(
-                self.get_url(reference_number=reference_number),
-                headers=headers.KSeFHeaders.bearer(access_token),
+                path=routes.InvoiceRoutes.EXPORT_STATUS.format(
+                    referenceNumber=reference_number
+                ),
             ),
             spec.InvoiceExportStatusResponse,
         )
 
-
-@final
-class DownloadInvoiceEndpoint:
-    url: str = "/invoices/ksef/{ksefNumber}"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, ksef_number: str) -> str:
-        return self.url.format(ksefNumber=ksef_number)
-
-    def send(self, access_token: str, ksef_number: str) -> bytes:
-        resp = self._transport.get(
-            self.get_url(ksef_number=ksef_number),
-            headers=headers.KSeFHeaders.bearer(access_token),
-        )
-        return resp.content
-
-
-@final
-class SendingInvoicesEndpoint:
-    url: str = "/sessions/online/{referenceNumber}/invoices"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
+    def download(self, ksef_number: str) -> bytes:
+        return self._transport.get(
+            path=routes.InvoiceRoutes.DOWNLOAD.format(ksefNumber=ksef_number),
+        ).content
 
     def send(
         self,
-        access_token: str,
         reference_number: str,
-        body: dict[str, Any],
+        body: SendInvoiceRequest,
     ) -> spec.SendInvoiceResponse:
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.post(
-                self.get_url(reference_number=reference_number),
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.InvoiceRoutes.SEND.format(referenceNumber=reference_number),
+                json=body.model_dump(mode="json"),
             ),
             spec.SendInvoiceResponse,
         )
 
-
-@final
-class GetSessionStatusEndpoint:
-    url: str = "/sessions/{referenceNumber}"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(
-        self,
-        access_token: str,
-        reference_number: str,
-    ) -> spec.SessionStatusResponse:
-        return codecs.JsonResponseCodec.parse(
+    def get_session_status(self, reference_number: str) -> spec.SessionStatusResponse:
+        return self._parse(
             self._transport.get(
-                self.get_url(reference_number=reference_number),
-                headers=headers.KSeFHeaders.bearer(access_token),
+                path=routes.InvoiceRoutes.SESSION_STATUS.format(
+                    referenceNumber=reference_number
+                ),
             ),
             spec.SessionStatusResponse,
         )
 
-
-ListSessionInvoicesQueryParams = TypedDict(
-    "ListSessionInvoicesQueryParams",
-    {
-        "pageSize": NotRequired[int | None],
-    },
-)
-
-
-@final
-class ListSessionInvoicesEndpoint:
-    url: str = "/sessions/{referenceNumber}/invoices"
-
-    _adapter = TypeAdapter(ListSessionInvoicesQueryParams)
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(
+    def get_session_invoice_status(
         self,
-        access_token: str,
-        reference_number: str,
-        *,
-        page_size: int,
-        continuation_token: str | None = None,
-    ) -> spec.SessionInvoicesResponse:
-        valid_params = self._adapter.validate_python({"pageSize": page_size})
-
-        query_string = urlencode(valid_params)
-        base = self.get_url(reference_number=reference_number)
-        path = f"{base}?{query_string}" if query_string else base
-
-        headers_dict = headers.KSeFHeaders.bearer(access_token)
-        if continuation_token:
-            headers_dict["x-continuation-token"] = continuation_token
-
-        return codecs.JsonResponseCodec.parse(
-            self._transport.get(path, headers=headers_dict),
-            spec.SessionInvoicesResponse,
-        )
-
-
-@final
-class GetSessionInvoiceStatusEndpoint:
-    url: str = "/sessions/{referenceNumber}/invoices/{invoiceReferenceNumber}"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str, invoice_reference_number: str) -> str:
-        return self.url.format(
-            referenceNumber=reference_number,
-            invoiceReferenceNumber=invoice_reference_number,
-        )
-
-    def send(
-        self,
-        access_token: str,
         reference_number: str,
         invoice_reference_number: str,
     ) -> spec.SessionInvoiceStatusResponse:
-        return codecs.JsonResponseCodec.parse(
+        return self._parse(
             self._transport.get(
-                self.get_url(
-                    reference_number=reference_number,
-                    invoice_reference_number=invoice_reference_number,
+                path=routes.InvoiceRoutes.SESSION_INVOICE_STATUS.format(
+                    referenceNumber=reference_number,
+                    invoiceReferenceNumber=invoice_reference_number,
                 ),
-                headers=headers.KSeFHeaders.bearer(access_token),
             ),
             spec.SessionInvoiceStatusResponse,
         )
 
-
-ListFailedSessionInvoicesQueryParams = TypedDict(
-    "ListFailedSessionInvoicesQueryParams",
-    {
-        "pageSize": NotRequired[int | None],
-    },
-)
-
-
-@final
-class ListFailedSessionInvoicesEndpoint:
-    url: str = "/sessions/{referenceNumber}/invoices/failed"
-
-    _adapter = TypeAdapter(ListFailedSessionInvoicesQueryParams)
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(
+    def get_invoice_upo_by_ksef(
         self,
-        access_token: str,
-        reference_number: str,
-        *,
-        page_size: int,
-        continuation_token: str | None = None,
-    ) -> spec.SessionInvoicesResponse:
-        valid_params = self._adapter.validate_python({"pageSize": page_size})
-        query_string = urlencode(valid_params)
-        base = self.get_url(reference_number=reference_number)
-        path = f"{base}?{query_string}" if query_string else base
-
-        headers_dict = headers.KSeFHeaders.bearer(access_token)
-        if continuation_token:
-            headers_dict["x-continuation-token"] = continuation_token
-
-        return codecs.JsonResponseCodec.parse(
-            self._transport.get(path, headers=headers_dict),
-            spec.SessionInvoicesResponse,
-        )
-
-
-@final
-class GetInvoiceUpoByKsefNumberEndpoint:
-    url: str = "/sessions/{referenceNumber}/invoices/ksef/{ksefNumber}/upo"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str, ksef_number: str) -> str:
-        return self.url.format(
-            referenceNumber=reference_number,
-            ksefNumber=ksef_number,
-        )
-
-    def send(
-        self,
-        access_token: str,
         reference_number: str,
         ksef_number: str,
     ) -> bytes:
-        resp = self._transport.get(
-            self.get_url(
-                reference_number=reference_number,
-                ksef_number=ksef_number,
+        return self._transport.get(
+            path=routes.InvoiceRoutes.INVOICE_UPO_BY_KSEF.format(
+                referenceNumber=reference_number,
+                ksefNumber=ksef_number,
             ),
-            headers=headers.KSeFHeaders.bearer(access_token),
-        )
-        return resp.content
+        ).content
 
-
-@final
-class GetInvoiceUpoByReferenceEndpoint:
-    url: str = "/sessions/{referenceNumber}/invoices/{invoiceReferenceNumber}/upo"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str, invoice_reference_number: str) -> str:
-        return self.url.format(
-            referenceNumber=reference_number,
-            invoiceReferenceNumber=invoice_reference_number,
-        )
-
-    def send(
+    def get_invoice_upo_by_reference(
         self,
-        access_token: str,
         reference_number: str,
         invoice_reference_number: str,
     ) -> bytes:
-        resp = self._transport.get(
-            self.get_url(
-                reference_number=reference_number,
-                invoice_reference_number=invoice_reference_number,
+        return self._transport.get(
+            path=routes.InvoiceRoutes.INVOICE_UPO_BY_REFERENCE.format(
+                referenceNumber=reference_number,
+                invoiceReferenceNumber=invoice_reference_number,
             ),
-            headers=headers.KSeFHeaders.bearer(access_token),
-        )
-        return resp.content
+        ).content
