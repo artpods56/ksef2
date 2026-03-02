@@ -1,133 +1,78 @@
-from __future__ import annotations
-
 from datetime import datetime
-from enum import Enum
+from typing import Literal
 
 from ksef2.domain.models.base import KSeFBaseModel
 
-
-class CertificateType(Enum):
-    """Type of KSeF certificate."""
-
-    AUTHENTICATION = "Authentication"
-    OFFLINE = "Offline"
+type IdentifierType = Literal["nip", "pesel", "fingerprint"]
+type RevocationReason = Literal["unspecified", "superseded", "key_compromise"]
+type CertificateType = Literal["authentication", "offline"]
+type CertificateStatus = Literal["active", "blocked", "revoked", "expired"]
 
 
-class CertificateStatus(Enum):
-    """Status of a certificate."""
-
-    ACTIVE = "Active"
-    BLOCKED = "Blocked"
-    REVOKED = "Revoked"
-    EXPIRED = "Expired"
+class Certificate(KSeFBaseModel):
+    base64_encoded_certificate: str
+    name: str
+    serial_number: str
+    certificate_type: CertificateType
 
 
-class CertificateRevocationReason(Enum):
-    """Reason for certificate revocation."""
-
-    UNSPECIFIED = "Unspecified"
-    SUPERSEDED = "Superseded"
-    KEY_COMPROMISE = "KeyCompromise"
-
-
-class CertificateSubjectIdentifierType(Enum):
-    """Type of certificate subject identifier."""
-
-    NIP = "Nip"
-    PESEL = "Pesel"
-    FINGERPRINT = "Fingerprint"
-
-
-class CertificateSubjectIdentifier(KSeFBaseModel):
-    """Certificate subject identifier."""
-
-    type: CertificateSubjectIdentifierType
-    value: str
-
-
-class CertificateLimit(KSeFBaseModel):
-    """Certificate limit info."""
-
-    limit: int
-    remaining: int
-
-
-class CertificateLimitsResponse(KSeFBaseModel):
-    """Response with certificate limits for the authenticated subject."""
-
-    can_request: bool
-    enrollment: CertificateLimit
-    certificate: CertificateLimit
-
-
-class CertificateEnrollmentData(KSeFBaseModel):
-    """Data required for preparing a PKCS#10 certificate signing request."""
-
-    common_name: str
-    country_name: str
-    given_name: str | None = None
-    surname: str | None = None
-    serial_number: str | None = None
-    unique_identifier: str | None = None
-    organization_name: str | None = None
-    organization_identifier: str | None = None
-
-
-class StatusInfo(KSeFBaseModel):
-    """Generic status info with code and description."""
-
-    code: int
-    description: str
-    details: list[str] | None = None
-
-
-class EnrollCertificateResponse(KSeFBaseModel):
-    """Response from certificate enrollment submission."""
-
-    reference_number: str
-    timestamp: datetime
-
-
-class CertificateEnrollmentStatus(KSeFBaseModel):
-    """Status of a certificate enrollment request."""
-
-    request_date: datetime
-    status: StatusInfo
-    certificate_serial_number: str | None = None
+class RetrievedCertificatesList(KSeFBaseModel):
+    certificates: list[Certificate]
 
 
 class CertificateInfo(KSeFBaseModel):
-    """Certificate metadata returned from query."""
-
-    certificate_serial_number: str
+    # certificate
+    serial_number: str
     name: str
-    type: CertificateType
     common_name: str
+    type: CertificateType
     status: CertificateStatus
-    subject_identifier: CertificateSubjectIdentifier
+
+    # issued for
+    identifier_type: IdentifierType
+    nip: str | None = None
+    pesel: str | None = None
+    fingerprint: str | None = None
+
+    # date
     valid_from: datetime
     valid_to: datetime
     last_use_date: datetime | None = None
     request_date: datetime
 
 
-class QueryCertificatesResponse(KSeFBaseModel):
-    """Response from certificates query."""
-
+class CertificatesInfoList(KSeFBaseModel):
     certificates: list[CertificateInfo]
     has_more: bool
 
 
-class RetrievedCertificate(KSeFBaseModel):
-    """Retrieved certificate with DER data."""
+class CertificateEnrollmentData(KSeFBaseModel):
+    common_name: str
+    name: str | None = None
+    surname: str | None = None
+    iso_country_code: str
+    serial_number: str | None = None
+    unique_identifier: str | None = None
+    organization_name: str | None = None
+    organization_identifier: str | None = None
 
-    certificate: str  # Base64 encoded DER
-    certificate_name: str
-    certificate_serial_number: str
-    certificate_type: CertificateType
+
+class CertificateEnrollmentResponse(KSeFBaseModel):
+    reference_number: str
+    timestamp: datetime
 
 
-class RetrieveCertificatesResponse(KSeFBaseModel):
-    """Response from retrieve certificates request."""
+class CertificateEnrollmentStatusResponse(KSeFBaseModel):
+    request_date: datetime
+    status_code: int
+    status_description: str
+    status_details: list[str] | None = None
+    certificate_serial_number: str | None = None
 
-    certificates: list[RetrievedCertificate]
+
+class CertificateLimitsResponse(KSeFBaseModel):
+    can_request: bool
+    enrollment_limit: int
+    enrollment_remaining: int
+    certificate_limit: int
+    certificate_remaining: int

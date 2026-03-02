@@ -1,21 +1,13 @@
-"""Certificate management endpoints."""
-
 from typing import final, Unpack
 
 from ksef2.core import routes
 from ksef2.endpoints.base import OffsetPaginationQueryParams
 from ksef2.endpoints.base import BaseEndpoints
 from ksef2.infra.schema.api import spec
-from ksef2.infra.schema.api.supp.invoices import (
-    EnrollCertificateRequest,
-    QueryCertificatesRequest,
-    RetrieveCertificatesRequest,
-    RevokeCertificateRequest,
-)
 
 
 @final
-class CertificateEndpoints(BaseEndpoints):
+class CertificatesEndpoints(BaseEndpoints):
     def get_limits(self) -> spec.CertificateLimitsResponse:
         return self._parse(
             self._transport.get(
@@ -32,7 +24,9 @@ class CertificateEndpoints(BaseEndpoints):
             spec.CertificateEnrollmentDataResponse,
         )
 
-    def enroll(self, body: EnrollCertificateRequest) -> spec.EnrollCertificateResponse:
+    def enroll(
+        self, body: spec.EnrollCertificateRequest
+    ) -> spec.EnrollCertificateResponse:
         return self._parse(
             self._transport.post(
                 path=routes.CertificateRoutes.ENROLLMENT,
@@ -54,7 +48,7 @@ class CertificateEndpoints(BaseEndpoints):
         )
 
     def retrieve(
-        self, body: RetrieveCertificatesRequest
+        self, body: spec.RetrieveCertificatesRequest
     ) -> spec.RetrieveCertificatesResponse:
         return self._parse(
             self._transport.post(
@@ -67,7 +61,7 @@ class CertificateEndpoints(BaseEndpoints):
     def revoke(
         self,
         certificate_serial_number: str,
-        body: RevokeCertificateRequest | None = None,
+        body: spec.RevokeCertificateRequest | None = None,
     ) -> None:
         _ = self._transport.post(
             path=routes.CertificateRoutes.REVOKE.format(
@@ -78,7 +72,7 @@ class CertificateEndpoints(BaseEndpoints):
 
     def query(
         self,
-        body: QueryCertificatesRequest,
+        body: spec.QueryCertificatesRequest,
         **params: Unpack[OffsetPaginationQueryParams],
     ) -> spec.QueryCertificatesResponse:
         return self._parse(
