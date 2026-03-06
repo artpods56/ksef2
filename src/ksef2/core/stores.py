@@ -21,9 +21,7 @@ class CertificateStore:
     def all(self) -> list[encryption.PublicKeyCertificate]:
         return list(self._certificates)
 
-    def get_valid(
-        self, usage: encryption.CertUsage
-    ) -> encryption.PublicKeyCertificate | None:
+    def get_valid(self, usage: encryption.CertUsage) -> encryption.PublicKeyCertificate:
         """Get a valid certificate for given usage.
 
         Raises:

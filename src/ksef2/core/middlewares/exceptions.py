@@ -1,17 +1,17 @@
-from typing import Any, final
+from typing import final, Any, override
 
 import httpx
 from pydantic import BaseModel
 
-from ksef2.core.http import HttpTransport
+from ksef2.core import middlewares, protocols
 from ksef2.infra.mappers.exceptions import ExceptionsMapper
 from ksef2.infra.schema.api import spec
 
 
 @final
-class KSeFProtocol:
-    def __init__(self, transport: HttpTransport) -> None:
-        self._transport = transport
+class KSeFExceptionMiddleware(middlewares.BaseMiddleware):
+    def __init__(self, transport: protocols.Middleware) -> None:
+        self._next = transport
 
     @staticmethod
     def _try_parse[T: BaseModel](content: str, model: type[T]) -> T | None:
@@ -57,39 +57,24 @@ class KSeFProtocol:
         self._raise_for_status(response)
         return response
 
+    @override
     def request(
         self,
         method: str,
         path: str,
         *,
         headers: dict[str, str] | None = None,
+        params: httpx.QueryParams | None = None,
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
     ) -> httpx.Response:
         return self._handle(
-            self._transport.request(
-                method, path, headers=headers, json=json, content=content
+            self._next.request(
+                method,
+                path,
+                headers=headers,
+                params=params,
+                json=json,
+                content=content,
             )
         )
-
-    def get(
-        self, path: str, *, headers: dict[str, str] | None = None
-    ) -> httpx.Response:
-        return self._handle(self._transport.get(path, headers=headers))
-
-    def post(
-        self,
-        path: str,
-        *,
-        headers: dict[str, str] | None = None,
-        json: dict[str, Any] | None = None,
-    ) -> httpx.Response:
-        return self._handle(self._transport.post(path, headers=headers, json=json))
-
-    def delete(
-        self,
-        path: str,
-        *,
-        headers: dict[str, str] | None = None,
-    ) -> httpx.Response:
-        return self._handle(self._transport.delete(path, headers=headers))

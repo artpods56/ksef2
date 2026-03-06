@@ -33,6 +33,16 @@ class KSeFException(Exception):
         self.context["code"] = self.code
 
 
+class KSeFValidationError(KSeFException):
+    """Raised when validation fails."""
+
+    code: str = "VALIDATION_ERROR"
+
+    def __init__(self, message: str, **context: Any):
+        super().__init__(message, **context)
+        self.context["code"] = self.code
+
+
 class KSeFInvoiceRenderingError(KSeFException):
     """Raised when invoice rendering fails."""
 
@@ -157,5 +167,20 @@ class KSeFInvoiceQueryTimeoutError(KSeFException):
         self.timeout = timeout
         super().__init__(
             f"No invoices found after polling for {timeout}s",
+            timeout=timeout,
+        )
+
+
+class KSeFInvoiceProcessingTimeoutError(KSeFException):
+    """Raised when polling for a session invoice to finish processing exceeds the timeout."""
+
+    code: str = "INVOICE_PROCESSING_TIMEOUT"
+
+    def __init__(self, invoice_reference_number: str, timeout: float) -> None:
+        self.invoice_reference_number = invoice_reference_number
+        self.timeout = timeout
+        super().__init__(
+            f"Invoice {invoice_reference_number} not ready after {timeout}s",
+            invoice_reference_number=invoice_reference_number,
             timeout=timeout,
         )

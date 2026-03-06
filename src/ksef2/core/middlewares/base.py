@@ -1,10 +1,11 @@
-from typing import Protocol, Any, runtime_checkable
+import abc
+from typing import Any
 
 import httpx
 
 
-@runtime_checkable
-class Middleware(Protocol):
+class BaseMiddleware(abc.ABC):
+    @abc.abstractmethod
     def request(
         self,
         method: str,
@@ -22,7 +23,8 @@ class Middleware(Protocol):
         *,
         headers: dict[str, str] | None = None,
         params: httpx.QueryParams | None = None,
-    ) -> httpx.Response: ...
+    ) -> httpx.Response:
+        return self.request("GET", path, headers=headers, params=params)
 
     def post(
         self,
@@ -32,7 +34,10 @@ class Middleware(Protocol):
         params: httpx.QueryParams | None = None,
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
-    ) -> httpx.Response: ...
+    ) -> httpx.Response:
+        return self.request(
+            "POST", path, headers=headers, json=json, params=params, content=content
+        )
 
     def delete(
         self,
@@ -40,4 +45,5 @@ class Middleware(Protocol):
         *,
         headers: dict[str, str] | None = None,
         params: httpx.QueryParams | None = None,
-    ) -> httpx.Response: ...
+    ) -> httpx.Response:
+        return self.request("DELETE", path, headers=headers, params=params)

@@ -30,7 +30,7 @@ def select_certificate(
 ) -> PublicKeyCertificate:
     """Select the first valid certificate matching *usage*.
 
-    *usage* should be ``"KsefTokenEncryption"`` or ``"SymmetricKeyEncryption"``.
+    *usage* should be ``"ksef_token_encryption"`` or ``"symmetric_key_encryption"``.
     """
     for cert in certificates:
         if usage in cert.usage:
