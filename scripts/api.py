@@ -16,7 +16,7 @@ from ksef2.domain.models import (
     InvoiceQueryDateRange,
     DateType,
 )
-from ksef2.domain.models.session import SessionType
+from ksef2.domain.models.session import SessionTypeEnum
 
 BUYER_NIP = generate_nip()
 BUYER_PESEL = generate_pesel()
@@ -82,7 +82,7 @@ with client.testdata.temporal() as temp:
 
         datetime_delta = datetime_now - timedelta(days=1)
 
-        query_result = session.wait_for_invoices(
+        query_result = auth.invoices.wait_for_invoices(
             filters=InvoiceQueryFilters(
                 date_range=InvoiceQueryDateRange(
                     date_type=DateType.ISSUE, from_=datetime_delta, to=datetime_now
@@ -95,8 +95,8 @@ with client.testdata.temporal() as temp:
 
         print(session.get_status().model_dump_json(indent=2))
 
-        for session in auth.session_log.list(
-            session_type=SessionType.ONLINE,
+        for session in auth.session_log.all(
+            session_type=SessionTypeEnum.ONLINE,
         ):
             print(session.model_dump_json(indent=2))
 

@@ -45,14 +45,14 @@ regenerate-models:
       --input openapi.json \
       --input-file-type openapi \
       --output models.py \
-      --output-model-type pydantic_v2.BaseModel \
+      --output-request-type pydantic_v2.BaseModel \
       --use-annotated \
       --field-constraints \
       --use-standard-collections \
       --use-union-operator \
       --strict-nullable \
       --collapse-root-models \
-      --reuse-model \
+      --reuse-request \
       --use-schema-description \
       --use-field-description \
       --disable-timestamp \
