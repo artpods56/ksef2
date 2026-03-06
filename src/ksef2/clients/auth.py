@@ -127,11 +127,9 @@ class AuthClient:
         max_poll_attempts: int = 60,
     ) -> AuthenticatedClient:
         if self._environment is not Environment.TEST:
-            raise ValueError(
+            raise exceptions.KSeFUnsupportedEnvironmentError(
                 "with_test_certificate() is only available for Environment.TEST"
             )
-
-
 
         cert, private_key = generate_test_certificate(nip)
         return self.with_xades(

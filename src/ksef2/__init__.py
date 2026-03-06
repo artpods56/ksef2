@@ -11,10 +11,28 @@ beartype_this_package()
 
 from ksef2.clients.base import Client
 from ksef2.domain.models import FormSchema
-from ksef2.config import Environment
+from ksef2.config import (
+    ConnectionPoolConfig,
+    Environment,
+    RetryConfig,
+    TimeoutConfig,
+    TlsConfig,
+    TransportConfig,
+)
 
 __version__ = "0.8.0"
 
 from ksef2._openapi import __openapi_version__
 
-__all__ = ["Client", "FormSchema", "Environment", "__version__", "__openapi_version__"]
+__all__ = [
+    "Client",
+    "ConnectionPoolConfig",
+    "Environment",
+    "FormSchema",
+    "RetryConfig",
+    "TimeoutConfig",
+    "TlsConfig",
+    "TransportConfig",
+    "__version__",
+    "__openapi_version__",
+]

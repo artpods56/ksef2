@@ -8,7 +8,11 @@ from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.clients.session_management import SessionManagementClient
 from ksef2.config import Environment
 from ksef2.core.xades import generate_test_certificate
-from ksef2.core.exceptions import KSeFAuthError, NoCertificateAvailableError
+from ksef2.core.exceptions import (
+    KSeFAuthError,
+    KSeFUnsupportedEnvironmentError,
+    NoCertificateAvailableError,
+)
 from ksef2.core.routes import AuthRoutes
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models import auth as domain_auth
@@ -241,7 +245,7 @@ class TestAuthClient:
         assert call.headers == {"Authorization": "Bearer refresh-token"}
 
     @patch.object(AuthClient, "with_xades")
-    @patch("ksef2.core.xades.generate_test_certificate")
+    @patch("ksef2.clients.auth.generate_test_certificate")
     def test_with_test_certificate(
         self,
         mock_generate_test_certificate: MagicMock,
@@ -278,7 +282,7 @@ class TestAuthClient:
         client = _build_auth_client(fake_transport, environment=Environment.DEMO)
 
         with pytest.raises(
-            ValueError,
+            KSeFUnsupportedEnvironmentError,
             match="with_test_certificate\\(\\) is only available for Environment.TEST",
         ):
             _ = client.with_test_certificate(nip="1234567890")

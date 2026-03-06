@@ -33,6 +33,18 @@ class KSeFException(Exception):
         self.context["code"] = self.code
 
 
+class KSeFClientClosedError(KSeFException):
+    """Raised when an SDK client is used after it has been closed."""
+
+    code: str = "CLIENT_CLOSED"
+
+
+class KSeFUnsupportedEnvironmentError(KSeFException):
+    """Raised when an operation is not available in the selected environment."""
+
+    code: str = "UNSUPPORTED_ENVIRONMENT"
+
+
 class KSeFValidationError(KSeFException):
     """Raised when validation fails."""
 
