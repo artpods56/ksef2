@@ -33,6 +33,4 @@ if __name__ == "__main__":
     INPUT_DIR = ROOT / "docs" / "assets" / "sample_invoices" / "fa3"
     OUTPUT_DIR = ROOT / "output" / "pdf_exports"
 
-    print(f"Input directory: {INPUT_DIR}dd")
-
     main(source_dir=INPUT_DIR, output_dir=OUTPUT_DIR)

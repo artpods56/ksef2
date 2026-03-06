@@ -21,20 +21,13 @@ Usage::
 Edit the constants below to match your setup.
 """
 
-from __future__ import annotations
-
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from ksef2 import Client, Environment, FormSchema
+from ksef2 import Client, Environment
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
-from ksef2.domain.models import (
-    DateType,
-    InvoiceQueryDateRange,
-    InvoiceQueryFilters,
-    InvoiceSubjectType,
-)
+from ksef2.domain.models import InvoicesFilter
 
 # ── configuration ────────────────────────────────────────────────────────────
 
@@ -80,36 +73,40 @@ def download_for_nip(client: Client, nip: str) -> None:
     target_dir = DOWNLOAD_DIR / nip
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    with auth.online_session(form_code=FormSchema.FA3) as session:
-        print(f"[{nip}] Scheduling export of purchase invoices …")
-        export = session.schedule_invoices_export(
-            filters=InvoiceQueryFilters(
-                subject_type=InvoiceSubjectType.BUYER,  # buyer = purchase invoices
-                date_range=InvoiceQueryDateRange(
-                    date_type=DateType.ISSUE,
-                    from_=DATE_FROM,
-                    to=DATE_TO,
-                ),
-            ),
+    print(f"[{nip}] Scheduling export of purchase invoices …")
+    export = auth.invoices.schedule_export(
+        filters=InvoicesFilter(
+            role="buyer",
+            date_type="issue_date",
+            date_from=DATE_FROM,
+            date_to=DATE_TO,
+            amount_type="brutto",
         )
+    )
 
-        # Poll until the package is ready
-        package = None
-        for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
-            status = session.get_export_status(reference_number=export.reference_number)
-            if status.package:
-                package = status.package
-                break
-            print(f"[{nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})")
-            time.sleep(POLL_INTERVAL)
+    # Poll until the package is ready
+    package = None
+    for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
+        status = auth.invoices.get_export_status(
+            reference_number=export.reference_number
+        )
+        if status.package:
+            package = status.package
+            break
+        print(f"[{nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})")
+        time.sleep(POLL_INTERVAL)
 
-        if package is None:
-            print(f"[{nip}] Export timed out — try increasing MAX_POLL_ATTEMPTS.")
-            return
+    if package is None:
+        print(f"[{nip}] Export timed out — try increasing MAX_POLL_ATTEMPTS.")
+        return
 
-        paths = session.fetch_package(package=package, target_directory=target_dir)
-        for path in paths:
-            print(f"[{nip}] Downloaded: {path}  ({path.stat().st_size:,} bytes)")
+    paths = auth.invoices.fetch_package(
+        package=package,
+        export=export,
+        target_directory=target_dir,
+    )
+    for path in paths:
+        print(f"[{nip}] Downloaded: {path}  ({path.stat().st_size:,} bytes)")
 
     print(f"[{nip}] Done.")
 

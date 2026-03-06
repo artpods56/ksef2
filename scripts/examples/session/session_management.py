@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
@@ -22,13 +20,13 @@ def main() -> None:
     # List active sessions
     print("Listing active authentication sessions ...")
     sessions = auth.sessions.list_page()
-    print(f"  Response: {sessions}")
+    print(f"  Found {len(sessions.items)} session(s)")
+    for item in sessions.items:
+        print(f"  {item.reference_number} current={item.is_current}")
 
     # Paginated listing (if many sessions exist)
-    # sessions = auth.sessions.list(
-    #     page_size=10,
-    #     continuation_token=None,  # from previous page
-    # )
+    # for page in auth.sessions.list(page_size=10):
+    #     print(len(page.items))
 
     # Terminate the current session
     print("Terminating current session ...")
@@ -36,7 +34,7 @@ def main() -> None:
     print("  Current session terminated.")
 
     # To terminate a specific session by reference number:
-    # auth.sessions.terminate(reference_number="some-reference-number")
+    # auth.sessions.close(reference_number="some-reference-number")
     print("Session management complete.")
 
 

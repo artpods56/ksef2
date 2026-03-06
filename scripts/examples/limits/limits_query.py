@@ -1,4 +1,4 @@
-"""Query API limits using authenticated client.
+"""Query API limits using an authenticated client.
 
 Demonstrates querying:
   - Context limits (session type limits)
@@ -9,18 +9,10 @@ Usage:
     uv run python scripts/examples/limits/limits_query.py
 """
 
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import Identifier, Permission
 
 ORG_NIP = generate_nip()
 PERSON_NIP = generate_nip()
@@ -35,7 +27,7 @@ def main() -> None:
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Limits query test",
         )
 
@@ -48,11 +40,11 @@ def main() -> None:
         temp.grant_permissions(
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE, description="Sending invoices"
+                    type="invoice_write", description="Sending invoices"
                 ),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=PERSON_NIP),
+            in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)

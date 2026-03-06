@@ -6,7 +6,7 @@ without needing MCU certificates or pre-existing KSEF data:
   1. Setup  — create a seller and N buyer entities via the testdata API
   2. Send   — authenticate as the seller and send one invoice per buyer
               (each buyer is Subject2, so each invoice appears as a
-               purchase invoice from the buyer's perspective)
+               purchase invoice from the buyer'request perspective)
   3. Wait   — poll until KSeF finishes processing
   4. Download — for each buyer: authenticate with their generated cert,
                open a session, schedule an export of Subject2 invoices,
@@ -20,8 +20,6 @@ Run::
     uv run scripts/examples/invoices/download_purchase_invoices_test.py
 """
 
-from __future__ import annotations
-
 import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -33,13 +31,7 @@ from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models import (
-    DateType,
-    InvoiceQueryDateRange,
-    InvoiceQueryFilters,
-    InvoiceSubjectType,
-)
-from ksef2.domain.models.testdata import SubjectType
+from ksef2.domain.models import InvoicesFilter
 from scripts.examples._common import repo_root
 
 # ── configuration ────────────────────────────────────────────────────────────
@@ -120,39 +112,43 @@ def download_for_buyer(
 
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    with auth.online_session(form_code=FormSchema.FA3) as session:
-        print(f"[buyer {buyer_nip}] Scheduling export of purchase invoices …")
-        export = session.schedule_invoices_export(
-            filters=InvoiceQueryFilters(
-                subject_type=InvoiceSubjectType.BUYER,  # buyer perspective
-                date_range=InvoiceQueryDateRange(
-                    date_type=DateType.ISSUE,
-                    from_=datetime.now(tz=timezone.utc) - timedelta(days=90),
-                    to=datetime.now(tz=timezone.utc),
-                ),
-            ),
+    print(f"[buyer {buyer_nip}] Scheduling export of purchase invoices …")
+    export = auth.invoices.schedule_export(
+        filters=InvoicesFilter(
+            role="buyer",
+            date_type="issue_date",
+            date_from=datetime.now(tz=timezone.utc) - timedelta(days=90),
+            date_to=datetime.now(tz=timezone.utc),
+            amount_type="brutto",
         )
+    )
 
-        package = None
-        for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
-            status = session.get_export_status(reference_number=export.reference_number)
-            if status.package:
-                package = status.package
-                break
-            print(
-                f"[buyer {buyer_nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})"
-            )
-            time.sleep(POLL_INTERVAL)
+    package = None
+    for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
+        status = auth.invoices.get_export_status(
+            reference_number=export.reference_number
+        )
+        if status.package:
+            package = status.package
+            break
+        print(
+            f"[buyer {buyer_nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})"
+        )
+        time.sleep(POLL_INTERVAL)
 
-        if package is None:
-            print(f"[buyer {buyer_nip}] Export timed out.")
-            return
+    if package is None:
+        print(f"[buyer {buyer_nip}] Export timed out.")
+        return
 
-        paths = session.fetch_package(package=package, target_directory=target_dir)
-        for path in paths:
-            print(
-                f"[buyer {buyer_nip}] Downloaded: {path.name}  ({path.stat().st_size:,} bytes)"
-            )
+    paths = auth.invoices.fetch_package(
+        package=package,
+        export=export,
+        target_directory=target_dir,
+    )
+    for path in paths:
+        print(
+            f"[buyer {buyer_nip}] Downloaded: {path.name}  ({path.stat().st_size:,} bytes)"
+        )
 
 
 def main() -> None:
@@ -177,13 +173,13 @@ def main() -> None:
         # Register all entities in the TEST environment
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Test seller",
         )
         for buyer_nip in buyer_nips:
             temp.create_subject(
                 nip=buyer_nip,
-                subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+                subject_type="enforcement_authority",
                 description=f"Test buyer {buyer_nip}",
             )
 

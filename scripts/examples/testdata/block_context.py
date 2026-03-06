@@ -1,4 +1,4 @@
-"""Block and unblock authentication contexts (TEST environment only).
+"""Block and unblock authentication contexts on TEST.
 
 Demonstrates how to block and unblock authentication for a context.
 When blocked, the context cannot authenticate until unblocked.
@@ -7,15 +7,9 @@ Usage:
     uv run python scripts/examples/testdata/block_context.py
 """
 
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
-from ksef2.domain.models.testdata import (
-    AuthContextIdentifier,
-    AuthContextIdentifierType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import AuthContextIdentifier
 
 ORG_NIP = generate_nip()
 
@@ -28,13 +22,13 @@ def main() -> None:
         print(f"Creating test subject with NIP: {ORG_NIP}")
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Block context test",
         )
 
         # Create identifier for the context
         context_id = AuthContextIdentifier(
-            type=AuthContextIdentifierType.NIP,
+            type="nip",
             value=ORG_NIP,
         )
 

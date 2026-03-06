@@ -1,17 +1,8 @@
-from __future__ import annotations
-
-
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.session import OnlineSessionState
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import Identifier, Permission
 
 ORG_NIP = generate_nip()
 PERSON_NIP = generate_nip()
@@ -25,7 +16,7 @@ def main() -> None:
         print("Creating test subject ...")
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Session resume test",
         )
 
@@ -38,12 +29,10 @@ def main() -> None:
 
         temp.grant_permissions(
             permissions=[
-                Permission(
-                    type=PermissionType.INVOICE_WRITE, description="Send invoices"
-                ),
+                Permission(type="invoice_write", description="Send invoices"),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=PERSON_NIP),
+            in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
         # we are using self-signed certificate here, this will only work in test environment
@@ -55,7 +44,7 @@ def main() -> None:
         print("Opening session (manual mode) ...")
         session = auth.online_session(form_code=FormSchema.FA3)
 
-        # Save the session state, its a pydantic model so we can easly serialize it
+        # Save the session state so it can be serialized and passed elsewhere.
         state: OnlineSessionState = (
             session.get_state()
         )  # [TODO] state should probably be secured somehow

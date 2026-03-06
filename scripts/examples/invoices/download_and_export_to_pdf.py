@@ -1,24 +1,17 @@
-from __future__ import annotations
-
 import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+from cryptography.x509 import Certificate
+
 from ksef2 import Client, Environment, FormSchema
+from ksef2.core.packages import PackageReader
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
-from cryptography.x509 import Certificate
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from ksef2.domain.models import (
-    DateType,
-    InvoiceQueryDateRange,
-    InvoiceQueryFilters,
-    InvoiceSubjectType,
-)
-from ksef2.domain.models.testdata import SubjectType
+from ksef2.domain.models import InvoicesFilter
 from ksef2.services.renderers import InvoicePDFExporter
-from ksef2.utils import PackageReader
 
 
 def generate_test_subject() -> tuple[str, Certificate, RSAPrivateKey]:
@@ -68,30 +61,28 @@ def download_and_export(
         private_key=buyer_key,
     )
 
-    query_filters = InvoiceQueryFilters(
-        subject_type=InvoiceSubjectType.BUYER,
-        date_range=InvoiceQueryDateRange(
-            date_type=DateType.ISSUE,
-            from_=datetime.now(tz=timezone.utc) - timedelta(days=1),
-            to=datetime.now(tz=timezone.utc),
-        ),
+    query_filters = InvoicesFilter(
+        role="buyer",
+        date_type="issue_date",
+        date_from=datetime.now(tz=timezone.utc) - timedelta(days=1),
+        date_to=datetime.now(tz=timezone.utc),
+        amount_type="brutto",
     )
 
-    with buyer_auth.online_session(form_code=FormSchema.FA3) as session:
-        print("Waiting for invoice to appear in KSeF...")
-        metadata = session.wait_for_invoices(filters=query_filters)
-        print(f"Found {len(metadata.invoices)} invoice(s). Exporting...")
+    print("Waiting for invoice to appear in KSeF...")
+    metadata = buyer_auth.invoices.wait_for_invoices(filters=query_filters)
+    print(f"Found {len(metadata.invoices)} invoice(s). Exporting...")
 
-        zip_parts = session.export_and_download(filters=query_filters)
+    zip_parts = buyer_auth.invoices.export_and_download(filters=query_filters)
 
-        downloads_dir.mkdir(parents=True, exist_ok=True)
-        exporter = InvoicePDFExporter()
+    downloads_dir.mkdir(parents=True, exist_ok=True)
+    exporter = InvoicePDFExporter()
 
-        for invoice in PackageReader(zip_parts):
-            pdf_bytes = exporter.export_from_string(invoice_xml=invoice.xml)
-            pdf_path = downloads_dir / f"{Path(invoice.name).stem}.pdf"
-            _ = pdf_path.write_bytes(pdf_bytes)
-            print(f"Saved: {pdf_path}")
+    for invoice in PackageReader(zip_parts):
+        pdf_bytes = exporter.export_from_string(invoice_xml=invoice.xml)
+        pdf_path = downloads_dir / f"{Path(invoice.name).stem}.pdf"
+        _ = pdf_path.write_bytes(pdf_bytes)
+        print(f"Saved: {pdf_path}")
 
 
 def main(template_path: Path, downloads_dir: Path) -> None:
@@ -103,12 +94,12 @@ def main(template_path: Path, downloads_dir: Path) -> None:
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Test buyer",
         )
 
@@ -132,6 +123,7 @@ if __name__ == "__main__":
         / "docs"
         / "assets"
         / "sample_invoices"
+        / "fa3"
         / "invoice-template-fa-3-with-custom-subject_2.xml"
     )
 

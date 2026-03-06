@@ -6,14 +6,7 @@ from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models import (
-    IdentifierType,
-    SubjectType,
-    PermissionType,
-    Identifier,
-    Permission,
-)
-from ksef2.domain.models.session import SessionType
+from ksef2.domain.models import Identifier, Permission
 from scripts.examples._common import repo_root
 
 ORG_NIP = generate_nip()
@@ -32,11 +25,11 @@ INVOICE_TEMPLATE_PATH = (
 client = Client(environment=Environment.TEST)
 
 
-def main():
+def main() -> None:
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="SDK test seller",
         )
         temp.create_person(
@@ -48,20 +41,20 @@ def main():
         temp.grant_permissions(
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE,
+                    type="invoice_write",
                     description="Send invoices",
                 ),
                 Permission(
-                    type=PermissionType.INTROSPECTION,
+                    type="introspection",
                     description="Introspect sessions",
                 ),
                 Permission(
-                    type=PermissionType.ENFORCEMENT_OPERATIONS,
+                    type="enforcement_operations",
                     description="Manage enforcement operations",
                 ),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=PERSON_NIP),
+            in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)
@@ -102,19 +95,19 @@ def main():
             invoices_list = session.list_invoices()
             print(invoices_list.model_dump_json(indent=2))
 
-            if ksef_number := invoices_list.invoices[0].ksefNumber:
+            if ksef_number := invoices_list.invoices[0].ksef_number:
                 print(f"Fetching UPO for {ksef_number} ...")
                 upo = session.get_invoice_upo_by_ksef_number(ksef_number=ksef_number)
                 print(f"UPO size: {len(upo)} bytes")
 
                 print(f"Downloading invoice {ksef_number} ...")
-                xml_bytes = session.download_invoice(ksef_number=ksef_number)
+                xml_bytes = auth.invoices.download_invoice(ksef_number=ksef_number)
                 print(f"Invoice size: {len(xml_bytes)} bytes")
 
             print("Listing online sessions:")
             print(
-                auth.session_log.list_page(
-                    session_type=SessionType.ONLINE,
+                auth.session_log.query(
+                    session_type="online",
                 )
             )
 

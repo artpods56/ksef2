@@ -1,46 +1,19 @@
 """
-Send, query, export, and download invoices — full invoice lifecycle.
-
-This example demonstrates the complete invoice workflow in KSeF:
-
-1. **Setup** — create test subjects and grant permissions
-2. **Authenticate** — obtain an access token via XAdES
-3. **Send** — upload an invoice from a template
-4. **Query status** — check processing status by reference number
-5. **Export** — schedule a bulk export filtered by date range and subject type
-6. **Download** — poll export status and fetch the resulting ZIP package
+Send an invoice, wait for processing, export matching invoices, and download the package.
 
 Run:
     uv run scripts/examples/invoices/send_query_export_download.py
 """
 
-from __future__ import annotations
+from datetime import date, datetime, timedelta, timezone
 
-import time
-from datetime import date, datetime, timezone
-
-from ksef2 import Client, FormSchema, Environment
+from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
-from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models import (
-    InvoiceQueryFilters,
-    InvoiceSubjectType,
-    InvoiceQueryDateRange,
-    DateType,
-)
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.core.tools import generate_nip
+from ksef2.domain.models import InvoicesFilter
 from scripts.examples._common import repo_root
 
-ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
+NIP = generate_nip()
 
 INVOICE_TEMPLATE_PATH = (
     repo_root()
@@ -48,10 +21,10 @@ INVOICE_TEMPLATE_PATH = (
     / "assets"
     / "sample_invoices"
     / "fa3"
-    / "invoice-template-fa-3-with-custom-subject_2.xml"
+    / "invoice-template_v3.xml"
 )
 
-DOWNLOAD_DIR = repo_root() / "downloads"
+DOWNLOAD_DIR = repo_root() / "downloads" / "invoice_export"
 
 
 def main() -> None:
@@ -59,90 +32,59 @@ def main() -> None:
 
     with client.testdata.temporal() as temp:
         temp.create_subject(
-            nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
-            description="SDK test seller",
-        )
-        temp.create_person(
-            nip=PERSON_NIP,
-            pesel=PERSON_PESEL,
-            description="Example person",
+            nip=NIP,
+            subject_type="enforcement_authority",
+            description="README lifecycle example",
         )
 
-        temp.grant_permissions(
-            permissions=[
-                Permission(
-                    type=PermissionType.INVOICE_WRITE,
-                    description="Send invoices",
-                ),
-                Permission(
-                    type=PermissionType.INVOICE_READ,
-                    description="Read invoices",
-                ),
-            ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+        auth = client.authentication.with_test_certificate(nip=NIP)
+
+        template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
+        invoice_xml = InvoiceFactory.create(
+            template_xml,
+            {
+                "#nip#": NIP,
+                "#invoicing_date#": date.today().isoformat(),
+                # Demo-only identifier. Use your own business numbering in production.
+                "#invoice_number#": f"DEMO-{datetime.now(tz=timezone.utc):%Y%m%d%H%M%S}",
+            },
         )
 
-        cert, private_key = generate_test_certificate(ORG_NIP)
-
-        auth = client.authentication.with_xades(
-            nip=ORG_NIP,
-            cert=cert,
-            private_key=private_key,
-        )
         with auth.online_session(form_code=FormSchema.FA3) as session:
-            template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
+            result = session.send_invoice(invoice_xml=invoice_xml)
+            print(f"Invoice sent: {result.reference_number}")
 
-            # building and sending sample invoice
-            result = session.send_invoice(
-                invoice_xml=InvoiceFactory.create(
-                    template_xml,
-                    {
-                        "#nip#": ORG_NIP,
-                        "#subject2nip#": generate_nip(),
-                        "#invoicing_date#": date.today().isoformat(),
-                        "#invoice_number#": str(int(time.time())),
-                    },
-                )
+            status = session.wait_for_invoice_ready(
+                invoice_reference_number=result.reference_number,
+                timeout=60.0,
+                poll_interval=2.0,
             )
+            print(f"Invoice processed as KSeF number: {status.ksef_number}")
 
-            # let them process the invoice
-            time.sleep(5)
-
-            print(
-                session.get_invoice_status(
-                    invoice_reference_number=result.reference_number
-                ).model_dump_json(indent=2)
+        export = auth.invoices.schedule_export(
+            filters=InvoicesFilter(
+                role="seller",
+                date_type="issue_date",
+                date_from=datetime.now(tz=timezone.utc) - timedelta(days=1),
+                date_to=datetime.now(tz=timezone.utc),
+                amount_type="brutto",
             )
+        )
+        print(f"Export scheduled: {export.reference_number}")
 
-            # lets get all invoiced that were issued in the last year
-            export = session.schedule_invoices_export(
-                filters=InvoiceQueryFilters(
-                    subject_type=InvoiceSubjectType.SELLER,  # Subject 1  is a seller
-                    date_range=InvoiceQueryDateRange(
-                        date_type=DateType.ISSUE,
-                        from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
-                        to=datetime.now(tz=timezone.utc),
-                    ),
-                ),
-            )
+        package = auth.invoices.wait_for_export_package(
+            reference_number=export.reference_number,
+            timeout=120.0,
+            poll_interval=2.0,
+        )
+        print(f"Export package ready with {len(package.parts)} part(s)")
 
-            print(export.model_dump_json(indent=2))
-
-            exported_invoices = session.get_export_status(
-                reference_number=export.reference_number
-            )
-
-            print(exported_invoices.model_dump_json(indent=2))
-
-            if package := exported_invoices.package:
-                for path in session.fetch_package(
-                    package=package, target_directory=DOWNLOAD_DIR
-                ):
-                    print(
-                        f"Downloaded invoice of size {len(path.read_bytes())} bytes into {path}"
-                    )
+        for path in auth.invoices.fetch_package(
+            package=package,
+            export=export,
+            target_directory=DOWNLOAD_DIR,
+        ):
+            print(f"Downloaded: {path} ({path.stat().st_size} bytes)")
 
 
 if __name__ == "__main__":

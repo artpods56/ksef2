@@ -12,8 +12,6 @@ Run::
 Then, in another terminal, copy-paste the printed CLI command.
 """
 
-from __future__ import annotations
-
 import time
 from datetime import date
 
@@ -27,13 +25,7 @@ from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import Identifier, Permission
 from scripts.examples._common import repo_root
 
 INVOICE_TEMPLATE_PATH = (
@@ -64,12 +56,12 @@ def main() -> None:
 
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Demo seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Demo buyer",
         )
         temp.create_person(
@@ -82,11 +74,11 @@ def main() -> None:
         for nip in (seller_nip, buyer_nip):
             temp.grant_permissions(
                 permissions=[
-                    Permission(type=PermissionType.INVOICE_WRITE),
-                    Permission(type=PermissionType.INVOICE_READ),
+                    Permission(type="invoice_write", description="Write invoices"),
+                    Permission(type="invoice_read", description="Read invoices"),
                 ],
-                grant_to=Identifier(type=IdentifierType.NIP, value=nip),
-                in_context_of=Identifier(type=IdentifierType.NIP, value=nip),
+                grant_to=Identifier(type="nip", value=nip),
+                in_context_of=Identifier(type="nip", value=nip),
             )
 
         # --- Send a sample invoice ---

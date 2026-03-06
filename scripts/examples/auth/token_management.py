@@ -1,10 +1,6 @@
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import SubjectType
-from ksef2.domain.models.tokens import TokenPermission
 
 NIP = generate_nip()
 
@@ -17,7 +13,7 @@ def main() -> None:
     with client.testdata.temporal() as td:
         td.create_subject(
             nip=NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Token management test",
         )
 
@@ -34,8 +30,8 @@ def main() -> None:
         print("Generating KSeF token ...")
         result = auth.tokens.generate(
             permissions=[
-                TokenPermission.INVOICE_READ,
-                TokenPermission.INVOICE_WRITE,
+                "invoice_read",
+                "invoice_write",
             ],
             description="Example API token",
         )
@@ -47,7 +43,7 @@ def main() -> None:
         status = auth.tokens.status(
             reference_number=result.reference_number,
         )
-        print(f"  Status: {status.status.value}")
+        print(f"  Status: {status.status}")
 
         # Revoke the token
         print("Revoking token ...")
@@ -55,12 +51,12 @@ def main() -> None:
             reference_number=result.reference_number,
         )
 
-        # Verify it's revoked
+        # Verify the token has entered revocation flow
         print("Verifying revocation ...")
         status = auth.tokens.status(
             reference_number=result.reference_number,
         )
-        print(f"  Status: {status.status.value}")
+        print(f"  Status: {status.status}")
 
     print("Done, test data cleaned up.")
 

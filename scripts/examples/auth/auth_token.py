@@ -1,9 +1,5 @@
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
-
-
 from dotenv import load_dotenv
 
 _ = load_dotenv()

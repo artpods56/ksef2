@@ -1,15 +1,7 @@
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models import (
-    IdentifierType,
-    SubjectType,
-    PermissionType,
-    Identifier,
-    Permission,
-    EntityPermission,
-    EntityPermissionType,
-)
+from ksef2.domain.models import EntityPermission, Identifier, Permission
 
 ORG_NIP = generate_nip()
 PERSON_NIP = generate_nip()
@@ -18,11 +10,11 @@ PERSON_PESEL = generate_pesel()
 client = Client(environment=Environment.TEST)
 
 
-def main():
+def main() -> None:
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="SDK test seller",
         )
         temp.create_person(
@@ -34,12 +26,12 @@ def main():
         temp.grant_permissions(
             permissions=[
                 Permission(
-                    type=PermissionType.CREDENTIALS_MANAGE,
+                    type="credentials_manage",
                     description="Manage credentials",
                 ),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=PERSON_NIP),
+            in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)
@@ -53,9 +45,9 @@ def main():
 
         print("Granting person permissions...")
         result = auth.permissions.grant_person(
-            subject_identifier=IdentifierType.PESEL,
+            subject_type="pesel",
             subject_value=PERSON_PESEL,
-            permissions=[PermissionType.INVOICE_READ, PermissionType.INVOICE_WRITE],
+            permissions=["invoice_read", "invoice_write"],
             description="Test person permissions",
             first_name="John",
             last_name="Doe",
@@ -67,7 +59,7 @@ def main():
             subject_value=ORG_NIP,
             permissions=[
                 EntityPermission(
-                    type=EntityPermissionType.INVOICE_READ,
+                    type="invoice_read",
                     can_delegate=True,
                 ),
             ],

@@ -21,8 +21,6 @@ Set the environment variables before running::
 Or edit the constants below directly.
 """
 
-from __future__ import annotations
-
 import os
 
 from ksef2 import Client, Environment

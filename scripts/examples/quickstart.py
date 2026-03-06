@@ -1,10 +1,8 @@
-import time
 from datetime import date
 
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
-from ksef2.core.xades import generate_test_certificate
 from scripts.examples._common import repo_root
 
 VALID_NIP = generate_nip()
@@ -22,12 +20,7 @@ INVOICE_TEMPLATE_PATH = (
 def main() -> None:
     client = Client(Environment.TEST)
 
-    cert, private_key = generate_test_certificate(VALID_NIP)
-    auth = client.authentication.with_xades(
-        nip=VALID_NIP,
-        cert=cert,
-        private_key=private_key,
-    )
+    auth = client.authentication.with_test_certificate(nip=VALID_NIP)
 
     template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
     invoice_xml = InvoiceFactory.create(
@@ -35,7 +28,7 @@ def main() -> None:
         {
             "#nip#": VALID_NIP,
             "#invoicing_date#": date.today().isoformat(),
-            "#invoice_number#": str(int(time.time())),
+            "#invoice_number#": f"DEMO-{date.today():%Y%m%d}-{VALID_NIP[-4:]}",
         },
     )
 

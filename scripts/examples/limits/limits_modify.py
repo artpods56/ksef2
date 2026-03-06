@@ -1,4 +1,4 @@
-"""Modify and reset API limits (TEST environment only).
+"""Modify and reset API limits on TEST.
 
 The TEST environment allows modifying limits for testing purposes.
 The recommended workflow: fetch current limits, modify, push back.
@@ -14,18 +14,10 @@ Usage:
     uv run python scripts/examples/limits/limits_modify.py
 """
 
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import Identifier, Permission
 
 ORG_NIP = generate_nip()
 PERSON_NIP = generate_nip()
@@ -40,7 +32,7 @@ def main() -> None:
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Limits modify test",
         )
 
@@ -53,11 +45,11 @@ def main() -> None:
         temp.grant_permissions(
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE, description="Sending invoices"
+                    type="invoice_write", description="Sending invoices"
                 ),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=PERSON_NIP),
+            in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
         cert, private_key = generate_test_certificate(ORG_NIP)
@@ -100,7 +92,7 @@ def main() -> None:
         rate_limits.invoice_send.per_second = 50
         rate_limits.invoice_send.per_minute = 200
         auth.limits.set_api_rate_limits(limits=rate_limits)
-        print("  invoice_send: 50/s, 200/m")
+        print("  invoice_send: 50/request, 200/m")
 
         # Reset rate limits back to defaults
         print("  Resetting API rate limits ...")
@@ -115,7 +107,7 @@ def main() -> None:
         prod_limits = auth.limits.get_api_rate_limits()
         inv = prod_limits.invoice_send
         print(
-            f"  invoice_send: {inv.per_second}/s, {inv.per_minute}/m, {inv.per_hour}/h"
+            f"  invoice_send: {inv.per_second}/request, {inv.per_minute}/m, {inv.per_hour}/h"
         )
 
         # Reset back to test defaults

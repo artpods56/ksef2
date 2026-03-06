@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate

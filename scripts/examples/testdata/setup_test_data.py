@@ -1,15 +1,7 @@
-from __future__ import annotations
-
 from ksef2 import Client, Environment
 from ksef2.core import exceptions
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
+from ksef2.domain.models.testdata import Identifier, Permission
 
 ORG_NIP = generate_nip()
 PERSON_NIP = generate_nip()
@@ -18,7 +10,7 @@ PERSON_PESEL = generate_pesel()
 client = Client(environment=Environment.TEST)
 
 
-def with_automatic_cleanup():
+def with_automatic_cleanup() -> None:
     """Set up test data with automatic cleanup.
 
     The creation and deletion of entities is handled automatically by the context manager.
@@ -32,7 +24,7 @@ def with_automatic_cleanup():
         print("Creating test subject ...")
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Example organization",
         )
 
@@ -55,20 +47,20 @@ def with_automatic_cleanup():
         temp.grant_permissions(
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_READ, description="Read invoices"
+                    type="invoice_read", description="Read invoices"
                 ),
                 Permission(
-                    type=PermissionType.INVOICE_WRITE, description="Send invoices"
+                    type="invoice_write", description="Send invoices"
                 ),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=PERSON_NIP),
+            in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
         print("Cleanup has been performed automatically.")
 
 
-def manual_cleanup():
+def manual_cleanup() -> None:
     """Manually set up and clean up test data.
 
     This method shows how to set up and clean up test data manually.
@@ -85,7 +77,7 @@ def manual_cleanup():
     print("Creating test subject ...")
     client.testdata.create_subject(
         nip=ORG_NIP,
-        subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+        subject_type="enforcement_authority",
         description="Example organization",
     )
 
@@ -109,19 +101,19 @@ def manual_cleanup():
     print("Granting permissions ...")
     client.testdata.grant_permissions(
         permissions=[
-            Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
-            Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
+            Permission(type="invoice_read", description="Read invoices"),
+            Permission(type="invoice_write", description="Send invoices"),
         ],
-        grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+        grant_to=Identifier(type="nip", value=PERSON_NIP),
+        in_context_of=Identifier(type="nip", value=ORG_NIP),
     )
 
     print("Cleaning up ...")
 
     print("Revoking permissions ...")
     client.testdata.revoke_permissions(
-        revoke_from=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
+        revoke_from=Identifier(type="nip", value=PERSON_NIP),
+        in_context_of=Identifier(type="nip", value=ORG_NIP),
     )
 
     print("Deleting test person ...")
@@ -132,7 +124,7 @@ def manual_cleanup():
 
 
 if __name__ == "__main__":
-    # this method uses automatic cleanup and it's the preferred way to set up test data'
+    # This method uses automatic cleanup and is the preferred way to set up test data.
     with_automatic_cleanup()
 
     print("\n")

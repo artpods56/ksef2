@@ -1,4 +1,4 @@
-"""Enable and revoke attachment permissions (TEST environment only).
+"""Enable and revoke attachment permissions on TEST.
 
 Demonstrates how to enable and revoke attachment sending permissions for a subject.
 
@@ -6,13 +6,10 @@ Usage:
     uv run python scripts/examples/testdata/attachments.py
 """
 
-from __future__ import annotations
-
 from datetime import date, timedelta
 
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
-from ksef2.domain.models.testdata import SubjectType
 
 ORG_NIP = generate_nip()
 
@@ -25,7 +22,7 @@ def main() -> None:
         print(f"Creating test subject with NIP: {ORG_NIP}")
         temp.create_subject(
             nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Attachments test",
         )
 
