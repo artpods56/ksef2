@@ -18,6 +18,7 @@ from ..supp.invoices import (
     SendInvoiceRequest,
     SessionInvoiceStatusResponse,
     SessionInvoicesResponse,
+    QueryInvoicesMetadataRequest,
 )
 from ..supp.auth import InitTokenAuthenticationRequest
 from ..supp.permissions import (
@@ -25,7 +26,10 @@ from ..supp.permissions import (
     PersonPermissionsAuthorizedIdentifier,
     QueryPersonPermissionsResponse,
     PersonPermissionsQueryRequest,
+    PersonPermission,
 )
+
+from ..supp.peppol import QueryPeppolProvidersResponse, PeppolProvider
 
 __all__ = [
     "OpenOnlineSessionRequest",
@@ -45,8 +49,12 @@ __all__ = [
     "InitTokenAuthenticationRequest",
     "SessionInvoiceStatusResponse",
     "SessionInvoicesResponse",
+    "QueryInvoicesMetadataRequest",
+    "PersonPermission",
     "PersonPermissionsAuthorIdentifier",
     "PersonPermissionsQueryRequest",
     "PersonPermissionsAuthorizedIdentifier",
     "QueryPersonPermissionsResponse",
+    "QueryPeppolProvidersResponse",
+    "PeppolProvider",
 ]

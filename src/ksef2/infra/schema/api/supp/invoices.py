@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Annotated
+from typing import Annotated, NotRequired
 
 from pydantic import AnyUrl, AwareDatetime, Field
 
@@ -145,3 +145,43 @@ class InvoiceExportStatusResponse(BaseSupp):
     completedDate: AwareDatetime | None = None
     packageExpirationDate: AwareDatetime | None = None
     package: InvoicePackage | None = None
+
+
+# ---------------------------------------------------------------------------
+# Query params models
+# ---------------------------------------------------------------------------
+
+
+class QueryInvoicesMetadataParams(BaseSupp):
+    sortOrder: str | None = None
+    pageOffset: int | None = None
+    pageSize: int | None = None
+
+
+class ListSessionInvoicesParams(BaseSupp):
+    pageSize: int | None = None
+
+
+class QueryInvoicesMetadataRequest(BaseSupp):
+    filters: InvoiceQueryFilters
+
+
+# ---------------------------------------------------------------------------
+# Certificate request models
+# ---------------------------------------------------------------------------
+
+
+class EnrollCertificateRequest(BaseSupp):
+    csr: str
+
+
+class RetrieveCertificatesRequest(BaseSupp):
+    certificateSerialNumbers: list[str]
+
+
+class RevokeCertificateRequest(BaseSupp):
+    reasonCode: int | None = None
+
+
+class QueryCertificatesRequest(BaseSupp):
+    filters: "InvoiceQueryFilters"

@@ -1,20 +1,9 @@
-import base64
-from typing import NamedTuple
+from collections import namedtuple
 
-from pydantic import AwareDatetime
+from ksef2.domain.models.session import OpenOnlineSessionRequest
+from ksef2.infra.mappers.sessions import from_spec, to_spec
 
-from ksef2.domain.models import FormSchema
-from ksef2.domain.models.session import (
-    ListSessionsResponse,
-    SessionSummary,
-    StatusInfo,
-)
-from ksef2.infra.schema.api import spec as spec
-
-
-class OpenSessionData(NamedTuple):
-    reference_number: str
-    valid_until: AwareDatetime
+OpenSessionData = namedtuple("OpenSessionData", ["reference_number", "valid_until"])
 
 
 class OpenOnlineSessionMapper:
@@ -22,57 +11,26 @@ class OpenOnlineSessionMapper:
     def map_request(
         encrypted_key: bytes,
         iv: bytes,
-        form_code: FormSchema = FormSchema.FA3,
-    ) -> spec.OpenOnlineSessionRequest:
-        encryption = spec.EncryptionInfo(
-            encryptedSymmetricKey=base64.b64encode(encrypted_key).decode(),
-            initializationVector=base64.b64encode(iv).decode(),
-        )
-        return spec.OpenOnlineSessionRequest(
-            formCode=spec.FormCode(
-                value=form_code.schema_value,
-                systemCode=form_code.system_code,
-                schemaVersion=form_code.schema_version,
-            ),
-            encryption=encryption,
+        form_code,
+    ):
+        return to_spec(
+            OpenOnlineSessionRequest(
+                encrypted_key=encrypted_key,
+                iv=iv,
+                form_code=form_code,
+            )
         )
 
     @staticmethod
-    def map_response(
-        request: spec.OpenOnlineSessionResponse,
-    ) -> OpenSessionData:
+    def map_response(response):
+        mapped = from_spec(response)
         return OpenSessionData(
-            reference_number=request.referenceNumber,
-            valid_until=request.validUntil,
+            reference_number=mapped.reference_number,
+            valid_until=mapped.valid_until,
         )
 
 
 class QuerySessionsMapper:
-    """Handles mapping of query sessions response to domain model.
-
-    Note:
-        The endpoint doesnt require request body so we are not mapping it.
-    """
-
     @staticmethod
-    def _map_session_items(item: spec.SessionsQueryResponseItem) -> SessionSummary:
-        return SessionSummary(
-            reference_number=item.referenceNumber,
-            status=StatusInfo(
-                code=item.status.code,
-                description=item.status.description,
-                details=list(item.status.details or []),
-            ),
-            date_created=item.dateCreated,
-            date_updated=item.dateUpdated,
-            total_invoice_count=item.totalInvoiceCount,
-            successful_invoice_count=item.successfulInvoiceCount,
-            failed_invoice_count=item.failedInvoiceCount,
-        )
-
-    @classmethod
-    def map_response(cls, response: spec.SessionsQueryResponse) -> ListSessionsResponse:
-        return ListSessionsResponse(
-            continuation_token=response.continuationToken,
-            sessions=[cls._map_session_items(item=item) for item in response.sessions],
-        )
+    def map_response(response):
+        return from_spec(response)

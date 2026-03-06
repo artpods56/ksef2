@@ -32,13 +32,13 @@ class AttachmentMapper:
 
     @staticmethod
     def map_attachment(schema: FakturaZalacznik) -> Attachment:
-        """Map FakturaZalacznik schema to Attachment domain model.
+        """Map FakturaZalacznik schema to Attachment domain request.
 
         Args:
-            schema: The FakturaZalacznik schema model from FA3 invoice.
+            schema: The FakturaZalacznik schema request from FA3 invoice.
 
         Returns:
-            Attachment domain model.
+            Attachment domain request.
         """
         return Attachment(
             data_blocks=[
@@ -48,13 +48,13 @@ class AttachmentMapper:
 
     @staticmethod
     def map_data_block(schema: FakturaZalacznikBlokDanych) -> DataBlock:
-        """Map FakturaZalacznikBlokDanych schema to DataBlock domain model.
+        """Map FakturaZalacznikBlokDanych schema to DataBlock domain request.
 
         Args:
-            schema: The FakturaZalacznikBlokDanych schema model.
+            schema: The FakturaZalacznikBlokDanych schema request.
 
         Returns:
-            DataBlock domain model.
+            DataBlock domain request.
         """
         return DataBlock(
             header=schema.znaglowek,
@@ -72,10 +72,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychMetaDane to AttachmentMetaData.
 
         Args:
-            schema: The metadata schema model.
+            schema: The metadata schema request.
 
         Returns:
-            AttachmentMetaData domain model.
+            AttachmentMetaData domain request.
         """
         return AttachmentMetaData(
             key=schema.zklucz,
@@ -87,10 +87,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychTekst to AttachmentText.
 
         Args:
-            schema: The text schema model.
+            schema: The text schema request.
 
         Returns:
-            AttachmentText domain model.
+            AttachmentText domain request.
         """
         return AttachmentText(
             paragraphs=list(schema.akapit),
@@ -101,10 +101,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychTabela to AttachmentTable.
 
         Args:
-            schema: The table schema model.
+            schema: The table schema request.
 
         Returns:
-            AttachmentTable domain model.
+            AttachmentTable domain request.
         """
         return AttachmentTable(
             meta_data=[
@@ -127,10 +127,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychTabelaTmetaDane to TableMetaData.
 
         Args:
-            schema: The table metadata schema model.
+            schema: The table metadata schema request.
 
         Returns:
-            TableMetaData domain model.
+            TableMetaData domain request.
         """
         return TableMetaData(
             key=schema.tklucz,
@@ -144,10 +144,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychTabelaTnaglowek to TableHeader.
 
         Args:
-            schema: The table header schema model.
+            schema: The table header schema request.
 
         Returns:
-            TableHeader domain model.
+            TableHeader domain request.
         """
         return TableHeader(
             columns=[
@@ -162,10 +162,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychTabelaTnaglowekKol to TableHeaderColumn.
 
         Args:
-            schema: The table header column schema model.
+            schema: The table header column schema request.
 
         Returns:
-            TableHeaderColumn domain model.
+            TableHeaderColumn domain request.
         """
         return TableHeaderColumn(
             name=schema.nkom.value,
@@ -177,10 +177,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychTabelaWiersz to TableRow.
 
         Args:
-            schema: The table row schema model.
+            schema: The table row schema request.
 
         Returns:
-            TableRow domain model.
+            TableRow domain request.
         """
         return TableRow(
             cells=list(schema.wkom),
@@ -191,10 +191,10 @@ class AttachmentMapper:
         """Map FakturaZalacznikBlokDanychTabelaSuma to TableSum.
 
         Args:
-            schema: The table sum/footer schema model.
+            schema: The table sum/footer schema request.
 
         Returns:
-            TableSum domain model.
+            TableSum domain request.
         """
         return TableSum(
             cells=list(schema.skom),

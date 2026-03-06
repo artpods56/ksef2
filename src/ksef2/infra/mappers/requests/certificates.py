@@ -1,30 +1,24 @@
-from datetime import datetime
-
 from ksef2.domain.models.certificates import (
+    Certificate,
     CertificateEnrollmentData,
+    CertificateEnrollmentResponse,
+    CertificateEnrollmentStatusResponse,
     CertificateInfo,
     CertificateLimitsResponse,
-    CertificateStatus,
-    CertificateEnrollmentStatusResponse,
-    RetrievedCertificatesList,
-    Certificate,
     CertificatesInfoList,
-    IdentifierType,
-    CertificateEnrollmentResponse,
+    CertificateStatus,
     CertificateType,
+    EnrollCertificateRequest,
+    IdentifierType,
+    QueryCertificatesRequest,
+    RetrieveCertificatesRequest,
+    RetrievedCertificatesList,
     RevocationReason,
+    RevokeCertificateRequest,
 )
+from ksef2.infra.mappers.helpers import lookup
 from ksef2.infra.schema.api import spec
 from ksef2.infra.mappers import helpers
-
-
-def _lookup[_K, _V](mapping: dict[_K, _V], key: _K, label: str) -> _V:
-    try:
-        return mapping[key]
-    except KeyError:
-        expected = ", ".join(str(k) for k in mapping)
-        raise ValueError(f"Unknown {label}: {key}. Expected one of: {expected}")
-
 
 _CERTIFICATE_TYPE_TO_DOMAIN: dict[spec.KsefCertificateType, CertificateType] = {
     spec.KsefCertificateType.Authentication: "authentication",
@@ -91,19 +85,17 @@ def map_get_enrollment_data_response(
 
 
 def map_enrollment_request(
-    *,
-    certificate_name: str,
-    certificate_type: CertificateType,
-    csr: str,
-    valid_from: datetime | str | None = None,
+    request: EnrollCertificateRequest,
 ) -> spec.EnrollCertificateRequest:
     return spec.EnrollCertificateRequest(
-        certificateName=certificate_name,
-        certificateType=_lookup(
-            _CERTIFICATE_TYPE_FROM_DOMAIN, certificate_type, "certificate type"
+        certificateName=request.certificate_name,
+        certificateType=lookup(
+            _CERTIFICATE_TYPE_FROM_DOMAIN, request.certificate_type, "certificate type"
         ),
-        csr=csr,
-        validFrom=helpers.to_aware_datetime(valid_from) if valid_from else None,
+        csr=request.csr,
+        validFrom=helpers.to_aware_datetime(request.valid_from)
+        if request.valid_from
+        else None,
     )
 
 
@@ -129,11 +121,10 @@ def map_get_enrollment_status_response(
 
 
 def map_retrieve_certificates_request(
-    *,
-    certificate_serial_numbers: list[str],
+    request: RetrieveCertificatesRequest,
 ) -> spec.RetrieveCertificatesRequest:
     return spec.RetrieveCertificatesRequest(
-        certificateSerialNumbers=certificate_serial_numbers,
+        certificateSerialNumbers=request.certificate_serial_numbers,
     )
 
 
@@ -144,7 +135,7 @@ def map_retrieve_certificates_response(
         certificates=[
             Certificate(
                 name=c.certificateName,
-                certificate_type=_lookup(
+                certificate_type=lookup(
                     _CERTIFICATE_TYPE_TO_DOMAIN, c.certificateType, "certificate type"
                 ),
                 base64_encoded_certificate=c.certificate,
@@ -156,39 +147,33 @@ def map_retrieve_certificates_response(
 
 
 def map_revoke_request(
-    *,
-    revocation_reason: RevocationReason | None = None,
+    request: RevokeCertificateRequest,
 ) -> spec.RevokeCertificateRequest | None:
     return spec.RevokeCertificateRequest(
-        revocationReason=_lookup(
-            _REVOCATION_REASON, revocation_reason, "revocation reason"
+        revocationReason=lookup(
+            _REVOCATION_REASON, request.revocation_reason, "revocation reason"
         )
-        if revocation_reason
+        if request.revocation_reason
         else None,
     )
 
 
 def map_query_request(
-    *,
-    certificate_serial_number: str | None = None,
-    name: str | None = None,
-    certificate_type: CertificateType | None = None,
-    status: CertificateStatus | None = None,
-    expires_after: datetime | str | None = None,
+    request: QueryCertificatesRequest,
 ) -> spec.QueryCertificatesRequest:
     return spec.QueryCertificatesRequest(
-        certificateSerialNumber=certificate_serial_number,
-        name=name,
-        type=_lookup(
-            _CERTIFICATE_TYPE_FROM_DOMAIN, certificate_type, "certificate type"
+        certificateSerialNumber=request.certificate_serial_number,
+        name=request.name,
+        type=lookup(
+            _CERTIFICATE_TYPE_FROM_DOMAIN, request.certificate_type, "certificate type"
         )
-        if certificate_type
+        if request.certificate_type
         else None,
-        status=_lookup(_STATUS_FROM_DOMAIN, status, "certificate status")
-        if status
+        status=lookup(_STATUS_FROM_DOMAIN, request.status, "certificate status")
+        if request.status
         else None,
-        expiresAfter=helpers.to_aware_datetime(expires_after)
-        if expires_after
+        expiresAfter=helpers.to_aware_datetime(request.expires_after)
+        if request.expires_after
         else None,
     )
 
@@ -200,7 +185,7 @@ def map_query_response(
     certificates_info: list[CertificateInfo] = []
 
     for c in response.certificates:
-        field_name = _lookup(
+        field_name = lookup(
             _IDENTIFIER_FIELD, c.subjectIdentifier.type, "identifier type"
         )
 
@@ -208,9 +193,9 @@ def map_query_response(
             serial_number=c.certificateSerialNumber,
             name=c.name,
             common_name=c.commonName,
-            type=_lookup(_CERTIFICATE_TYPE_TO_DOMAIN, c.type, "certificate type"),
-            status=_lookup(_STATUS_TO_DOMAIN, c.status, "certificate status"),
-            identifier_type=_lookup(
+            type=lookup(_CERTIFICATE_TYPE_TO_DOMAIN, c.type, "certificate type"),
+            status=lookup(_STATUS_TO_DOMAIN, c.status, "certificate status"),
+            identifier_type=lookup(
                 _IDENTIFIER_TYPE, c.subjectIdentifier.type, "identifier type"
             ),
             valid_from=c.validFrom,
@@ -225,3 +210,6 @@ def map_query_response(
         certificates=certificates_info,
         has_more=response.hasMore,
     )
+
+
+# single dispatch implementatio

@@ -3000,7 +3000,7 @@ class OpenBatchSessionResponse(BaseModel):
 
     Dla każdej części należy:
     * zastosować metodę HTTP wskazaną w <b>method</b>,
-    * ustawić adres z <b>url</b>,
+    * ustawić adres z <b>base_url</b>,
     * dołączyć nagłówki z <b>headers</b>,
     * dołączyć treść części pliku w korpusie żądania.
 

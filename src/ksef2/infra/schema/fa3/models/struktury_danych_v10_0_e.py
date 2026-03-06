@@ -291,8 +291,8 @@ class TidentyfikatorOsobyFizycznejZagranicznej(BaseModel):
         nazwisko: Nazwisko [Family name]
         data_urodzenia: Data urodzenia [Date of Birth]
         miejsce_urodzenia: Miejsce urodzenia [Place of Birth]
-        imie_ojca: Imię ojca [Father’s name]
-        imie_matki: Imię matki [Mother’s name]
+        imie_ojca: Imię ojca [Father’request name]
+        imie_matki: Imię matki [Mother’request name]
         nip: Identyfikator podatkowy NIP [Tax Identification Number
             (NIP)]
     """
