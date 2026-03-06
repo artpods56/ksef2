@@ -1,24 +1,28 @@
+from collections.abc import Iterator
 from datetime import datetime
 from typing import final
 
 from ksef2.core.protocols import Middleware
 from ksef2.domain.models.certificates import (
     CertificateEnrollmentData,
-    CertificateLimitsResponse,
-    CertificateEnrollmentStatusResponse,
-    RetrievedCertificatesList,
-    CertificatesInfoList,
-    CertificateType,
-    CertificateStatus,
-    RevocationReason,
     CertificateEnrollmentResponse,
+    CertificateEnrollmentStatusResponse,
+    CertificateInfo,
+    CertificateLimitsResponse,
+    CertificatesInfoList,
+    CertificateStatus,
+    CertificateType,
+    EnrollCertificateRequest,
+    QueryCertificatesRequest,
+    RetrieveCertificatesRequest,
+    RetrievedCertificatesList,
+    RevocationReason,
+    RevokeCertificateRequest,
 )
 from ksef2.domain.models.pagination import OffsetPaginationParams
 from ksef2.endpoints.certificates import CertificatesEndpoints
 
-from ksef2.infra.mappers.requests.certificates import (
-    CertificatesMapper,
-)
+from ksef2.infra.mappers.certificates import from_spec, to_spec
 
 
 @final
@@ -27,12 +31,10 @@ class CertificatesClient:
         self._endpoints = CertificatesEndpoints(transport)
 
     def get_limits(self) -> CertificateLimitsResponse:
-        return CertificatesMapper.map_get_limits_response(self._endpoints.get_limits())
+        return from_spec(self._endpoints.get_limits())
 
     def get_enrollment_data(self) -> CertificateEnrollmentData:
-        return CertificatesMapper.map_get_enrolment_data_response(
-            self._endpoints.get_enrollment_data()
-        )
+        return from_spec(self._endpoints.get_enrollment_data())
 
     def enroll(
         self,
@@ -42,22 +44,21 @@ class CertificatesClient:
         csr: str,
         valid_from: datetime | str | None = None,
     ) -> CertificateEnrollmentResponse:
-        body = CertificatesMapper.map_entroll_request(
+        request = EnrollCertificateRequest(
             certificate_name=certificate_name,
             certificate_type=certificate_type,
             csr=csr,
             valid_from=valid_from,
         )
-        return CertificatesMapper.map_cert_enrollment_response(
-            self._endpoints.enroll(body=body)
-        )
+        body = to_spec(request)
+        return from_spec(self._endpoints.enroll(body=body))
 
     def get_enrollment_status(
         self,
         *,
         reference_number: str,
     ) -> CertificateEnrollmentStatusResponse:
-        return CertificatesMapper.map_get_enrollment_status_response(
+        return from_spec(
             self._endpoints.get_enrollment_status(
                 reference_number=reference_number,
             )
@@ -68,12 +69,11 @@ class CertificatesClient:
         *,
         certificate_serial_numbers: list[str],
     ) -> RetrievedCertificatesList:
-        body = CertificatesMapper.map_retrieve_certificates_request(
-            certificate_serial_numbers
+        request = RetrieveCertificatesRequest(
+            certificate_serial_numbers=certificate_serial_numbers,
         )
-        return CertificatesMapper.map_retrieve_certificates_response(
-            self._endpoints.retrieve(body=body)
-        )
+        body = to_spec(request)
+        return from_spec(self._endpoints.retrieve(body=body))
 
     def revoke(
         self,
@@ -82,7 +82,8 @@ class CertificatesClient:
         reason: RevocationReason | None = None,
     ) -> None:
 
-        body = CertificatesMapper.map_revoke_request(reason)
+        request = RevokeCertificateRequest(revocation_reason=reason)
+        body = to_spec(request)
         self._endpoints.revoke(
             certificate_serial_number=certificate_serial_number,
             body=body,
@@ -95,16 +96,45 @@ class CertificatesClient:
         name: str | None = None,
         certificate_type: CertificateType | None = None,
         status: CertificateStatus | None = None,
-        expiration_date: datetime | str | None = None,
+        expires_after: datetime | str | None = None,
         params: OffsetPaginationParams | None = None,
     ) -> CertificatesInfoList:
         parameters = params or OffsetPaginationParams()
-        body = CertificatesMapper.map_query_request(
-            certificate_serial_number,
-            name,
-            certificate_type,
-            status,
-            expiration_date,
+        request = QueryCertificatesRequest(
+            certificate_serial_number=certificate_serial_number,
+            name=name,
+            certificate_type=certificate_type,
+            status=status,
+            expires_after=expires_after,
         )
+        body = to_spec(request)
         spec_resp = self._endpoints.query(body=body, **parameters.to_query_params())
-        return CertificatesMapper.map_query_response(spec_resp)
+        return from_spec(spec_resp)
+
+    def all(
+        self,
+        *,
+        certificate_serial_number: str | None = None,
+        name: str | None = None,
+        certificate_type: CertificateType | None = None,
+        status: CertificateStatus | None = None,
+        expires_after: datetime | str | None = None,
+        params: OffsetPaginationParams | None = None,
+    ) -> Iterator[CertificateInfo]:
+        current_params = params or OffsetPaginationParams()
+
+        while True:
+            response = self.query(
+                certificate_serial_number=certificate_serial_number,
+                name=name,
+                certificate_type=certificate_type,
+                status=status,
+                expires_after=expires_after,
+                params=current_params,
+            )
+            yield from response.certificates
+
+            if not response.has_more:
+                break
+
+            current_params = current_params.next_page()

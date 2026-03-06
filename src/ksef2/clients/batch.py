@@ -2,10 +2,10 @@
 
 from typing import final
 
-from ksef2.core import protocols
+from ksef2.core.middlewares.base import BaseMiddleware
 from ksef2.domain.models.batch import PartUploadRequest
 from ksef2.domain.models import BatchSessionState
-from ksef2.endpoints.session import CloseBatchSessionEndpoint
+from ksef2.endpoints.session import SessionEndpoints
 
 
 @final
@@ -18,12 +18,12 @@ class BatchSessionClient:
 
     def __init__(
         self,
-        transport: protocols.Middleware,
+        transport: BaseMiddleware,
         state: BatchSessionState,
     ):
         self._transport = transport
         self._state = state
-        self._close_ep = CloseBatchSessionEndpoint(transport)
+        self._session_eps = SessionEndpoints(transport)
 
     @property
     def reference_number(self) -> str:
@@ -67,7 +67,6 @@ class BatchSessionClient:
         This triggers processing of the invoice batch and generation of UPO
         for valid invoices and a collective UPO for the session.
         """
-        self._close_ep.send(
-            access_token=self._state.access_token,
+        self._session_eps.close_batch(
             reference_number=self._state.reference_number,
         )

@@ -3,11 +3,11 @@ from typing import NotRequired, TypedDict, Unpack, final
 from pydantic import TypeAdapter
 
 from ksef2.core import routes
+from ksef2.domain.models.invoices import SortOrder
 from ksef2.endpoints.base import BaseEndpoints
 from ksef2.infra.schema.api import spec
 from ksef2.infra.schema.api.supp.invoices import (
     InvoiceExportRequest,
-    QueryInvoicesMetadataRequest,
     SendInvoiceRequest,
 )
 
@@ -28,12 +28,12 @@ SessionInvoiceListQueryParams = TypedDict(
 
 
 @final
-class InvoiceEndpoints(BaseEndpoints):
+class InvoicesEndpoints(BaseEndpoints):
     _METADATA_PARAMS = TypeAdapter(InvoiceMetadataQueryParams)
 
     def query_metadata(
         self,
-        body: QueryInvoicesMetadataRequest,
+        body: spec.InvoiceQueryFilters,
         **params: Unpack[InvoiceMetadataQueryParams],
     ) -> spec.QueryInvoicesMetadataResponse:
         return self._parse(

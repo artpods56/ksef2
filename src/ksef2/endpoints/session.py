@@ -7,14 +7,13 @@ from pydantic import TypeAdapter
 from ksef2.core import routes
 from ksef2.endpoints.base import BaseEndpoints
 from ksef2.infra.schema.api import spec
-from ksef2.infra.schema.api.supp.session import (
-    OpenBatchSessionRequest,
-    OpenOnlineSessionRequest,
-)
+from ksef2.infra.schema.api.supp.batch import OpenBatchSessionRequest
+from ksef2.infra.schema.api.supp.session import OpenOnlineSessionRequest
 
 ListSessionsQueryParams = TypedDict(
     "ListSessionsQueryParams",
     {
+        "pageSize": NotRequired[int | None],
         "sessionType": Literal["Online", "Batch"],
         "referenceNumber": NotRequired[str | None],
         "dateCreatedFrom": NotRequired[str | None],

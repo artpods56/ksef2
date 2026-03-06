@@ -19,13 +19,13 @@ AuthSessionsQueryParams = TypedDict(
 XadesAuthParams = TypedDict(
     "XadesAuthParams",
     {
-        "verifyCertificateChain": NotRequired[bool | None],
+        "verifyCertificateChain": NotRequired[str | None],
     },
 )
 
+
 @final
 class AuthEndpoints(BaseEndpoints):
-
     _AUTH_SESSIONS_PARAMS = TypeAdapter(AuthSessionsQueryParams)
 
     def list_sessions(
@@ -51,14 +51,14 @@ class AuthEndpoints(BaseEndpoints):
     def xades_auth(
         self,
         signed_xml: bytes,
-        **params: Unpack[XadesAuthParams],
+        verify_chain: bool = False,
     ) -> spec.AuthenticationInitResponse:
         return self._parse(
             self._transport.request(
                 "POST",
                 routes.AuthRoutes.XADES_SIGNATURE,
                 params=self.build_params(
-                    params,
+                    {"verifyCertificateChain": str(verify_chain).lower()},
                     self._XADES_AUTH_PARAMS,
                 ),
                 content=signed_xml,
@@ -85,8 +85,6 @@ class AuthEndpoints(BaseEndpoints):
             ),
             spec.AuthenticationInitResponse,
         )
-
-
 
     def auth_status(
         self,
@@ -122,8 +120,6 @@ class AuthEndpoints(BaseEndpoints):
             ),
             spec.AuthenticationTokenRefreshResponse,
         )
-
-
 
     def terminate_current_session(self) -> None:
         _ = self._transport.delete(

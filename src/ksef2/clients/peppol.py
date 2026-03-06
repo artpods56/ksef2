@@ -1,11 +1,11 @@
 from collections.abc import Iterator
 from typing import final
 
-from ksef2.core import protocols
-from ksef2.domain.models.pagination import PaginationParams
+from ksef2.core.protocols import Middleware
+from ksef2.domain.models.pagination import OffsetPaginationParams
 from ksef2.domain.models.peppol import ListPeppolProvidersResponse, PeppolProvider
-from ksef2.endpoints.peppol import QueryPeppolProvidersEndpoint
-from ksef2.infra.mappers.requests.peppol import PeppolProviderMapper
+from ksef2.endpoints.peppol import PeppolEndpoints
+from ksef2.infra.mappers.peppol import from_spec
 
 
 @final
@@ -17,14 +17,14 @@ class PeppolClient:
     public and do not require authentication.
     """
 
-    def __init__(self, transport: protocols.Middleware):
+    def __init__(self, transport: Middleware):
         self._transport = transport
-        self._query_endpoint = QueryPeppolProvidersEndpoint(transport)
+        self._endpoints = PeppolEndpoints(transport)
 
     def query(
         self,
         *,
-        params: PaginationParams | None = None,
+        params: OffsetPaginationParams | None = None,
     ) -> ListPeppolProvidersResponse:
         """Query Peppol service providers.
 
@@ -35,16 +35,14 @@ class PeppolClient:
             QueryPeppolProvidersResponse containing the list of providers
             and pagination info.
         """
-        params = params or PaginationParams()
+        params = params or OffsetPaginationParams()
 
-        response = self._query_endpoint.send(
-            **params.to_api_params()
-        )
-        return PeppolProviderMapper.map_response(response)
+        response = self._endpoints.query_providers(**params.to_query_params())
+        return from_spec(response)
 
-
-
-    def all(self, *, params: PaginationParams | None = None) -> Iterator[PeppolProvider]:
+    def all(
+        self, *, params: OffsetPaginationParams | None = None
+    ) -> Iterator[PeppolProvider]:
         """Iterate over all Peppol service providers.
 
         This method handles pagination internally.
@@ -55,14 +53,13 @@ class PeppolClient:
         Returns:
             Iterator over PeppolProvider objects.
         """
-        current_params = params or PaginationParams()
+        current_params = params or OffsetPaginationParams()
 
         while True:
             response = self.query(params=current_params)
             yield from response.providers
-            
+
             if not response.has_more:
                 break
 
             current_params = current_params.next_page()
-            

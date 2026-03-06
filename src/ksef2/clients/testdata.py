@@ -1,0 +1,298 @@
+import logging
+from datetime import date, datetime
+from types import TracebackType
+from typing import Self, final
+
+from ksef2.core.protocols import Middleware
+from ksef2.domain.models.testdata import (
+    AuthContextIdentifier,
+    BlockContextRequest,
+    CreatePersonRequest,
+    CreateSubjectRequest,
+    DeletePersonRequest,
+    DeleteSubjectRequest,
+    EnableAttachmentsRequest,
+    GrantPermissionsRequest,
+    Identifier,
+    Permission,
+    RevokeAttachmentsRequest,
+    RevokePermissionsRequest,
+    SubjectType,
+    SubUnit,
+    UnblockContextRequest,
+)
+from ksef2.endpoints.testdata import TestDataEndpoints
+from ksef2.infra.mappers.testdata import to_spec
+
+logger = logging.getLogger(__name__)
+
+
+@final
+class TestDataClient:
+    def __init__(self, transport: Middleware) -> None:
+        self._endpoints = TestDataEndpoints(transport)
+
+    def create_subject(
+        self,
+        *,
+        nip: str,
+        subject_type: SubjectType,
+        description: str,
+        subunits: list[SubUnit] | None = None,
+        created_date: datetime | None = None,
+    ) -> None:
+        request = CreateSubjectRequest(
+            subject_nip=nip,
+            subject_type=subject_type,
+            description=description,
+            subunits=subunits,
+            created_date=created_date,
+        )
+        self._endpoints.create_subject(to_spec(request))
+
+    def delete_subject(self, *, nip: str) -> None:
+        self._endpoints.delete_subject(to_spec(DeleteSubjectRequest(subject_nip=nip)))
+
+    def create_person(
+        self,
+        *,
+        nip: str,
+        pesel: str,
+        description: str,
+        is_bailiff: bool = False,
+        is_deceased: bool = False,
+        created_date: datetime | None = None,
+    ) -> None:
+        request = CreatePersonRequest(
+            nip=nip,
+            pesel=pesel,
+            description=description,
+            is_bailiff=is_bailiff,
+            is_deceased=is_deceased,
+            created_date=created_date,
+        )
+        self._endpoints.create_person(to_spec(request))
+
+    def delete_person(self, *, nip: str) -> None:
+        self._endpoints.delete_person(to_spec(DeletePersonRequest(nip=nip)))
+
+    def grant_permissions(
+        self,
+        *,
+        permissions: list[Permission],
+        grant_to: Identifier,
+        in_context_of: Identifier,
+    ) -> None:
+        request = GrantPermissionsRequest(
+            permissions=permissions,
+            grant_to=grant_to,
+            in_context_of=in_context_of,
+        )
+        self._endpoints.grant_permissions(to_spec(request))
+
+    def revoke_permissions(
+        self, *, revoke_from: Identifier, in_context_of: Identifier
+    ) -> None:
+        request = RevokePermissionsRequest(
+            revoke_from=revoke_from,
+            in_context_of=in_context_of,
+        )
+        self._endpoints.revoke_permissions(to_spec(request))
+
+    def enable_attachments(self, *, nip: str) -> None:
+        self._endpoints.enable_attachments(
+            to_spec(EnableAttachmentsRequest(nip=nip))
+        )
+
+    def revoke_attachments(
+        self, *, nip: str, expected_end_date: date | None = None
+    ) -> None:
+        request = RevokeAttachmentsRequest(
+            nip=nip,
+            expected_end_date=expected_end_date,
+        )
+        self._endpoints.revoke_attachments(to_spec(request))
+
+    def block_context(self, *, context: AuthContextIdentifier) -> None:
+        self._endpoints.block_context(to_spec(BlockContextRequest(context=context)))
+
+    def unblock_context(self, *, context: AuthContextIdentifier) -> None:
+        self._endpoints.unblock_context(to_spec(UnblockContextRequest(context=context)))
+
+    def temporal(self) -> "TemporalTestData":
+        return TemporalTestData(self)
+
+
+@final
+class TemporalTestData:
+    def __init__(self, client: TestDataClient) -> None:
+        self._client = client
+        self._subjects: list[str] = []
+        self._persons: list[str] = []
+        self._permissions: list[tuple[Identifier, Identifier]] = []
+        self._attachments: list[str] = []
+        self._blocked_contexts: list[AuthContextIdentifier] = []
+
+    def __enter__(self) -> Self:
+        return self
+
+    def _cleanup_blocked_context(self, context: AuthContextIdentifier) -> None:
+        try:
+            self._client.unblock_context(context=context)
+        except Exception:
+            logger.warning("Failed to unblock context %request", context, exc_info=True)
+
+    def _cleanup_attachment(self, nip: str) -> None:
+        try:
+            self._client.revoke_attachments(nip=nip)
+        except Exception:
+            logger.warning(
+                "Failed to revoke attachments for %request", nip, exc_info=True
+            )
+
+    def _cleanup_permission(
+        self, in_context_of: Identifier, grant_to: Identifier
+    ) -> None:
+        try:
+            self._client.revoke_permissions(
+                revoke_from=grant_to,
+                in_context_of=in_context_of,
+            )
+        except Exception:
+            logger.warning(
+                "Failed to revoke permissions for %request → %request",
+                in_context_of,
+                grant_to,
+                exc_info=True,
+            )
+
+    def _cleanup_person(self, nip: str) -> None:
+        try:
+            self._client.delete_person(nip=nip)
+        except Exception:
+            logger.warning("Failed to delete person %request", nip, exc_info=True)
+
+    def _cleanup_subject(self, nip: str) -> None:
+        try:
+            self._client.delete_subject(nip=nip)
+        except Exception:
+            logger.warning("Failed to delete subject %request", nip, exc_info=True)
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        for context in reversed(self._blocked_contexts):
+            self._cleanup_blocked_context(context)
+        for nip in reversed(self._attachments):
+            self._cleanup_attachment(nip)
+        for in_context_of, grant_to in reversed(self._permissions):
+            self._cleanup_permission(in_context_of, grant_to)
+        for nip in reversed(self._persons):
+            self._cleanup_person(nip)
+        for nip in reversed(self._subjects):
+            self._cleanup_subject(nip)
+
+    def create_subject(
+        self,
+        *,
+        nip: str,
+        subject_type: SubjectType,
+        description: str,
+        subunits: list[SubUnit] | None = None,
+        created_date: datetime | None = None,
+    ) -> None:
+        if nip not in self._subjects:
+            self._subjects.append(nip)
+        self._client.create_subject(
+            nip=nip,
+            subject_type=subject_type,
+            description=description,
+            subunits=subunits,
+            created_date=created_date,
+        )
+
+    def delete_subject(self, *, nip: str) -> None:
+        self._client.delete_subject(nip=nip)
+        if nip in self._subjects:
+            self._subjects.remove(nip)
+
+    def create_person(
+        self,
+        *,
+        nip: str,
+        pesel: str,
+        description: str,
+        is_bailiff: bool = False,
+        is_deceased: bool = False,
+        created_date: datetime | None = None,
+    ) -> None:
+        if nip not in self._persons:
+            self._persons.append(nip)
+        self._client.create_person(
+            nip=nip,
+            pesel=pesel,
+            description=description,
+            is_bailiff=is_bailiff,
+            is_deceased=is_deceased,
+            created_date=created_date,
+        )
+
+    def delete_person(self, *, nip: str) -> None:
+        self._client.delete_person(nip=nip)
+        if nip in self._persons:
+            self._persons.remove(nip)
+
+    def grant_permissions(
+        self,
+        *,
+        permissions: list[Permission],
+        grant_to: Identifier,
+        in_context_of: Identifier,
+    ) -> None:
+        permission_key = (in_context_of, grant_to)
+        if permission_key not in self._permissions:
+            self._permissions.append(permission_key)
+        self._client.grant_permissions(
+            permissions=permissions,
+            grant_to=grant_to,
+            in_context_of=in_context_of,
+        )
+
+    def revoke_permissions(
+        self, *, revoke_from: Identifier, in_context_of: Identifier
+    ) -> None:
+        self._client.revoke_permissions(
+            revoke_from=revoke_from,
+            in_context_of=in_context_of,
+        )
+        permission_key = (in_context_of, revoke_from)
+        if permission_key in self._permissions:
+            self._permissions.remove(permission_key)
+
+    def enable_attachments(self, *, nip: str) -> None:
+        if nip not in self._attachments:
+            self._attachments.append(nip)
+        self._client.enable_attachments(nip=nip)
+
+    def revoke_attachments(
+        self, *, nip: str, expected_end_date: date | None = None
+    ) -> None:
+        self._client.revoke_attachments(
+            nip=nip,
+            expected_end_date=expected_end_date,
+        )
+        if nip in self._attachments:
+            self._attachments.remove(nip)
+
+    def block_context(self, *, context: AuthContextIdentifier) -> None:
+        if context not in self._blocked_contexts:
+            self._blocked_contexts.append(context)
+        self._client.block_context(context=context)
+
+    def unblock_context(self, *, context: AuthContextIdentifier) -> None:
+        self._client.unblock_context(context=context)
+        if context in self._blocked_contexts:
+            self._blocked_contexts.remove(context)
