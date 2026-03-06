@@ -21,11 +21,11 @@ Usage::
 Edit the constants below to match your setup.
 """
 
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from ksef2 import Client, Environment
+from ksef2.core import exceptions
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
 from ksef2.domain.models import InvoicesFilter
 
@@ -49,7 +49,7 @@ DOWNLOAD_DIR = Path("downloads")  # invoices will be saved here, one sub-dir per
 DATE_TO = datetime.now(tz=timezone.utc)
 DATE_FROM = DATE_TO - timedelta(days=90)
 
-# Seconds to wait between export-status polls
+# Polling configuration for the SDK export wait helper
 POLL_INTERVAL = 3.0
 MAX_POLL_ATTEMPTS = 60
 
@@ -84,19 +84,13 @@ def download_for_nip(client: Client, nip: str) -> None:
         )
     )
 
-    # Poll until the package is ready
-    package = None
-    for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
-        status = auth.invoices.get_export_status(
-            reference_number=export.reference_number
+    try:
+        package = auth.invoices.wait_for_export_package(
+            reference_number=export.reference_number,
+            timeout=POLL_INTERVAL * MAX_POLL_ATTEMPTS,
+            poll_interval=POLL_INTERVAL,
         )
-        if status.package:
-            package = status.package
-            break
-        print(f"[{nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})")
-        time.sleep(POLL_INTERVAL)
-
-    if package is None:
+    except exceptions.KSeFExportTimeoutError:
         print(f"[{nip}] Export timed out — try increasing MAX_POLL_ATTEMPTS.")
         return
 

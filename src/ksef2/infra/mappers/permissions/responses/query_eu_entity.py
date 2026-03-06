@@ -13,18 +13,16 @@ from ksef2.domain.models.permissions import (
 from ksef2.infra.schema.api import spec
 
 
-def _map_cert_subject_identifier_type(
-    response: spec.CertificateSubjectIdentifierType,
-) -> IdentifierType:
-    match response:
-        case spec.CertificateSubjectIdentifierType.Nip:
+def _certificate_subject_identifier_from_value(value: str) -> IdentifierType:
+    match value:
+        case "Nip":
             return "nip"
-        case spec.CertificateSubjectIdentifierType.Pesel:
+        case "Pesel":
             return "pesel"
-        case spec.CertificateSubjectIdentifierType.Fingerprint:
+        case "Fingerprint":
             return "fingerprint"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+        case _:
+            raise ValueError(f"Unknown certificate subject identifier type: {value!r}")
 
 
 def _map_eu_query_permission(
@@ -49,6 +47,18 @@ def eu_entity_from_spec(response: spec.EuEntityPermission) -> EuEntityPermission
 
 @overload
 def eu_entity_from_spec(
+    response: spec.CertificateSubjectIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def eu_entity_from_spec(
+    response: spec.EuEntityPermissionsAuthorIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def eu_entity_from_spec(
     response: spec.QueryEuEntityPermissionsResponse,
 ) -> EuEntityPermissionsQueryResponse: ...
 
@@ -63,6 +73,16 @@ def _from_spec(response: BaseModel | Enum) -> object:
         f"No mapper registered for {type(response).__name__}. "
         f"Register one with @_from_spec.register"
     )
+
+
+@_from_spec.register
+def _(response: spec.CertificateSubjectIdentifierType) -> IdentifierType:
+    return _certificate_subject_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.EuEntityPermissionsAuthorIdentifierType) -> IdentifierType:
+    return _certificate_subject_identifier_from_value(response.value)
 
 
 @_from_spec.register
@@ -87,7 +107,7 @@ def _(
 
     return EuEntityPermission(
         id=response.id,
-        author_type=_map_cert_subject_identifier_type(response.authorIdentifier.type),
+        author_type=eu_entity_from_spec(response.authorIdentifier.type),
         author_value=response.authorIdentifier.value,
         vat_ue_identifier=response.vatUeIdentifier,
         eu_entity_name=response.euEntityName,

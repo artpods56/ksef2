@@ -20,29 +20,28 @@ Run::
     uv run scripts/examples/invoices/download_purchase_invoices_test.py
 """
 
-import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.x509 import Certificate
-
 from ksef2 import Client, Environment, FormSchema
+from ksef2.core import exceptions
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
-from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models import InvoicesFilter
-from scripts.examples._common import repo_root
 
 # ── configuration ────────────────────────────────────────────────────────────
 
 N_BUYERS = 3  # number of buyer entities to create
 INVOICES_PER_BUYER = 2  # invoices the seller sends to each buyer
 
-DOWNLOAD_DIR = repo_root() / "downloads" / "test"
+ROOT = next(
+    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+)
+
+DOWNLOAD_DIR = ROOT / "downloads" / "test"
 
 INVOICE_TEMPLATE_PATH = (
-    repo_root()
+    ROOT
     / "docs"
     / "assets"
     / "sample_invoices"
@@ -60,55 +59,46 @@ MAX_POLL_ATTEMPTS = 60
 def send_invoices(
     client: Client,
     seller_nip: str,
-    seller_cert: Certificate,
-    seller_key: RSAPrivateKey,
     buyers: list[str],
 ) -> None:
     """Authenticate as seller and send INVOICES_PER_BUYER invoices to each buyer."""
     print(f"\n[seller {seller_nip}] Authenticating …")
-    auth = client.authentication.with_xades(
-        nip=seller_nip,
-        cert=seller_cert,
-        private_key=seller_key,
-    )
+    auth = client.authentication.with_test_certificate(nip=seller_nip)
 
     template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
     with auth.online_session(form_code=FormSchema.FA3) as session:
         for buyer_nip in buyers:
             for i in range(INVOICES_PER_BUYER):
-                invoice_xml = InvoiceFactory.create(
-                    template_xml,
-                    {
-                        "#nip#": seller_nip,
-                        "#subject2nip#": buyer_nip,
-                        "#invoicing_date#": date.today().isoformat(),
-                        "#invoice_number#": str(int(time.time() * 1000) + i),
-                    },
+                status = session.send_invoice_and_wait(
+                    invoice_xml=InvoiceFactory.create(
+                        template_xml,
+                        {
+                            "#nip#": seller_nip,
+                            "#subject2nip#": buyer_nip,
+                            "#invoicing_date#": date.today().isoformat(),
+                            "#invoice_number#": (
+                                f"DEMO-{date.today():%Y%m%d}-{buyer_nip[-4:]}-{i + 1}"
+                            ),
+                        },
+                    ),
+                    timeout=60.0,
+                    poll_interval=2.0,
                 )
-                result = session.send_invoice(invoice_xml=invoice_xml)
                 print(
-                    f"[seller] Sent invoice #{i + 1} to buyer {buyer_nip} → {result.reference_number}"
+                    f"[seller] Sent invoice #{i + 1} to buyer {buyer_nip} → {status.reference_number}"
                 )
-
-    print("[seller] All invoices sent, waiting for KSeF to process …")
-    time.sleep(8)
+    print("[seller] All invoices sent and processed.")
 
 
 def download_for_buyer(
     client: Client,
     buyer_nip: str,
-    buyer_cert: Certificate,
-    buyer_key: RSAPrivateKey,
     target_dir: Path,
 ) -> None:
     """Authenticate as buyer and download all purchase invoices (Subject2)."""
     print(f"\n[buyer {buyer_nip}] Authenticating …")
-    auth = client.authentication.with_xades(
-        nip=buyer_nip,
-        cert=buyer_cert,
-        private_key=buyer_key,
-    )
+    auth = client.authentication.with_test_certificate(nip=buyer_nip)
 
     target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -123,20 +113,13 @@ def download_for_buyer(
         )
     )
 
-    package = None
-    for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
-        status = auth.invoices.get_export_status(
-            reference_number=export.reference_number
+    try:
+        package = auth.invoices.wait_for_export_package(
+            reference_number=export.reference_number,
+            timeout=POLL_INTERVAL * MAX_POLL_ATTEMPTS,
+            poll_interval=POLL_INTERVAL,
         )
-        if status.package:
-            package = status.package
-            break
-        print(
-            f"[buyer {buyer_nip}] Waiting for package … ({attempt}/{MAX_POLL_ATTEMPTS})"
-        )
-        time.sleep(POLL_INTERVAL)
-
-    if package is None:
+    except exceptions.KSeFExportTimeoutError:
         print(f"[buyer {buyer_nip}] Export timed out.")
         return
 
@@ -162,13 +145,6 @@ def main() -> None:
     print(f"Buyer NIPs : {', '.join(buyer_nips)}")
     print("=" * 60)
 
-    # Generate certs for all entities up front (before the temporal context
-    # so we have them available throughout)
-    seller_cert, seller_key = generate_test_certificate(seller_nip)
-    buyer_certs: dict[str, tuple[Certificate, RSAPrivateKey]] = {
-        nip: generate_test_certificate(nip) for nip in buyer_nips
-    }
-
     with client.testdata.temporal() as temp:
         # Register all entities in the TEST environment
         temp.create_subject(
@@ -187,20 +163,15 @@ def main() -> None:
         send_invoices(
             client=client,
             seller_nip=seller_nip,
-            seller_cert=seller_cert,
-            seller_key=seller_key,
             buyers=buyer_nips,
         )
 
         # Each buyer downloads their purchase invoices
         for buyer_nip in buyer_nips:
-            buyer_cert, buyer_key = buyer_certs[buyer_nip]
             try:
                 download_for_buyer(
                     client=client,
                     buyer_nip=buyer_nip,
-                    buyer_cert=buyer_cert,
-                    buyer_key=buyer_key,
                     target_dir=DOWNLOAD_DIR / buyer_nip,
                 )
             except Exception as exc:  # noqa: BLE001

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Annotated, NotRequired
+from typing import Annotated
 
 from pydantic import AnyUrl, AwareDatetime, Field
 

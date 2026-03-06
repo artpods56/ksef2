@@ -2,7 +2,6 @@ import time
 
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models import EntityPermission, Identifier, Permission
 from ksef2.domain.models.pagination import OffsetPaginationParams
 from ksef2.domain.models.permissions import (
@@ -54,14 +53,8 @@ def main() -> None:
             in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
-        cert, private_key = generate_test_certificate(ORG_NIP)
-
         # Authenticate - no session needed for permission operations
-        auth = client.authentication.with_xades(
-            nip=ORG_NIP,
-            cert=cert,
-            private_key=private_key,
-        )
+        auth = client.authentication.with_test_certificate(nip=ORG_NIP)
 
         # Grant some permissions so there is data to query.
         _ = auth.permissions.grant_entity(

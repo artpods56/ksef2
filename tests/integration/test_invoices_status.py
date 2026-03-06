@@ -20,13 +20,18 @@ from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import SessionTypeEnum, SessionStatusEnum, ListSessionsResponse
+from ksef2.domain.models.session import (
+    ListSessionsResponse,
+    SessionInvoiceStatusResponse,
+    SessionInvoicesResponse,
+    SessionStatusEnum,
+    SessionStatusResponse,
+    SessionTypeEnum,
+)
 from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
 )
-from ksef2.infra.schema.api import spec
-
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
     / "docs"
@@ -167,10 +172,10 @@ def test_get_session_status(session_with_invoice):
 
     response = session.get_status()
 
-    assert isinstance(response, spec.SessionStatusResponse)
+    assert isinstance(response, SessionStatusResponse)
     assert response.status is not None
     assert response.status.code is not None
-    assert response.dateCreated is not None
+    assert response.date_created is not None
 
 
 @pytest.mark.integration
@@ -180,7 +185,7 @@ def test_list_session_invoices(session_with_invoice):
 
     response = session.list_invoices(page_size=10)
 
-    assert isinstance(response, spec.SessionInvoicesResponse)
+    assert isinstance(response, SessionInvoicesResponse)
     assert len(response.invoices) >= 1
 
 
@@ -191,8 +196,8 @@ def test_get_session_invoice_status(session_with_invoice):
 
     response = session.get_invoice_status(invoice_reference_number=invoice_ref)
 
-    assert isinstance(response, spec.SessionInvoiceStatusResponse)
-    assert response.referenceNumber == invoice_ref
+    assert isinstance(response, SessionInvoiceStatusResponse)
+    assert response.reference_number == invoice_ref
     assert response.status is not None
 
 
@@ -203,5 +208,5 @@ def test_list_failed_session_invoices(session_with_invoice):
 
     response = session.list_failed_invoices(page_size=10)
 
-    assert isinstance(response, spec.SessionInvoicesResponse)
+    assert isinstance(response, SessionInvoicesResponse)
     assert hasattr(response, "invoices")

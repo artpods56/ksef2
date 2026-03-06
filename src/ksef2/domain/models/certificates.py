@@ -6,8 +6,8 @@ from ksef2.domain.models.base import KSeFBaseModel
 
 type IdentifierType = Literal["nip", "pesel", "fingerprint"]
 type RevocationReason = Literal["unspecified", "superseded", "key_compromise"]
-type CertificateType = Literal["authentication", "offline"]
-type CertificateStatus = Literal["active", "blocked", "revoked", "expired"]
+type CertificateTypeValue = Literal["authentication", "offline"]
+type CertificateStatusValue = Literal["active", "blocked", "revoked", "expired"]
 
 
 class CertificateTypeEnum(StrEnum):
@@ -34,6 +34,11 @@ class RevocationReasonEnum(StrEnum):
     KEY_COMPROMISE = "key_compromise"
 
 
+# Public runtime aliases kept enum-shaped for compatibility with older examples/tests.
+CertificateType = CertificateTypeEnum
+CertificateStatus = CertificateStatusEnum
+
+
 class SubjectIdentifier(KSeFBaseModel):
     type: IdentifierTypeEnum
     value: str
@@ -48,6 +53,11 @@ class Certificate(KSeFBaseModel):
 
 class RetrievedCertificatesList(KSeFBaseModel):
     certificates: list[Certificate]
+
+
+class CertificateQuota(KSeFBaseModel):
+    limit: int
+    remaining: int
 
 
 class CertificateInfo(KSeFBaseModel):
@@ -83,6 +93,10 @@ class CertificateEnrollmentData(KSeFBaseModel):
     organization_name: str | None = None
     organization_identifier: str | None = None
 
+    @property
+    def country_name(self) -> str:
+        return self.iso_country_code
+
 
 class CertificateEnrollmentResponse(KSeFBaseModel):
     reference_number: str
@@ -103,6 +117,20 @@ class CertificateLimitsResponse(KSeFBaseModel):
     enrollment_remaining: int
     certificate_limit: int
     certificate_remaining: int
+
+    @property
+    def enrollment(self) -> CertificateQuota:
+        return CertificateQuota(
+            limit=self.enrollment_limit,
+            remaining=self.enrollment_remaining,
+        )
+
+    @property
+    def certificate(self) -> CertificateQuota:
+        return CertificateQuota(
+            limit=self.certificate_limit,
+            remaining=self.certificate_remaining,
+        )
 
 
 # --- Request models ---
@@ -129,3 +157,6 @@ class QueryCertificatesRequest(KSeFBaseModel):
     certificate_type: CertificateType | None = None
     status: CertificateStatus | None = None
     expires_after: datetime | str | None = None
+
+
+QueryCertificatesResponse = CertificatesInfoList

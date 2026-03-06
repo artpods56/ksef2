@@ -7,6 +7,7 @@ from ksef2.domain.models.base import KSeFBaseModel
 type TokenPermission = Literal[
     "invoice_read",
     "invoice_write",
+    "introspection",
     "credentials_read",
     "credentials_manage",
     "subunit_manage",
@@ -25,6 +26,7 @@ type TokenContextIdentifierType = Literal[
 class TokenPermissionEnum(StrEnum):
     INVOICE_READ = "invoice_read"
     INVOICE_WRITE = "invoice_write"
+    INTROSPECTION = "introspection"
     CREDENTIALS_READ = "credentials_read"
     CREDENTIALS_MANAGE = "credentials_manage"
     SUBUNIT_MANAGE = "subunit_manage"

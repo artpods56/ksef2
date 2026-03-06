@@ -42,7 +42,7 @@ class TestSessionEndpoints:
         session_open_online_resp: OpenOnlineSessionResponseFactory,
     ):
         request = session_open_online_req.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = session_open_online_resp.build()
         expected_dump = expected.model_dump(mode="json")
 
@@ -175,7 +175,7 @@ class TestSessionEndpoints:
         session_open_batch_resp: OpenBatchSessionResponseFactory,
     ):
         request = session_open_batch_req.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = session_open_batch_resp.build()
         expected_dump = expected.model_dump(mode="json")
 

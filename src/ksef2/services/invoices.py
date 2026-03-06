@@ -7,6 +7,7 @@ from tenacity import RetryError, retry, retry_if_result, stop_after_delay, wait_
 from ksef2.clients.invoices import InvoicesClient
 from ksef2.core import exceptions
 from ksef2.core.crypto import decrypt_aes_cbc
+from ksef2.core.middlewares.auth import BearerTokenMiddleware
 from ksef2.core.protocols import Middleware
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models.invoices import (
@@ -31,10 +32,17 @@ class InvoicesService:
         certificate_store: CertificateStore,
         *,
         client: InvoicesClient | None = None,
+        ensure_encryption_certificates_loaded: Callable[[], None] | None = None,
     ) -> None:
         self._transport = transport
+        self._download_transport = (
+            transport._next if isinstance(transport, BearerTokenMiddleware) else transport
+        )
         self._certificate_store = certificate_store
         self._client = client or InvoicesClient(transport)
+        self._ensure_encryption_certificates_loaded = (
+            ensure_encryption_certificates_loaded or (lambda: None)
+        )
 
     def query_metadata(
         self,
@@ -57,6 +65,7 @@ class InvoicesService:
         *,
         filters: InvoicesFilter,
     ) -> ExportHandle:
+        self._ensure_encryption_certificates_loaded()
         cert = self._certificate_store.get_valid("symmetric_key_encryption")
         return self._client.schedule_export(
             filters=filters,
@@ -88,7 +97,7 @@ class InvoicesService:
         for part in package.parts:
             logger.info(f"Downloading part: {part.part_name}")
 
-            resp = self._transport.get(str(part.url))
+            resp = self._download_transport.get(str(part.url))
             _ = resp.raise_for_status()
 
             zip_data = decrypt_aes_cbc(resp.content, key=export.aes_key, iv=export.iv)
@@ -114,7 +123,7 @@ class InvoicesService:
         result: list[bytes] = []
         for part in package.parts:
             logger.info(f"Downloading part: {part.part_name}")
-            resp = self._transport.get(str(part.url))
+            resp = self._download_transport.get(str(part.url))
             _  = resp.raise_for_status()
             result.append(
                 decrypt_aes_cbc(resp.content, key=export.aes_key, iv=export.iv)

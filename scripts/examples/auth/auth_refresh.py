@@ -1,6 +1,5 @@
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
-from ksef2.core.xades import generate_test_certificate
 
 NIP = generate_nip()
 
@@ -10,12 +9,7 @@ def main() -> None:
 
     # First, authenticate to get initial tokens
     print("Authenticating via XAdES ...")
-    cert, private_key = generate_test_certificate(NIP)
-    auth = client.authentication.with_xades(
-        nip=NIP,
-        cert=cert,
-        private_key=private_key,
-    )
+    auth = client.authentication.with_test_certificate(nip=NIP)
     print(f"  Access token valid until:  {auth.auth_tokens.access_token.valid_until}")
     print(f"  Refresh token valid until: {auth.auth_tokens.refresh_token.valid_until}")
 

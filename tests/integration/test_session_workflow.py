@@ -20,12 +20,11 @@ from ksef2.clients.online import OnlineSessionClient
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import OnlineSessionState
+from ksef2.domain.models.session import OnlineSessionState, SessionStatusResponse
 from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
 )
-from ksef2.infra.schema.api import spec
 
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -152,10 +151,10 @@ def test_download_invoice_returns_xml_bytes(workflow_context):
     auth: AuthenticatedClient = workflow_context["auth"]
     invoices_list = workflow_context["invoices_list"]
 
-    if not invoices_list.invoices or not invoices_list.invoices[0].ksefNumber:
-        pytest.skip("No processed invoice with ksefNumber available")
+    if not invoices_list.invoices or not invoices_list.invoices[0].ksef_number:
+        pytest.skip("No processed invoice with ksef_number available")
 
-    ksef_number = invoices_list.invoices[0].ksefNumber
+    ksef_number = invoices_list.invoices[0].ksef_number
     xml_bytes = auth.invoices.download_invoice(ksef_number=ksef_number)
 
     assert isinstance(xml_bytes, bytes)
@@ -173,10 +172,10 @@ def test_get_invoice_upo_by_ksef_number(workflow_context):
     session: OnlineSessionClient = workflow_context["session"]
     invoices_list = workflow_context["invoices_list"]
 
-    if not invoices_list.invoices or not invoices_list.invoices[0].ksefNumber:
-        pytest.skip("No processed invoice with ksefNumber available")
+    if not invoices_list.invoices or not invoices_list.invoices[0].ksef_number:
+        pytest.skip("No processed invoice with ksef_number available")
 
-    ksef_number = invoices_list.invoices[0].ksefNumber
+    ksef_number = invoices_list.invoices[0].ksef_number
     upo = session.get_invoice_upo_by_ksef_number(ksef_number=ksef_number)
 
     assert isinstance(upo, bytes)
@@ -225,7 +224,7 @@ def test_resume_session_from_state(workflow_context):
 
     # The resumed session should be able to query status
     status = resumed.get_status()
-    assert isinstance(status, spec.SessionStatusResponse)
+    assert isinstance(status, SessionStatusResponse)
     assert status.status is not None
 
 

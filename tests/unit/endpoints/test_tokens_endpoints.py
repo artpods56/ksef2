@@ -1,4 +1,4 @@
-from typing import cast, Callable
+from typing import cast
 
 import pytest
 
@@ -52,7 +52,7 @@ class TestTokenEndpoints:
         token_generate_resp: GenerateTokenResponseFactory,
     ):
         request = token_generate_req.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = token_generate_resp.build()
         expected_dump = expected.model_dump(mode="json")
 

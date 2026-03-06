@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -15,14 +13,12 @@ from ksef2.domain.models.permissions import (
 from ksef2.infra.schema.api import spec
 
 
-def _map_authorizing_entity_identifier_type(
-    response: spec.EntityAuthorizationsAuthorizingEntityIdentifierType,
-) -> IdentifierType:
-    match response:
-        case spec.EntityAuthorizationsAuthorizingEntityIdentifierType.Nip:
+def _entity_identifier_from_value(value: str) -> IdentifierType:
+    match value:
+        case "Nip":
             return "nip"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+        case _:
+            raise ValueError(f"Unknown entity identifier type: {value!r}")
 
 
 def _map_subordinate_role(
@@ -45,6 +41,18 @@ def subordinate_roles_from_spec(
 
 @overload
 def subordinate_roles_from_spec(
+    response: spec.EntityAuthorizationsAuthorizingEntityIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def subordinate_roles_from_spec(
+    response: spec.SubordinateRoleSubordinateEntityIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def subordinate_roles_from_spec(
     response: spec.QuerySubordinateEntityRolesResponse,
 ) -> SubordinateEntityRolesQueryResponse: ...
 
@@ -62,9 +70,23 @@ def _from_spec(response: BaseModel | Enum) -> object:
 
 
 @_from_spec.register
+def _(
+    response: spec.EntityAuthorizationsAuthorizingEntityIdentifierType,
+) -> IdentifierType:
+    return _entity_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(
+    response: spec.SubordinateRoleSubordinateEntityIdentifierType,
+) -> IdentifierType:
+    return _entity_identifier_from_value(response.value)
+
+
+@_from_spec.register
 def _(response: spec.SubordinateEntityRole) -> SubordinateEntityRoleDetail:
     return SubordinateEntityRoleDetail(
-        subordinate_entity_type=_map_authorizing_entity_identifier_type(
+        subordinate_entity_type=subordinate_roles_from_spec(
             response.subordinateEntityIdentifier.type
         ),
         subordinate_entity_value=response.subordinateEntityIdentifier.value,

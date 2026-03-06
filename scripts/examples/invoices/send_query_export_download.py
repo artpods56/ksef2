@@ -6,17 +6,20 @@ Run:
 """
 
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
 from ksef2.domain.models import InvoicesFilter
-from scripts.examples._common import repo_root
 
 NIP = generate_nip()
+ROOT = next(
+    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+)
 
 INVOICE_TEMPLATE_PATH = (
-    repo_root()
+    ROOT
     / "docs"
     / "assets"
     / "sample_invoices"
@@ -24,7 +27,7 @@ INVOICE_TEMPLATE_PATH = (
     / "invoice-template_v3.xml"
 )
 
-DOWNLOAD_DIR = repo_root() / "downloads" / "invoice_export"
+DOWNLOAD_DIR = ROOT / "downloads" / "invoice_export"
 
 
 def main() -> None:

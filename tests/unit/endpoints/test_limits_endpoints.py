@@ -119,7 +119,7 @@ class TestLimitEndpoints:
     ):
         # Arrange
         request = req_factory.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
 
         # Act
         fake_transport.enqueue({})
@@ -207,7 +207,7 @@ class TestLimitEndpoints:
         resp_factory: BaseFactory[BaseModel],
     ):
         # Arrange
-        response_dump = InvalidContent(invalid_field="invalid").model_dump()
+        response_dump = {"enrollment": {"maxEnrollments": []}}
 
         # Act & Assert
         with pytest.raises(exceptions.KSeFValidationError):

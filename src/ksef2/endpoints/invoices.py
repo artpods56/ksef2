@@ -3,7 +3,6 @@ from typing import NotRequired, TypedDict, Unpack, final
 from pydantic import TypeAdapter
 
 from ksef2.core import routes
-from ksef2.domain.models.invoices import SortOrder
 from ksef2.endpoints.base import BaseEndpoints
 from ksef2.infra.schema.api import spec
 from ksef2.infra.schema.api.supp.invoices import (
@@ -40,7 +39,7 @@ class InvoicesEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.InvoiceRoutes.QUERY_METADATA,
                 params=self.build_params(params, self._METADATA_PARAMS),
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.QueryInvoicesMetadataResponse,
         )
@@ -93,7 +92,7 @@ class InvoicesEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.InvoiceRoutes.EXPORT,
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.ExportInvoicesResponse,
         )
@@ -123,7 +122,7 @@ class InvoicesEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.InvoiceRoutes.SEND.format(referenceNumber=reference_number),
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.SendInvoiceResponse,
         )

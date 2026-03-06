@@ -1,14 +1,17 @@
 from datetime import date
+from pathlib import Path
 
 from ksef2 import Client, FormSchema, Environment
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
-from scripts.examples._common import repo_root
 
 ORG_NIP = generate_nip()
+ROOT = next(
+    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+)
 
 INVOICE_TEMPLATE_PATH = (
-    repo_root()
+    ROOT
     / "docs"
     / "assets"
     / "sample_invoices"

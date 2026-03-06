@@ -38,7 +38,7 @@ class SessionEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.SessionRoutes.OPEN_ONLINE,
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.OpenOnlineSessionResponse,
         )
@@ -56,7 +56,7 @@ class SessionEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.SessionRoutes.OPEN_BATCH,
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.OpenBatchSessionResponse,
         )

@@ -35,13 +35,16 @@ def with_automatic_cleanup() -> None:
             description="Example person",
         )
 
-        # trying to create the same person again will result in an exception that gets suppressed by the context manager
-        # calling create_person() method outside of the context manager will result in an exception that has to be handled manually
-        temp.create_person(
-            nip=PERSON_NIP,
-            pesel=PERSON_PESEL,
-            description="Example person",
-        )
+        # Duplicate creates still raise errors. The temporal() context only guarantees
+        # cleanup for resources already registered in the managed scope.
+        try:
+            temp.create_person(
+                nip=PERSON_NIP,
+                pesel=PERSON_PESEL,
+                description="Example person",
+            )
+        except exceptions.KSeFApiError:
+            print("Person already exists: cleanup will still run on exit.")
 
         print("Granting permissions ...")
         temp.grant_permissions(

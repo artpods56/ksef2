@@ -1,6 +1,5 @@
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.session import OnlineSessionState
 from ksef2.domain.models.testdata import Identifier, Permission
 
@@ -35,11 +34,7 @@ def main() -> None:
             in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
-        # we are using self-signed certificate here, this will only work in test environment
-        cert, private_key = generate_test_certificate(PERSON_NIP)
-        auth = client.authentication.with_xades(
-            nip=PERSON_NIP, cert=cert, private_key=private_key
-        )
+        auth = client.authentication.with_test_certificate(nip=PERSON_NIP)
         # Open a session WITHOUT context manager (manual lifecycle)
         print("Opening session (manual mode) ...")
         session = auth.online_session(form_code=FormSchema.FA3)

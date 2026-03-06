@@ -18,18 +18,18 @@ from ksef2.domain.models.permissions import (
 from ksef2.infra.schema.api import spec
 
 
-def _map_cert_subject_identifier_type(
-    response: spec.CertificateSubjectIdentifierType,
+def _cert_subject_identifier_from_value(
+    value: str,
 ) -> CertificateSubjectIdentifierType:
-    match response:
-        case spec.CertificateSubjectIdentifierType.Nip:
+    match value:
+        case "Nip":
             return "nip"
-        case spec.CertificateSubjectIdentifierType.Pesel:
+        case "Pesel":
             return "pesel"
-        case spec.CertificateSubjectIdentifierType.Fingerprint:
+        case "Fingerprint":
             return "fingerprint"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+        case _:
+            raise ValueError(f"Unknown certificate subject identifier type: {value!r}")
 
 
 def _map_entity_role(response: spec.EntityRoleType) -> EntityRoleType:
@@ -52,6 +52,42 @@ def _map_entity_role(response: spec.EntityRoleType) -> EntityRoleType:
 
 @overload
 def entity_from_spec(response: spec.EntityRole) -> EntityRole: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.CertificateSubjectIdentifierType,
+) -> CertificateSubjectIdentifierType: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.EntityAuthorizationsAuthorIdentifierType,
+) -> CertificateSubjectIdentifierType: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.EntityAuthorizationPermissionsSubjectIdentifierType,
+) -> AuthorizationSubjectIdentifierType: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.EntityAuthorizationsAuthorizedEntityIdentifierType,
+) -> AuthorizationSubjectIdentifierType: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.EntityAuthorizationsAuthorizingEntityIdentifierType,
+) -> EntityIdentifierType: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.EntityRolesParentEntityIdentifierType,
+) -> EntityIdentifierType: ...
 
 
 @overload
@@ -100,26 +136,64 @@ def _map_authorization_permission(
             assert_never(unreachable)
 
 
-def _map_authorization_subject_identifier_type(
+def _authorization_subject_identifier_from_value(
+    value: str,
+) -> AuthorizationSubjectIdentifierType:
+    match value:
+        case "Nip":
+            return "nip"
+        case "PeppolId":
+            return "peppol_id"
+        case _:
+            raise ValueError(f"Unknown authorization subject identifier type: {value!r}")
+
+
+def _entity_identifier_from_value(
+    value: str,
+) -> EntityIdentifierType:
+    match value:
+        case "Nip":
+            return "nip"
+        case _:
+            raise ValueError(f"Unknown entity identifier type: {value!r}")
+
+
+@_from_spec.register
+def _(response: spec.CertificateSubjectIdentifierType) -> CertificateSubjectIdentifierType:
+    return _cert_subject_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(
+    response: spec.EntityAuthorizationsAuthorIdentifierType,
+) -> CertificateSubjectIdentifierType:
+    return _cert_subject_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(
     response: spec.EntityAuthorizationPermissionsSubjectIdentifierType,
 ) -> AuthorizationSubjectIdentifierType:
-    match response:
-        case spec.EntityAuthorizationPermissionsSubjectIdentifierType.Nip:
-            return "nip"
-        case spec.EntityAuthorizationPermissionsSubjectIdentifierType.PeppolId:
-            return "peppol_id"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+    return _authorization_subject_identifier_from_value(response.value)
 
 
-def _map_authorizing_entity_identifier_type(
+@_from_spec.register
+def _(
+    response: spec.EntityAuthorizationsAuthorizedEntityIdentifierType,
+) -> AuthorizationSubjectIdentifierType:
+    return _authorization_subject_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(
     response: spec.EntityAuthorizationsAuthorizingEntityIdentifierType,
 ) -> EntityIdentifierType:
-    match response:
-        case spec.EntityAuthorizationsAuthorizingEntityIdentifierType.Nip:
-            return "nip"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+    return _entity_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.EntityRolesParentEntityIdentifierType) -> EntityIdentifierType:
+    return _entity_identifier_from_value(response.value)
 
 
 @_from_spec.register
@@ -129,17 +203,17 @@ def _(response: spec.EntityAuthorizationGrant) -> AuthorizationGrantDetail:
         entity_full_name = response.subjectEntityDetails.fullName
     return AuthorizationGrantDetail(
         id=response.id,
-        author_type=_map_cert_subject_identifier_type(response.authorIdentifier.type)
+        author_type=entity_from_spec(response.authorIdentifier.type)
         if response.authorIdentifier
         else None,
         author_value=response.authorIdentifier.value
         if response.authorIdentifier
         else None,
-        authorized_entity_type=_map_authorization_subject_identifier_type(
+        authorized_entity_type=entity_from_spec(
             response.authorizedEntityIdentifier.type
         ),
         authorized_entity_value=response.authorizedEntityIdentifier.value,
-        authorizing_entity_type=_map_authorizing_entity_identifier_type(
+        authorizing_entity_type=entity_from_spec(
             response.authorizingEntityIdentifier.type
         ),
         authorizing_entity_value=response.authorizingEntityIdentifier.value,
@@ -155,9 +229,7 @@ def _(response: spec.EntityRole) -> EntityRole:
     parent_type = None
     parent_value = None
     if response.parentEntityIdentifier:
-        parent_type = _map_authorizing_entity_identifier_type(
-            response.parentEntityIdentifier.type
-        )
+        parent_type = entity_from_spec(response.parentEntityIdentifier.type)
         parent_value = response.parentEntityIdentifier.value
     return EntityRole(
         role=_map_entity_role(response.role),

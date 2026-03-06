@@ -29,10 +29,13 @@ class InvoiceSessionLogClient:
         session_type: str,
         continuation_token: str | None = None,
         params: ListSessionsQuery | None = None,
+        statuses: list[str] | None = None,
     ) -> ListSessionsResponse:
         parameters = params or ListSessionsQuery(
             session_type=self._coerce_session_type(session_type),
         )
+        if statuses is not None:
+            parameters = parameters.model_copy(update={"statuses": list(statuses)})
 
         return from_spec(
             self._endpoints.list_sessions(

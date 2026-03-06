@@ -16,7 +16,6 @@ Usage:
 
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.testdata import Identifier, Permission
 
 ORG_NIP = generate_nip()
@@ -52,15 +51,9 @@ def main() -> None:
             in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
-        cert, private_key = generate_test_certificate(ORG_NIP)
-
         # Authenticate and get an AuthenticatedClient
         print("Authenticating ...")
-        auth = client.authentication.with_xades(
-            nip=ORG_NIP,
-            cert=cert,
-            private_key=private_key,
-        )
+        auth = client.authentication.with_test_certificate(nip=ORG_NIP)
 
         # --- Modify session limits ---
         print("\nModifying session limits ...")

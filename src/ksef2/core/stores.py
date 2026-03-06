@@ -21,7 +21,10 @@ class CertificateStore:
     def all(self) -> list[encryption.PublicKeyCertificate]:
         return list(self._certificates)
 
-    def get_valid(self, usage: encryption.CertUsage) -> encryption.PublicKeyCertificate:
+    def get_valid(
+        self,
+        usage: encryption.CertUsage | str,
+    ) -> encryption.PublicKeyCertificate:
         """Get a valid certificate for given usage.
 
         Raises:
@@ -55,8 +58,15 @@ class CertificateStore:
 
     def by_usage(
         self,
-        usage: encryption.CertUsage,
+        usage: encryption.CertUsage | str,
         *,
         at: datetime | None = None,
     ) -> list[encryption.PublicKeyCertificate]:
-        return [cert for cert in self.list_valid(at=at) if usage in cert.usage]
+        normalized_usage = (
+            encryption.CertUsage(usage) if isinstance(usage, str) else usage
+        )
+        return [
+            cert
+            for cert in self.list_valid(at=at)
+            if normalized_usage in cert.usage
+        ]

@@ -36,7 +36,7 @@ class LimitEndpoints(BaseEndpoints):
     def set_session_limits(self, body: spec.SetSessionLimitsRequest) -> None:
         _ = self._transport.post(
             path=routes.LimitRoutes.SET_SESSION_LIMITS,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def reset_session_limits(self) -> None:
@@ -47,7 +47,7 @@ class LimitEndpoints(BaseEndpoints):
     def set_subject_limits(self, body: spec.SetSubjectLimitsRequest) -> None:
         _ = self._transport.post(
             path=routes.LimitRoutes.SET_SUBJECT_LIMITS,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def reset_subject_limits(self) -> None:
@@ -58,7 +58,7 @@ class LimitEndpoints(BaseEndpoints):
     def set_api_rate_limits(self, body: spec.SetRateLimitsRequest) -> None:
         _ = self._transport.post(
             path=routes.LimitRoutes.SET_API_RATE_LIMITS,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def reset_api_rate_limits(self) -> None:

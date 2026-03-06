@@ -10,8 +10,6 @@ from ksef2.core.routes import CertificateRoutes
 from ksef2.endpoints.certificates import CertificatesEndpoints
 from tests.unit.fakes import transport
 from tests.unit.factories.certificates import (
-    CertificateLimitsResponseFactory,
-    CertificateEnrollmentDataResponseFactory,
     EnrollCertificateRequestFactory,
     EnrollCertificateResponseFactory,
     CertificateEnrollmentStatusResponseFactory,
@@ -184,7 +182,7 @@ class TestCertificateEndpoints:
         cert_enroll_resp: EnrollCertificateResponseFactory,
     ):
         request = cert_enroll_req.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = cert_enroll_resp.build()
         expected_dump = expected.model_dump(mode="json")
 
@@ -342,7 +340,7 @@ class TestCertificateEndpoints:
         cert_retrieve_resp: RetrieveCertificatesResponseFactory,
     ):
         request = cert_retrieve_req.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = cert_retrieve_resp.build()
         expected_dump = expected.model_dump(mode="json")
 
@@ -495,7 +493,7 @@ class TestCertificateEndpoints:
         cert_query_resp: QueryCertificatesResponseFactory,
     ):
         request = cert_query_req.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = cert_query_resp.build()
         expected_dump = expected.model_dump(mode="json")
 

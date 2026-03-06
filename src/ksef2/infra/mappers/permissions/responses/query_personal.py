@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -16,44 +14,38 @@ from ksef2.domain.models.permissions import (
 from ksef2.infra.schema.api import spec
 
 
-def _map_cert_subject_identifier_type(
-    response: spec.CertificateSubjectIdentifierType,
-) -> IdentifierType:
-    match response:
-        case spec.CertificateSubjectIdentifierType.Nip:
+def _certificate_subject_identifier_from_value(value: str) -> IdentifierType:
+    match value:
+        case "Nip":
             return "nip"
-        case spec.CertificateSubjectIdentifierType.Pesel:
+        case "Pesel":
             return "pesel"
-        case spec.CertificateSubjectIdentifierType.Fingerprint:
+        case "Fingerprint":
             return "fingerprint"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+        case _:
+            raise ValueError(f"Unknown certificate subject identifier type: {value!r}")
 
 
-def _map_context_identifier_type(
-    response: spec.PersonPermissionsContextIdentifierType,
-) -> IdentifierType:
-    match response:
-        case spec.PersonPermissionsContextIdentifierType.Nip:
+def _context_identifier_from_value(value: str) -> IdentifierType:
+    match value:
+        case "Nip":
             return "nip"
-        case spec.PersonPermissionsContextIdentifierType.InternalId:
+        case "InternalId":
             return "internal_id"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+        case _:
+            raise ValueError(f"Unknown context identifier type: {value!r}")
 
 
-def _map_indirect_target_identifier_type(
-    response: spec.IndirectPermissionsTargetIdentifierType,
-) -> IdentifierType:
-    match response:
-        case spec.IndirectPermissionsTargetIdentifierType.Nip:
+def _target_identifier_from_value(value: str) -> IdentifierType:
+    match value:
+        case "Nip":
             return "nip"
-        case spec.IndirectPermissionsTargetIdentifierType.InternalId:
+        case "InternalId":
             return "internal_id"
-        case spec.IndirectPermissionsTargetIdentifierType.AllPartners:
+        case "AllPartners":
             return "all_partners"
-        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
-            assert_never(unreachable)
+        case _:
+            raise ValueError(f"Unknown target identifier type: {value!r}")
 
 
 def _map_personal_permission(
@@ -98,6 +90,48 @@ def personal_from_spec(
 
 @overload
 def personal_from_spec(
+    response: spec.CertificateSubjectIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def personal_from_spec(
+    response: spec.PersonalPermissionsAuthorizedIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def personal_from_spec(
+    response: spec.PersonPermissionsContextIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def personal_from_spec(
+    response: spec.PersonalPermissionsContextIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def personal_from_spec(
+    response: spec.IndirectPermissionsTargetIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def personal_from_spec(
+    response: spec.PersonalPermissionsTargetIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def personal_from_spec(
+    response: spec.PersonPermissionsTargetIdentifierType,
+) -> IdentifierType: ...
+
+
+@overload
+def personal_from_spec(
     response: spec.QueryPersonalPermissionsResponse,
 ) -> PersonalPermissionsQueryResponse: ...
 
@@ -115,6 +149,41 @@ def _from_spec(response: BaseModel | Enum) -> object:
 
 
 @_from_spec.register
+def _(response: spec.CertificateSubjectIdentifierType) -> IdentifierType:
+    return _certificate_subject_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.PersonalPermissionsAuthorizedIdentifierType) -> IdentifierType:
+    return _certificate_subject_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.PersonPermissionsContextIdentifierType) -> IdentifierType:
+    return _context_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.PersonalPermissionsContextIdentifierType) -> IdentifierType:
+    return _context_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.IndirectPermissionsTargetIdentifierType) -> IdentifierType:
+    return _target_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.PersonalPermissionsTargetIdentifierType) -> IdentifierType:
+    return _target_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.PersonPermissionsTargetIdentifierType) -> IdentifierType:
+    return _target_identifier_from_value(response.value)
+
+
+@_from_spec.register
 def _(response: spec.PersonalPermission) -> PersonalPermissionDetail:
     subject_first_name, subject_last_name = None, None
     if response.subjectPersonDetails:
@@ -128,21 +197,19 @@ def _(response: spec.PersonalPermission) -> PersonalPermissionDetail:
 
     return PersonalPermissionDetail(
         id=response.id,
-        context_type=_map_context_identifier_type(response.contextIdentifier.type)
+        context_type=personal_from_spec(response.contextIdentifier.type)
         if response.contextIdentifier
         else None,
         context_value=response.contextIdentifier.value
         if response.contextIdentifier
         else None,
-        authorized_type=_map_cert_subject_identifier_type(
-            response.authorizedIdentifier.type
-        )
+        authorized_type=personal_from_spec(response.authorizedIdentifier.type)
         if response.authorizedIdentifier
         else None,
         authorized_value=response.authorizedIdentifier.value
         if response.authorizedIdentifier
         else None,
-        target_type=_map_indirect_target_identifier_type(response.targetIdentifier.type)
+        target_type=personal_from_spec(response.targetIdentifier.type)
         if response.targetIdentifier
         else None,
         target_value=response.targetIdentifier.value

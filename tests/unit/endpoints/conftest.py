@@ -1,7 +1,6 @@
 import pytest
 
 from ksef2.domain.models.pagination import (
-    OffsetPaginationParams,
     PermissionsQueryParams,
     OffsetPaginationParams,
     InvoiceMetadataParams,

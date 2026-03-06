@@ -1,4 +1,3 @@
-from typing import cast
 
 import pytest
 
@@ -47,7 +46,7 @@ class TestEncryptionEndpoints:
         result = encryption_eps.fetch_public_certificates()
 
         assert len(result) == 1
-        assert result[0].certificate == "test-certificate-data"
+        assert result[0].certificate == "dGVzdC1jZXJ0aWZpY2F0ZS1kYXRh"
         assert len(fake_transport.calls) == 1
         call = fake_transport.calls[0]
         assert call.method == "GET"

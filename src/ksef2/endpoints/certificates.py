@@ -30,7 +30,7 @@ class CertificatesEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.CertificateRoutes.ENROLLMENT,
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.EnrollCertificateResponse,
         )
@@ -53,7 +53,7 @@ class CertificatesEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.CertificateRoutes.RETRIEVE,
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.RetrieveCertificatesResponse,
         )
@@ -67,7 +67,7 @@ class CertificatesEndpoints(BaseEndpoints):
             path=routes.CertificateRoutes.REVOKE.format(
                 certificateSerialNumber=certificate_serial_number
             ),
-            json=body.model_dump(mode="json") if body else None,
+            json=body.model_dump(mode="json", by_alias=True) if body else None,
         )
 
     def query(
@@ -79,7 +79,7 @@ class CertificatesEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.CertificateRoutes.QUERY,
                 params=self.build_params(params),
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.QueryCertificatesResponse,
         )

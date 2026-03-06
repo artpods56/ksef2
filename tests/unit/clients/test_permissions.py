@@ -115,7 +115,7 @@ class TestPermissionsClient:
             first_name=request.first_name,
             last_name=request.last_name,
             target_type=request.target_type,
-            target_value=request.target_value,
+            target_value="1234567890-12345",
         )
 
         assert isinstance(result, domain_permissions.GrantPermissionsResponse)
@@ -124,7 +124,7 @@ class TestPermissionsClient:
         assert str(call.path) == GrantPermissionsRoutes.GRANT_INDIRECT
         assert call.json is not None
         if request.target_type and request.target_value:
-            assert call.json["targetIdentifier"]["value"] == request.target_value
+            assert call.json["targetIdentifier"]["value"] == "1234567890-12345"
 
     def test_grant_subunit(
         self,

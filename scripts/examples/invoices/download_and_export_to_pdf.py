@@ -2,22 +2,16 @@ import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.x509 import Certificate
-
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.packages import PackageReader
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
-from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models import InvoicesFilter
 from ksef2.services.renderers import InvoicePDFExporter
 
 
-def generate_test_subject() -> tuple[str, Certificate, RSAPrivateKey]:
-    nip = generate_nip()
-    cert, key = generate_test_certificate(nip)
-    return nip, cert, key
+def generate_test_subject() -> str:
+    return generate_nip()
 
 
 def send_invoice(
@@ -25,14 +19,8 @@ def send_invoice(
     template_path: Path,
     seller_nip: str,
     buyer_nip: str,
-    seller_cert: Certificate,
-    seller_key: RSAPrivateKey,
 ) -> None:
-    seller_auth = client.authentication.with_xades(
-        nip=seller_nip,
-        cert=seller_cert,
-        private_key=seller_key,
-    )
+    seller_auth = client.authentication.with_test_certificate(nip=seller_nip)
 
     with seller_auth.online_session(form_code=FormSchema.FA3) as session:
         invoice_xml = InvoiceFactory.create(
@@ -52,14 +40,8 @@ def download_and_export(
     client: Client,
     downloads_dir: Path,
     buyer_nip: str,
-    buyer_cert: Certificate,
-    buyer_key: RSAPrivateKey,
 ) -> None:
-    buyer_auth = client.authentication.with_xades(
-        nip=buyer_nip,
-        cert=buyer_cert,
-        private_key=buyer_key,
-    )
+    buyer_auth = client.authentication.with_test_certificate(nip=buyer_nip)
 
     query_filters = InvoicesFilter(
         role="buyer",
@@ -88,8 +70,8 @@ def download_and_export(
 def main(template_path: Path, downloads_dir: Path) -> None:
 
     client = Client(environment=Environment.TEST)
-    seller_nip, seller_cert, seller_key = generate_test_subject()
-    buyer_nip, buyer_cert, buyer_key = generate_test_subject()
+    seller_nip = generate_test_subject()
+    buyer_nip = generate_test_subject()
 
     with client.testdata.temporal() as temp:
         temp.create_subject(
@@ -104,9 +86,9 @@ def main(template_path: Path, downloads_dir: Path) -> None:
         )
 
         send_invoice(
-            client, template_path, seller_nip, buyer_nip, seller_cert, seller_key
+            client, template_path, seller_nip, buyer_nip
         )
-        download_and_export(client, downloads_dir, buyer_nip, buyer_cert, buyer_key)
+        download_and_export(client, downloads_dir, buyer_nip)
 
     print("Done.")
 

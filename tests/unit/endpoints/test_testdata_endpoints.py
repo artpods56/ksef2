@@ -9,18 +9,6 @@ from ksef2.core import exceptions
 from ksef2.core.routes import TestDataRoutes
 from ksef2.endpoints.testdata import TestDataEndpoints
 from tests.unit.fakes import transport
-from tests.unit.factories.testdata import (
-    CreateSubjectRequestFactory,
-    DeleteSubjectRequestFactory,
-    CreatePersonRequestFactory,
-    DeletePersonRequestFactory,
-    GrantPermissionsRequestFactory,
-    RevokePermissionsRequestFactory,
-    EnableAttachmentsRequestFactory,
-    RevokeAttachmentsRequestFactory,
-    BlockContextRequestFactory,
-    UnblockContextRequestFactory,
-)
 
 from ksef2.core.middlewares.exceptions import KSeFExceptionMiddleware
 
@@ -108,7 +96,7 @@ class TestTestDataEndpoints:
         req_factory: BaseFactory[BaseModel],
     ):
         request = req_factory.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
 
         fake_transport.enqueue({})
         getattr(testdata_eps, method.__name__)(request)

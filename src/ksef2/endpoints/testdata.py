@@ -23,59 +23,59 @@ class TestDataEndpoints(BaseEndpoints):
     def create_subject(self, body: CreateSubjectRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.CREATE_SUBJECT,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def delete_subject(self, body: DeleteSubjectRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.DELETE_SUBJECT,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def create_person(self, body: CreatePersonRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.CREATE_PERSON,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def delete_person(self, body: DeletePersonRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.DELETE_PERSON,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def grant_permissions(self, body: GrantPermissionsRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.GRANT_PERMISSIONS,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def revoke_permissions(self, body: RevokePermissionsRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.REVOKE_PERMISSIONS,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def enable_attachments(self, body: EnableAttachmentsRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.ENABLE_ATTACHMENTS,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def revoke_attachments(self, body: RevokeAttachmentsRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.REVOKE_ATTACHMENTS,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def block_context(self, body: BlockContextRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.BLOCK_CONTEXT,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )
 
     def unblock_context(self, body: UnblockContextRequest) -> None:
         self._transport.post(
             path=routes.TestDataRoutes.UNBLOCK_CONTEXT,
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(mode="json", by_alias=True),
         )

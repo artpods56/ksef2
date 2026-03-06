@@ -7,7 +7,6 @@ from typing import assert_never, overload
 from pydantic import BaseModel
 
 from ksef2.domain.models.permissions import (
-    AuthorizationPermissionTypeEnum,
     AuthorizationPermissionsQuery,
     EuEntityPermissionsQuery,
     EuEntityQueryPermissionTypeEnum,

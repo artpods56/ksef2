@@ -81,7 +81,7 @@ class AuthEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.AuthRoutes.TOKEN_AUTH,
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.AuthenticationInitResponse,
         )

@@ -15,7 +15,7 @@ class PermissionsGrantEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.GrantPermissionsRoutes.GRANT_PERSON,
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.PermissionsOperationResponse,
         )
@@ -26,7 +26,7 @@ class PermissionsGrantEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.GrantPermissionsRoutes.GRANT_ENTITY,
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.PermissionsOperationResponse,
         )
@@ -37,7 +37,7 @@ class PermissionsGrantEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.GrantPermissionsRoutes.GRANT_AUTHORIZATION,
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.PermissionsOperationResponse,
         )
@@ -48,7 +48,7 @@ class PermissionsGrantEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.GrantPermissionsRoutes.GRANT_INDIRECT,
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.PermissionsOperationResponse,
         )
@@ -59,7 +59,7 @@ class PermissionsGrantEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.GrantPermissionsRoutes.GRANT_SUBUNITS,
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.PermissionsOperationResponse,
         )
@@ -70,7 +70,7 @@ class PermissionsGrantEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.GrantPermissionsRoutes.GRANT_ADMINISTERED_EU_ENTITY,
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.PermissionsOperationResponse,
         )
@@ -81,7 +81,7 @@ class PermissionsGrantEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.GrantPermissionsRoutes.GRANT_EU_ENTITY,
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.PermissionsOperationResponse,
         )
@@ -123,7 +123,7 @@ class QueryPermissionsEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.QueryPermissionsRoutes.QUERY_PERSONAL_GRANTS,
                 params=self.build_params(params),
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.QueryPersonalPermissionsResponse,
         )
@@ -145,7 +145,7 @@ class QueryPermissionsEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.QueryPermissionsRoutes.QUERY_AUTHORIZATIONS_GRANTS,
                 params=self.build_params(params),
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.QueryEntityAuthorizationPermissionsResponse,
         )
@@ -159,7 +159,7 @@ class QueryPermissionsEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.QueryPermissionsRoutes.QUERY_EU_ENTITIES_GRANTS,
                 params=self.build_params(params),
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.QueryEuEntityPermissionsResponse,
         )
@@ -173,7 +173,7 @@ class QueryPermissionsEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.QueryPermissionsRoutes.QUERY_PERSONS_GRANTS,
                 params=self.build_params(params),
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.QueryPersonPermissionsResponse,
         )
@@ -187,7 +187,7 @@ class QueryPermissionsEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.QueryPermissionsRoutes.QUERY_SUBORDINATE_ENTITIES_ROLES,
                 params=self.build_params(params),
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.QuerySubordinateEntityRolesResponse,
         )
@@ -201,7 +201,7 @@ class QueryPermissionsEndpoints(BaseEndpoints):
             self._transport.post(
                 path=routes.QueryPermissionsRoutes.QUERY_SUBUNITS_GRANTS,
                 params=self.build_params(params),
-                json=request.model_dump(mode="json"),
+                json=request.model_dump(mode="json", by_alias=True),
             ),
             spec.QuerySubunitPermissionsResponse,
         )

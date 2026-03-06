@@ -29,7 +29,7 @@ class TokenEndpoints(BaseEndpoints):
         return self._parse(
             self._transport.post(
                 path=routes.TokenRoutes.GENERATE_TOKEN,
-                json=body.model_dump(mode="json"),
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.GenerateTokenResponse,
         )

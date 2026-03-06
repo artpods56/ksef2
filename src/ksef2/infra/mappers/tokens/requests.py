@@ -10,9 +10,7 @@ from ksef2.domain.models.tokens import (
     TokenPermissionEnum,
     TokenStatus,
     TokenStatusEnum,
-    TokenAuthorIdentifierType,
     TokenAuthorIdentifierTypeEnum,
-    TokenContextIdentifierType,
     TokenContextIdentifierTypeEnum,
 )
 from ksef2.infra.mappers.helpers import get_matching_enum

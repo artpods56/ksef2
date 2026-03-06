@@ -50,6 +50,7 @@ def _(request: ContextLimits) -> spec.SetSessionLimitsRequest:
 @_to_spec.register
 def _(request: SubjectLimits) -> spec.SetSubjectLimitsRequest:
     return spec.SetSubjectLimitsRequest(
+        subjectIdentifierType=spec.SubjectIdentifierType.Nip,
         certificate=(
             spec.CertificateSubjectLimitsOverride(
                 maxCertificates=request.certificate.max_certificates,

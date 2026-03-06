@@ -117,7 +117,7 @@ class TestGrantPermissionsEndpoints:
     ):
         # Arrange
         request = req_factory.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = resp_factory.build()
         expected_dump = expected.model_dump(mode="json")
 
@@ -640,7 +640,7 @@ class TestQueryPermissionsEndpoints:
         fake_transport: transport.FakeTransport,
     ):
         # Arrange
-        response_dump = InvalidContent(invalid_field="invalid").model_dump()
+        response_dump = {"isAttachmentAllowed": []}
 
         # Act
         with pytest.raises(exceptions.KSeFValidationError):

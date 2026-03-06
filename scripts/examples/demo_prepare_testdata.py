@@ -14,6 +14,7 @@ Then, in another terminal, copy-paste the printed CLI command.
 
 import time
 from datetime import date
+from pathlib import Path
 
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
@@ -26,10 +27,12 @@ from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.testdata import Identifier, Permission
-from scripts.examples._common import repo_root
 
+ROOT = next(
+    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+)
 INVOICE_TEMPLATE_PATH = (
-    repo_root()
+    ROOT
     / "docs"
     / "assets"
     / "sample_invoices"
@@ -37,7 +40,7 @@ INVOICE_TEMPLATE_PATH = (
     / "invoice-template-fa-3-with-custom-subject_2.xml"
 )
 
-CREDS_DIR = repo_root() / ".demo_creds"
+CREDS_DIR = ROOT / ".demo_creds"
 
 
 def main() -> None:
@@ -45,7 +48,6 @@ def main() -> None:
     buyer_nip = generate_nip()
     buyer_pesel = generate_pesel()
 
-    seller_cert, seller_key = generate_test_certificate(seller_nip)
     buyer_cert, buyer_key = generate_test_certificate(buyer_nip)
 
     client = Client(environment=Environment.TEST)
@@ -83,11 +85,7 @@ def main() -> None:
 
         # --- Send a sample invoice ---
         print("Sending a sample invoice as the seller ...")
-        seller_auth = client.authentication.with_xades(
-            nip=seller_nip,
-            cert=seller_cert,
-            private_key=seller_key,
-        )
+        seller_auth = client.authentication.with_test_certificate(nip=seller_nip)
 
         template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
         invoice_xml = InvoiceFactory.create(
@@ -101,11 +99,13 @@ def main() -> None:
         )
 
         with seller_auth.online_session(form_code=FormSchema.FA3) as session:
-            result = session.send_invoice(invoice_xml=invoice_xml)
+            status = session.send_invoice_and_wait(
+                invoice_xml=invoice_xml,
+                timeout=60.0,
+                poll_interval=2.0,
+            )
 
-        print(f"Invoice sent (ref: {result.reference_number})")
-        print("Waiting 5s for KSeF to process ...")
-        time.sleep(5)
+        print(f"Invoice sent and processed (ref: {status.reference_number})")
 
         # --- Write buyer credentials to disk ---
         CREDS_DIR.mkdir(parents=True, exist_ok=True)
@@ -129,7 +129,7 @@ def main() -> None:
         print(f"  Buyer PESEL:   {buyer_pesel}")
         print(f"  Buyer cert:    {cert_path}")
         print(f"  Buyer key:     {key_path}")
-        print(f"  Invoice ref:   {result.reference_number}")
+        print(f"  Invoice ref:   {status.reference_number}")
         print("=" * 60)
         print("\nRun this in another terminal:\n")
         print(

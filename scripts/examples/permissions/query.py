@@ -1,6 +1,5 @@
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
-from ksef2.core.xades import generate_test_certificate
 
 ORG_NIP = generate_nip()
 
@@ -15,12 +14,7 @@ def main() -> None:
             description="Permission query example",
         )
 
-        cert, private_key = generate_test_certificate(ORG_NIP)
-        auth = client.authentication.with_xades(
-            nip=ORG_NIP,
-            cert=cert,
-            private_key=private_key,
-        )
+        auth = client.authentication.with_test_certificate(nip=ORG_NIP)
 
         print(auth.permissions.get_attachment_permission_status().model_dump_json(indent=2))
 

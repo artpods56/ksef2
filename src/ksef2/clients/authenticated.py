@@ -54,18 +54,23 @@ class AuthenticatedClient:
     def access_token(self) -> str:
         return self._auth_tokens.access_token.token
 
+    def _ensure_encryption_certificates_loaded(self) -> None:
+        if self._certificate_store.all():
+            return
+
+        self._certificate_store.load(
+            [
+                encryption_from_spec(cert)
+                for cert in self._encryption_eps.fetch_public_certificates()
+            ]
+        )
+
     @property
     def refresh_token(self) -> str:
         return self._auth_tokens.refresh_token.token
 
     def get_encryption_key(self) -> tuple[bytes, bytes, bytes]:
-        if not self._certificate_store.all():
-            self._certificate_store.load(
-                [
-                    encryption_from_spec(cert)
-                    for cert in self._encryption_eps.fetch_public_certificates()
-                ]
-            )
+        self._ensure_encryption_certificates_loaded()
 
         cert = self._certificate_store.get_valid("symmetric_key_encryption")
 
@@ -162,4 +167,7 @@ class AuthenticatedClient:
             self._authed_transport,
             self._certificate_store,
             client=InvoicesClient(self._authed_transport),
+            ensure_encryption_certificates_loaded=(
+                self._ensure_encryption_certificates_loaded
+            ),
         )

@@ -12,14 +12,7 @@ from tests.unit.fakes import transport
 from tests.unit.factories.invoices import (
     QueryInvoicesMetadataRequestFactory,
     QueryInvoicesMetadataResponseFactory,
-    InvoiceExportRequestFactory,
-    ExportInvoicesResponseFactory,
-    InvoiceExportStatusResponseFactory,
-    SendInvoiceRequestFactory,
-    SendInvoiceResponseFactory,
-    SessionStatusResponseFactory,
     SessionInvoicesResponseFactory,
-    SessionInvoiceStatusResponseFactory,
 )
 
 from ksef2.core.middlewares.exceptions import KSeFExceptionMiddleware
@@ -110,7 +103,7 @@ class TestInvoiceEndpoints:
         prefix_args: list[str],
     ):
         request = req_factory.build() if hasattr(req_factory, "build") else req_factory
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = resp_factory.build()
 
         fake_transport.enqueue(expected.model_dump(mode="json"))

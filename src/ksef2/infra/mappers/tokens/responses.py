@@ -103,6 +103,8 @@ def _(response: spec.TokenPermissionType) -> TokenPermission:
             return "invoice_read"
         case spec.TokenPermissionType.InvoiceWrite:
             return "invoice_write"
+        case spec.TokenPermissionType.Introspection:
+            return "introspection"
         case spec.TokenPermissionType.CredentialsRead:
             return "credentials_read"
         case spec.TokenPermissionType.CredentialsManage:

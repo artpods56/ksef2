@@ -13,7 +13,6 @@ from ksef2.domain.models.permissions import (
     CertificateSubjectIdentifierType,
     EntityPermission,
     EntityRolesResponse,
-    EntityIdentifierType,
     EuEntityAdminContextIdentifierType,
     EuEntityPermissionsQuery,
     EuEntityPermissionsQueryResponse,

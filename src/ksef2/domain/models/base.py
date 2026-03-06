@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import cast
 
 from pydantic import BaseModel, ConfigDict, AliasGenerator
 from pydantic.alias_generators import to_camel

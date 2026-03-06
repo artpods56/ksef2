@@ -21,11 +21,26 @@ from ksef2.clients.online import OnlineSessionClient
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.permissions import (
-    AuthorizationPermissionType,
-    AuthorizationSubjectIdentifierType,
+    AuthorizationPermissionTypeEnum,
+    AuthorizationPermissionsQuery,
+    AuthorizationPermissionsQueryResponse,
+    AuthorizationSubjectIdentifierTypeEnum,
     EntityPermission,
-    EntityPermissionType,
-    SubunitIdentifierType,
+    EntityPermissionTypeEnum,
+    EuEntityPermissionsQuery,
+    EuEntityPermissionsQueryResponse,
+    PersonalPermissionsQuery,
+    PersonalPermissionsQueryResponse,
+    PersonPermissionDetail,
+    PersonPermissionsQuery,
+    PersonPermissionsQueryResponse,
+    PersonPermissionsQueryTypeEnum,
+    QueryTypeEnum,
+    SubordinateEntityRolesQuery,
+    SubordinateEntityRolesQueryResponse,
+    SubunitIdentifierTypeEnum,
+    SubunitPermissionsQuery,
+    SubunitPermissionsQueryResponse,
 )
 
 
@@ -113,16 +128,10 @@ def test_get_entity_roles(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_query_authorizations(permissions_context: PermissionContext):
     """Query authorization permissions."""
-    from ksef2.domain.models.permissions import (
-        AuthorizationPermissionsQueryRequest,
-        AuthorizationPermissionsQueryResponse,
-        QueryType,
-    )
-
     auth = permissions_context["auth"]
 
-    query = AuthorizationPermissionsQueryRequest(
-        query_type=QueryType.GRANTED,
+    query = AuthorizationPermissionsQuery(
+        query_type=QueryTypeEnum.GRANTED,
     )
 
     response = auth.permissions.query_authorizations(query=query)
@@ -135,14 +144,9 @@ def test_query_authorizations(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_query_eu_entities(permissions_context: PermissionContext):
     """Query EU entity permissions."""
-    from ksef2.domain.models.permissions import (
-        EuEntityPermissionsQueryRequest,
-        EuEntityPermissionsQueryResponse,
-    )
-
     auth = permissions_context["auth"]
 
-    query = EuEntityPermissionsQueryRequest()
+    query = EuEntityPermissionsQuery()
 
     response = auth.permissions.query_eu_entities(query=query)
 
@@ -154,14 +158,9 @@ def test_query_eu_entities(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_query_personal(permissions_context: PermissionContext):
     """Query personal permissions."""
-    from ksef2.domain.models.permissions import (
-        PersonalPermissionsQueryRequest,
-        PersonalPermissionsQueryResponse,
-    )
-
     auth = permissions_context["auth"]
 
-    query = PersonalPermissionsQueryRequest()
+    query = PersonalPermissionsQuery()
 
     response = auth.permissions.query_personal(query=query)
 
@@ -173,17 +172,10 @@ def test_query_personal(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_query_persons(permissions_context: PermissionContext):
     """Query person permissions and verify domain response request."""
-    from ksef2.domain.models.permissions import (
-        PersonPermissionDetail,
-        PersonPermissionsQueryRequest,
-        PersonPermissionsQueryResponse,
-        PermissionsQueryType,
-    )
-
     auth = permissions_context["auth"]
 
-    query = PersonPermissionsQueryRequest(
-        query_type=PermissionsQueryType.PERMISSIONS_IN_CURRENT_CONTEXT,
+    query = PersonPermissionsQuery(
+        query_type=PersonPermissionsQueryTypeEnum.IN_CONTEXT,
     )
 
     response = auth.permissions.query_persons(query=query)
@@ -195,8 +187,8 @@ def test_query_persons(permissions_context: PermissionContext):
     for perm in response.permissions:
         assert isinstance(perm, PersonPermissionDetail)
         assert perm.id
-        assert perm.author_identifier is not None
-        assert perm.authorized_identifier is not None
+        assert perm.author_type is not None
+        assert perm.authorized_type is not None
         assert perm.permission_state is not None
         assert perm.permission_type is not None
         assert perm.description
@@ -207,14 +199,9 @@ def test_query_persons(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_query_subordinate_entities(permissions_context: PermissionContext):
     """Query subordinate entity roles."""
-    from ksef2.domain.models.permissions import (
-        SubordinateEntityRolesQueryRequest,
-        SubordinateEntityRolesQueryResponse,
-    )
-
     auth = permissions_context["auth"]
 
-    query = SubordinateEntityRolesQueryRequest()
+    query = SubordinateEntityRolesQuery()
 
     response = auth.permissions.query_subordinate_entities(query=query)
 
@@ -226,14 +213,9 @@ def test_query_subordinate_entities(permissions_context: PermissionContext):
 @pytest.mark.integration
 def test_query_subunits(permissions_context: PermissionContext):
     """Query subunit permissions."""
-    from ksef2.domain.models.permissions import (
-        SubunitPermissionsQueryRequest,
-        SubunitPermissionsQueryResponse,
-    )
-
     auth = permissions_context["auth"]
 
-    query = SubunitPermissionsQueryRequest()
+    query = SubunitPermissionsQuery()
 
     response = auth.permissions.query_subunits(query=query)
 
@@ -257,7 +239,7 @@ def test_grant_entity_permission(permissions_context: PermissionContext):
         subject_value=buyer_nip,
         permissions=[
             EntityPermission(
-                type=EntityPermissionType.INVOICE_READ, can_delegate=False
+                type=EntityPermissionTypeEnum.INVOICE_READ, can_delegate=False
             ),
         ],
         description="Test entity permission grant",
@@ -286,9 +268,9 @@ def test_grant_authorization_permission(permissions_context: PermissionContext):
     buyer_nip = generate_nip()
 
     response = auth.permissions.grant_authorization(
-        subject_type=AuthorizationSubjectIdentifierType.NIP,
+        subject_type=AuthorizationSubjectIdentifierTypeEnum.NIP,
         subject_value=buyer_nip,
-        permissions=AuthorizationPermissionType.SELF_INVOICING,
+        permission=AuthorizationPermissionTypeEnum.SELF_INVOICING,
         description="Test authorization grant",
         entity_name="Test Authorization Entity",
     )
@@ -305,7 +287,7 @@ def test_grant_person_permission(permissions_context: PermissionContext):
     person_nip = generate_nip()
 
     response = auth.permissions.grant_person(
-        subject_identifier="nip",
+        subject_type="nip",
         subject_value=person_nip,
         permissions=["invoice_read"],
         description="Test person permission grant",
@@ -325,9 +307,9 @@ def test_grant_subunit_permission(permissions_context: PermissionContext):
     seller_nip = permissions_context["seller_nip"]
 
     response = auth.permissions.grant_subunit(
-        subject_identifier="nip",
+        subject_type="nip",
         subject_value=seller_nip,
-        context_identifier=SubunitIdentifierType.NIP,
+        context_type=SubunitIdentifierTypeEnum.NIP,
         context_value=seller_nip,
         description="Test subunit permission grant",
         first_name="Test",
@@ -352,9 +334,9 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
 
     # First, grant an authorization permission
     grant_response = auth.permissions.grant_authorization(
-        subject_type=AuthorizationSubjectIdentifierType.NIP,
+        subject_type=AuthorizationSubjectIdentifierTypeEnum.NIP,
         subject_value=buyer_nip,
-        permissions=AuthorizationPermissionType.SELF_INVOICING,
+        permission=AuthorizationPermissionTypeEnum.SELF_INVOICING,
         description="Test authorization for revoke",
         entity_name="Test Entity for Revoke",
     )
@@ -365,14 +347,10 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
     time.sleep(5)
 
     # Query authorizations to find the one we just created
-    from ksef2.domain.models.permissions import (
-        AuthorizationPermissionsQueryRequest,
-        QueryType,
-    )
     from ksef2.domain.models.pagination import OffsetPaginationParams
 
     query_response = auth.permissions.query_authorizations(
-        query=AuthorizationPermissionsQueryRequest(query_type=QueryType.GRANTED),
+        query=AuthorizationPermissionsQuery(query_type=QueryTypeEnum.GRANTED),
         params=OffsetPaginationParams(page_size=100),
     )
 
@@ -411,7 +389,7 @@ def test_revoke_common_permission(permissions_context: PermissionContext):
         subject_value=buyer_nip,
         permissions=[
             EntityPermission(
-                type=EntityPermissionType.INVOICE_READ, can_delegate=False
+                type=EntityPermissionTypeEnum.INVOICE_READ, can_delegate=False
             ),
         ],
         description="Test entity for revoke",
@@ -427,11 +405,10 @@ def test_revoke_common_permission(permissions_context: PermissionContext):
     )
 
     # Query personal permissions to find the one we just created
-    from ksef2.domain.models.permissions import PersonalPermissionsQueryRequest
     from ksef2.domain.models.pagination import OffsetPaginationParams
 
     query_response = auth.permissions.query_personal(
-        query=PersonalPermissionsQueryRequest(),
+        query=PersonalPermissionsQuery(),
         params=OffsetPaginationParams(page_size=100),
     )
 

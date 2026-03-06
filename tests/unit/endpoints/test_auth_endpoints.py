@@ -115,7 +115,7 @@ class TestAuthEndpoints:
         auth_init_resp: AuthenticationInitResponseFactory,
     ):
         request = auth_init_req.build()
-        request_dump = request.model_dump(mode="json")
+        request_dump = request.model_dump(mode="json", by_alias=True)
         expected = auth_init_resp.build()
         expected_dump = expected.model_dump(mode="json")
 

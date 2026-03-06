@@ -1,20 +1,22 @@
 import random
-import time
 from datetime import date
+from pathlib import Path
 
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models import Identifier, Permission
-from scripts.examples._common import repo_root
 
 ORG_NIP = generate_nip()
 PERSON_NIP = generate_nip()
 PERSON_PESEL = generate_pesel()
 
+ROOT = next(
+    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+)
+
 INVOICE_TEMPLATE_PATH = (
-    repo_root()
+    ROOT
     / "docs"
     / "assets"
     / "sample_invoices"
@@ -57,13 +59,7 @@ def main() -> None:
             in_context_of=Identifier(type="nip", value=ORG_NIP),
         )
 
-        cert, private_key = generate_test_certificate(ORG_NIP)
-
-        auth = client.authentication.with_xades(
-            nip=ORG_NIP,
-            cert=cert,
-            private_key=private_key,
-        )
+        auth = client.authentication.with_test_certificate(nip=ORG_NIP)
         with auth.online_session(form_code=FormSchema.FA3) as session:
             print(session.get_state().model_dump_json(indent=2))
 
@@ -84,9 +80,10 @@ def main() -> None:
             )
             invoice_ref = session.send_invoice(invoice_xml=invoice_xml)
             print(f"Invoice sent: {invoice_ref.model_dump_json(indent=2)}")
-
-            # give them some time to process the invoice
-            time.sleep(5)
+            status = session.wait_for_invoice_ready(
+                invoice_reference_number=invoice_ref.reference_number
+            )
+            print(f"Invoice processed as KSeF number: {status.ksef_number}")
 
             print("Failed invoices:")
             print(session.list_failed_invoices())
@@ -95,7 +92,7 @@ def main() -> None:
             invoices_list = session.list_invoices()
             print(invoices_list.model_dump_json(indent=2))
 
-            if ksef_number := invoices_list.invoices[0].ksef_number:
+            if ksef_number := status.ksef_number:
                 print(f"Fetching UPO for {ksef_number} ...")
                 upo = session.get_invoice_upo_by_ksef_number(ksef_number=ksef_number)
                 print(f"UPO size: {len(upo)} bytes")

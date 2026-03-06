@@ -1,5 +1,4 @@
-from datetime import date
-from typing import Literal, NotRequired
+from typing import Literal
 
 from ksef2.infra.schema.api.supp.base import BaseSupp
 from ksef2.infra.schema.api.spec.models import FormCode

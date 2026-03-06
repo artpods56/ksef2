@@ -40,7 +40,7 @@ class CertificatesClient:
         self,
         *,
         certificate_name: str,
-        certificate_type: CertificateType,
+        certificate_type: CertificateType | str,
         csr: str,
         valid_from: datetime | str | None = None,
     ) -> CertificateEnrollmentResponse:
@@ -94,12 +94,19 @@ class CertificatesClient:
         *,
         certificate_serial_number: str | None = None,
         name: str | None = None,
-        certificate_type: CertificateType | None = None,
-        status: CertificateStatus | None = None,
+        certificate_type: CertificateType | str | None = None,
+        status: CertificateStatus | str | None = None,
         expires_after: datetime | str | None = None,
         params: OffsetPaginationParams | None = None,
+        page_size: int | None = None,
+        page_offset: int | None = None,
     ) -> CertificatesInfoList:
         parameters = params or OffsetPaginationParams()
+        if page_size is not None or page_offset is not None:
+            parameters = OffsetPaginationParams(
+                page_size=page_size or parameters.page_size,
+                page_offset=page_offset or parameters.page_offset,
+            )
         request = QueryCertificatesRequest(
             certificate_serial_number=certificate_serial_number,
             name=name,
@@ -116,8 +123,8 @@ class CertificatesClient:
         *,
         certificate_serial_number: str | None = None,
         name: str | None = None,
-        certificate_type: CertificateType | None = None,
-        status: CertificateStatus | None = None,
+        certificate_type: CertificateType | str | None = None,
+        status: CertificateStatus | str | None = None,
         expires_after: datetime | str | None = None,
         params: OffsetPaginationParams | None = None,
     ) -> Iterator[CertificateInfo]:
