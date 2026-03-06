@@ -23,10 +23,12 @@ class FormSchema(Enum):
         self.schema_version = schema_version
         self.schema_value = schema_value
 
+
 type SessionType = Literal["online", "batch"]
 
 
 type SessionStatus = Literal["in_progress", "succeeded", "failed", "cancelled"]
+
 
 class SessionTypeEnum(StrEnum):
     ONLINE = "Online"

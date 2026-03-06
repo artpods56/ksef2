@@ -18,9 +18,7 @@ type IdentifierType = Literal[
 
 type CertificateSubjectIdentifierType = Literal["nip", "pesel", "fingerprint"]
 
-type PersonAuthorIdentifierType = Literal[
-    "nip", "pesel", "fingerprint", "system"
-]
+type PersonAuthorIdentifierType = Literal["nip", "pesel", "fingerprint", "system"]
 
 type PersonContextIdentifierType = Literal["nip", "internal_id"]
 

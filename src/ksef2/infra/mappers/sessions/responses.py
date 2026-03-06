@@ -21,7 +21,9 @@ from ksef2.infra.schema.api import spec
 
 
 @overload
-def from_spec(response: spec.OpenOnlineSessionResponse) -> OpenOnlineSessionResponse: ...
+def from_spec(
+    response: spec.OpenOnlineSessionResponse,
+) -> OpenOnlineSessionResponse: ...
 
 
 @overload

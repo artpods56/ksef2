@@ -100,9 +100,7 @@ class TestDataClient:
         self._endpoints.revoke_permissions(to_spec(request))
 
     def enable_attachments(self, *, nip: str) -> None:
-        self._endpoints.enable_attachments(
-            to_spec(EnableAttachmentsRequest(nip=nip))
-        )
+        self._endpoints.enable_attachments(to_spec(EnableAttachmentsRequest(nip=nip)))
 
     def revoke_attachments(
         self, *, nip: str, expected_end_date: date | None = None

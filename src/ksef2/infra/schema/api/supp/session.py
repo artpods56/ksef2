@@ -35,6 +35,8 @@ class OpenOnlineSessionRequest(BaseSupp):
     """
     Symetryczny klucz szyfrujący pliki XML, zaszyfrowany kluczem publicznym Ministerstwa Finansów.
     """
+
+
 ListSessionsQueryParams = Literal[
     "sessionType",
     "referenceNumber",

@@ -101,7 +101,9 @@ def subunit_from_spec(response: BaseModel | Enum) -> object:
 
 
 @_from_spec.register
-def _(response: spec.CertificateSubjectIdentifierType) -> CertificateSubjectIdentifierType:
+def _(
+    response: spec.CertificateSubjectIdentifierType,
+) -> CertificateSubjectIdentifierType:
     return _certificate_subject_identifier_from_value(response.value)
 
 

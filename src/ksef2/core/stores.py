@@ -66,7 +66,5 @@ class CertificateStore:
             encryption.CertUsage(usage) if isinstance(usage, str) else usage
         )
         return [
-            cert
-            for cert in self.list_valid(at=at)
-            if normalized_usage in cert.usage
+            cert for cert in self.list_valid(at=at) if normalized_usage in cert.usage
         ]

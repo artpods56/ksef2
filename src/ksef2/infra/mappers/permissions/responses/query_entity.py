@@ -145,7 +145,9 @@ def _authorization_subject_identifier_from_value(
         case "PeppolId":
             return "peppol_id"
         case _:
-            raise ValueError(f"Unknown authorization subject identifier type: {value!r}")
+            raise ValueError(
+                f"Unknown authorization subject identifier type: {value!r}"
+            )
 
 
 def _entity_identifier_from_value(
@@ -159,7 +161,9 @@ def _entity_identifier_from_value(
 
 
 @_from_spec.register
-def _(response: spec.CertificateSubjectIdentifierType) -> CertificateSubjectIdentifierType:
+def _(
+    response: spec.CertificateSubjectIdentifierType,
+) -> CertificateSubjectIdentifierType:
     return _cert_subject_identifier_from_value(response.value)
 
 

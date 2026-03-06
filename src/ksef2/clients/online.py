@@ -112,15 +112,14 @@ class OnlineSessionClient:
         poll_interval: float = 2.0,
     ) -> SessionInvoiceStatusResponse:
 
-
-        retry_predicate: Callable[[SessionInvoiceStatusResponse], bool] = lambda s: not s.ksef_number and s.status.code < 400
+        retry_predicate: Callable[[SessionInvoiceStatusResponse], bool] = lambda s: (
+            not s.ksef_number and s.status.code < 400
+        )
 
         @retry(
             stop=stop_after_delay(timeout),
             wait=wait_fixed(poll_interval),
-            retry=retry_if_result(
-                retry_predicate
-            ),
+            retry=retry_if_result(retry_predicate),
             reraise=True,
         )
         def _poll() -> SessionInvoiceStatusResponse:

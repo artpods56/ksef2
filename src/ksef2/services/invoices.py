@@ -36,7 +36,9 @@ class InvoicesService:
     ) -> None:
         self._transport = transport
         self._download_transport = (
-            transport._next if isinstance(transport, BearerTokenMiddleware) else transport
+            transport._next
+            if isinstance(transport, BearerTokenMiddleware)
+            else transport
         )
         self._certificate_store = certificate_store
         self._client = client or InvoicesClient(transport)
@@ -124,7 +126,7 @@ class InvoicesService:
         for part in package.parts:
             logger.info(f"Downloading part: {part.part_name}")
             resp = self._download_transport.get(str(part.url))
-            _  = resp.raise_for_status()
+            _ = resp.raise_for_status()
             result.append(
                 decrypt_aes_cbc(resp.content, key=export.aes_key, iv=export.iv)
             )
@@ -138,7 +140,10 @@ class InvoicesService:
         poll_interval: float = 2.0,
     ) -> QueryInvoicesMetadataResponse:
 
-        retry_predicate: Callable[[QueryInvoicesMetadataResponse], bool] = lambda s: not s.invoices
+        retry_predicate: Callable[[QueryInvoicesMetadataResponse], bool] = lambda s: (
+            not s.invoices
+        )
+
         @retry(
             stop=stop_after_delay(timeout),
             wait=wait_fixed(poll_interval),
@@ -161,7 +166,9 @@ class InvoicesService:
         poll_interval: float = 2.0,
     ) -> InvoicePackage:
 
-        retry_predicate: Callable[[InvoiceExportStatusResponse], bool] = lambda s: not (s.package and s.package.parts)
+        retry_predicate: Callable[[InvoiceExportStatusResponse], bool] = lambda s: (
+            not (s.package and s.package.parts)
+        )
 
         @retry(
             stop=stop_after_delay(timeout),

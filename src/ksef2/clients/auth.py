@@ -166,7 +166,10 @@ class AuthClient:
         max_attempts: int,
     ) -> None:
 
-        retry_predicate: Callable[[Response], bool] = lambda resp: resp.status_code < 200
+        retry_predicate: Callable[[Response], bool] = lambda resp: (
+            resp.status_code < 200
+        )
+
         @retry(
             stop=stop_after_attempt(max_attempts),
             wait=wait_fixed(poll_interval),

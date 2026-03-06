@@ -92,7 +92,9 @@ def from_spec(
 
 
 @overload
-def from_spec(response: spec.ExportInvoicesResponse) -> invoices.ExportInvoicesResponse: ...
+def from_spec(
+    response: spec.ExportInvoicesResponse,
+) -> invoices.ExportInvoicesResponse: ...
 
 
 @overload
@@ -161,7 +163,9 @@ def _(response: spec.SendInvoiceResponse) -> invoices.SendInvoiceResponse:
 
 
 @_from_spec.register
-def _(response: spec.QueryInvoicesMetadataResponse) -> invoices.QueryInvoicesMetadataResponse:
+def _(
+    response: spec.QueryInvoicesMetadataResponse,
+) -> invoices.QueryInvoicesMetadataResponse:
     return invoices.QueryInvoicesMetadataResponse(
         has_more=response.hasMore,
         is_truncated=response.isTruncated,
@@ -178,7 +182,9 @@ def _(response: spec.ExportInvoicesResponse) -> invoices.ExportInvoicesResponse:
 
 
 @_from_spec.register
-def _(response: spec.InvoiceExportStatusResponse) -> invoices.InvoiceExportStatusResponse:
+def _(
+    response: spec.InvoiceExportStatusResponse,
+) -> invoices.InvoiceExportStatusResponse:
     return invoices.InvoiceExportStatusResponse(
         status=invoices.ExportStatusInfo(
             code=response.status.code,

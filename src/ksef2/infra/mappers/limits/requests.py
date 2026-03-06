@@ -3,7 +3,12 @@ from typing import overload
 
 from pydantic import BaseModel
 
-from ksef2.domain.models.limits import ApiRateLimits, ContextLimits, RateLimitValues, SubjectLimits
+from ksef2.domain.models.limits import (
+    ApiRateLimits,
+    ContextLimits,
+    RateLimitValues,
+    SubjectLimits,
+)
 from ksef2.infra.schema.api import spec
 
 

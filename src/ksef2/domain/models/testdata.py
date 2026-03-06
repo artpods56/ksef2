@@ -8,7 +8,9 @@ from ksef2.domain.models.base import KSeFBaseModel
 
 type SubjectType = Literal["enforcement_authority", "vat_group", "jst"]
 type IdentifierType = Literal["nip", "pesel", "fingerprint", "system"]
-type AuthContextIdentifierType = Literal["nip", "internal_id", "nip_vat_ue", "peppol_id"]
+type AuthContextIdentifierType = Literal[
+    "nip", "internal_id", "nip_vat_ue", "peppol_id"
+]
 type PermissionType = Literal[
     "invoice_read",
     "invoice_write",

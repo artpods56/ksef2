@@ -14,7 +14,11 @@ from ksef2.core.crypto import generate_session_key, encrypt_symmetric_key
 from ksef2.core.protocols import Middleware
 from ksef2.core.middlewares.auth import BearerTokenMiddleware
 from ksef2.core.stores import CertificateStore
-from ksef2.domain.models import BatchFileInfo, BatchSessionState, OpenBatchSessionRequest
+from ksef2.domain.models import (
+    BatchFileInfo,
+    BatchSessionState,
+    OpenBatchSessionRequest,
+)
 from ksef2.domain.models.auth import AuthTokens
 from ksef2.domain.models.session import (
     FormSchema,

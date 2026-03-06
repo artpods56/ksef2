@@ -223,7 +223,9 @@ def _(request: CreateSubjectRequest) -> supp.CreateSubjectRequest:
         subjectNip=request.subject_nip,
         subjectType=to_spec(SubjectTypeEnum(request.subject_type)),
         description=request.description,
-        subunits=[to_spec(unit) for unit in request.subunits] if request.subunits else None,
+        subunits=[to_spec(unit) for unit in request.subunits]
+        if request.subunits
+        else None,
         createdDate=request.created_date,
     )
 
