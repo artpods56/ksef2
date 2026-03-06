@@ -2,7 +2,10 @@ from datetime import date, datetime, timezone
 
 from polyfactory import BaseFactory
 
-from ksef2.clients.testdata import TemporalTestData, TestDataClient as KSeFTestDataClient
+from ksef2.clients.testdata import (
+    TemporalTestData,
+    TestDataClient as KSeFTestDataClient,
+)
 from ksef2.core.routes import TestDataRoutes as ApiRoutes
 from ksef2.domain.models.testdata import (
     AuthContextIdentifier,

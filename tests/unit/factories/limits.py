@@ -57,12 +57,16 @@ class DomainApiRateLimitsFactory(ModelFactory[domain_limits.ApiRateLimits]):
         DomainRateLimitValuesFactory.build()
     )
     session_misc: domain_limits.RateLimitValues = DomainRateLimitValuesFactory.build()
-    invoice_metadata: domain_limits.RateLimitValues = DomainRateLimitValuesFactory.build()
+    invoice_metadata: domain_limits.RateLimitValues = (
+        DomainRateLimitValuesFactory.build()
+    )
     invoice_export: domain_limits.RateLimitValues = DomainRateLimitValuesFactory.build()
     invoice_export_status: domain_limits.RateLimitValues = (
         DomainRateLimitValuesFactory.build()
     )
-    invoice_download: domain_limits.RateLimitValues = DomainRateLimitValuesFactory.build()
+    invoice_download: domain_limits.RateLimitValues = (
+        DomainRateLimitValuesFactory.build()
+    )
     other: domain_limits.RateLimitValues = DomainRateLimitValuesFactory.build()
 
 

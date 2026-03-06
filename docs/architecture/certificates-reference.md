@@ -637,9 +637,9 @@ class TestPeppolClient:
     ):
         expected = peppol_providers_resp.build()
         fake_transport.enqueue(expected.model_dump(mode="json"))
-        
+
         response = peppol_client.query()
-        
+
         assert len(response.providers) == len(expected.peppolProviders)
         assert response.has_more == expected.hasMore
 ```

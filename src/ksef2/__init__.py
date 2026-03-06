@@ -20,10 +20,6 @@ from ksef2.config import (
     TransportConfig,
 )
 
-__version__ = "0.8.0"
-
-from ksef2._openapi import __openapi_version__
-
 __all__ = [
     "Client",
     "ConnectionPoolConfig",
@@ -33,6 +29,4 @@ __all__ = [
     "TimeoutConfig",
     "TlsConfig",
     "TransportConfig",
-    "__version__",
-    "__openapi_version__",
 ]

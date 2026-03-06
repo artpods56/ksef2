@@ -184,12 +184,10 @@ class PersonalPermissionsTargetIdentifierFactory(
 ): ...
 
 
-
 @register_fixture(name="perm_entity_role_parent_identifier")
 class EntityRolesParentEntityIdentifierFactory(
     ModelFactory[spec.EntityRolesParentEntityIdentifier]
 ): ...
-
 
 
 @register_fixture(name="perm_subject_person_details")
@@ -213,9 +211,7 @@ class PermissionsSubjectEntityByIdentifierDetailsFactory(
 
 
 @register_fixture(name="perm_eu_entity_details")
-class PermissionsEuEntityDetailsFactory(
-    ModelFactory[spec.PermissionsEuEntityDetails]
-):
+class PermissionsEuEntityDetailsFactory(ModelFactory[spec.PermissionsEuEntityDetails]):
     fullName = "EU Context Entity"
     address = "EU Street 2"
 
@@ -249,11 +245,9 @@ class EntityAuthorizationGrantFactory(ModelFactory[spec.EntityAuthorizationGrant
         type=spec.EntityAuthorizationPermissionsSubjectIdentifierType.Nip,
         value="1234567890",
     )
-    authorizingEntityIdentifier = (
-        spec.EntityAuthorizationsAuthorizingEntityIdentifier(
-            type=spec.EntityAuthorizationsAuthorizingEntityIdentifierType.Nip,
-            value="1234567890",
-        )
+    authorizingEntityIdentifier = spec.EntityAuthorizationsAuthorizingEntityIdentifier(
+        type=spec.EntityAuthorizationsAuthorizingEntityIdentifierType.Nip,
+        value="1234567890",
     )
     authorizationScope = spec.InvoicePermissionType.SelfInvoicing
     description = "Authorization"
@@ -336,7 +330,6 @@ class DomainGrantPersonPermissionsRequestFactory(
     permissions: list[str] = ["invoice_read"]
 
 
-
 @register_fixture(name="domain_perm_grant_entity_req")
 class DomainGrantEntityPermissionsRequestFactory(
     ModelFactory[domain_permissions.GrantEntityPermissionsRequest]
@@ -360,7 +353,6 @@ class DomainGrantAuthorizationPermissionsRequestFactory(
 class DomainGrantIndirectPermissionsRequestFactory(
     ModelFactory[domain_permissions.GrantIndirectPermissionsRequest]
 ): ...
-
 
 
 @register_fixture(name="domain_perm_grant_subunit_req")

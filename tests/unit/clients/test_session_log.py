@@ -53,7 +53,9 @@ class TestInvoiceSessionLogClient:
         session_list_resp: BaseFactory[spec.SessionsQueryResponse],
     ) -> None:
         fake_transport.enqueue(
-            session_list_resp.build(continuationToken="next-token").model_dump(mode="json")
+            session_list_resp.build(continuationToken="next-token").model_dump(
+                mode="json"
+            )
         )
         fake_transport.enqueue(
             session_list_resp.build(continuationToken=None).model_dump(mode="json")

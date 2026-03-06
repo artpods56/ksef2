@@ -9,7 +9,10 @@ class TestTestDataMapper:
     def test_to_spec_string_values(self) -> None:
         assert to_spec("enforcement_authority") == "EnforcementAuthority"
         assert to_spec("invoice_write") == "InvoiceWrite"
-        assert to_spec(domain_testdata.AuthContextIdentifierTypeEnum.PEPPOL_ID) == "PeppolId"
+        assert (
+            to_spec(domain_testdata.AuthContextIdentifierTypeEnum.PEPPOL_ID)
+            == "PeppolId"
+        )
 
     def test_to_spec_create_subject_request(
         self,
@@ -62,7 +65,9 @@ class TestTestDataMapper:
 
     def test_to_spec_grant_permissions_request(
         self,
-        domain_td_grant_permissions_req: BaseFactory[domain_testdata.GrantPermissionsRequest],
+        domain_td_grant_permissions_req: BaseFactory[
+            domain_testdata.GrantPermissionsRequest
+        ],
     ) -> None:
         request = domain_td_grant_permissions_req.build()
 
@@ -75,7 +80,9 @@ class TestTestDataMapper:
 
     def test_to_spec_revoke_permissions_request(
         self,
-        domain_td_revoke_permissions_req: BaseFactory[domain_testdata.RevokePermissionsRequest],
+        domain_td_revoke_permissions_req: BaseFactory[
+            domain_testdata.RevokePermissionsRequest
+        ],
     ) -> None:
         request = domain_td_revoke_permissions_req.build()
 
@@ -87,7 +94,9 @@ class TestTestDataMapper:
 
     def test_to_spec_enable_attachments_request(
         self,
-        domain_td_enable_attachments_req: BaseFactory[domain_testdata.EnableAttachmentsRequest],
+        domain_td_enable_attachments_req: BaseFactory[
+            domain_testdata.EnableAttachmentsRequest
+        ],
     ) -> None:
         request = domain_td_enable_attachments_req.build()
 
@@ -98,7 +107,9 @@ class TestTestDataMapper:
 
     def test_to_spec_revoke_attachments_request(
         self,
-        domain_td_revoke_attachments_req: BaseFactory[domain_testdata.RevokeAttachmentsRequest],
+        domain_td_revoke_attachments_req: BaseFactory[
+            domain_testdata.RevokeAttachmentsRequest
+        ],
     ) -> None:
         request = domain_td_revoke_attachments_req.build()
 
@@ -122,7 +133,9 @@ class TestTestDataMapper:
 
     def test_to_spec_unblock_context_request(
         self,
-        domain_td_unblock_context_req: BaseFactory[domain_testdata.UnblockContextRequest],
+        domain_td_unblock_context_req: BaseFactory[
+            domain_testdata.UnblockContextRequest
+        ],
     ) -> None:
         request = domain_td_unblock_context_req.build()
 

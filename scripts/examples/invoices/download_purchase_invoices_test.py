@@ -35,7 +35,9 @@ N_BUYERS = 3  # number of buyer entities to create
 INVOICES_PER_BUYER = 2  # invoices the seller sends to each buyer
 
 ROOT = next(
-    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+    path
+    for path in Path(__file__).resolve().parents
+    if (path / "pyproject.toml").exists()
 )
 
 DOWNLOAD_DIR = ROOT / "downloads" / "test"

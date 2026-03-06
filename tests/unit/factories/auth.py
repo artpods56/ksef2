@@ -40,9 +40,7 @@ class AuthenticationChallengeResponseFactory(
 
 
 @register_fixture(name="auth_init_resp")
-class AuthenticationInitResponseFactory(
-    ModelFactory[spec.AuthenticationInitResponse]
-):
+class AuthenticationInitResponseFactory(ModelFactory[spec.AuthenticationInitResponse]):
     authenticationToken: spec.TokenInfo = TokenInfoFactory.build()
 
 
@@ -72,9 +70,7 @@ class AuthenticationTokenRefreshResponseFactory(
 
 
 @register_fixture(name="auth_list_resp")
-class AuthenticationListResponseFactory(
-    ModelFactory[spec.AuthenticationListResponse]
-):
+class AuthenticationListResponseFactory(ModelFactory[spec.AuthenticationListResponse]):
     @classmethod
     def items(cls) -> list[spec.AuthenticationListItem]:
         return [AuthenticationListItemFactory.build()]
@@ -116,9 +112,7 @@ class DomainAuthInitResponseFactory(ModelFactory[domain_auth.AuthInitResponse]):
 
 
 @register_fixture(name="domain_auth_status_resp")
-class DomainAuthOperationStatusFactory(
-    ModelFactory[domain_auth.AuthOperationStatus]
-):
+class DomainAuthOperationStatusFactory(ModelFactory[domain_auth.AuthOperationStatus]):
     authentication_method: str = "token"
     authentication_method_category: str = "token"
     authentication_method_code: str = "token"

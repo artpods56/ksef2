@@ -59,7 +59,9 @@ class TestAuthResponseMapper:
 
         assert isinstance(output, domain_auth.AuthInitResponse)
         assert output.reference_number == mapped_input.referenceNumber
-        assert output.authentication_token.token == mapped_input.authenticationToken.token
+        assert (
+            output.authentication_token.token == mapped_input.authenticationToken.token
+        )
         assert (
             output.authentication_token.valid_until
             == mapped_input.authenticationToken.validUntil
@@ -74,11 +76,16 @@ class TestAuthResponseMapper:
 
         assert isinstance(output, domain_auth.AuthOperationStatus)
         assert output.start_date == mapped_input.startDate
-        assert output.authentication_method == from_spec(mapped_input.authenticationMethod)
+        assert output.authentication_method == from_spec(
+            mapped_input.authenticationMethod
+        )
         assert output.authentication_method_category == from_spec(
             mapped_input.authenticationMethodInfo.category
         )
-        assert output.authentication_method_code == mapped_input.authenticationMethodInfo.code
+        assert (
+            output.authentication_method_code
+            == mapped_input.authenticationMethodInfo.code
+        )
         assert (
             output.authentication_method_display_name
             == mapped_input.authenticationMethodInfo.displayName
@@ -97,7 +104,9 @@ class TestAuthResponseMapper:
         assert isinstance(output, domain_auth.AuthenticationSession)
         assert output.reference_number == mapped_input.referenceNumber
         assert output.is_current == mapped_input.isCurrent
-        assert output.authentication_method == from_spec(mapped_input.authenticationMethod)
+        assert output.authentication_method == from_spec(
+            mapped_input.authenticationMethod
+        )
         assert output.authentication_method_category == from_spec(
             mapped_input.authenticationMethodInfo.category
         )

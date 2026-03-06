@@ -1,11 +1,11 @@
-"""Extract the API version from openapi.json and write it to _openapi.py."""
+"""Extract the API version from openapi.json and write it to __openapi_version__.py."""
 
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OPENAPI_PATH = ROOT / "openapi.json"
-OUTPUT_PATH = ROOT / "src" / "ksef2" / "_openapi.py"
+OUTPUT_PATH = ROOT / "src" / "ksef2" / "__openapi_version__.py"
 
 MARKER = "**Wersja API:** "
 
@@ -20,8 +20,8 @@ def extract_api_version() -> str:
 
 def main() -> None:
     version = extract_api_version()
-    _ = OUTPUT_PATH.write_text(f'__openapi_version__ = "{version}"\n')
-    print(f'Set __openapi_version__ = "{version}"')
+    _ = OUTPUT_PATH.write_text(f'version = "{version}"\n')
+    print(f'Set version = "{version}" in {OUTPUT_PATH.relative_to(ROOT)}')
 
 
 if __name__ == "__main__":

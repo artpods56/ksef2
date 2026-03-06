@@ -36,7 +36,9 @@ from ksef2.infra.schema.api import spec
 class TestPermissionsQueryRequestMapper:
     def test_maps_person_query_all_optional_identifiers(
         self,
-        domain_perm_query_persons: BaseFactory[domain_permissions.PersonPermissionsQuery],
+        domain_perm_query_persons: BaseFactory[
+            domain_permissions.PersonPermissionsQuery
+        ],
     ) -> None:
         request = domain_perm_query_persons.build(
             query_type="granted_in_context",
@@ -141,7 +143,10 @@ class TestPermissionsQueryRequestMapper:
             == spec.PersonPermissionsContextIdentifierType.InternalId
         )
         assert output.targetIdentifier is not None
-        assert output.targetIdentifier.type == spec.IndirectPermissionsTargetIdentifierType.Nip
+        assert (
+            output.targetIdentifier.type
+            == spec.IndirectPermissionsTargetIdentifierType.Nip
+        )
         assert output.permissionState == spec.PermissionState.Active
 
     @pytest.mark.parametrize(
@@ -196,7 +201,9 @@ class TestPermissionsQueryRequestMapper:
             (query_type_from_enum, domain_permissions.QueryTypeEnum.GRANTED),
         ],
     )
-    def test_maps_valid_query_enums(self, func: Callable[[StrEnum], str], enum_value: StrEnum) -> None:
+    def test_maps_valid_query_enums(
+        self, func: Callable[[StrEnum], str], enum_value: StrEnum
+    ) -> None:
         assert func(enum_value) is not None
 
     def test_omits_subordinate_identifier_when_query_is_empty(
@@ -230,8 +237,12 @@ class TestPermissionsQueryResponseMapper:
     def test_maps_person_permission_item(
         self,
         perm_person_item: BaseFactory[spec.PersonPermission],
-        perm_person_context_identifier: BaseFactory[spec.PersonPermissionsContextIdentifier],
-        perm_person_target_identifier: BaseFactory[spec.PersonPermissionsTargetIdentifier],
+        perm_person_context_identifier: BaseFactory[
+            spec.PersonPermissionsContextIdentifier
+        ],
+        perm_person_target_identifier: BaseFactory[
+            spec.PersonPermissionsTargetIdentifier
+        ],
         perm_subject_person_details: BaseFactory[spec.PermissionsSubjectPersonDetails],
         perm_subject_entity_details: BaseFactory[spec.PermissionsSubjectEntityDetails],
     ) -> None:

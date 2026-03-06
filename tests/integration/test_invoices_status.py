@@ -32,6 +32,7 @@ from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
 )
+
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
     / "docs"

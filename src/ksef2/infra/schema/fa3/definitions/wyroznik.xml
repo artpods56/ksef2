@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="http://crd.gov.pl/wzor/2008/05/09/1/styl.xsl"?><wyr:Dokument xmlns:adr="http://crd.gov.pl/xml/schematy/adres/2008/05/09/" xmlns:inst="http://crd.gov.pl/xml/schematy/instytucja/2008/05/09/" xmlns:meta="http://crd.gov.pl/xml/schematy/meta/2008/05/09/" xmlns:oso="http://crd.gov.pl/xml/schematy/osoba/2008/05/09/" xmlns:str="http://crd.gov.pl/xml/schematy/struktura/2008/05/09/" xmlns:wyr="http://crd.gov.pl/wzor/2008/05/09/1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://crd.gov.pl/wzor/2008/05/09/1/ http://crd.gov.pl/wzor/2008/05/09/1/schemat.xsd">
+<?xml-stylesheet type="text/xsl" href="http://crd.gov.pl/wzor/2008/05/09/1/styl.xsl"?>
+<wyr:Dokument xmlns:adr="http://crd.gov.pl/xml/schematy/adres/2008/05/09/"
+              xmlns:inst="http://crd.gov.pl/xml/schematy/instytucja/2008/05/09/"
+              xmlns:meta="http://crd.gov.pl/xml/schematy/meta/2008/05/09/"
+              xmlns:str="http://crd.gov.pl/xml/schematy/struktura/2008/05/09/"
+              xmlns:wyr="http://crd.gov.pl/wzor/2008/05/09/1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://crd.gov.pl/wzor/2008/05/09/1/ http://crd.gov.pl/wzor/2008/05/09/1/schemat.xsd">
 	<wyr:OpisDokumentu>
 		<meta:Data typDaty="opublikowany">
 			</meta:Data>

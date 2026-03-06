@@ -645,7 +645,7 @@ class TestAuthEndpoints:
         reference_number = "20250625-AUTH-2C3E6C8000-B675CF5D68-07"
 
         fake_transport.enqueue(status_code=204)
-        assert None == auth_eps.terminate_auth_session(reference_number)
+        assert auth_eps.terminate_auth_session(reference_number) is None
         assert len(fake_transport.calls) == 1
         call = fake_transport.calls[0]
         assert call.method == "DELETE"

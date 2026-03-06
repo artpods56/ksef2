@@ -76,7 +76,6 @@ class TestSessionRequestMapper:
             date_created_from="2026-03-05T10:00:00+00:00",
         ).to_query_params()
 
-
         assert request is not None
         assert isinstance(request, dict)
         assert request["pageSize"] == 25

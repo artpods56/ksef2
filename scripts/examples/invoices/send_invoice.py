@@ -7,7 +7,9 @@ from ksef2.core.tools import generate_nip
 
 ORG_NIP = generate_nip()
 ROOT = next(
-    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+    path
+    for path in Path(__file__).resolve().parents
+    if (path / "pyproject.toml").exists()
 )
 
 INVOICE_TEMPLATE_PATH = (

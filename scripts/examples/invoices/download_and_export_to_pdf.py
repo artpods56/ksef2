@@ -85,9 +85,7 @@ def main(template_path: Path, downloads_dir: Path) -> None:
             description="Test buyer",
         )
 
-        send_invoice(
-            client, template_path, seller_nip, buyer_nip
-        )
+        send_invoice(client, template_path, seller_nip, buyer_nip)
         download_and_export(client, downloads_dir, buyer_nip)
 
     print("Done.")

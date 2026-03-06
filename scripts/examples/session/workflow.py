@@ -12,16 +12,13 @@ PERSON_NIP = generate_nip()
 PERSON_PESEL = generate_pesel()
 
 ROOT = next(
-    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+    path
+    for path in Path(__file__).resolve().parents
+    if (path / "pyproject.toml").exists()
 )
 
 INVOICE_TEMPLATE_PATH = (
-    ROOT
-    / "docs"
-    / "assets"
-    / "sample_invoices"
-    / "fa3"
-    / "invoice-template_v3.xml"
+    ROOT / "docs" / "assets" / "sample_invoices" / "fa3" / "invoice-template_v3.xml"
 )
 
 client = Client(environment=Environment.TEST)

@@ -116,7 +116,7 @@ class PersonPermissionsQueryRequest(BaseSupp):
     """
     permissionState: PermissionState | None = None
     """
-    Stan uprawnienia. 
+    Stan uprawnienia.
     | Type | Value |
     | --- | --- |
     | Active | Uprawnienia aktywne |

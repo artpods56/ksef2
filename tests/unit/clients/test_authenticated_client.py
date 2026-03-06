@@ -24,7 +24,7 @@ from tests.unit.conftest import _TOKEN
 from tests.unit.fakes.transport import FakeTransport
 
 
-def _build_client( # [TODO] maybe we could just have client as a fixture, im not sure if rebuilding is necessary for every test
+def _build_client(  # [TODO] maybe we could just have client as a fixture, im not sure if rebuilding is necessary for every test
     fake_transport: FakeTransport,
     auth_tokens: AuthTokens,
     certificate_store: CertificateStore | None = None,

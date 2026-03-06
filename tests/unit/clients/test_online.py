@@ -149,8 +149,7 @@ class TestOnlineSessionClient:
 
         assert status.ksef_number == ksef_number
         assert fake_transport.calls[0].method == "POST"
-        assert (
-            fake_transport.calls[0].path
-            == InvoiceRoutes.SEND.format(referenceNumber=session_state.reference_number)
+        assert fake_transport.calls[0].path == InvoiceRoutes.SEND.format(
+            referenceNumber=session_state.reference_number
         )
         assert fake_transport.calls[1].method == "GET"

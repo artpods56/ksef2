@@ -141,7 +141,7 @@ class TestCertificatesClient:
         certificates_client: CertificatesClient,
         fake_transport: FakeTransport,
     ):
-        fake_transport.enqueue() # status 200 by default
+        fake_transport.enqueue()  # status 200 by default
 
         certificates_client.revoke(
             certificate_serial_number="SN123",
@@ -158,7 +158,7 @@ class TestCertificatesClient:
         certificates_client: CertificatesClient,
         fake_transport: FakeTransport,
     ):
-        fake_transport.enqueue() # status 200 by default
+        fake_transport.enqueue()  # status 200 by default
 
         certificates_client.revoke(
             certificate_serial_number="SN123",

@@ -2,7 +2,6 @@ import json
 import sys
 from pathlib import Path
 
-from ksef2 import endpoints
 from ksef2.core.routes import ALL_ROUTES
 
 OPENAPI_PATH = Path(__file__).resolve().parent.parent / "openapi.json"

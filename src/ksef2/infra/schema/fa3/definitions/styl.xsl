@@ -6,22 +6,22 @@
    	</xsl:template>
 	<xsl:template name="StyleDlaFormularza">
 		<style type="text/css">
-      
+
     .tlo-formularza { background-color:#D3D3D3; }
     table.wrapping, .break-word {
     white-space: normal !important;
     word-wrap: break-word;
 	}
-   
+
 	table {
     width:100%;
 	}
- 
+
 	.word-break {
     width:100%;
     word-break: break-all;
 	}
-	
+
 	.tlo-zalacznika {
 	background-color: #D3D3D3;
 	}
@@ -124,7 +124,7 @@
 		<xsl:if test="tns:Naglowek/tns:SystemInfo">
 			<table class="break-word">
 				<tr>
-					<td>Nazwa systemu teleinformatycznego, z którego korzysta podatnik: 
+					<td>Nazwa systemu teleinformatycznego, z którego korzysta podatnik:
 					<b>
 							<xsl:value-of select="tns:Naglowek/tns:SystemInfo"/>
 						</b>
@@ -145,7 +145,7 @@
 			</tr>
 			<tr>
 				<td>
-					Kolejny numer faktury, nadany w ramach jednej lub więcej serii, który w sposób jednoznaczny identyfikuje fakturę: 
+					Kolejny numer faktury, nadany w ramach jednej lub więcej serii, który w sposób jednoznaczny identyfikuje fakturę:
 				<b>
 						<xsl:value-of select="tns:Fa/tns:P_2"/>
 					</b>
@@ -153,7 +153,7 @@
 			</tr>
 			<tr>
 				<td>
-				Data wystawienia, z zastrzeżeniem art. 106na ust. 1 ustawy: 
+				Data wystawienia, z zastrzeżeniem art. 106na ust. 1 ustawy:
 				<b>
 						<xsl:value-of select="tns:Fa/tns:P_1"/>
 					</b>
@@ -161,7 +161,7 @@
 			</tr>
 			<xsl:if test="tns:Fa/tns:P_1M">
 				<tr>
-					<td>Miejsce wystawienia faktury: 
+					<td>Miejsce wystawienia faktury:
 						<b>
 							<xsl:value-of select="tns:Fa/tns:P_1M"/>
 						</b>
@@ -191,7 +191,7 @@
 			</tr>
 			<xsl:if test="tns:Fa/tns:FP = '1'">
 				<tr>
-					<td>Faktura, o której mowa w art. 109 ust. 3d ustawy: 
+					<td>Faktura, o której mowa w art. 109 ust. 3d ustawy:
 				<input type="checkbox" checked="checked" disabled="disabled"/>
 						<b>1. Tak</b>
 					</td>
@@ -199,7 +199,7 @@
 			</xsl:if>
 			<xsl:if test="tns:Fa/tns:TP = '1'">
 				<tr>
-					<td>Istniejące powiązania między nabywcą a dokonującym dostawy towarów lub usługodawcą, zgodnie z § 10 ust. 4 pkt 3, z zastrzeżeniem ust. 4b rozporządzenia w sprawie szczegółowego zakresu danych zawartych w deklaracjach podatkowych i w ewidencji w zakresie podatku od towarów i usług: 
+					<td>Istniejące powiązania między nabywcą a dokonującym dostawy towarów lub usługodawcą, zgodnie z § 10 ust. 4 pkt 3, z zastrzeżeniem ust. 4b rozporządzenia w sprawie szczegółowego zakresu danych zawartych w deklaracjach podatkowych i w ewidencji w zakresie podatku od towarów i usług:
 			<input type="checkbox" checked="checked" disabled="disabled"/>
 						<b>1. Tak</b>
 					</td>
@@ -1089,28 +1089,28 @@
 						</td>
 						<td class="lewa" width="auto">
 							<xsl:if test="tns:GTIN">
-									GTIN: 
+									GTIN:
 									<xsl:value-of select="tns:GTIN"/>;
 							</xsl:if>
 							<xsl:if test="tns:PKWiU">
 								<xsl:if test="tns:GTIN">
 									<br/>
 								</xsl:if>
-									PKWiU: 
+									PKWiU:
 									<xsl:value-of select="tns:PKWiU"/>;
 							</xsl:if>
 							<xsl:if test="tns:CN">
 								<xsl:if test="tns:GTIN|tns:PKWiU">
 									<br/>
 								</xsl:if>
-									CN: 
+									CN:
 									<xsl:value-of select="tns:CN"/>;
 							</xsl:if>
 							<xsl:if test="tns:PKOB">
 								<xsl:if test="tns:GTIN|tns:PKWiU|tns:CN">
 									<br/>
 								</xsl:if>
-									PKOB: 
+									PKOB:
 									<xsl:value-of select="tns:PKOB"/>;
 							</xsl:if>
 						</td>
@@ -1371,13 +1371,13 @@
 					<br/>
 					<b>
 						<xsl:if test="((tns:Fa/tns:RodzajFaktury = 'VAT') or (tns:Fa/tns:RodzajFaktury = 'KOR') or (tns:Fa/tns:RodzajFaktury = 'UPR'))">
-					Kwota należności ogółem: 
+					Kwota należności ogółem:
 					</xsl:if>
 						<xsl:if test="((tns:Fa/tns:RodzajFaktury = 'ZAL') or (tns:Fa/tns:RodzajFaktury = 'KOR_ZAL'))">
-					Otrzymana kwota zapłaty: 
+					Otrzymana kwota zapłaty:
 					</xsl:if>
 						<xsl:if test="((tns:Fa/tns:RodzajFaktury = 'ROZ') or (tns:Fa/tns:RodzajFaktury = 'KOR_ROZ'))">
-					Kwota pozostała do zapłaty: 
+					Kwota pozostała do zapłaty:
 					</xsl:if>
 						<xsl:value-of select="tns:Fa/tns:P_15"/>
 						<xsl:text> </xsl:text>
@@ -1390,7 +1390,7 @@
 			<xsl:if test="tns:Fa/tns:KursWalutyZ">
 				<tr>
 					<td>
-						Kurs waluty stosowany do wyliczenia kwoty podatku w przypadkach, o których mowa w dziale VI ustawy na fakturach, o których mowa w art. 106b ust. 1 pkt 4 ustawy: 
+						Kurs waluty stosowany do wyliczenia kwoty podatku w przypadkach, o których mowa w dziale VI ustawy na fakturach, o których mowa w art. 106b ust. 1 pkt 4 ustawy:
 						<b>
 							<xsl:value-of select="tns:Fa/tns:KursWalutyZ"/> PLN/<xsl:value-of select="tns:Fa/tns:KodWaluty"/>
 						</b>
@@ -1579,7 +1579,7 @@
 										<xsl:when test="tns:FormaPlatnosci = '7'">
 											<xsl:text>Mobilna</xsl:text>
 										</xsl:when>
-									</xsl:choose> 
+									</xsl:choose>
 								</xsl:if>
 								<xsl:if test="tns:PlatnoscInna = '1'">
 									<input type="checkbox" checked="checked" disabled="disabled"/>
@@ -1684,7 +1684,7 @@
 								<xsl:value-of select="tns:NrRB"/>
 								<br/>
 								<xsl:if test="tns:SWIFT">
-									SWIFT: 
+									SWIFT:
 									<xsl:value-of select="tns:SWIFT"/>
 								</xsl:if>
 							</td>
@@ -1728,7 +1728,7 @@
 								<xsl:value-of select="tns:NrRB"/>
 								<br/>
 								<xsl:if test="tns:SWIFT">
-									SWIFT: 
+									SWIFT:
 									<xsl:value-of select="tns:SWIFT"/>
 								</xsl:if>
 							</td>
@@ -1917,7 +1917,7 @@
 					</table>
 				</xsl:if>
 				<xsl:if test="tns:P_19N = '1'">
-					Znacznik braku dostawy towarów lub świadczenia usług zwolnionych od podatku na podstawie art. 43 ust. 1, art. 113 ust. 1 i 9 ustawy albo przepisów wydanych na podstawie art. 82 ust. 3 ustawy lub na podstawie innych przepisów - 
+					Znacznik braku dostawy towarów lub świadczenia usług zwolnionych od podatku na podstawie art. 43 ust. 1, art. 113 ust. 1 i 9 ustawy albo przepisów wydanych na podstawie art. 82 ust. 3 ustawy lub na podstawie innych przepisów -
 					<input type="checkbox" checked="checked" disabled="disabled"/>
 					<b>1. Tak</b>
 					<br/>
@@ -2025,7 +2025,7 @@
 			</xsl:if>
 			<br/>
 			<br/>
-			<div>VAT: Faktura WE uproszczona na mocy art. 135-138 ustawy o ptu. Podatek z tytułu dokonanej dostawy zostanie rozliczony przez ostatniego w kolejności podatnika podatku od wartości dodanej: 
+			<div>VAT: Faktura WE uproszczona na mocy art. 135-138 ustawy o ptu. Podatek z tytułu dokonanej dostawy zostanie rozliczony przez ostatniego w kolejności podatnika podatku od wartości dodanej:
 				<xsl:choose>
 					<xsl:when test="tns:P_23 = '1'">
 						<b>
@@ -2045,7 +2045,7 @@
 			<xsl:for-each select="tns:PMarzy">
 				<xsl:choose>
 					<xsl:when test="tns:P_PMarzy = '1'">
-						<div>Wystąpienie procedur marży, o których mowa w art. 119 lub art. 120 ustawy:  
+						<div>Wystąpienie procedur marży, o których mowa w art. 119 lub art. 120 ustawy:
 						<b>
 								<input type="checkbox" checked="checked" disabled="disabled"/>
 								<xsl:text>1. Tak</xsl:text>
@@ -2562,7 +2562,7 @@
 					</xsl:for-each>
 				</xsl:if>
 				<xsl:if test="tns:PodmiotPosredniczacy = '1'">
-					<div>Dostawa dokonana przez podmiot, o którym mowa w art. 22 ust. 2d ustawy (pole dotyczy przypadku, w którym podmiot uczestniczy w transakcji łańcuchowej innej niż procedura trójstronna uproszczona, o której mowa w art. 135 ust. 1 pkt 4 ustawy): 
+					<div>Dostawa dokonana przez podmiot, o którym mowa w art. 22 ust. 2d ustawy (pole dotyczy przypadku, w którym podmiot uczestniczy w transakcji łańcuchowej innej niż procedura trójstronna uproszczona, o której mowa w art. 135 ust. 1 pkt 4 ustawy):
 					<input type="checkbox" checked="checked" disabled="disabled"/>
 						<b>1. Tak</b>
 					</div>
@@ -2578,7 +2578,7 @@
 			<br/>
 			<xsl:for-each select="tns:Fa/tns:Zamowienie">
 				<br/>
-				<div>Wartość zamówienia lub umowy z uwzględnieniem kwoty podatku: 
+				<div>Wartość zamówienia lub umowy z uwzględnieniem kwoty podatku:
 					<b>
 						<xsl:value-of select="tns:WartoscZamowienia"/>
 					</b>
@@ -2681,28 +2681,28 @@
 							</td>
 							<td class="lewa" width="auto">
 								<xsl:if test="tns:GTINZ">
-									GTIN: 
+									GTIN:
 									<xsl:value-of select="tns:GTINZ"/>;
 								</xsl:if>
 								<xsl:if test="tns:PKWiUZ">
 									<xsl:if test="tns:GTINZ">
 										<br/>
 									</xsl:if>
-									PKWiU: 
+									PKWiU:
 									<xsl:value-of select="tns:PKWiUZ"/>;
 								</xsl:if>
 								<xsl:if test="tns:CNZ">
 									<xsl:if test="tns:GTINZ|tns:PKWiUZ">
 										<br/>
 									</xsl:if>
-									CN: 
+									CN:
 									<xsl:value-of select="tns:CNZ"/>;
 								</xsl:if>
 								<xsl:if test="tns:PKOBZ">
 									<xsl:if test="tns:GTINZ|tns:PKWiUZ|tns:CNZ">
 										<br/>
 									</xsl:if>
-									PKOB: 
+									PKOB:
 									<xsl:value-of select="tns:PKOBZ"/>;
 								</xsl:if>
 							</td>
@@ -3001,7 +3001,7 @@
 						</xsl:for-each>
 						<xsl:if test="tns:IDNabywcy">
 							<div>
-								Unikalny klucz powiązania danych nabywcy na fakturach korygujących, w przypadku gdy dane nabywcy na fakturze korygującej zmieniły się w stosunku do danych na fakturze korygowanej: 
+								Unikalny klucz powiązania danych nabywcy na fakturach korygujących, w przypadku gdy dane nabywcy na fakturze korygującej zmieniły się w stosunku do danych na fakturze korygowanej:
 							<b>
 									<xsl:value-of select="tns:IDNabywcy"/>
 								</b>
@@ -3013,7 +3013,7 @@
 			</xsl:if>
 			<xsl:if test="tns:P_15ZK">
 				<div>
-					W przypadku korekt faktur zaliczkowych - kwota zapłaty przed korektą. W przypadku korekt faktur, o których mowa w art. 106f ust. 3 ustawy - kwota pozostała do zapłaty przed korektą: 
+					W przypadku korekt faktur zaliczkowych - kwota zapłaty przed korektą. W przypadku korekt faktur, o których mowa w art. 106f ust. 3 ustawy - kwota pozostała do zapłaty przed korektą:
 							<b>
 						<xsl:value-of select="tns:P_15ZK"/>
 					</b>
@@ -3022,7 +3022,7 @@
 			</xsl:if>
 			<xsl:if test="tns:KursWalutyZK">
 				<div>
-					Kurs waluty stosowany do wyliczenia kwoty podatku w przypadkach, o których mowa w dziale VI ustawy przed korektą: 
+					Kurs waluty stosowany do wyliczenia kwoty podatku w przypadkach, o których mowa w dziale VI ustawy przed korektą:
 							<b>
 						<xsl:value-of select="tns:KursWalutyZK"/>
 					</b>
@@ -3149,7 +3149,7 @@
 		<br/>
 		<xsl:if test="tns:Fa/tns:ZwrotAkcyzy = '1'">
 			<div>
-				Zwrot akcyzy: 
+				Zwrot akcyzy:
 				<b>
 					<input type="checkbox" checked="checked" disabled="disabled"/>
 						1. Tak

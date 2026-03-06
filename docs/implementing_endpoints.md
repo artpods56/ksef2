@@ -371,7 +371,7 @@ from ksef2.core import headers
 # Bearer token (for authenticated endpoints)
 headers.KSeFHeaders.bearer(access_token)
 
-# Session token (for session-based endpoints)  
+# Session token (for session-based endpoints)
 headers.KSeFHeaders.session(access_token)
 ```
 

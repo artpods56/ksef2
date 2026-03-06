@@ -26,50 +26,50 @@ Responses
 Response Schema: application/json
 challenge
 required
-	
+
 string (Challenge) = 36 characters
 
 Unikalny challenge.
 timestamp
 required
-	
+
 string <date-time>
 
 Czas wygenerowania challenge-a.
 timestampMs
 required
-	
+
 integer <int64>
 
 Czas wygenerowania challenge-a w milisekundach od 1 stycznia 1970 roku (Unix timestamp).
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -97,7 +97,7 @@ Rozpoczyna operację uwierzytelniania za pomocą dokumentu XML podpisanego podpi
         Schemat XSD
 
 query Parameters
-verifyCertificateChain	
+verifyCertificateChain
 boolean
 
 Wymuszenie weryfikacji zaufania łańcucha certyfikatu wraz ze sprawdzeniem statusu certyfikatu (OCSP/CRL) na środowiskach które umożliwiają wykorzystanie samodzielnie wygenerowanych certyfikatów.
@@ -108,55 +108,55 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny sesji uwierzytelnienia.
 required
-	
+
 object
 
 Token operacji uwierzytelnienia.
 token
 required
-	
+
 string
 
 Token w formacie JWT.
 validUntil
 required
-	
+
 string <date-time>
 
 Data ważności tokena.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -206,51 +206,51 @@ Token KSeF wraz z timestampem ze wcześniej wygenerowanego challenge'a (w formac
 Request Body schema: application/json
 challenge
 required
-	
+
 string = 36 characters
 
 Wygenerowany wcześniej challenge.
 required
-	
+
 object
 
 Identyfikator kontekstu do którego następuje uwierzytelnienie.
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId" "NipVatUe" "PeppolId"
 
 Typ identyfikatora
 value
 required
-	
+
 string
 
 Wartość identyfikatora
 encryptedToken
 required
-	
+
 string <byte>
 
 Zaszyfrowany token wraz z timestampem z challenge'a, w postaci token|timestamp, zakodowany w formacie Base64.
-	
+
 object or null
 
 Polityka autoryzacji żądań przy każdym użyciu tokena dostępu.
-	
+
 object or null
 
 Lista dozwolonych adresów IP.
-ip4Addresses	
+ip4Addresses
 Array of strings or null[ items^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$ ]
 
 Lista adresów IPv4 w notacji dziesiętnej kropkowanej, np. 192.168.0.10.
-ip4Ranges	
+ip4Ranges
 Array of strings or null[ items^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}-((... ]
 
 Lista adresów IPv4 podana w formie zakresu początek–koniec, oddzielonego pojedynczym myślnikiem, np. 10.0.0.1–10.0.0.254.
-ip4Masks	
+ip4Masks
 Array of strings or null[ items^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}\/(... ]
 
 Lista adresów IPv4 w notacji CIDR, np. 172.16.0.0/16.
@@ -258,55 +258,55 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny sesji uwierzytelnienia.
 required
-	
+
 object
 
 Token operacji uwierzytelnienia.
 token
 required
-	
+
 string
 
 Token w formacie JWT.
 validUntil
 required
-	
+
 string <date-time>
 
 Data ważności tokena.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -351,7 +351,7 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny tokena otrzymanego przy inicjalizacji operacji uwierzytelniania.
@@ -359,13 +359,13 @@ Responses
 Response Schema: application/json
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia operacji uwierzytelnienia.
 authenticationMethod
 required
-	
+
 string
 Enum: "Token" "TrustedProfile" "InternalCertificate" "QualifiedSignature" "QualifiedSeal" "PersonalSignature" "PeppolSignature"
 
@@ -379,7 +379,7 @@ QualifiedSeal 	Pieczęć kwalifikowana.
 PersonalSignature 	Podpis osobisty.
 PeppolSignature 	Podpis dostawcy usług Peppol.
 required
-	
+
 object
 
 Informacje o aktualnym statusie.
@@ -404,60 +404,60 @@ Code 	Description 	Details
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie
 code
 required
-	
+
 integer <int32>
 
 Kod statusu
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
-isTokenRedeemed	
+isTokenRedeemed
 boolean or null
 
 Czy został już wydany refresh token powiązany z danym uwierzytelnieniem.
-lastTokenRefreshDate	
+lastTokenRefreshDate
 string or null <date-time>
 
 Data ostatniego odświeżenia tokena.
-refreshTokenValidUntil	
+refreshTokenValidUntil
 string or null <date-time>
 
 Termin ważności refresh tokena (o ile nie zostanie wcześniej unieważniony).
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -489,24 +489,24 @@ Bearer
 Responses
 Response Schema: application/json
 required
-	
+
 object
 
 Token dostępu.
 token
 required
-	
+
 string
 
 Token w formacie JWT.
 validUntil
 required
-	
+
 string <date-time>
 
 Data ważności tokena.
 required
-	
+
 object
 
 Token umożliwiający odświeżenie tokenu dostępu.
@@ -517,44 +517,44 @@ Token umożliwiający odświeżenie tokenu dostępu.
 
 token
 required
-	
+
 string
 
 Token w formacie JWT.
 validUntil
 required
-	
+
 string <date-time>
 
 Data ważności tokena.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -586,50 +586,50 @@ Bearer
 Responses
 Response Schema: application/json
 required
-	
+
 object
 
 Token dostępu, którego należy używać w wywołaniach chronionych zasobów API.
 token
 required
-	
+
 string
 
 Token w formacie JWT.
 validUntil
 required
-	
+
 string <date-time>
 
 Data ważności tokena.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -651,46 +651,46 @@ Zablokowanie kontekstu
 
 Blokuje możliwość uwierzytelniania dla bieżącego kontekstu. Tylko na środowiskach testowych.
 Request Body schema: application/json
-	
+
 object or null
 value
 required
-	
+
 string
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId" "NipVatUe" "PeppolId"
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -730,46 +730,46 @@ Odblokowanie kontekstu
 
 Odblokowuje możliwość uwierzytelniania dla bieżącego kontekstu. Tylko na środowiskach testowych.
 Request Body schema: application/json
-	
+
 object or null
 value
 required
-	
+
 string
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId" "NipVatUe" "PeppolId"
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -817,37 +817,37 @@ Sortowanie:
 Authorizations:
 Bearer
 query Parameters
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 header Parameters
-x-continuation-token	
+x-continuation-token
 string
 
 Token służący do pobrania kolejnej strony wyników.
 Responses
 Response Schema: application/json
-continuationToken	
+continuationToken
 string or null
 
 Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
 required
-	
+
 Array of objects (AuthenticationListItem)
 
 Lista sesji uwierzytelniania.
 Array
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia operacji uwierzytelnienia.
 authenticationMethod
 required
-	
+
 string
 Enum: "Token" "TrustedProfile" "InternalCertificate" "QualifiedSignature" "QualifiedSeal" "PersonalSignature" "PeppolSignature"
 
@@ -861,7 +861,7 @@ QualifiedSeal 	Pieczęć kwalifikowana.
 PersonalSignature 	Podpis osobisty.
 PeppolSignature 	Podpis dostawcy usług Peppol.
 required
-	
+
 object
 
 Informacje o aktualnym statusie.
@@ -886,70 +886,70 @@ Code 	Description 	Details
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie
 code
 required
-	
+
 integer <int32>
 
 Kod statusu
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
-isTokenRedeemed	
+isTokenRedeemed
 boolean or null
 
 Czy został już wydany refresh token powiązany z danym uwierzytelnieniem.
-lastTokenRefreshDate	
+lastTokenRefreshDate
 string or null <date-time>
 
 Data ostatniego odświeżenia tokena.
-refreshTokenValidUntil	
+refreshTokenValidUntil
 string or null <date-time>
 
 Termin ważności refresh tokena (o ile nie zostanie wcześniej unieważniony).
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny sesji uwierzytelnienia.
-isCurrent	
+isCurrent
 boolean
 
 Czy sesja jest powiązana z aktualnie używanym tokenem.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -979,32 +979,32 @@ Bearer
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1036,39 +1036,39 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji uwierzytelnienia.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1099,79 +1099,79 @@ Bearer
 Responses
 Response Schema: application/json
 required
-	
+
 object
 
 Limity dla sesji interaktywnych.
 maxInvoiceSizeInMB
 required
-	
+
 integer <int32> >= 0
 
 Maksymalny rozmiar faktury w MB.
 maxInvoiceWithAttachmentSizeInMB
 required
-	
+
 integer <int32> >= 0
 
 Maksymalny rozmiar faktury z załącznikiem w MB.
 maxInvoices
 required
-	
+
 integer <int32> >= 0
 
 Maksymalna ilość faktur które można przesłać w pojedynczej sesji.
 required
-	
+
 object
 
 Limity dla sesji wsadowych.
 maxInvoiceSizeInMB
 required
-	
+
 integer <int32> >= 0
 
 Maksymalny rozmiar faktury w MB.
 maxInvoiceWithAttachmentSizeInMB
 required
-	
+
 integer <int32> >= 0
 
 Maksymalny rozmiar faktury z załącznikiem w MB.
 maxInvoices
 required
-	
+
 integer <int32> >= 0
 
 Maksymalna ilość faktur które można przesłać w pojedynczej sesji.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1202,42 +1202,42 @@ Authorizations:
 Bearer
 Responses
 Response Schema: application/json
-	
+
 object or null
-maxEnrollments	
+maxEnrollments
 integer <int32>
-	
+
 object or null
-maxCertificates	
+maxCertificates
 integer <int32>
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1265,309 +1265,309 @@ Bearer
 Responses
 Response Schema: application/json
 required
-	
+
 object
 
 Limity dla otwierania/zamykania sesji interaktywnych.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla otwierania/zamykania sesji wsadowych.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla wysyłki faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania statusu faktury z sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania listy sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania listy faktur w sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pozostałych operacji w ramach sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania metadanych faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla eksportu paczki faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierana statusu eksportu paczki faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania faktur po numerze KSeF.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pozostałych operacji API.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1648,80 +1648,80 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Limity dla sesji interaktywnych.
 maxInvoiceSizeInMB
 required
-	
+
 integer <int32> [ 0 .. 5 ]
 
 Maksymalny rozmiar faktury w MB.
 maxInvoiceWithAttachmentSizeInMB
 required
-	
+
 integer <int32> [ 0 .. 10 ]
 
 Maksymalny rozmiar faktury z załącznikiem w MB.
 maxInvoices
 required
-	
+
 integer <int32> [ 0 .. 100000 ]
 
 Maksymalna ilość faktur które można przesłać w pojedynczej sesji.
 required
-	
+
 object
 
 Limity dla sesji wsadowych.
 maxInvoiceSizeInMB
 required
-	
+
 integer <int32> [ 0 .. 5 ]
 
 Maksymalny rozmiar faktury w MB.
 maxInvoiceWithAttachmentSizeInMB
 required
-	
+
 integer <int32> [ 0 .. 10 ]
 
 Maksymalny rozmiar faktury z załącznikiem w MB.
 maxInvoices
 required
-	
+
 integer <int32> [ 0 .. 100000 ]
 
 Maksymalna ilość faktur które można przesłać w pojedynczej sesji.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1771,32 +1771,32 @@ Bearer
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1824,46 +1824,46 @@ Zmienia wartości aktualnie obowiązujących limitów certyfikatów dla bieżąc
 Authorizations:
 Bearer
 Request Body schema: application/json
-subjectIdentifierType	
+subjectIdentifierType
 string
 Enum: "Nip" "Pesel" "Fingerprint"
-	
+
 object or null
-maxEnrollments	
+maxEnrollments
 integer or null <int32> >= 0
-	
+
 object or null
-maxCertificates	
+maxCertificates
 integer or null <int32> >= 0
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1910,32 +1910,32 @@ Bearer
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -1964,315 +1964,315 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Limity dla ilości żądań do API.
 required
-	
+
 object
 
 Limity dla otwierania/zamykania sesji interaktywnych.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla otwierania/zamykania sesji wsadowych.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla wysyłki faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania statusu faktury z sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania listy sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania listy faktur w sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pozostałych operacji w ramach sesji.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania metadanych faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla eksportu paczki faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania statusu eksportu paczki faktur.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pobierania faktur po numerze KSeF.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 required
-	
+
 object
 
 Limity dla pozostałych operacji API.
 perSecond
 required
-	
+
 integer <int32>
 
 Limit na sekundę.
 perMinute
 required
-	
+
 integer <int32>
 
 Limit na minutę.
 perHour
 required
-	
+
 integer <int32>
 
 Limit na godzinę.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -2326,32 +2326,32 @@ Bearer
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -2381,32 +2381,32 @@ Bearer
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -2437,25 +2437,25 @@ Response Schema: application/json
 Array
 certificate
 required
-	
+
 string <byte>
 
 Certyfikat klucza publicznego w formacie DER, zakodowany w formacie Base64.
 validFrom
 required
-	
+
 string <date-time>
 
 Data początku obowiązywania certyfikatu.
 validTo
 required
-	
+
 string <date-time>
 
 Data końca obowiązywania certyfikatu.
 usage
 required
-	
+
 Array of strings (PublicKeyCertificateUsage)
 Items Enum: "KsefTokenEncryption" "SymmetricKeyEncryption"
 
@@ -2465,32 +2465,32 @@ KsefTokenEncryption 	Szyfrowanie tokenów KSeF przesyłanych w trakcie procesu u
 SymmetricKeyEncryption 	Szyfrowanie klucza symetrycznego wykorzystywanego do szyfrowania przesyłanych faktur.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -2525,7 +2525,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Schemat faktur wysyłanych w ramach sesji.
@@ -2538,30 +2538,30 @@ PEF (3) 	2-1 	PEF
 PEF_KOR (3) 	2-1 	PEF
 systemCode
 required
-	
+
 string
 
 Kod systemowy
 schemaVersion
 required
-	
+
 string
 
 Wersja schematu
 value
 required
-	
+
 string
 
 Wartość
 required
-	
+
 object
 
 Symetryczny klucz szyfrujący pliki XML, zaszyfrowany kluczem publicznym Ministerstwa Finansów.
 encryptedSymmetricKey
 required
-	
+
 string <byte>
 
 Klucz symetryczny o długości 32 bajtów, zaszyfrowany algorytmem RSA (Padding: OAEP z SHA-256), zakodowany w formacie Base64.
@@ -2569,7 +2569,7 @@ Klucz symetryczny o długości 32 bajtów, zaszyfrowany algorytmem RSA (Padding:
 Klucz publiczny Ministerstwa Finansów
 initializationVector
 required
-	
+
 string <byte>
 
 Wektor inicjalizujący (IV) o długości 16 bajtów, używany do szyfrowania symetrycznego, zakodowany w formacie Base64.
@@ -2577,44 +2577,44 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny sesji.
 validUntil
 required
-	
+
 string <date-time>
 
 Termin ważności sesji. Po jego upływie sesja zostanie automatycznie zamknięta.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	onlineSession
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -2663,7 +2663,7 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji
@@ -2672,40 +2672,40 @@ Request Body schema: application/json
 Dane faktury
 invoiceHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 oryginalnej faktury, zakodowany w formacie Base64.
 invoiceSize
 required
-	
+
 integer <int64> >= 1
 
 Rozmiar oryginalnej faktury w bajtach. Maksymalny rozmiar zależy od limitów ustawionych dla uwierzytelnionego kontekstu.
 encryptedInvoiceHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 zaszyfrowanej faktury, zakodowany w formacie Base64.
 encryptedInvoiceSize
 required
-	
+
 integer <int64> >= 1
 
 Rozmiar zaszyfrowanej faktury w bajtach.
 encryptedInvoiceContent
 required
-	
+
 string <byte>
 
 Faktura zaszyfrowana algorytmem AES-256-CBC z dopełnianiem PKCS#7 (kluczem przekazanym przy otwarciu sesji), zakodowana w formacie Base64.
-offlineMode	
+offlineMode
 boolean
 Default: false
 
 Określa, czy podatnik deklaruje tryb fakturowania "offline" dla przesyłanego dokumentu.
-hashOfCorrectedInvoice	
+hashOfCorrectedInvoice
 string or null <byte> = 44 characters
 
 Skrót SHA256 korygowanej faktury, zakodowany w formacie Base64. Wymagany przy wysyłaniu korekty technicznej faktury.
@@ -2713,38 +2713,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny faktury.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1800 	invoiceSend
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -2785,39 +2785,39 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	onlineSession
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -2854,7 +2854,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Schemat faktur wysyłanych w ramach sesji.
@@ -2865,71 +2865,71 @@ FA (2) 	1-0E 	FA
 FA (3) 	1-0E 	FA
 systemCode
 required
-	
+
 string
 
 Kod systemowy
 schemaVersion
 required
-	
+
 string
 
 Wersja schematu
 value
 required
-	
+
 string
 
 Wartość
 required
-	
+
 object
 
 Informacje o przesyłanej paczce faktur.
 fileSize
 required
-	
+
 integer <int64> [ 1 .. 5000000000 ]
 
 Rozmiar pliku paczki w bajtach. Maksymalny rozmiar paczki to 5GB.
 fileHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 pliku paczki, zakodowany w formacie Base64.
 required
-	
+
 Array of objects (BatchFilePartInfo) [ 1 .. 50 ] items
 
 Informacje o częściach pliku paczki. Maksymalna liczba części to 50. Maksymalny dozwolony rozmiar części przed zaszyfrowaniem to 100MB.
 Array ([ 1 .. 50 ] items)
 ordinalNumber
 required
-	
+
 integer <int32> >= 1
 
 Numer sekwencyjny części pliku paczki.
 fileSize
 required
-	
+
 integer <int64> >= 1
 
 Rozmiar zaszyfrowanej części pliku paczki w bajtach.
 fileHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 zaszyfrowanej części pliku paczki, zakodowany w formacie Base64.
 required
-	
+
 object
 
 Symetryczny klucz szyfrujący plik paczki, zaszyfrowany kluczem publicznym Ministerstwa Finansów.
 encryptedSymmetricKey
 required
-	
+
 string <byte>
 
 Klucz symetryczny o długości 32 bajtów, zaszyfrowany algorytmem RSA (Padding: OAEP z SHA-256), zakodowany w formacie Base64.
@@ -2937,11 +2937,11 @@ Klucz symetryczny o długości 32 bajtów, zaszyfrowany algorytmem RSA (Padding:
 Klucz publiczny Ministerstwa Finansów
 initializationVector
 required
-	
+
 string <byte>
 
 Wektor inicjalizujący (IV) o długości 16 bajtów, używany do szyfrowania symetrycznego, zakodowany w formacie Base64.
-offlineMode	
+offlineMode
 boolean
 Default: false
 
@@ -2950,12 +2950,12 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny sesji.
 required
-	
+
 Array of objects (PartUploadRequest)
 
 Dane wymagane do poprawnego przesłania poszczególnych części pliku paczki faktur.
@@ -2981,59 +2981,59 @@ Każdą część przesyła się oddzielnym żądaniem HTTP.Zwracane kody odpowie
 Array
 ordinalNumber
 required
-	
+
 integer <int32> >= 1
 
 Numer sekwencyjny części pliku paczki.
 method
 required
-	
+
 string
 
 Metoda HTTP, której należy użyć przy wysyłce części pliku paczki.
 url
 required
-	
+
 string <uri>
 
 Adres pod który należy wysłać część pliku paczki.
 required
-	
+
 object
 
 Nagłówki, których należy użyć przy wysyłce części pliku paczki.
 property name*
 additional property
-	
+
 string or null
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	200 	600 	batchSession
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -3086,39 +3086,39 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	200 	600 	batchSession
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -3157,14 +3157,14 @@ Wymagane uprawnienia:
 Authorizations:
 Bearer
 query Parameters
-pageSize	
+pageSize
 integer <int32> [ 10 .. 1000 ]
 Default: 10
 
 Rozmiar strony.
 sessionType
 required
-	
+
 string
 Enum: "Online" "Batch"
 
@@ -3172,35 +3172,35 @@ Typ sesji.
 Wartość 	Opis
 Online 	Wysyłka interaktywna (pojedyncze faktury).
 Batch 	Wysyłka wsadowa (paczka faktur).
-referenceNumber	
+referenceNumber
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
-dateCreatedFrom	
+dateCreatedFrom
 string <date-time>
 
 Data utworzenia sesji (od).
-dateCreatedTo	
+dateCreatedTo
 string <date-time>
 
 Data utworzenia sesji (do).
-dateClosedFrom	
+dateClosedFrom
 string <date-time>
 
 Data zamknięcia sesji (od).
-dateClosedTo	
+dateClosedTo
 string <date-time>
 
 Data zamknięcia sesji (do).
-dateModifiedFrom	
+dateModifiedFrom
 string <date-time>
 
 Data ostatniej aktywności (wysyłka faktury lub zmiana statusu) w ramach sesji (od).
-dateModifiedTo	
+dateModifiedTo
 string <date-time>
 
 Data ostatniej aktywności (wysyłka faktury lub zmiana statusu) w ramach sesji (do).
-statuses	
+statuses
 Array of strings (CommonSessionStatus)
 Items Enum: "InProgress" "Succeeded" "Failed" "Cancelled"
 
@@ -3211,111 +3211,111 @@ Succeeded 	Sesja przetworzona poprawnie. W trakcie przetwarzania sesji nie wyst�
 Failed 	Sesja nie przetworzona z powodu błędów. Na etapie rozpoczynania lub kończenia sesji wystąpiły błędy, które nie pozwoliły na jej poprawne przetworzenie.
 Cancelled 	Sesja anulowania. Został przekroczony czas na wysyłkę w sesji wsadowej, lub nie przesłano żadnych faktur w sesji interaktywnej.
 header Parameters
-x-continuation-token	
+x-continuation-token
 string
 
 Token służący do pobrania kolejnej strony wyników.
 Responses
 Response Schema: application/json
-continuationToken	
+continuationToken
 string or null
 
 Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
 required
-	
+
 Array of objects (SessionsQueryResponseItem)
 
 Lista sesji.
 Array
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny sesji.
 required
-	
+
 object
 
 Status sesji.
 code
 required
-	
+
 integer <int32>
 
 Kod statusu
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
 dateCreated
 required
-	
+
 string <date-time>
 
 Data utworzenia sesji.
 dateUpdated
 required
-	
+
 string <date-time>
 
 Data ostatniej aktywności w ramach sesji.
-validUntil	
+validUntil
 string or null <date-time>
 
 Termin ważności sesji. Po jego upływie sesja interaktywna zostanie automatycznie zamknięta.
 totalInvoiceCount
 required
-	
+
 integer <int32> >= 0
 
 Łączna liczba faktur (uwzględnia również te w trakcie przetwarzania).
 successfulInvoiceCount
 required
-	
+
 integer <int32> >= 0
 
 Liczba poprawnie przetworzonych faktur.
 failedInvoiceCount
 required
-	
+
 integer <int32> >= 0
 
 Liczba błędnie przetworzonych faktur.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	50 	100 	600 	sessionList
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -3344,14 +3344,14 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
 Responses
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o aktualnym statusie.
@@ -3382,55 +3382,55 @@ Code 	Description 	Details
 * 	description missing 	-
 code
 required
-	
+
 integer <int32>
 
 Kod statusu
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
 dateCreated
 required
-	
+
 string <date-time>
 
 Data utworzenia sesji.
 dateUpdated
 required
-	
+
 string <date-time>
 
 Data ostatniej aktywności w ramach sesji.
-validUntil	
+validUntil
 string or null <date-time>
 
 Termin ważności sesji. Po jego upływie sesja zostanie automatycznie zamknięta.
-	
+
 object or null
 
 Informacja o UPO sesyjnym, zwracana gdy sesja została zamknięta i UPO zostało wygenerowane.
 required
-	
+
 Array of objects (UpoPageResponse)
 
 Lista stron UPO.
 Array
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny strony UPO.
 downloadUrl
 required
-	
+
 string <uri>
 
 Adres do pobrania strony UPO. Link generowany jest przy każdym odpytaniu o status. Dostęp odbywa się metodą HTTP GET i nie należy wysyłać tokenu dostępowego. Link nie podlega limitom API i wygasa po określonym czasie w DownloadUrlExpirationDate.
@@ -3441,50 +3441,50 @@ Odpowiedź HTTP zawiera dodatkowe nagłówki:
 
 downloadUrlExpirationDate
 required
-	
+
 string <date-time>
 
 Data i godzina wygaśnięcia adresu. Po tej dacie link DownloadUrl nie będzie już aktywny.
-invoiceCount	
+invoiceCount
 integer or null <int32> >= 0
 
 Liczba przyjętych faktur w ramach sesji.
-successfulInvoiceCount	
+successfulInvoiceCount
 integer or null <int32> >= 0
 
 Liczba faktur przeprocesowanych w ramach sesji z sukcesem .
-failedInvoiceCount	
+failedInvoiceCount
 integer or null <int32> >= 0
 
 Liczba faktur przeprocesowanych w ramach sesji z błędem.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	1200 	12000 	sessionMisc
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -3520,78 +3520,78 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
 query Parameters
-pageSize	
+pageSize
 integer <int32> [ 10 .. 1000 ]
 Default: 10
 
 Rozmiar strony wyników.
 header Parameters
-x-continuation-token	
+x-continuation-token
 string
 
 Token służący do pobrania kolejnej strony wyników.
 Responses
 Response Schema: application/json
-continuationToken	
+continuationToken
 string or null
 
 Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
 required
-	
+
 Array of objects (SessionInvoiceStatusResponse)
 
 Lista pobranych faktur.
 Array
 ordinalNumber
 required
-	
+
 integer <int32> >= 1
 
 Numer sekwencyjny faktury w ramach sesji.
-invoiceNumber	
+invoiceNumber
 string or null <= 256 characters
 
 Numer faktury.
-ksefNumber	
+ksefNumber
 string or null [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF.
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny faktury.
 invoiceHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 faktury, zakodowany w formacie Base64.
-invoiceFileName	
+invoiceFileName
 string or null <= 128 characters
 
 Nazwa pliku faktury (zwracana dla faktur wysyłanych wsadowo).
-acquisitionDate	
+acquisitionDate
 string or null <date-time>
 
 Data nadania numeru KSeF.
 invoicingDate
 required
-	
+
 string <date-time>
 
 Data przyjęcia faktury w systemie KSeF (do dalszego przetwarzania).
-permanentStorageDate	
+permanentStorageDate
 string or null <date-time>
 
 Data trwałego zapisu faktury w repozytorium KSeF. Wartość uzupełniana asynchronicznie w momencie trwałego zapisu; zawsze późniejsza niż acquisitionDate. Podczas sprawdzania statusu może być jeszcze niedostępna.
-upoDownloadUrl	
+upoDownloadUrl
 string or null <uri>
 
 Adres do pobrania UPO. Link generowany jest przy każdym odpytaniu o status. Dostęp odbywa się metodą HTTP GET i nie należy wysyłać tokenu dostępowego. Link nie podlega limitom API i wygasa po określonym czasie w UpoDownloadUrlExpirationDate.
@@ -3600,17 +3600,17 @@ Odpowiedź HTTP zawiera dodatkowe nagłówki:
 
     x-ms-meta-hash – skrót SHA-256 dokumentu UPO, zakodowany w formacie Base64.
 
-upoDownloadUrlExpirationDate	
+upoDownloadUrlExpirationDate
 string or null <date-time>
 
 Data i godzina wygaśnięcia adresu. Po tej dacie link UpoDownloadUrl nie będzie już aktywny.
-invoicingMode	
+invoicingMode
 string or null
 Enum: "Online" "Offline"
 
 Tryb fakturowania (online/offline).
 required
-	
+
 object
 
 Status faktury.
@@ -3629,56 +3629,56 @@ Code 	Description 	Details 	Extensions
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie 	-
 code
 required
-	
+
 integer <int32>
 
 Kod statusu faktury
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
-	
+
 object or null
 
 Zbiór dodatkowych informacji związanych ze statusem faktury, zapisanych jako pary klucz–wartość. Umożliwia rozszerzenie modelu o dane specyficzne dla danego przypadku.
 property name*
 additional property
-	
+
 string or null
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	200 	2000 	sessionInvoiceList
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -3707,13 +3707,13 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
 invoiceReferenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny faktury.
@@ -3721,49 +3721,49 @@ Responses
 Response Schema: application/json
 ordinalNumber
 required
-	
+
 integer <int32> >= 1
 
 Numer sekwencyjny faktury w ramach sesji.
-invoiceNumber	
+invoiceNumber
 string or null <= 256 characters
 
 Numer faktury.
-ksefNumber	
+ksefNumber
 string or null [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF.
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny faktury.
 invoiceHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 faktury, zakodowany w formacie Base64.
-invoiceFileName	
+invoiceFileName
 string or null <= 128 characters
 
 Nazwa pliku faktury (zwracana dla faktur wysyłanych wsadowo).
-acquisitionDate	
+acquisitionDate
 string or null <date-time>
 
 Data nadania numeru KSeF.
 invoicingDate
 required
-	
+
 string <date-time>
 
 Data przyjęcia faktury w systemie KSeF (do dalszego przetwarzania).
-permanentStorageDate	
+permanentStorageDate
 string or null <date-time>
 
 Data trwałego zapisu faktury w repozytorium KSeF. Wartość uzupełniana asynchronicznie w momencie trwałego zapisu; zawsze późniejsza niż acquisitionDate. Podczas sprawdzania statusu może być jeszcze niedostępna.
-upoDownloadUrl	
+upoDownloadUrl
 string or null <uri>
 
 Adres do pobrania UPO. Link generowany jest przy każdym odpytaniu o status. Dostęp odbywa się metodą HTTP GET i nie należy wysyłać tokenu dostępowego. Link nie podlega limitom API i wygasa po określonym czasie w UpoDownloadUrlExpirationDate.
@@ -3772,17 +3772,17 @@ Odpowiedź HTTP zawiera dodatkowe nagłówki:
 
     x-ms-meta-hash – skrót SHA-256 dokumentu UPO, zakodowany w formacie Base64.
 
-upoDownloadUrlExpirationDate	
+upoDownloadUrlExpirationDate
 string or null <date-time>
 
 Data i godzina wygaśnięcia adresu. Po tej dacie link UpoDownloadUrl nie będzie już aktywny.
-invoicingMode	
+invoicingMode
 string or null
 Enum: "Online" "Offline"
 
 Tryb fakturowania (online/offline).
 required
-	
+
 object
 
 Status faktury.
@@ -3801,56 +3801,56 @@ Code 	Description 	Details 	Extensions
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie 	-
 code
 required
-	
+
 integer <int32>
 
 Kod statusu faktury
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
-	
+
 object or null
 
 Zbiór dodatkowych informacji związanych ze statusem faktury, zapisanych jako pary klucz–wartość. Umożliwia rozszerzenie modelu o dane specyficzne dla danego przypadku.
 property name*
 additional property
-	
+
 string or null
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	300 	1200 	12000 	invoiceStatus
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -3883,78 +3883,78 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
 query Parameters
-pageSize	
+pageSize
 integer <int32> [ 10 .. 1000 ]
 Default: 10
 
 Rozmiar strony wyników.
 header Parameters
-x-continuation-token	
+x-continuation-token
 string
 
 Token służący do pobrania kolejnej strony wyników.
 Responses
 Response Schema: application/json
-continuationToken	
+continuationToken
 string or null
 
 Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
 required
-	
+
 Array of objects (SessionInvoiceStatusResponse)
 
 Lista pobranych faktur.
 Array
 ordinalNumber
 required
-	
+
 integer <int32> >= 1
 
 Numer sekwencyjny faktury w ramach sesji.
-invoiceNumber	
+invoiceNumber
 string or null <= 256 characters
 
 Numer faktury.
-ksefNumber	
+ksefNumber
 string or null [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF.
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny faktury.
 invoiceHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 faktury, zakodowany w formacie Base64.
-invoiceFileName	
+invoiceFileName
 string or null <= 128 characters
 
 Nazwa pliku faktury (zwracana dla faktur wysyłanych wsadowo).
-acquisitionDate	
+acquisitionDate
 string or null <date-time>
 
 Data nadania numeru KSeF.
 invoicingDate
 required
-	
+
 string <date-time>
 
 Data przyjęcia faktury w systemie KSeF (do dalszego przetwarzania).
-permanentStorageDate	
+permanentStorageDate
 string or null <date-time>
 
 Data trwałego zapisu faktury w repozytorium KSeF. Wartość uzupełniana asynchronicznie w momencie trwałego zapisu; zawsze późniejsza niż acquisitionDate. Podczas sprawdzania statusu może być jeszcze niedostępna.
-upoDownloadUrl	
+upoDownloadUrl
 string or null <uri>
 
 Adres do pobrania UPO. Link generowany jest przy każdym odpytaniu o status. Dostęp odbywa się metodą HTTP GET i nie należy wysyłać tokenu dostępowego. Link nie podlega limitom API i wygasa po określonym czasie w UpoDownloadUrlExpirationDate.
@@ -3963,17 +3963,17 @@ Odpowiedź HTTP zawiera dodatkowe nagłówki:
 
     x-ms-meta-hash – skrót SHA-256 dokumentu UPO, zakodowany w formacie Base64.
 
-upoDownloadUrlExpirationDate	
+upoDownloadUrlExpirationDate
 string or null <date-time>
 
 Data i godzina wygaśnięcia adresu. Po tej dacie link UpoDownloadUrl nie będzie już aktywny.
-invoicingMode	
+invoicingMode
 string or null
 Enum: "Online" "Offline"
 
 Tryb fakturowania (online/offline).
 required
-	
+
 object
 
 Status faktury.
@@ -3992,56 +3992,56 @@ Code 	Description 	Details 	Extensions
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie 	-
 code
 required
-	
+
 integer <int32>
 
 Kod statusu faktury
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
-	
+
 object or null
 
 Zbiór dodatkowych informacji związanych ze statusem faktury, zapisanych jako pary klucz–wartość. Umożliwia rozszerzenie modelu o dane specyficzne dla danego przypadku.
 property name*
 additional property
-	
+
 string or null
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	200 	2000 	sessionInvoiceList
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -4069,18 +4069,18 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
 ksefNumber
 required
-	
+
 string (KsefNumber) [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF faktury.
 Responses
-Response Headers x-ms-meta-hash	
+Response Headers x-ms-meta-hash
 string <byte> (Sha256HashBase64) = 44 characters
 
 Skrót SHA-256 dokumentu UPO, zakodowany w formacie Base64
@@ -4088,32 +4088,32 @@ Response Schema: application/xml
 string
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	1200 	12000 	sessionMisc
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -4145,18 +4145,18 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
 invoiceReferenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny faktury.
 Responses
-Response Headers x-ms-meta-hash	
+Response Headers x-ms-meta-hash
 string <byte> (Sha256HashBase64) = 44 characters
 
 Skrót SHA-256 dokumentu UPO, zakodowany w formacie Base64
@@ -4164,32 +4164,32 @@ Response Schema: application/xml
 string
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	1200 	12000 	sessionMisc
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -4221,18 +4221,18 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny sesji.
 upoReferenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny UPO.
 Responses
-Response Headers x-ms-meta-hash	
+Response Headers x-ms-meta-hash
 string <byte> (Sha256HashBase64) = 44 characters
 
 Skrót SHA-256 dokumentu UPO, zakodowany w formacie Base64
@@ -4240,32 +4240,32 @@ Response Schema: application/xml
 string
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	1200 	12000 	sessionMisc
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -4298,12 +4298,12 @@ Bearer
 path Parameters
 ksefNumber
 required
-	
+
 string (KsefNumber) [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF faktury.
 Responses
-Response Headers x-ms-meta-hash	
+Response Headers x-ms-meta-hash
 string <byte> (Sha256HashBase64) = 44 characters
 
 Skrót SHA-256 faktury, zakodowany w formacie Base64
@@ -4311,32 +4311,32 @@ Response Schema: application/xml
 string
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	80 	160 	640 	invoiceDownload
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -4380,7 +4380,7 @@ Wymagane uprawnienia: InvoiceRead.
 Authorizations:
 Bearer
 query Parameters
-sortOrder	
+sortOrder
 string
 Default: "Asc"
 Enum: "Asc" "Desc"
@@ -4389,12 +4389,12 @@ Kolejność sortowania wyników.
 Wartość 	Opis
 Asc 	Sortowanie rosnąco.
 Desc 	Sortowanie malejąco.
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Indeks pierwszej strony wyników (0 = pierwsza strona).
-pageSize	
+pageSize
 integer <int32> [ 10 .. 250 ]
 Default: 10
 
@@ -4404,7 +4404,7 @@ Request Body schema: application/json
 Kryteria filtrowania.
 subjectType
 required
-	
+
 string
 Enum: "Subject1" "Subject2" "Subject3" "SubjectAuthorized"
 
@@ -4415,7 +4415,7 @@ Subject2 	Podmiot 2 - nabywca
 Subject3 	Podmiot 3
 SubjectAuthorized 	Podmiot upoważniony
 required
-	
+
 object
 
 Typ i zakres dat, według którego filtrowane są faktury. Maksymalny dozwolony okres wynosi 3 miesiące w strefie UTC lub w strefie Europe/Warsaw (WAW).
@@ -4436,7 +4436,7 @@ Zasady interpretacji dat:
 
 dateType
 required
-	
+
 string
 Enum: "Issue" "Invoicing" "PermanentStorage"
 
@@ -4447,15 +4447,15 @@ Invoicing 	Data przyjęcia faktury w systemie KSeF (do dalszego przetwarzania).
 PermanentStorage 	Data trwałego zapisu faktury w repozytorium systemu KSeF.
 from
 required
-	
+
 string <date-time>
 
 Data początkowa zakresu w formacie ISO-8601 np. 2026-01-03T13:45:00+00:00.
-to	
+to
 string or null <date-time>
 
 Data końcowa zakresu w formacie ISO-8601. Jeśli nie zostanie podana, przyjmowana jest bieżąca data i czas w UTC.
-restrictToPermanentStorageHwmDate	
+restrictToPermanentStorageHwmDate
 boolean or null
 
 Określa, czy system ma ograniczyć filtrowanie (zakres dateRange.to) do wartości PermanentStorageHwmDate.
@@ -4464,32 +4464,32 @@ Określa, czy system ma ograniczyć filtrowanie (zakres dateRange.to) do wartoś
     Gdy true, system ogranicza filtrowanie tak, aby wartość dateRange.to nie przekraczała wartości PermanentStorageHwmDate,
     Gdy null lub false, filtrowanie może wykraczać poza PermanentStorageHwmDate.
 
-ksefNumber	
+ksefNumber
 string or null [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF faktury (exact match).
-invoiceNumber	
+invoiceNumber
 string or null <= 256 characters
 
 Numer faktury nadany przez wystawcę (exact match).
-	
+
 object or null
 
 Filtr kwotowy – brutto, netto lub VAT (z wartością).
 type
 required
-	
+
 string
 Enum: "Brutto" "Netto" "Vat"
-from	
+from
 number or null <double>
-to	
+to
 number or null <double>
-sellerNip	
+sellerNip
 string or null = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 Nip sprzedawcy (exact match).
-	
+
 object or null
 
 Identyfikator nabywcy.
@@ -4500,7 +4500,7 @@ Other 	Inny identyfikator
 None 	Brak identyfikatora nabywcy
 type
 required
-	
+
 string
 Enum: "Nip" "VatUe" "Other" "None"
 
@@ -4510,25 +4510,25 @@ Nip 	10 cyfrowy numer NIP
 VatUe 	Identyfikator VAT UE podmiotu unijnego
 Other 	Inny identyfikator
 None 	Brak identyfikatora nabywcy
-value	
+value
 string or null <= 50 characters
 
 Wartość identyfikatora nabywcy (exact match).
-currencyCodes	
+currencyCodes
 Array of strings or null (CurrencyCode)
 Enum: "AED" "AFN" "ALL" "AMD" "ANG" "AOA" "ARS" "AUD" "AWG" "AZN" "BAM" "BBD" "BDT" "BGN" "BHD" "BIF" "BMD" "BND" "BOB" "BOV" "BRL" "BSD" "BTN" "BWP" "BYN" "BZD" "CAD" "CDF" "CHE" "CHF" "CHW" "CLF" "CLP" "CNY" "COP" "COU" "CRC" "CUC" "CUP" "CVE" "CZK" "DJF" "DKK" "DOP" "DZD" "EGP" "ERN" "ETB" "EUR" "FJD" "FKP" "GBP" "GEL" "GGP" "GHS" "GIP" "GMD" "GNF" "GTQ" "GYD" "HKD" "HNL" "HRK" "HTG" "HUF" "IDR" "ILS" "IMP" "INR" "IQD" "IRR" "ISK" "JEP" "JMD" "JOD" "JPY" "KES" "KGS" "KHR" "KMF" "KPW" "KRW" "KWD" "KYD" "KZT" "LAK" "LBP" "LKR" "LRD" "LSL" "LYD" "MAD" "MDL" "MGA" "MKD" "MMK" "MNT" "MOP" "MRU" "MUR" "MVR" "MWK" "MXN" "MXV" "MYR" "MZN" "NAD" "NGN" "NIO" "NOK" "NPR" "NZD" "OMR" "PAB" "PEN" "PGK" "PHP" "PKR" "PLN" "PYG" "QAR" "RON" "RSD" "RUB" "RWF" "SAR" "SBD" "SCR" "SDG" "SEK" "SGD" "SHP" "SLL" "SOS" "SRD" "SSP" "STN" "SVC" "SYP" "SZL" "THB" "TJS" "TMT" "TND" "TOP" "TRY" "TTD" "TWD" "TZS" "UAH" "UGX" "USD" "USN" "UYI" "UYU" "UYW" "UZS" "VES" "VND" "VUV" "WST" "XAF" "XAG" "XAU" "XBA" "XBB" "XBC" "XBD" "XCD" "XCG" "XDR" "XOF" "XPD" "XPF" "XPT" "XSU" "XUA" "XXX" "YER" "ZAR" "ZMW" "ZWL"
 
 Kody walut.
-invoicingMode	
+invoicingMode
 string or null
 Enum: "Online" "Offline"
 
 Tryb wystawienia faktury: online lub offline.
-isSelfInvoicing	
+isSelfInvoicing
 boolean or null
 
 Czy faktura została wystawiona w trybie samofakturowania.
-formType	
+formType
 string or null
 Enum: "FA" "PEF" "RR"
 
@@ -4537,7 +4537,7 @@ Wartość 	Opis
 FA 	Faktura VAT
 PEF 	Faktura PEF
 RR 	Faktura RR
-invoiceTypes	
+invoiceTypes
 Array of strings or null (InvoiceType)
 Enum: "Vat" "Zal" "Kor" "Roz" "Upr" "KorZal" "KorRoz" "VatPef" "VatPefSp" "KorPef" "VatRr" "KorVatRr"
 
@@ -4555,7 +4555,7 @@ VatPefSp 	(PEF) Specjalizowana
 KorPef 	(PEF) Korygująca
 VatRr 	(RR) Podstawowa
 KorVatRr 	(RR) Korygująca
-hasAttachment	
+hasAttachment
 boolean or null
 
 Czy faktura ma załącznik.
@@ -4563,17 +4563,17 @@ Responses
 Response Schema: application/json
 hasMore
 required
-	
+
 boolean
 
 Określa, czy istnieją kolejne wyniki zapytania.
 isTruncated
 required
-	
+
 boolean
 
 Określa, czy osiągnięto maksymalny dopuszczalny zakres wyników zapytania (10 000).
-permanentStorageHwmDate	
+permanentStorageHwmDate
 string or null <date-time>
 
 Dotyczy wyłącznie zapytań filtrowanych po typie daty PermanentStorage. Jeśli zapytanie dotyczyło najnowszego okresu, wartość ta może być wartością nieznacznie skorygowaną względem górnej granicy podanej w warunkach zapytania. Dla okresów starszych, będzie to zgodne z warunkami zapytania.
@@ -4584,69 +4584,69 @@ System gwarantuje, że dane poniżej tej wartości są spójne i kompletne. Pono
 
 Dla dateType = Issue lub Invoicing – null.
 required
-	
+
 Array of objects (InvoiceMetadata)
 
 Lista faktur spełniających kryteria.
 Array
 ksefNumber
 required
-	
+
 string [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF faktury.
 invoiceNumber
 required
-	
+
 string <= 256 characters
 
 Numer faktury nadany przez wystawcę.
 issueDate
 required
-	
+
 string <date>
 
 Data wystawienia faktury.
 invoicingDate
 required
-	
+
 string <date-time>
 
 Data przyjęcia faktury w systemie KSeF (do dalszego przetwarzania).
 acquisitionDate
 required
-	
+
 string <date-time>
 
 Data nadania numeru KSeF.
 permanentStorageDate
 required
-	
+
 string <date-time>
 
 Data trwałego zapisu faktury w repozytorium systemu KSeF.
 required
-	
+
 object
 
 Dane identyfikujące sprzedawcę.
 nip
 required
-	
+
 string = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 Nip sprzedawcy.
-name	
+name
 string or null <= 512 characters
 
 Nazwa sprzedawcy.
 required
-	
+
 object
 
 Dane identyfikujące nabywcę.
 required
-	
+
 object
 
 Identyfikator nabywcy.
@@ -4657,7 +4657,7 @@ Other 	Inny identyfikator
 None 	Brak identyfikatora nabywcy
 type
 required
-	
+
 string
 Enum: "Nip" "VatUe" "Other" "None"
 
@@ -4667,48 +4667,48 @@ Nip 	10 cyfrowy numer NIP
 VatUe 	Identyfikator VAT UE podmiotu unijnego
 Other 	Inny identyfikator
 None 	Brak identyfikatora nabywcy
-value	
+value
 string or null <= 50 characters
 
 Wartość identyfikatora nabywcy.
-name	
+name
 string or null <= 512 characters
 
 Nazwa nabywcy.
 netAmount
 required
-	
+
 number <double>
 
 Łączna kwota netto.
 grossAmount
 required
-	
+
 number <double>
 
 Łączna kwota brutto.
 vatAmount
 required
-	
+
 number <double>
 
 Łączna kwota VAT.
 currency
 required
-	
+
 string = 3 characters
 
 Kod waluty.
 invoicingMode
 required
-	
+
 string
 Enum: "Online" "Offline"
 
 Tryb fakturowania (online/offline).
 invoiceType
 required
-	
+
 string
 Enum: "Vat" "Zal" "Kor" "Roz" "Upr" "KorZal" "KorRoz" "VatPef" "VatPefSp" "KorPef" "VatRr" "KorVatRr"
 
@@ -4727,7 +4727,7 @@ KorPef 	(PEF) Korygująca
 VatRr 	(RR) Podstawowa
 KorVatRr 	(RR) Korygująca
 required
-	
+
 object
 
 Struktura dokumentu faktury.
@@ -4741,55 +4741,55 @@ PEF_KOR (3) 	2-1 	PEF
 FA_RR (1) 	1-0E 	RR
 systemCode
 required
-	
+
 string
 
 Kod systemowy
 schemaVersion
 required
-	
+
 string
 
 Wersja schematu
 value
 required
-	
+
 string
 
 Wartość
 isSelfInvoicing
 required
-	
+
 boolean
 
 Czy faktura została wystawiona w trybie samofakturowania.
 hasAttachment
 required
-	
+
 boolean
 
 Określa, czy faktura posiada załącznik.
 invoiceHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 faktury, zakodowany w formacie Base64.
-hashOfCorrectedInvoice	
+hashOfCorrectedInvoice
 string or null <byte> = 44 characters
 
 Skrót SHA256 korygowanej faktury, zakodowany w formacie Base64.
-	
+
 Array of objects or null (InvoiceMetadataThirdSubject)
 
 Lista podmiotów trzecich.
 Array
 required
-	
+
 object
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId" "VatUe" "Other" "None"
 
@@ -4800,17 +4800,17 @@ InternalId 	Identyfikator wewnętrzny, składający się z numeru NIP i 5 cyfr.
 VatUe 	Identyfikator VAT UE podmiotu unijnego
 Other 	Inny identyfikator
 None 	Brak identyfikatora podmiotu trzeciego
-value	
+value
 string or null <= 50 characters
 
 Wartość identyfikatora podmiotu trzeciego.
-name	
+name
 string or null <= 512 characters
 
 Nazwa podmiotu trzeciego.
 role
 required
-	
+
 integer <int32>
 
 Rola podmiotu trzeciego.
@@ -4827,23 +4827,23 @@ Wartość 	Opis
 9 	Członek grupy VAT - wystawca
 10 	Członek grupy VAT - odbiorca
 11 	Pracownik
-	
+
 object or null
 
 Podmiot upoważniony.
 nip
 required
-	
+
 string = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 Nip podmiotu upoważnionego
-name	
+name
 string or null <= 512 characters
 
 Nazwa podmiotu upoważnionego.
 role
 required
-	
+
 integer <int32>
 
 Rola podmiotu upoważnionego.
@@ -4853,32 +4853,32 @@ Wartość 	Opis
 3 	Przedstawiciel podatkowy - w przypadku gdy na fakturze występują dane przedstawiciela podatkowego, o którym mowa w art. 18a - 18d ustawy
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	80 	160 	200 	invoiceMetadata
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -4956,13 +4956,13 @@ Request Body schema: application/json
 
 Dane wejściowe określające kryteria i format eksportu paczki faktur.
 required
-	
+
 object
 
 Informacje wymagane do zaszyfrowania wyniku zapytania.
 encryptedSymmetricKey
 required
-	
+
 string <byte>
 
 Klucz symetryczny o długości 32 bajtów, zaszyfrowany algorytmem RSA (Padding: OAEP z SHA-256), zakodowany w formacie Base64.
@@ -4970,18 +4970,18 @@ Klucz symetryczny o długości 32 bajtów, zaszyfrowany algorytmem RSA (Padding:
 Klucz publiczny Ministerstwa Finansów
 initializationVector
 required
-	
+
 string <byte>
 
 Wektor inicjalizujący (IV) o długości 16 bajtów, używany do szyfrowania symetrycznego, zakodowany w formacie Base64.
 required
-	
+
 object
 
 Zestaw filtrów do wyszukiwania faktur.
 subjectType
 required
-	
+
 string
 Enum: "Subject1" "Subject2" "Subject3" "SubjectAuthorized"
 
@@ -4992,7 +4992,7 @@ Subject2 	Podmiot 2 - nabywca
 Subject3 	Podmiot 3
 SubjectAuthorized 	Podmiot upoważniony
 required
-	
+
 object
 
 Typ i zakres dat, według którego filtrowane są faktury. Maksymalny dozwolony okres wynosi 3 miesiące w strefie UTC lub w strefie Europe/Warsaw (WAW).
@@ -5013,7 +5013,7 @@ Zasady interpretacji dat:
 
 dateType
 required
-	
+
 string
 Enum: "Issue" "Invoicing" "PermanentStorage"
 
@@ -5024,15 +5024,15 @@ Invoicing 	Data przyjęcia faktury w systemie KSeF (do dalszego przetwarzania).
 PermanentStorage 	Data trwałego zapisu faktury w repozytorium systemu KSeF.
 from
 required
-	
+
 string <date-time>
 
 Data początkowa zakresu w formacie ISO-8601 np. 2026-01-03T13:45:00+00:00.
-to	
+to
 string or null <date-time>
 
 Data końcowa zakresu w formacie ISO-8601. Jeśli nie zostanie podana, przyjmowana jest bieżąca data i czas w UTC.
-restrictToPermanentStorageHwmDate	
+restrictToPermanentStorageHwmDate
 boolean or null
 
 Określa, czy system ma ograniczyć filtrowanie (zakres dateRange.to) do wartości PermanentStorageHwmDate.
@@ -5041,32 +5041,32 @@ Określa, czy system ma ograniczyć filtrowanie (zakres dateRange.to) do wartoś
     Gdy true, system ogranicza filtrowanie tak, aby wartość dateRange.to nie przekraczała wartości PermanentStorageHwmDate,
     Gdy null lub false, filtrowanie może wykraczać poza PermanentStorageHwmDate.
 
-ksefNumber	
+ksefNumber
 string or null [ 35 .. 36 ] characters ^([1-9](\d[1-9]|[1-9]\d)\d{7})-(20[2-9][0-9]|...
 
 Numer KSeF faktury (exact match).
-invoiceNumber	
+invoiceNumber
 string or null <= 256 characters
 
 Numer faktury nadany przez wystawcę (exact match).
-	
+
 object or null
 
 Filtr kwotowy – brutto, netto lub VAT (z wartością).
 type
 required
-	
+
 string
 Enum: "Brutto" "Netto" "Vat"
-from	
+from
 number or null <double>
-to	
+to
 number or null <double>
-sellerNip	
+sellerNip
 string or null = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 Nip sprzedawcy (exact match).
-	
+
 object or null
 
 Identyfikator nabywcy.
@@ -5077,7 +5077,7 @@ Other 	Inny identyfikator
 None 	Brak identyfikatora nabywcy
 type
 required
-	
+
 string
 Enum: "Nip" "VatUe" "Other" "None"
 
@@ -5087,25 +5087,25 @@ Nip 	10 cyfrowy numer NIP
 VatUe 	Identyfikator VAT UE podmiotu unijnego
 Other 	Inny identyfikator
 None 	Brak identyfikatora nabywcy
-value	
+value
 string or null <= 50 characters
 
 Wartość identyfikatora nabywcy (exact match).
-currencyCodes	
+currencyCodes
 Array of strings or null (CurrencyCode)
 Enum: "AED" "AFN" "ALL" "AMD" "ANG" "AOA" "ARS" "AUD" "AWG" "AZN" "BAM" "BBD" "BDT" "BGN" "BHD" "BIF" "BMD" "BND" "BOB" "BOV" "BRL" "BSD" "BTN" "BWP" "BYN" "BZD" "CAD" "CDF" "CHE" "CHF" "CHW" "CLF" "CLP" "CNY" "COP" "COU" "CRC" "CUC" "CUP" "CVE" "CZK" "DJF" "DKK" "DOP" "DZD" "EGP" "ERN" "ETB" "EUR" "FJD" "FKP" "GBP" "GEL" "GGP" "GHS" "GIP" "GMD" "GNF" "GTQ" "GYD" "HKD" "HNL" "HRK" "HTG" "HUF" "IDR" "ILS" "IMP" "INR" "IQD" "IRR" "ISK" "JEP" "JMD" "JOD" "JPY" "KES" "KGS" "KHR" "KMF" "KPW" "KRW" "KWD" "KYD" "KZT" "LAK" "LBP" "LKR" "LRD" "LSL" "LYD" "MAD" "MDL" "MGA" "MKD" "MMK" "MNT" "MOP" "MRU" "MUR" "MVR" "MWK" "MXN" "MXV" "MYR" "MZN" "NAD" "NGN" "NIO" "NOK" "NPR" "NZD" "OMR" "PAB" "PEN" "PGK" "PHP" "PKR" "PLN" "PYG" "QAR" "RON" "RSD" "RUB" "RWF" "SAR" "SBD" "SCR" "SDG" "SEK" "SGD" "SHP" "SLL" "SOS" "SRD" "SSP" "STN" "SVC" "SYP" "SZL" "THB" "TJS" "TMT" "TND" "TOP" "TRY" "TTD" "TWD" "TZS" "UAH" "UGX" "USD" "USN" "UYI" "UYU" "UYW" "UZS" "VES" "VND" "VUV" "WST" "XAF" "XAG" "XAU" "XBA" "XBB" "XBC" "XBD" "XCD" "XCG" "XDR" "XOF" "XPD" "XPF" "XPT" "XSU" "XUA" "XXX" "YER" "ZAR" "ZMW" "ZWL"
 
 Kody walut.
-invoicingMode	
+invoicingMode
 string or null
 Enum: "Online" "Offline"
 
 Tryb wystawienia faktury: online lub offline.
-isSelfInvoicing	
+isSelfInvoicing
 boolean or null
 
 Czy faktura została wystawiona w trybie samofakturowania.
-formType	
+formType
 string or null
 Enum: "FA" "PEF" "RR"
 
@@ -5114,7 +5114,7 @@ Wartość 	Opis
 FA 	Faktura VAT
 PEF 	Faktura PEF
 RR 	Faktura RR
-invoiceTypes	
+invoiceTypes
 Array of strings or null (InvoiceType)
 Enum: "Vat" "Zal" "Kor" "Roz" "Upr" "KorZal" "KorRoz" "VatPef" "VatPefSp" "KorPef" "VatRr" "KorVatRr"
 
@@ -5132,7 +5132,7 @@ VatPefSp 	(PEF) Specjalizowana
 KorPef 	(PEF) Korygująca
 VatRr 	(RR) Podstawowa
 KorVatRr 	(RR) Korygująca
-hasAttachment	
+hasAttachment
 boolean or null
 
 Czy faktura ma załącznik.
@@ -5140,38 +5140,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny eksportu faktur.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	40 	80 	200 	invoiceExport
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -5220,14 +5220,14 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny eksportu faktur.
 Responses
 Response Schema: application/json
 required
-	
+
 object
 
 Status eksportu.
@@ -5241,71 +5241,71 @@ Code 	Description 	Details
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie
 code
 required
-	
+
 integer <int32>
 
 Kod statusu
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
-completedDate	
+completedDate
 string or null <date-time>
 
 Data zakończenia przetwarzania żądania eksportu faktur.
-packageExpirationDate	
+packageExpirationDate
 string or null <date-time>
 
 Data wygaśnięcia paczki faktur przygotowanej do pobrania. Po upływie tej daty paczka nie będzie już dostępna do pobrania.
-	
+
 object or null
 
 Dane paczki faktur przygotowanej do pobrania.
 invoiceCount
 required
-	
+
 integer <int64> [ 0 .. 10000 ]
 
 Łączna liczba faktur w paczce.
 size
 required
-	
+
 integer <int64> >= 0
 
 Rozmiar paczki w bajtach.
 required
-	
+
 Array of objects (InvoicePackagePart)
 
 Lista dostępnych części paczki do pobrania.
 Array
 ordinalNumber
 required
-	
+
 integer <int32> >= 1
 
 Numer sekwencyjny pliku części paczki.
 partName
 required
-	
+
 string <= 100 characters
 
 Nazwa pliku części paczki.
 method
 required
-	
+
 string
 
 Metoda HTTP, której należy użyć przy pobieraniu pliku.
 url
 required
-	
+
 string <uri>
 
 Adres URL, pod który należy wysłać żądanie pobrania części paczki. Link jest generowany dynamicznie w momencie odpytania o status operacji eksportu. Nie podlega limitom API i nie wymaga przesyłania tokenu dostępowego przy pobraniu.
@@ -5316,53 +5316,53 @@ Odpowiedź HTTP zawiera dodatkowe nagłówki:
 
 partSize
 required
-	
+
 integer <int64> >= 1
 
 Rozmiar części paczki w bajtach.
 partHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 pliku części paczki, zakodowany w formacie Base64.
 encryptedPartSize
 required
-	
+
 integer <int64> >= 1
 
 Rozmiar zaszyfrowanej części paczki w bajtach.
 encryptedPartHash
 required
-	
+
 string <byte> = 44 characters
 
 Skrót SHA256 zaszyfrowanej części paczki, zakodowany w formacie Base64.
 expirationDate
 required
-	
+
 string <date-time>
 
 Data i godzina wygaśnięcia linku umożliwiającego pobranie części paczki. Po upływie tego momentu link przestaje być aktywny.
 isTruncated
 required
-	
+
 boolean
 
 Określa, czy wynik eksportu został ucięty z powodu przekroczenia limitu liczby faktur lub wielkości paczki.
-lastIssueDate	
+lastIssueDate
 string or null <date>
 
 Data wystawienia ostatniej faktury ujętej w paczce. Pole występuje wyłącznie wtedy, gdy paczka została ucięta i eksport był filtrowany po typie daty Issue.
-lastInvoicingDate	
+lastInvoicingDate
 string or null <date-time>
 
 Data przyjęcia ostatniej faktury ujętej w paczce. Pole występuje wyłącznie wtedy, gdy paczka została ucięta i eksport był filtrowany po typie daty Invoicing.
-lastPermanentStorageDate	
+lastPermanentStorageDate
 string or null <date-time>
 
 Data trwałego zapisu ostatniej faktury ujętej w paczce. Pole występuje wyłącznie wtedy, gdy paczka została ucięta i eksport był filtrowany po typie daty PermanentStorage.
-permanentStorageHwmDate	
+permanentStorageHwmDate
 string or null <date-time>
 
 Dotyczy wyłącznie zapytań filtrowanych po typie daty PermanentStorage. Jeśli zapytanie dotyczyło najnowszego okresu, wartość ta może być wartością nieznacznie skorygowaną względem górnej granicy podanej w warunkach zapytania. Dla okresów starszych, będzie to zgodne z warunkami zapytania.
@@ -5372,32 +5372,32 @@ System gwarantuje, że dane poniżej tej wartości są spójne i kompletne. Pono
 Dla dateType = Issue lub Invoicing – null.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	600 	6000 	invoiceExportStatus
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -5454,7 +5454,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Identyfikator osoby fizycznej.
@@ -5464,38 +5464,38 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
 permissions
 required
-	
+
 Array of strings (PersonPermissionType)
 Items Enum: "CredentialsManage" "CredentialsRead" "InvoiceWrite" "InvoiceRead" "Introspection" "SubunitManage" "EnforcementOperations"
 
 Lista nadawanych uprawnień. Każda wartość może wystąpić tylko raz.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia
 required
-	
+
 object
 
 Dane podmiotu, któremu nadawane są uprawnienia.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByIdentifier" "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier"
 
@@ -5504,98 +5504,98 @@ Wartość 	Opis
 PersonByIdentifier 	Osoba fizyczna posługująca się Profilem Zaufanym lub certyfikatem zawierającym identyfikator NIP lub PESEL.
 PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL, ale mająca NIP lub PESEL.
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 required
-	
+
 object
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithoutIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 birthDate
 required
-	
+
 string <date>
 
 Data urodzenia osoby fizycznej.
 required
-	
+
 object
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
@@ -5603,38 +5603,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -5694,7 +5694,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Identyfikator podmiotu.
@@ -5702,48 +5702,48 @@ Type 	Value
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Value: "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 10 characters
 
 Wartość identyfikatora.
 required
-	
+
 Array of objects (EntityPermission)
 
 Lista nadawanych uprawnień. Każda wartość może wystąpić tylko raz.
 Array
 type
 required
-	
+
 string
 Enum: "InvoiceWrite" "InvoiceRead"
 
 Rodzaj uprawnienia.
-canDelegate	
+canDelegate
 boolean
 
 Flaga pozwalająca na pośrednie przekazywanie danego uprawnienia
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia
 required
-	
+
 object
 
 Dane podmiotu, któremu nadawane są uprawnienia.
 fullName
 required
-	
+
 string [ 5 .. 90 ] characters
 
 Pełna nazwa podmiotu.
@@ -5751,38 +5751,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -5832,7 +5832,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Identyfikator podmiotu uprawnianego.
@@ -5841,38 +5841,38 @@ Nip 	10 cyfrowy numer NIP
 PeppolId 	Identyfikator dostawcy usług Peppol
 type
 required
-	
+
 string
 Enum: "Nip" "PeppolId"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 9 .. 10 ] characters
 
 Wartość identyfikatora.
 permission
 required
-	
+
 string
 Enum: "SelfInvoicing" "RRInvoicing" "TaxRepresentative" "PefInvoicing"
 
 Rodzaj uprawnienia.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia
 required
-	
+
 object
 
 Dane podmiotu, któremu nadawane są uprawnienia.
 fullName
 required
-	
+
 string [ 5 .. 90 ] characters
 
 Pełna nazwa podmiotu.
@@ -5880,38 +5880,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -5971,7 +5971,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Identyfikator osoby fizycznej.
@@ -5981,18 +5981,18 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator kontekstu klienta. Nie przekazanie identyfikatora oznacza, że uprawnienie nadane w sposób pośredni jest typu generalnego.
@@ -6002,36 +6002,36 @@ AllPartners 	Identyfikator oznaczający, że uprawnienie nadane w sposób pośre
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "AllPartners" "InternalId"
 
 Typ identyfikatora.
-value	
+value
 string or null [ 10 .. 16 ] characters
 
 Wartość identyfikatora. W przypadku typu AllPartners należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
 permissions
 required
-	
+
 Array of strings (IndirectPermissionType)
 Items Enum: "InvoiceRead" "InvoiceWrite"
 
 Lista nadawanych uprawnień. Każda wartość może wystąpić tylko raz.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia
 required
-	
+
 object
 
 Dane podmiotu, któremu nadawane są uprawnienia.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByIdentifier" "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier"
 
@@ -6040,98 +6040,98 @@ Wartość 	Opis
 PersonByIdentifier 	Osoba fizyczna posługująca się Profilem Zaufanym lub certyfikatem zawierającym identyfikator NIP lub PESEL.
 PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL, ale mająca NIP lub PESEL.
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 required
-	
+
 object
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithoutIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 birthDate
 required
-	
+
 string <date>
 
 Data urodzenia osoby fizycznej.
 required
-	
+
 object
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
@@ -6139,38 +6139,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -6262,7 +6262,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Identyfikator podmiotu lub osoby fizycznej.
@@ -6272,19 +6272,19 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator podmiotu podrzędnego.
@@ -6293,35 +6293,35 @@ Nip 	10 cyfrowy numer NIP
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "InternalId" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 16 ] characters
 
 Wartość identyfikatora.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia
-subunitName	
+subunitName
 string or null [ 5 .. 256 ] characters
 
 Nazwa jednostki podrzędnej. W przypadku jednostki podrzędnej z identyfikatorem wewnętrznym pole jest wymagane.
 required
-	
+
 object
 
 Dane podmiotu, któremu nadawane są uprawnienia.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByIdentifier" "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier"
 
@@ -6330,98 +6330,98 @@ Wartość 	Opis
 PersonByIdentifier 	Osoba fizyczna posługująca się Profilem Zaufanym lub certyfikatem zawierającym identyfikator NIP lub PESEL.
 PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL, ale mająca NIP lub PESEL.
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 required
-	
+
 object
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithoutIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 birthDate
 required
-	
+
 string <date>
 
 Data urodzenia osoby fizycznej.
 required
-	
+
 object
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
@@ -6429,38 +6429,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -6528,7 +6528,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Identyfikator podmiotu uprawnionego.
@@ -6536,19 +6536,19 @@ Type 	Value
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Value: "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 64 characters
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator kontekstu złożonego.
@@ -6556,37 +6556,37 @@ Type 	Value
 NipVatUe 	Dwuczłonowy identyfikator składający się z numeru NIP i numeru VAT-UE: {nip}-{vat_ue}
 type
 required
-	
+
 string
 Value: "NipVatUe"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 15 .. 25 ] characters
 
 Wartość identyfikatora.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia
 euEntityName
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Nazwa i adres podmiotu unijnego w formacie: {euSubjectName}, {euSubjectAddress}
 required
-	
+
 object
 
 Dane podmiotu, któremu nadawane są uprawnienia.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier" "EntityByFingerprint"
 
@@ -6595,115 +6595,115 @@ Wartość 	Opis
 PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL, ale mająca NIP lub PESEL.
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
 EntityByFingerprint 	Podmiot identyfikowany odciskiem palca pieczęci kwalifikowanej.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 required
-	
+
 object
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithoutIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 birthDate
 required
-	
+
 string <date>
 
 Data urodzenia osoby fizycznej.
 required
-	
+
 object
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = EntityByFingerprint.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu.
 address
 required
-	
+
 string <= 512 characters
 
 Adres podmiotu.
 required
-	
+
 object
 
 Dane podmiotu unijnego, w kontekście którego nadawane są uprawnienia.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu.
 address
 required
-	
+
 string <= 512 characters
 
 Adres podmiotu.
@@ -6711,38 +6711,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -6810,7 +6810,7 @@ Authorizations:
 Bearer
 Request Body schema: application/json
 required
-	
+
 object
 
 Identyfikator podmiotu uprawnianego.
@@ -6818,38 +6818,38 @@ Type 	Value
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Value: "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 64 characters
 
 Wartość identyfikatora.
 permissions
 required
-	
+
 Array of strings (EuEntityPermissionType)
 Items Enum: "InvoiceWrite" "InvoiceRead"
 
 Lista nadawanych uprawnień. Każda wartość może wystąpić tylko raz.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia
 required
-	
+
 object
 
 Dane podmiotu, któremu nadawane są uprawnienia.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier" "EntityByFingerprint"
 
@@ -6858,98 +6858,98 @@ Wartość 	Opis
 PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL, ale mająca NIP lub PESEL.
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
 EntityByFingerprint 	Podmiot identyfikowany odciskiem palca pieczęci kwalifikowanej.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 required
-	
+
 object
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = PersonByFingerprintWithoutIdentifier.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
 birthDate
 required
-	
+
 string <date>
 
 Data urodzenia osoby fizycznej.
 required
-	
+
 object
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
-	
+
 object or null
 
 Dane podmiotu. Wymagane, gdy subjectDetailsType = EntityByFingerprint.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu.
 address
 required
-	
+
 string <= 512 characters
 
 Adres podmiotu.
@@ -6957,38 +6957,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -7043,7 +7043,7 @@ Bearer
 path Parameters
 permissionId
 required
-	
+
 string (PermissionId) = 36 characters
 
 Id uprawnienia.
@@ -7051,38 +7051,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -7113,7 +7113,7 @@ Bearer
 path Parameters
 permissionId
 required
-	
+
 string (PermissionId) = 36 characters
 
 Id uprawnienia.
@@ -7121,38 +7121,38 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -7217,18 +7217,18 @@ Sortowanie:
 Authorizations:
 Bearer
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 Request Body schema: application/json
-	
+
 object or null
 
 Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
@@ -7237,18 +7237,18 @@ Nip 	10 cyfrowy numer NIP
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 16 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator podmiotu docelowego dla uprawnień selektywnych nadanych pośrednio.
@@ -7258,21 +7258,21 @@ AllPartners 	Identyfikator oznaczający, że wyszukiwanie dotyczy uprawnień gen
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "AllPartners" "InternalId"
 
 Typ identyfikatora.
-value	
+value
 string or null [ 10 .. 16 ] characters
 
 Wartość identyfikatora. W przypadku typu AllPartners należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
-permissionTypes	
+permissionTypes
 Array of strings or null (PersonalPermissionType)
 Enum: "CredentialsManage" "CredentialsRead" "InvoiceWrite" "InvoiceRead" "Introspection" "SubunitManage" "EnforcementOperations" "VatUeManage"
 
 Lista rodzajów wyszukiwanych uprawnień.
-permissionState	
+permissionState
 string or null
 Enum: "Active" "Inactive"
 
@@ -7283,18 +7283,18 @@ Inactive 	Uprawnienia nieaktywne
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (PersonalPermission)
 
 Lista odczytanych uprawnień.
 Array
 id
 required
-	
+
 string = 36 characters
 
 Identyfikator uprawnienia.
-	
+
 object or null
 
 Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
@@ -7303,18 +7303,18 @@ Nip 	10 cyfrowy numer NIP
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 16 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator podmiotu uprawnionego, jeżeli jest inny niż identyfikator uwierzytelnionego klienta API.
@@ -7322,18 +7322,18 @@ Type 	Value
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator podmiotu docelowego dla uprawnień selektywnych nadanych pośrednio.
@@ -7343,35 +7343,35 @@ AllPartners 	Identyfikator oznaczający, że wyszukiwanie dotyczy uprawnień gen
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "AllPartners" "InternalId"
 
 Typ identyfikatora.
-value	
+value
 string or null [ 10 .. 16 ] characters
 
 Wartość identyfikatora. W przypadku typu AllPartners należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
 permissionScope
 required
-	
+
 string
 Enum: "CredentialsManage" "CredentialsRead" "InvoiceWrite" "InvoiceRead" "Introspection" "SubunitManage" "EnforcementOperations" "VatUeManage"
 
 Rodzaj uprawnienia.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia.
-	
+
 object or null
 
 Dane osoby uprawnionej.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByIdentifier" "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier"
 
@@ -7382,66 +7382,66 @@ PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikate
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
-	
+
 object or null
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-birthDate	
+birthDate
 string or null <date>
 
 Data urodzenia osoby fizycznej.
-	
+
 object or null
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
-	
+
 object or null
 
 Dane podmiotu uprawnionego.
 subjectDetailsType
 required
-	
+
 string
 Enum: "EntityByIdentifier" "EntityByFingerprint"
 
@@ -7451,67 +7451,67 @@ EntityByIdentifier 	Podmiot identyfikowany numerem NIP.
 EntityByFingerprint 	Podmiot identyfikowany odciskiem palca pieczęci kwalifikowanej.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu.
-address	
+address
 string or null <= 512 characters
 
 Adres podmiotu.
 permissionState
 required
-	
+
 string
 Enum: "Active" "Inactive"
 
 Stan uprawnienia.
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia obowiązywania uprawnienia.
 canDelegate
 required
-	
+
 boolean
 
 Flaga określająca, czy uprawnienie ma być możliwe do dalszego przekazywania.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -7605,18 +7605,18 @@ Wymagane uprawnienia: CredentialsManage, CredentialsRead, SubunitManage.
 Authorizations:
 Bearer
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 Request Body schema: application/json
-	
+
 object or null
 
 Identyfikator osoby lub podmiotu nadającego uprawnienie.
@@ -7627,16 +7627,16 @@ Fingerprint 	Odcisk palca certyfikatu
 System 	Identyfikator systemowy KSeF
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint" "System"
 
 Typ identyfikatora.
-value	
+value
 string or null [ 10 .. 64 ] characters
 
 Wartość identyfikatora. W przypadku typu System należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
-	
+
 object or null
 
 Identyfikator osoby lub podmiotu uprawnionego.
@@ -7646,18 +7646,18 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator kontekstu uprawnienia (dla uprawnień nadanych administratorom jednostek podrzędnych).
@@ -7666,18 +7666,18 @@ Nip 	10 cyfrowy numer NIP
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 16 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator podmiotu docelowego dla uprawnień nadanych pośrednio.
@@ -7687,21 +7687,21 @@ AllPartners 	Identyfikator oznaczający, że uprawnienie nadane w sposób pośre
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "AllPartners" "InternalId"
 
 Typ identyfikatora.
-value	
+value
 string or null [ 10 .. 16 ] characters
 
 Wartość identyfikatora. W przypadku typu AllPartners należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
-permissionTypes	
+permissionTypes
 Array of strings or null (PersonPermissionType)
 Enum: "CredentialsManage" "CredentialsRead" "InvoiceWrite" "InvoiceRead" "Introspection" "SubunitManage" "EnforcementOperations"
 
 Lista rodzajów wyszukiwanych uprawnień.
-permissionState	
+permissionState
 string or null
 Enum: "Active" "Inactive"
 
@@ -7711,7 +7711,7 @@ Active 	Uprawnienia aktywne
 Inactive 	Uprawnienia nieaktywne, nadane w sposób pośredni
 queryType
 required
-	
+
 string
 Enum: "PermissionsInCurrentContext" "PermissionsGrantedInCurrentContext"
 
@@ -7722,19 +7722,19 @@ PermissionsGrantedInCurrentContext 	Lista uprawnień nadanych w bieżącym konte
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (PersonPermission)
 
 Lista odczytanych uprawnień.
 Array
 id
 required
-	
+
 string = 36 characters
 
 Identyfikator uprawnienia.
 required
-	
+
 object
 
 Identyfikator osoby lub podmiotu uprawnionego.
@@ -7744,18 +7744,18 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator kontekstu uprawnienia (dla uprawnień nadanych administratorom jednostek podrzędnych).
@@ -7764,18 +7764,18 @@ Nip 	10 cyfrowy numer NIP
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 16 ] characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator podmiotu docelowego dla uprawnień nadanych pośrednio.
@@ -7785,17 +7785,17 @@ AllPartners 	Identyfikator oznaczający, że uprawnienie nadane w sposób pośre
 InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: {nip}-{5_cyfr}
 type
 required
-	
+
 string
 Enum: "Nip" "AllPartners" "InternalId"
 
 Typ identyfikatora.
-value	
+value
 string or null [ 10 .. 16 ] characters
 
 Wartość identyfikatora. W przypadku typu AllPartners należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
 required
-	
+
 object
 
 Identyfikator osoby lub podmiotu nadającego uprawnienie.
@@ -7806,35 +7806,35 @@ Fingerprint 	Odcisk palca certyfikatu
 System 	Identyfikator systemowy KSeF
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint" "System"
 
 Typ identyfikatora.
-value	
+value
 string or null [ 10 .. 64 ] characters
 
 Wartość identyfikatora. W przypadku typu System należy pozostawić puste. W pozostałych przypadkach pole jest wymagane.
 permissionScope
 required
-	
+
 string
 Enum: "CredentialsManage" "CredentialsRead" "InvoiceWrite" "InvoiceRead" "Introspection" "SubunitManage" "EnforcementOperations"
 
 Rodzaj uprawnienia.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia.
-	
+
 object or null
 
 Dane osoby uprawnionej.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByIdentifier" "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier"
 
@@ -7845,66 +7845,66 @@ PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikate
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
-	
+
 object or null
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-birthDate	
+birthDate
 string or null <date>
 
 Data urodzenia osoby fizycznej.
-	
+
 object or null
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
-	
+
 object or null
 
 Dane podmiotu uprawnionego.
 subjectDetailsType
 required
-	
+
 string
 Enum: "EntityByIdentifier" "EntityByFingerprint"
 
@@ -7914,67 +7914,67 @@ EntityByIdentifier 	Podmiot identyfikowany numerem NIP.
 EntityByFingerprint 	Podmiot identyfikowany odciskiem palca pieczęci kwalifikowanej.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu.
-address	
+address
 string or null <= 512 characters
 
 Adres podmiotu.
 permissionState
 required
-	
+
 string
 Enum: "Active" "Inactive"
 
 Stan uprawnienia.
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia obowiązywania uprawnienia.
 canDelegate
 required
-	
+
 boolean
 
 Flaga określająca, czy uprawnienie ma być możliwe do dalszego przekazywania.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -8048,18 +8048,18 @@ Wymagane uprawnienia: CredentialsManage, CredentialsRead, SubunitManage.
 Authorizations:
 Bearer
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 Request Body schema: application/json
-	
+
 object or null
 
 Identyfikator jednostki lub podmiotu podrzędnego.
@@ -8068,33 +8068,33 @@ InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: 
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Enum: "InternalId" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 16 ] characters
 
 Wartość identyfikatora.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (SubunitPermission)
 
 Lista odczytanych uprawnień.
 Array
 id
 required
-	
+
 string = 36 characters
 
 Identyfikator uprawnienia.
 required
-	
+
 object
 
 Identyfikator uprawnionego.
@@ -8104,19 +8104,19 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator jednostki lub podmiotu podrzędnego.
@@ -8125,19 +8125,19 @@ InternalId 	Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: 
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Enum: "InternalId" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 16 ] characters
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator uprawniającego.
@@ -8147,37 +8147,37 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
 permissionScope
 required
-	
+
 string
 Value: "CredentialsManage"
 
 Rodzaj uprawnienia.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia.
-	
+
 object or null
 
 Dane osoby uprawnionej.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByIdentifier" "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier"
 
@@ -8188,103 +8188,103 @@ PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikate
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
-	
+
 object or null
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-birthDate	
+birthDate
 string or null <date>
 
 Data urodzenia osoby fizycznej.
-	
+
 object or null
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
-subunitName	
+subunitName
 string or null [ 5 .. 256 ] characters
 
 Nazwa jednostki podrzędnej.
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia obowiązywania uprawnienia.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -8349,12 +8349,12 @@ Wymagane uprawnienia: CredentialsManage, CredentialsRead.
 Authorizations:
 Bearer
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
@@ -8362,12 +8362,12 @@ Rozmiar strony wyników.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (EntityRole)
 
 Lista odczytanych ról podmiotu.
 Array
-	
+
 object or null
 
 Identyfikator podmiotu nadrzędnego.
@@ -8375,70 +8375,70 @@ Type 	Value
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Value: "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 10 characters
 
 Wartość identyfikatora.
 role
 required
-	
+
 string
 Enum: "CourtBailiff" "EnforcementAuthority" "LocalGovernmentUnit" "LocalGovernmentSubUnit" "VatGroupUnit" "VatGroupSubUnit"
 
 Typ roli - powiązania z podmiotem nadrzędnym.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis roli.
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia obowiązywania roli.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -8494,18 +8494,18 @@ Wymagane uprawnienia: CredentialsManage, CredentialsRead, SubunitManage.
 Authorizations:
 Bearer
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 Request Body schema: application/json
-	
+
 object or null
 
 Identyfikator podmiotu podrzędnego.
@@ -8513,27 +8513,27 @@ Type 	Value
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Value: "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 10 characters
 
 Wartość identyfikatora.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (SubordinateEntityRole)
 
 Lista odczytanych podmiotów podrzędnych i ich ról.
 Array
 required
-	
+
 object
 
 Identyfikator podmiotu podrzędnego.
@@ -8541,70 +8541,70 @@ Type 	Value
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Value: "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 10 characters
 
 Wartość identyfikatora.
 role
 required
-	
+
 string
 Enum: "LocalGovernmentSubUnit" "VatGroupSubUnit"
 
 Typ roli - powiązania z podmiotem nadrzędnym.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis powiązania.
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia obowiązywania powiązania.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -8679,18 +8679,18 @@ Wymagane uprawnienia: CredentialsManage, CredentialsRead, PefInvoiceWrite.
 Authorizations:
 Bearer
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 Request Body schema: application/json
-	
+
 object or null
 
 Identyfikator podmiotu uprawniającego.
@@ -8698,18 +8698,18 @@ Type 	Value
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Value: "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 10 characters
 
 Wartość identyfikatora.
-	
+
 object or null
 
 Identyfikator podmiotu uprawnionego.
@@ -8718,20 +8718,20 @@ Nip 	10 cyfrowy numer NIP
 PeppolId 	Identyfikator dostawcy usług Peppol
 type
 required
-	
+
 string
 Enum: "Nip" "PeppolId"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 9 .. 10 ] characters
 
 Wartość identyfikatora.
 queryType
 required
-	
+
 string
 Enum: "Granted" "Received"
 
@@ -8739,7 +8739,7 @@ Typ zapytania.
 Type 	Value
 Granted 	Uprawnienia nadane innym podmiotom
 Received 	Uprawnienia otrzymane od innych podmiotów
-permissionTypes	
+permissionTypes
 Array of strings or null (InvoicePermissionType)
 Enum: "SelfInvoicing" "TaxRepresentative" "RRInvoicing" "PefInvoicing"
 
@@ -8747,18 +8747,18 @@ Lista rodzajów wyszukiwanych uprawnień.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (EntityAuthorizationGrant)
 
 Lista odczytanych uprawnień.
 Array
 id
 required
-	
+
 string = 36 characters
 
 Identyfikator uprawnienia.
-	
+
 object or null
 
 Identyfikator osoby nadającej uprawnienie.
@@ -8768,19 +8768,19 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator podmiotu uprawnionego.
@@ -8789,19 +8789,19 @@ Nip 	10 cyfrowy numer NIP
 PeppolId 	Identyfikator dostawcy usług Peppol
 type
 required
-	
+
 string
 Enum: "Nip" "PeppolId"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 9 .. 10 ] characters
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator podmiotu uprawniającego.
@@ -8809,37 +8809,37 @@ Type 	Value
 Nip 	10 cyfrowy numer NIP
 type
 required
-	
+
 string
 Value: "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string = 10 characters
 
 Wartość identyfikatora.
 authorizationScope
 required
-	
+
 string
 Enum: "SelfInvoicing" "TaxRepresentative" "RRInvoicing" "PefInvoicing"
 
 Rodzaj uprawnienia.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia.
-	
+
 object or null
 
 Dane podmiotu uprawnionego.
 subjectDetailsType
 required
-	
+
 string
 Value: "EntityByIdentifier"
 
@@ -8848,50 +8848,50 @@ Wartość 	Opis
 EntityByIdentifier 	Podmiot identyfikowany numerem NIP.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu.
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia obowiązywania uprawnienia.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -8970,26 +8970,26 @@ Wymagane uprawnienia: CredentialsManage, CredentialsRead, VatUeManage.
 Authorizations:
 Bearer
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 Request Body schema: application/json
-vatUeIdentifier	
+vatUeIdentifier
 string or null^(ATU\d{8}|BE[01]{1}\d{9}|BG\d{9,10}|CY\d{8}[...
 
 Wartość identyfikatora (numeru identyfikacyjnego VAT) podmiotu unijnego (exact match).
-authorizedFingerprintIdentifier	
+authorizedFingerprintIdentifier
 string or null
 
 Odcisk palca certyfikatu kwalifikowanego uprawnionego (contains).
-permissionTypes	
+permissionTypes
 Array of strings or null (EuEntityPermissionsQueryPermissionType)
 Enum: "VatUeManage" "InvoiceWrite" "InvoiceRead" "Introspection"
 
@@ -8997,19 +8997,19 @@ Lista rodzajów wyszukiwanych uprawnień.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (EuEntityPermission)
 
 Lista odczytanych uprawnień.
 Array
 id
 required
-	
+
 string = 36 characters
 
 Identyfikator uprawnienia.
 required
-	
+
 object
 
 Identyfikator uprawniającego.
@@ -9019,55 +9019,55 @@ Pesel 	11 cyfrowy numer PESEL
 Fingerprint 	Odcisk palca certyfikatu
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
 vatUeIdentifier
 required
-	
+
 string
 
 Identyfikator podmiotu unijnego.
 euEntityName
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Nazwa podmiotu unijnego.
 authorizedFingerprintIdentifier
 required
-	
+
 string = 64 characters
 
 Uprawniony odcisk palca certyfikatu.
 permissionScope
 required
-	
+
 string
 Enum: "VatUeManage" "InvoiceWrite" "InvoiceRead" "Introspection"
 
 Uprawnienie.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis uprawnienia.
-	
+
 object or null
 
 Dane osoby uprawnionej.
 subjectDetailsType
 required
-	
+
 string
 Enum: "PersonByFingerprintWithIdentifier" "PersonByFingerprintWithoutIdentifier"
 
@@ -9077,66 +9077,66 @@ PersonByFingerprintWithIdentifier 	Osoba fizyczna posługująca się certyfikate
 PersonByFingerprintWithoutIdentifier 	Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL.
 firstName
 required
-	
+
 string [ 2 .. 30 ] characters
 
 Imię osoby fizycznej.
 lastName
 required
-	
+
 string [ 2 .. 81 ] characters
 
 Nazwisko osoby fizycznej.
-	
+
 object or null
 
 Identyfikator osoby fizycznej.
 type
 required
-	
+
 string
 Enum: "Pesel" "Nip"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 11 ] characters
 
 Wartość identyfikatora.
-birthDate	
+birthDate
 string or null <date>
 
 Data urodzenia osoby fizycznej.
-	
+
 object or null
 
 Dane dokumentu tożsamości osoby fizycznej.
 type
 required
-	
+
 string <= 20 characters
 
 Rodzaj dokumentu tożsamości.
 number
 required
-	
+
 string <= 20 characters
 
 Seria i numer dokumentu tożsamości.
 country
 required
-	
+
 string = 2 characters
 
 Kraj wydania dokumentu tożsamości. Musi być zgodny z ISO 3166-1 alpha-2 (np. PL, DE, US) oraz zawierać dokładnie 2 wielkie litery.
-	
+
 object or null
 
 Dane podmiotu uprawnionego.
 subjectDetailsType
 required
-	
+
 string
 Value: "EntityByFingerprint"
 
@@ -9145,70 +9145,70 @@ Wartość 	Opis
 EntityByFingerprint 	Podmiot identyfikowany odciskiem palca pieczęci kwalifikowanej.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu.
-address	
+address
 string or null <= 512 characters
 
 Adres podmiotu.
-	
+
 object or null
 
 Dane podmiotu unijnego, w kontekście którego nadane jest uprawnienie.
 fullName
 required
-	
+
 string <= 100 characters
 
 Pełna nazwa podmiotu unijnego.
 address
 required
-	
+
 string <= 512 characters
 
 Adres podmiotu unijnego.
 startDate
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia obowiązywania uprawnienia.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9250,14 +9250,14 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny operacji nadania lub odbierania uprawnień.
 Responses
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o aktualnym statusie.
@@ -9274,48 +9274,48 @@ Code 	Description 	Details
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie później.
 code
 required
-	
+
 integer <int32>
 
 Kod statusu
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9342,42 +9342,42 @@ Authorizations:
 Bearer
 Responses
 Response Schema: application/json
-isAttachmentAllowed	
+isAttachmentAllowed
 boolean
 
 Informacja czy Podmiot ma obecnie możliwość dodawania Załączników do Faktur
-revokedDate	
+revokedDate
 string or null <date-time>
 
 Data i czas zakończenia możliwość dodawania przez Podmiot Załączników do Faktur. Brak podanej daty oznacza bezterminową możliwość dodawania Załączników do Faktur
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9410,72 +9410,72 @@ Responses
 Response Schema: application/json
 canRequest
 required
-	
+
 boolean
 
 Flaga informująca czy uwierzytelniony podmiot może złożyć nowy wniosek o certyfikat.
 required
-	
+
 object
 
 Informacje o limitach związanych z liczbą możliwych do złożenia wniosków certyfikacyjnych.
 remaining
 required
-	
+
 integer <int32>
 
 Pozostała wartość limitu.
 limit
 required
-	
+
 integer <int32>
 
 Maksymalna liczba zasobów dozwolona w ramach limitu.
 required
-	
+
 object
 
 Informacje o limitach dotyczących liczby aktywnych certyfikatów wydanych dla danego podmiotu.
 remaining
 required
-	
+
 integer <int32>
 
 Pozostała wartość limitu.
 limit
 required
-	
+
 integer <int32>
 
 Maksymalna liczba zasobów dozwolona w ramach limitu.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9515,68 +9515,68 @@ Responses
 Response Schema: application/json
 commonName
 required
-	
+
 string
 
 Nazwa powszechna.
 countryName
 required
-	
+
 string
 
 Kraj, kod ISO 3166.
-givenName	
+givenName
 string or null
 
 Imię.
-surname	
+surname
 string or null
 
 Nazwisko.
-serialNumber	
+serialNumber
 string or null
 
 Numer seryjny podmiotu.
-uniqueIdentifier	
+uniqueIdentifier
 string or null
 
 Unikalny identyfikator.
-organizationName	
+organizationName
 string or null
 
 Nazwa organizacji.
-organizationIdentifier	
+organizationIdentifier
 string or null
 
 Identyfikator organizacji.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9629,13 +9629,13 @@ Bearer
 Request Body schema: application/json
 certificateName
 required
-	
+
 string [ 5 .. 100 ] characters ^[a-zA-Z0-9_\-\ ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$
 
 Nazwa własna certyfikatu.
 certificateType
 required
-	
+
 string
 Enum: "Authentication" "Offline"
 
@@ -9645,11 +9645,11 @@ Authentication 	Certyfikat używany do uwierzytelnienia w systemie.
 Offline 	Certyfikat używany wyłącznie do potwierdzania autentyczności wystawcy i integralności faktury w trybie offline
 csr
 required
-	
+
 string <byte>
 
 Wniosek certyfikacyjny PKCS#10 (CSR) w formacie DER, zakodowany w formacie Base64.
-validFrom	
+validFrom
 string or null <date-time>
 
 Data rozpoczęcia ważności certyfikatu. Jeśli nie zostanie podana, certyfikat będzie ważny od momentu jego wystawienia.
@@ -9657,44 +9657,44 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny wniosku certyfikacyjnego.
 timestamp
 required
-	
+
 string <date-time>
 
 Data złożenia wniosku certyfikacyjnego.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9732,7 +9732,7 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny wniosku certyfikacyjnego
@@ -9740,12 +9740,12 @@ Responses
 Response Schema: application/json
 requestDate
 required
-	
+
 string <date-time>
 
 Data złożenia wniosku certyfikacyjnego.
 required
-	
+
 object
 
 Informacje o aktualnym statusie.
@@ -9758,52 +9758,52 @@ Code 	Description 	Details
 550 	Operacja została anulowana przez system 	Przetwarzanie zostało przerwane z przyczyn wewnętrznych systemu. Spróbuj ponownie
 code
 required
-	
+
 integer <int32>
 
 Kod statusu
 description
 required
-	
+
 string non-empty
 
 Opis statusu
-details	
+details
 Array of strings or null
 
 Dodatkowe szczegóły statusu
-certificateSerialNumber	
+certificateSerialNumber
 string or null
 
 Numer seryjny wygenerowanego certyfikatu (w formacie szesnastkowym). Zwracany w przypadku prawidłowego przeprocesowania wniosku certyfikacyjnego.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9830,39 +9830,39 @@ Bearer
 Request Body schema: application/json
 certificateSerialNumbers
 required
-	
+
 Array of strings [ 1 .. 10 ] items
 
 Numery seryjne certyfikatów do pobrania.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (RetrieveCertificatesListItem)
 
 Pobrane certyfikaty.
 Array
 certificate
 required
-	
+
 string <byte>
 
 Certyfikat w formacie DER, zakodowany w formacie Base64.
 certificateName
 required
-	
+
 string
 
 Nazwa własna certyfikatu.
 certificateSerialNumber
 required
-	
+
 string
 
 Numer seryjny certyfikatu.
 certificateType
 required
-	
+
 string
 Enum: "Authentication" "Offline"
 
@@ -9872,32 +9872,32 @@ Authentication 	Certyfikat używany do uwierzytelnienia w systemie.
 Offline 	Certyfikat używany wyłącznie do potwierdzania autentyczności wystawcy i integralności faktury w trybie offline
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -9936,12 +9936,12 @@ Bearer
 path Parameters
 certificateSerialNumber
 required
-	
+
 string
 
 Numer seryjny certyfikatu (w formacie szesnastkowym).
 Request Body schema: application/json
-revocationReason	
+revocationReason
 string or null
 Enum: "Unspecified" "Superseded" "KeyCompromise"
 
@@ -9953,32 +9953,32 @@ KeyCompromise 	Klucz prywatny powiązany z certyfikatem został skompromitowany.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10022,12 +10022,12 @@ Sortowanie:
 Authorizations:
 Bearer
 query Parameters
-pageSize	
+pageSize
 integer <int32> [ 10 .. 50 ]
 Default: 10
 
 Rozmiar strony wyników
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
@@ -10035,15 +10035,15 @@ Numer strony wyników
 Request Body schema: application/json
 
 Kryteria filtrowania
-certificateSerialNumber	
+certificateSerialNumber
 string or null
 
 Numer seryjny certyfikatu. Wyszukiwanie odbywa się na zasadzie dokładnego dopasowania (exact match).
-name	
+name
 string or null
 
 Nazwa własna certyfikatu. Wyszukiwanie jest częściowe, czyli zwracane są certyfikaty, których nazwa zawiera podany ciąg znaków (contains).
-type	
+type
 string or null
 Enum: "Authentication" "Offline"
 
@@ -10051,7 +10051,7 @@ Typ certyfikatu KSeF.
 Wartość 	Opis
 Authentication 	Certyfikat używany do uwierzytelnienia w systemie.
 Offline 	Certyfikat używany wyłącznie do potwierdzania autentyczności wystawcy i integralności faktury w trybie offline
-status	
+status
 string or null
 Enum: "Active" "Blocked" "Revoked" "Expired"
 
@@ -10061,33 +10061,33 @@ Active 	Certyfikat jest aktywny i może zostać użyty do uwierzytelnienia lub r
 Blocked 	Certyfikat został zablokowany i nie może zostać użyty do uwierzytelnienia i realizacji operacji w trybie offline. Status przejściowy do czasu zakończenia procesu unieważniania.
 Revoked 	Certyfikat został unieważniony i nie może zostać użyty do uwierzytelnienia i realizacji operacji w trybie offline.
 Expired 	Certyfikat wygasł i nie może zostać użyty do uwierzytelnienia i realizacji operacji w trybie offline.
-expiresAfter	
+expiresAfter
 string or null <date-time>
 
 Filtruje certyfikaty, które wygasają po podanej dacie.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (CertificateListItem)
 
 Lista certyfikatów spełniających kryteria wyszukiwania.
 Array
 certificateSerialNumber
 required
-	
+
 string
 
 Numer seryjny certyfikatu (w formacie szesnastkowym).
 name
 required
-	
+
 string <= 100 characters
 
 Nazwa własna certyfikatu.
 type
 required
-	
+
 string
 Enum: "Authentication" "Offline"
 
@@ -10097,13 +10097,13 @@ Authentication 	Certyfikat używany do uwierzytelnienia w systemie.
 Offline 	Certyfikat używany wyłącznie do potwierdzania autentyczności wystawcy i integralności faktury w trybie offline
 commonName
 required
-	
+
 string
 
 Nazwa powszechna (CN) podmiotu, dla którego wystawiono certyfikat.
 status
 required
-	
+
 string
 Enum: "Active" "Blocked" "Revoked" "Expired"
 
@@ -10114,79 +10114,79 @@ Blocked 	Certyfikat został zablokowany i nie może zostać użyty do uwierzytel
 Revoked 	Certyfikat został unieważniony i nie może zostać użyty do uwierzytelnienia i realizacji operacji w trybie offline.
 Expired 	Certyfikat wygasł i nie może zostać użyty do uwierzytelnienia i realizacji operacji w trybie offline.
 required
-	
+
 object
 
 Identyfikator podmiotu, dla którego wystawiono certyfikat.
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
 Typ identyfikatora.
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 
 Wartość identyfikatora.
 validFrom
 required
-	
+
 string <date-time>
 
 Data rozpoczęcia ważności certyfikatu.
 validTo
 required
-	
+
 string <date-time>
 
 Data wygaśnięcia certyfikatu.
-lastUseDate	
+lastUseDate
 string or null <date-time>
 
 Data ostatniego użycia certyfikatu.
 requestDate
 required
-	
+
 string <date-time>
 
 Data złożenia wniosku certyfikacyjnego.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10239,14 +10239,14 @@ Bearer
 Request Body schema: application/json
 permissions
 required
-	
+
 Array of strings (TokenPermissionType)
 Items Enum: "InvoiceRead" "InvoiceWrite" "CredentialsRead" "CredentialsManage" "SubunitManage" "EnforcementOperations"
 
 Uprawnienia przypisane tokenowi.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis tokena.
@@ -10254,44 +10254,44 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny tokena KSeF.
 token
 required
-	
+
 string <= 160 characters
 
 Token KSeF.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10331,7 +10331,7 @@ Sortowanie:
 Authorizations:
 Bearer
 query Parameters
-status	
+status
 Array of strings (AuthenticationTokenStatus)
 Items Enum: "Pending" "Active" "Revoking" "Revoked" "Failed"
 
@@ -10342,15 +10342,15 @@ Active 	Token jest aktywny i może być wykorzystywany do uwierzytelniania.
 Revoking 	Token jest w trakcie unieważniania. Nie może już być wykorzystywany do uwierzytelniania.
 Revoked 	Token został unieważniony i nie może być wykorzystywany do uwierzytelniania.
 Failed 	Nie udało się aktywować tokena. Należy wygenerować nowy token, obecny nie może być wykorzystywany do uwierzytelniania.
-description	
+description
 string >= 3 characters
 
 Umożliwia filtrowanie tokenów po opisie. Wartość parametru jest wyszukiwana w opisie tokena (operacja nie rozróżnia wielkości liter). Należy podać co najmniej 3 znaki.
-authorIdentifier	
+authorIdentifier
 string >= 3 characters
 
 Umożliwia filtrowanie tokenów po ich twórcy. Wartość parametru jest wyszukiwana w identyfikatorze (operacja nie rozróżnia wielkości liter). Należy podać co najmniej 3 znaki.
-authorIdentifierType	
+authorIdentifierType
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
@@ -10359,42 +10359,42 @@ Wartość 	Opis
 Nip 	NIP.
 Pesel 	PESEL.
 Fingerprint 	Odcisk palca certyfikatu.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
 Rozmiar strony wyników.
 header Parameters
-x-continuation-token	
+x-continuation-token
 string
 
 Token służący do pobrania kolejnej strony wyników.
 Responses
 Response Schema: application/json
-continuationToken	
+continuationToken
 string or null
 
 Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
 required
-	
+
 Array of objects (QueryTokensResponseItem)
 
 Lista tokenów uwierzytelniających.
 Array
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny tokena KSeF.
 required
-	
+
 object
 
 Identyfikator osoby która wygenerowała token.
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
@@ -10405,18 +10405,18 @@ Pesel 	PESEL.
 Fingerprint 	Odcisk palca certyfikatu.
 value
 required
-	
+
 string
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator kontekstu, w którym został wygenerowany token i do którego daje dostęp.
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId" "NipVatUe" "PeppolId"
 
@@ -10428,36 +10428,36 @@ NipVatUe 	Dwuczłonowy identyfikator składający się z numeru NIP i numeru VAT
 PeppolId 	Identyfikator dostawcy usług Peppol.
 value
 required
-	
+
 string
 
 Wartość identyfikatora.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis tokena.
 requestedPermissions
 required
-	
+
 Array of strings (TokenPermissionType)
 Items Enum: "InvoiceRead" "InvoiceWrite" "CredentialsRead" "CredentialsManage" "SubunitManage" "EnforcementOperations"
 
 Uprawnienia przypisane tokenowi.
 dateCreated
 required
-	
+
 string <date-time>
 
 Data i czas utworzenia tokena.
-lastUseDate	
+lastUseDate
 string or null <date-time>
 
 Data ostatniego użycia tokena.
 status
 required
-	
+
 string
 Enum: "Pending" "Active" "Revoking" "Revoked" "Failed"
 
@@ -10468,38 +10468,38 @@ Active 	Token jest aktywny i może być wykorzystywany do uwierzytelniania.
 Revoking 	Token jest w trakcie unieważniania. Nie może już być wykorzystywany do uwierzytelniania.
 Revoked 	Token został unieważniony i nie może być wykorzystywany do uwierzytelniania.
 Failed 	Nie udało się aktywować tokena. Należy wygenerować nowy token, obecny nie może być wykorzystywany do uwierzytelniania.
-statusDetails	
+statusDetails
 Array of strings or null
 
 Dodatkowe informacje na temat statusu, zwracane w przypadku błędów.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10524,7 +10524,7 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny tokena KSeF.
@@ -10532,18 +10532,18 @@ Responses
 Response Schema: application/json
 referenceNumber
 required
-	
+
 string = 36 characters
 
 Numer referencyjny tokena KSeF.
 required
-	
+
 object
 
 Identyfikator osoby która wygenerowała token.
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 
@@ -10554,18 +10554,18 @@ Pesel 	PESEL.
 Fingerprint 	Odcisk palca certyfikatu.
 value
 required
-	
+
 string
 
 Wartość identyfikatora.
 required
-	
+
 object
 
 Identyfikator kontekstu, w którym został wygenerowany token i do którego daje dostęp.
 type
 required
-	
+
 string
 Enum: "Nip" "InternalId" "NipVatUe" "PeppolId"
 
@@ -10577,36 +10577,36 @@ NipVatUe 	Dwuczłonowy identyfikator składający się z numeru NIP i numeru VAT
 PeppolId 	Identyfikator dostawcy usług Peppol.
 value
 required
-	
+
 string
 
 Wartość identyfikatora.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 
 Opis tokena.
 requestedPermissions
 required
-	
+
 Array of strings (TokenPermissionType)
 Items Enum: "InvoiceRead" "InvoiceWrite" "CredentialsRead" "CredentialsManage" "SubunitManage" "EnforcementOperations"
 
 Uprawnienia przypisane tokenowi.
 dateCreated
 required
-	
+
 string <date-time>
 
 Data i czas utworzenia tokena.
-lastUseDate	
+lastUseDate
 string or null <date-time>
 
 Data ostatniego użycia tokena.
 status
 required
-	
+
 string
 Enum: "Pending" "Active" "Revoking" "Revoked" "Failed"
 
@@ -10617,38 +10617,38 @@ Active 	Token jest aktywny i może być wykorzystywany do uwierzytelniania.
 Revoking 	Token jest w trakcie unieważniania. Nie może już być wykorzystywany do uwierzytelniania.
 Revoked 	Token został unieważniony i nie może być wykorzystywany do uwierzytelniania.
 Failed 	Nie udało się aktywować tokena. Należy wygenerować nowy token, obecny nie może być wykorzystywany do uwierzytelniania.
-statusDetails	
+statusDetails
 Array of strings or null
 
 Dodatkowe informacje na temat statusu, zwracane w przypadku błędów.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10688,39 +10688,39 @@ Bearer
 path Parameters
 referenceNumber
 required
-	
+
 string (ReferenceNumber) = 36 characters
 
 Numer referencyjny tokena KSeF.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	100 	300 	1200 	other
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10753,12 +10753,12 @@ Sortowanie:
     id (Asc)
 
 query Parameters
-pageOffset	
+pageOffset
 integer <int32> >= 0
 Default: 0
 
 Numer strony wyników.
-pageSize	
+pageSize
 integer <int32> [ 10 .. 100 ]
 Default: 10
 
@@ -10766,63 +10766,63 @@ Rozmiar strony wyników.
 Responses
 Response Schema: application/json
 required
-	
+
 Array of objects (PeppolProvider)
 
 Lista dostawców usług Peppol.
 Array
 id
 required
-	
+
 string = 9 characters ^P[A-Z]{2}[0-9]{6}$
 
 Identyfikator dostawcy usług Peppol.
 name
 required
-	
+
 string <= 256 characters
 
 Nazwa dostawcy usług Peppol.
 dateCreated
 required
-	
+
 string <date-time>
 
 Data rejestracji dostawcy usług Peppol w systemie.
 hasMore
 required
-	
+
 boolean
 
 Flaga informująca o dostępności kolejnej strony wyników.
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10854,65 +10854,65 @@ Tworzenie nowego podmiotu testowego. W przypadku grupy VAT i JST istnieje możli
 Request Body schema: application/json
 subjectNip
 required
-	
+
 string (Nip) = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 10 cyfrowy numer NIP.
 subjectType
 required
-	
+
 string
 Enum: "EnforcementAuthority" "VatGroup" "JST"
-	
+
 Array of objects or null (Subunit)
 Array
 subjectNip
 required
-	
+
 string (Nip) = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 10 cyfrowy numer NIP.
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 description
 required
-	
+
 string [ 5 .. 256 ] characters
-createdDate	
+createdDate
 string or null <date-time>
 
 W przypadku wielokrotnego tworzenia danych testowych z tym samym identyfikatorem nie można podawać daty wcześniejszej ani takiej samej jak poprzednia.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -10954,39 +10954,39 @@ Usuwanie podmiotu testowego. W przypadku grupy VAT i JST usunięte zostaną rów
 Request Body schema: application/json
 subjectNip
 required
-	
+
 string (Nip) = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 10 cyfrowy numer NIP.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -11025,59 +11025,59 @@ Tworzenie nowej osoby fizycznej, której system nadaje uprawnienia właściciels
 Request Body schema: application/json
 nip
 required
-	
+
 string (Nip) = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 10 cyfrowy numer NIP.
 pesel
 required
-	
+
 string (Pesel) = 11 characters ^\d{2}(?:0[1-9]|1[0-2]|2[1-9]|3[0-2]|4[1-9]|5...
 
 11 cyfrowy numer PESEL.
 isBailiff
 required
-	
+
 boolean
 description
 required
-	
+
 string [ 5 .. 256 ] characters
-isDeceased	
+isDeceased
 boolean
-createdDate	
+createdDate
 string or null <date-time>
 
 W przypadku wielokrotnego tworzenia danych testowych z tym samym identyfikatorem nie można podawać daty wcześniejszej ani takiej samej jak poprzednia.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -11121,39 +11121,39 @@ Usuwanie testowej osoby fizycznej. System automatycznie odbierze jej wszystkie u
 Request Body schema: application/json
 nip
 required
-	
+
 string (Nip) = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 10 cyfrowy numer NIP.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -11191,71 +11191,71 @@ Nadanie uprawnień testowemu podmiotowi/osobie fizycznej
 Nadawanie uprawnień testowemu podmiotowi lub osobie fizycznej, a także w ich kontekście.
 Request Body schema: application/json
 required
-	
+
 object
 type
 required
-	
+
 string
 Value: "Nip"
 value
 required
-	
+
 string = 10 characters
 required
-	
+
 object
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 required
-	
+
 Array of objects (TestDataPermission)
 Array
 description
 required
-	
+
 string [ 5 .. 256 ] characters
 permissionType
 required
-	
+
 string
 Enum: "InvoiceRead" "InvoiceWrite" "Introspection" "CredentialsRead" "CredentialsManage" "EnforcementOperations" "SubunitManage"
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -11303,58 +11303,58 @@ Odebranie uprawnień testowemu podmiotowi/osobie fizycznej
 Odbieranie uprawnień nadanych testowemu podmiotowi lub osobie fizycznej, a także w ich kontekście.
 Request Body schema: application/json
 required
-	
+
 object
 type
 required
-	
+
 string
 Value: "Nip"
 value
 required
-	
+
 string = 10 characters
 required
-	
+
 object
 type
 required
-	
+
 string
 Enum: "Nip" "Pesel" "Fingerprint"
 value
 required
-	
+
 string [ 10 .. 64 ] characters
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -11400,39 +11400,39 @@ Dodaje możliwość wysyłania faktur z załącznikiem przez wskazany podmiot
 Request Body schema: application/json
 nip
 required
-	
+
 string (Nip) = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 10 cyfrowy numer NIP.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.
@@ -11471,43 +11471,43 @@ Odbiera możliwość wysyłania faktur z załącznikiem przez wskazany podmiot
 Request Body schema: application/json
 nip
 required
-	
+
 string (Nip) = 10 characters ^[1-9]((\d[1-9])|([1-9]\d))\d{7}$
 
 10 cyfrowy numer NIP.
-expectedEndDate	
+expectedEndDate
 string or null <date>
 
 Data wycofania zgody na przesyłanie faktur z załącznikiem.
 Responses
 	req / s 	req / min 	req / h 	grupa
 Limity liczby żądań 	60 	- 	- 	-
-Response Headers Retry-After	
+Response Headers Retry-After
 integer <int32> (RetryAfter)
 Example: "30"
 
 Liczba sekund po których można ponowić żądanie.
 Response Schema: application/json
 required
-	
+
 object
 
 Informacje o błędzie związanym z przekroczeniem limitu żądań.
 code
 required
-	
+
 integer
 
 Kod statusu HTTP odpowiadający błędowi. Zawsze ma wartość 429.
 description
 required
-	
+
 string
 
 Opis błędu zgodny z nazwą statusu HTTP.
 details
 required
-	
+
 Array of strings
 
 Lista szczegółowych informacji opisujących przyczynę przekroczenia limitu żądań oraz wskazówki dotyczące ponowienia żądania.

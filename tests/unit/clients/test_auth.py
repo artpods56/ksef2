@@ -54,9 +54,7 @@ class TestAuthClient:
     ) -> None:
         client = _build_auth_client(
             fake_transport,
-            _token_store(
-                domain_public_key_cert.build(usage=["ksef_token_encryption"])
-            ),
+            _token_store(domain_public_key_cert.build(usage=["ksef_token_encryption"])),
         )
         challenge = auth_challenge_resp.build(timestampMs=1735689600000)
         init_response = auth_init_resp.build()
@@ -125,9 +123,7 @@ class TestAuthClient:
     ) -> None:
         client = _build_auth_client(
             fake_transport,
-            _token_store(
-                domain_public_key_cert.build(usage=["ksef_token_encryption"])
-            ),
+            _token_store(domain_public_key_cert.build(usage=["ksef_token_encryption"])),
         )
         init_response = auth_init_resp.build()
         failed_status = auth_status_resp.build(
@@ -152,9 +148,7 @@ class TestAuthClient:
     ) -> None:
         client = _build_auth_client(
             fake_transport,
-            _token_store(
-                domain_public_key_cert.build(usage=["ksef_token_encryption"])
-            ),
+            _token_store(domain_public_key_cert.build(usage=["ksef_token_encryption"])),
         )
         init_response = auth_init_resp.build()
         pending_status = auth_status_resp.build(
@@ -194,9 +188,7 @@ class TestAuthClient:
     ) -> None:
         client = _build_auth_client(
             fake_transport,
-            _token_store(
-                domain_public_key_cert.build(usage=["ksef_token_encryption"])
-            ),
+            _token_store(domain_public_key_cert.build(usage=["ksef_token_encryption"])),
         )
         challenge = auth_challenge_resp.build()
         init_response = auth_init_resp.build()

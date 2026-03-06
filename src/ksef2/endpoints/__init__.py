@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 
 from ksef2.endpoints import (
-    peppol,
-    testdata,
-    limits,
-    tokens,
-    encryption,
-    auth,
-    invoices,
-    certificates,
-    session,
+    peppol as peppol,
+    testdata as testdata,
+    limits as limits,
+    tokens as tokens,
+    encryption as encryption,
+    auth as auth,
+    invoices as invoices,
+    certificates as certificates,
+    session as session,
 )
 from ksef2.core import routes
 

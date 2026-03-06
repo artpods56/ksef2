@@ -96,7 +96,9 @@ class TestPermissionsGrantRequestMapper:
             (subunit_context_identifier_from_literal, "pesel"),
         ],
     )
-    def test_rejects_invalid_literal_inputs(self, func: Callable[[str], StrEnum], value: str) -> None:
+    def test_rejects_invalid_literal_inputs(
+        self, func: Callable[[str], StrEnum], value: str
+    ) -> None:
         with pytest.raises(ValueError):
             _ = func(value)
 
@@ -113,7 +115,9 @@ class TestPermissionsGrantRequestMapper:
             ),
         ],
     )
-    def test_maps_enum_inputs(self, func: Callable[[StrEnum], str], enum_value: StrEnum) -> None:
+    def test_maps_enum_inputs(
+        self, func: Callable[[StrEnum], str], enum_value: StrEnum
+    ) -> None:
         assert func(enum_value) is not None
 
     @pytest.mark.parametrize(

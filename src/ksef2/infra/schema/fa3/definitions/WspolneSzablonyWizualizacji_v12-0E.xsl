@@ -917,7 +917,7 @@ table {
 }
 
 .naglowek .wartosc {
-	font-weight: bold;	
+	font-weight: bold;
 }
 
 .tytul {
@@ -938,15 +938,15 @@ table {
 	font-size: 1.2em;
 	text-align: center;
 	vertical-align: top;
-	clear: both; 
+	clear: both;
 }
 
 .data {
-	border: 1px solid black; 
+	border: 1px solid black;
 	padding: 2px 1.5em;
 	background-color: white;
 	font-weight: bold;
-	margin: 0 2em; 
+	margin: 0 2em;
 }
 
 .obok-daty {
@@ -957,20 +957,20 @@ table {
 
 .objasnienie {
 	border: 2px solid black;
-	padding: 0.25em 0.5em; 
-	font-size: 0.8em; 
+	padding: 0.25em 0.5em;
+	font-size: 0.8em;
 }
 
 .zalacznik-objasnienie {
-	background-color: #DDDDDD;	
+	background-color: #DDDDDD;
 	border: 2px solid black;
 	font-size: 0.8em;
 	width:99.5%;
 }
 
 .prawne {
-	background-color: #DDDDDD;	
-	border: 2px solid black; 
+	background-color: #DDDDDD;
+	border: 2px solid black;
 	font-size: 0.8em;
 }
 
@@ -1009,7 +1009,7 @@ h1 {
 h2 {
 	text-align: left;
 	font-size: 1.2em;
-	font-weight: bold; 
+	font-weight: bold;
 }
 
 h3 {
@@ -1031,28 +1031,28 @@ h1, h2, h3, h4 {
 }
 
 .wypelniane {
-	border: 1px solid black; 
+	border: 1px solid black;
 	font-size: 1.2em;
-	padding: 1px; 
-	vertical-align: top;	
+	padding: 1px;
+	vertical-align: top;
 	text-align: left;
 }
 
-	
+
 .puste {
 	background-color: #DDDDDD;
-	border: 1px solid black; 
+	border: 1px solid black;
 	font-size: 0.8em;
-	padding: 1px; 
+	padding: 1px;
 	height: 2em;
 	vertical-align: top;
 }
 
 .puste2 {
 	background-color: #DDDDDD;
-	border: 1px solid black; 
+	border: 1px solid black;
 	 font-size: 1.2em;
-	padding: 1px; 
+	padding: 1px;
 	height: 2em;
 	text-align: center;
 }
@@ -1061,7 +1061,7 @@ h1, h2, h3, h4 {
 	background-color: #DDDDDD;
 	border: 1px solid black;
 	font-size: 0.8em;
-	padding: 1px; 
+	padding: 1px;
 	height: 2em;
 	vertical-align: top;
 	text-align: left;
@@ -1069,9 +1069,9 @@ h1, h2, h3, h4 {
 
 .center {
 	background-color: #DDDDDD;
-	border: 1px solid black; 
+	border: 1px solid black;
 	font-size: 0.8em;
-	padding: 1px; 
+	padding: 1px;
 	height: 2em;
 	vertical-align: top;
 	text-align: center;
@@ -1081,9 +1081,9 @@ h1, h2, h3, h4 {
 	border: 1px solid black;
 	font-size: 0.8em;
 	font-weight: bold;
-	padding: 1px; 
+	padding: 1px;
 	height: 2em;
-	vertical-align: top; 
+	vertical-align: top;
 	text-align: center;
 }
 
@@ -1097,14 +1097,14 @@ h1, h2, h3, h4 {
 	margin-bottom: 0.2em;
 	text-align: left;
 	font-weight: bold;
-	text-transform: none; 
+	text-transform: none;
 }
 
 .opis-tekstowy{
 	font-size: 0.7em;
 	margin-bottom: 0.2em;
 	font-weight: bold;
-	text-transform: none; 
+	text-transform: none;
 }
 
 .czcionka td, .czcionka th {
@@ -1151,7 +1151,7 @@ p {
 }
 
 .normalna-tekstowa {
-	width: 100%; 
+	width: 100%;
 	border: 0px
 }
 
@@ -1164,12 +1164,12 @@ p {
 }
 
 .miesiac {
-	border: 1px solid black; 
+	border: 1px solid black;
 	font-size: 0.8em;
 	font-weight: bold;
-	padding: 1px; 
+	padding: 1px;
 	height: 2em;
-	vertical-align: middle; 
+	vertical-align: middle;
 	text-align: center;
 	background-color: #DDDDDD;
 }
@@ -1186,23 +1186,23 @@ p {
 
 .opis {
 	font-size: 1em;
-	padding: 4px; 
+	padding: 4px;
 }
 
 .opis-tabela {
 	font-size: 1em;
-	padding: 4px; 
+	padding: 4px;
 	border: 0;
 }
 
 .dodatkowe {
-	background-color: white; 
+	background-color: white;
 	border: 0;
 }
 
 .wypunktowane {
 	font-size: 1em;
-	padding: 1px; 
+	padding: 1px;
 	vertical-align: top;
 }
 

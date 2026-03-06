@@ -29,7 +29,9 @@ from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.testdata import Identifier, Permission
 
 ROOT = next(
-    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+    path
+    for path in Path(__file__).resolve().parents
+    if (path / "pyproject.toml").exists()
 )
 INVOICE_TEMPLATE_PATH = (
     ROOT

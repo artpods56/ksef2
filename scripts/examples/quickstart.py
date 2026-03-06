@@ -7,16 +7,13 @@ from ksef2.core.tools import generate_nip
 
 VALID_NIP = generate_nip()
 ROOT = next(
-    path for path in Path(__file__).resolve().parents if (path / "pyproject.toml").exists()
+    path
+    for path in Path(__file__).resolve().parents
+    if (path / "pyproject.toml").exists()
 )
 
 INVOICE_TEMPLATE_PATH = (
-    ROOT
-    / "docs"
-    / "assets"
-    / "sample_invoices"
-    / "fa3"
-    / "invoice-template_v3.xml"
+    ROOT / "docs" / "assets" / "sample_invoices" / "fa3" / "invoice-template_v3.xml"
 )
 
 

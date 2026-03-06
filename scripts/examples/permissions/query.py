@@ -16,7 +16,11 @@ def main() -> None:
 
         auth = client.authentication.with_test_certificate(nip=ORG_NIP)
 
-        print(auth.permissions.get_attachment_permission_status().model_dump_json(indent=2))
+        print(
+            auth.permissions.get_attachment_permission_status().model_dump_json(
+                indent=2
+            )
+        )
 
 
 if __name__ == "__main__":

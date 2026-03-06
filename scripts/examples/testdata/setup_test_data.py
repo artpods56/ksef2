@@ -49,12 +49,8 @@ def with_automatic_cleanup() -> None:
         print("Granting permissions ...")
         temp.grant_permissions(
             permissions=[
-                Permission(
-                    type="invoice_read", description="Read invoices"
-                ),
-                Permission(
-                    type="invoice_write", description="Send invoices"
-                ),
+                Permission(type="invoice_read", description="Read invoices"),
+                Permission(type="invoice_write", description="Send invoices"),
             ],
             grant_to=Identifier(type="nip", value=PERSON_NIP),
             in_context_of=Identifier(type="nip", value=ORG_NIP),

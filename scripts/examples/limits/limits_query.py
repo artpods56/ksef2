@@ -38,9 +38,7 @@ def main() -> None:
 
         temp.grant_permissions(
             permissions=[
-                Permission(
-                    type="invoice_write", description="Sending invoices"
-                ),
+                Permission(type="invoice_write", description="Sending invoices"),
             ],
             grant_to=Identifier(type="nip", value=PERSON_NIP),
             in_context_of=Identifier(type="nip", value=ORG_NIP),
