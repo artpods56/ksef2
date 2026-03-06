@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ksef2.domain.models import KSeFBaseModel
+from ksef2.domain.models.base import KSeFBaseModel
 
 
 class PeppolProvider(KSeFBaseModel):

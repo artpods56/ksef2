@@ -1,17 +1,19 @@
-from enum import Enum
+from datetime import datetime
+from enum import StrEnum
+from typing import Literal
 
-from pydantic import AwareDatetime
+from ksef2.domain.models.base import KSeFBaseModel
 
-from ksef2.domain.models import KSeFBaseModel
+type CertUsage = Literal["ksef_token_encryption", "symmetric_key_encryption"]
 
 
-class CertUsage(Enum):
-    KSEF_TOKEN_ENCRYPTION = "KsefTokenEncryption"
-    SYMMETRIC_KEY_ENCRYPTION = "SymmetricKeyEncryption"
+class CertUsageEnum(StrEnum):
+    KSEF_TOKEN_ENCRYPTION = "ksef_token_encryption"
+    SYMMETRIC_KEY_ENCRYPTION = "symmetric_key_encryption"
 
 
 class PublicKeyCertificate(KSeFBaseModel):
     certificate: str
-    valid_from: AwareDatetime
-    valid_to: AwareDatetime
+    valid_from: datetime
+    valid_to: datetime
     usage: list[CertUsage]

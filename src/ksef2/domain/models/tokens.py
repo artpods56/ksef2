@@ -1,48 +1,64 @@
-from __future__ import annotations
-
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
+from typing import Literal
 
 from ksef2.domain.models.base import KSeFBaseModel
 
+type TokenPermission = Literal[
+    "invoice_read",
+    "invoice_write",
+    "credentials_read",
+    "credentials_manage",
+    "subunit_manage",
+    "enforcement_operations",
+]
 
-class TokenPermission(Enum):
-    INVOICE_READ = "InvoiceRead"
-    INVOICE_WRITE = "InvoiceWrite"
-    CREDENTIALS_READ = "CredentialsRead"
-    CREDENTIALS_MANAGE = "CredentialsManage"
-    SUBUNIT_MANAGE = "SubunitManage"
-    ENFORCEMENT_OPERATIONS = "EnforcementOperations"
+type TokenStatus = Literal["pending", "active", "revoking", "revoked", "failed"]
 
+type TokenAuthorIdentifierType = Literal["nip", "pesel", "fingerprint"]
 
-class TokenStatus(Enum):
-    PENDING = "Pending"
-    ACTIVE = "Active"
-    REVOKING = "Revoking"
-    REVOKED = "Revoked"
-    FAILED = "Failed"
-
-
-class TokenAuthorIdentifierType(Enum):
-    NIP = "Nip"
-    PESEL = "Pesel"
-    FINGERPRINT = "Fingerprint"
+type TokenContextIdentifierType = Literal[
+    "nip", "internal_id", "nip_vat_ue", "peppol_id"
+]
 
 
-class TokenContextIdentifierType(Enum):
-    NIP = "Nip"
-    INTERNAL_ID = "InternalId"
-    NIP_VAT_UE = "NipVatUe"
-    PEPPOL_ID = "PeppolId"
+class TokenPermissionEnum(StrEnum):
+    INVOICE_READ = "invoice_read"
+    INVOICE_WRITE = "invoice_write"
+    CREDENTIALS_READ = "credentials_read"
+    CREDENTIALS_MANAGE = "credentials_manage"
+    SUBUNIT_MANAGE = "subunit_manage"
+    ENFORCEMENT_OPERATIONS = "enforcement_operations"
+
+
+class TokenStatusEnum(StrEnum):
+    PENDING = "pending"
+    ACTIVE = "active"
+    REVOKING = "revoking"
+    REVOKED = "revoked"
+    FAILED = "failed"
+
+
+class TokenAuthorIdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    PESEL = "pesel"
+    FINGERPRINT = "fingerprint"
+
+
+class TokenContextIdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    INTERNAL_ID = "internal_id"
+    NIP_VAT_UE = "nip_vat_ue"
+    PEPPOL_ID = "peppol_id"
 
 
 class TokenAuthorIdentifier(KSeFBaseModel):
-    type: TokenAuthorIdentifierType
+    type: TokenAuthorIdentifierTypeEnum
     value: str
 
 
 class TokenContextIdentifier(KSeFBaseModel):
-    type: TokenContextIdentifierType
+    type: TokenContextIdentifierTypeEnum
     value: str
 
 
@@ -71,3 +87,15 @@ class TokenInfo(KSeFBaseModel):
 class QueryTokensResponse(KSeFBaseModel):
     continuation_token: str | None
     tokens: list[TokenInfo]
+
+
+class GenerateTokenRequest(KSeFBaseModel):
+    permissions: list[TokenPermission]
+    description: str
+
+
+class QueryTokensRequest(KSeFBaseModel):
+    status: list[TokenStatus] | None = None
+    description: str | None = None
+    author_identifier: TokenAuthorIdentifier | None = None
+    page_size: int | None = None

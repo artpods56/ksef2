@@ -1,11 +1,13 @@
-from __future__ import annotations
-
-from datetime import date
+from dataclasses import dataclass, field
+from datetime import date, datetime, timezone
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import AwareDatetime, AnyUrl
 
 from ksef2.domain.models.base import KSeFBaseModel
+from ksef2.domain.types import CurrencyCodes, KsefInvoiceTypes
+from ksef2.domain.models.session import FormSchema
 
 
 class SortOrder(StrEnum):
@@ -13,46 +15,11 @@ class SortOrder(StrEnum):
     DESC = "Desc"
 
 
-class InvoiceSubjectType(StrEnum):
-    """
-    Enumeration representing different types of invoice subjects.
-
-    Values:
-        Subject1 -> Seller
-        Subject2 -> Buyer
-        Subject3 -> Other / Third Subject
-        SubjectAuthorized -> Authorized Subject
-    """
-
-    SELLER = "Subject1"
-    BUYER = "Subject2"
-    THIRD_SUBJECT = "Subject3"
-    SUBJECT_AUTHORIZED = "SubjectAuthorized"
-
-
-class DateType(StrEnum):
-    ISSUE = "Issue"
-    INVOICING = "Invoicing"
-    PERMANENT_STORAGE = "PermanentStorage"
-
-
-class AmountType(StrEnum):
-    BRUTTO = "Brutto"
-    NETTO = "Netto"
-    VAT = "Vat"
-
-
 class BuyerIdentifierType(StrEnum):
     NIP = "Nip"
     VAT_UE = "VatUe"
     OTHER = "Other"
     NONE = "None"
-
-
-class FormType(StrEnum):
-    FA = "FA"
-    PEF = "PEF"
-    RR = "RR"
 
 
 class InvoiceType(StrEnum):
@@ -84,7 +51,7 @@ class ThirdSubjectIdentifierType(StrEnum):
 
 
 # ---------------------------------------------------------------------------
-# Existing response model
+# Existing response request
 # ---------------------------------------------------------------------------
 
 
@@ -94,43 +61,19 @@ class SendInvoiceResponse(KSeFBaseModel):
     reference_number: str
 
 
-# ---------------------------------------------------------------------------
-# Query / Filter models
-# ---------------------------------------------------------------------------
-
-
-class InvoiceQueryDateRange(KSeFBaseModel):
-    date_type: DateType
-    from_: AwareDatetime
-    to: AwareDatetime | None = None
-    restrict_to_hwm_date: bool | None = None
-
-
-class InvoiceQueryAmount(KSeFBaseModel):
-    type: AmountType
-    from_: float | None = None
-    to: float | None = None
-
-
-class InvoiceQueryBuyerIdentifier(KSeFBaseModel):
-    type: BuyerIdentifierType
-    value: str | None = None
-
-
-class InvoiceQueryFilters(KSeFBaseModel):
-    subject_type: InvoiceSubjectType
-    date_range: InvoiceQueryDateRange
-    ksef_number: str | None = None
+class InvoicesMetadataFilter(KSeFBaseModel):
+    role: Literal["seller", "buyer", "third_subject", "authorized_subject"]
+    date_from: datetime | str
+    date_to: datetime | str
     invoice_number: str | None = None
-    amount: InvoiceQueryAmount | None = None
-    seller_nip: str | None = None
-    buyer_identifier: InvoiceQueryBuyerIdentifier | None = None
-    currency_codes: list[str] | None = None
-    invoicing_mode: InvoicingMode | None = None
-    is_self_invoicing: bool | None = None
-    form_type: FormType | None = None
-    invoice_types: list[InvoiceType] | None = None
-    has_attachment: bool | None = None
+    ksef_number: str | None = None
+    amount_min: float | None = None
+    amount_max: float | None = None
+
+
+class Identity(KSeFBaseModel):
+    type: Literal["nip"]
+    value: str
 
 
 # ---------------------------------------------------------------------------
@@ -246,3 +189,66 @@ class InvoiceExportStatusResponse(KSeFBaseModel):
     completed_date: AwareDatetime | None = None
     package_expiration_date: AwareDatetime | None = None
     package: InvoicePackage | None = None
+
+
+@dataclass(frozen=True)
+class ExportHandle:
+    """Holds export reference + crypto keys needed to later fetch/decrypt the package."""
+
+    reference_number: str
+    aes_key: bytes
+    iv: bytes
+
+
+### Public API ###
+
+
+class AmountMixin(KSeFBaseModel):
+    amount_type: Literal["brutto", "netto", "vat"]
+    amount_min: float | None = None
+    amount_max: float | None = None
+
+
+class InvoicesFilter(KSeFBaseModel):
+    # role
+    role: Literal["buyer", "seller", "third_subject", "authorized_subject"]
+
+    # dates
+    date_type: Literal["issue_date", "invoicing_date", "permanent_storage"]
+    date_from: datetime | str
+    date_to: datetime | str = field(default_factory=datetime.now)
+    restrict_to_permanent_storage_hwm_date: bool | None = None
+
+    # currency and amounts
+    currency_codes: list[CurrencyCodes] | None = None
+    amount_type: Literal["brutto", "netto", "vat"]
+    amount_min: float | None = None
+    amount_max: float | None = None
+
+    # identification
+    seller_nip: str | None = None
+    buyer_nip: str | None = None
+    buyer_vat_ue: str | None = None
+    buyer_other_id: str | None = None
+    invoice_number: str | None = None
+    ksef_number: str | None = None
+
+    # data
+    invoice_schema: FormSchema | None = None
+    invoice_types: list[KsefInvoiceTypes] | None = None
+    has_attachment: bool | None = None
+
+    # others
+    invoicing_mode: Literal["Online", "Offline"] | None = None
+    is_self_invoicing: bool | None = None
+
+
+class ExportInvoicesPayload(KSeFBaseModel):
+    filter: InvoicesFilter
+    encrypted_symmetric_key: str
+    initialization_vector: str
+
+
+class SendInvoicePayload(KSeFBaseModel):
+    xml_bytes: bytes
+    encrypted_bytes: bytes

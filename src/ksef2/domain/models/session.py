@@ -3,11 +3,11 @@ from __future__ import annotations
 import base64
 from datetime import datetime
 from enum import Enum, StrEnum
-from typing import Self
+from typing import Self, Literal
 
-from pydantic import AwareDatetime, Field, field_validator
+from pydantic import AwareDatetime, AnyUrl, field_validator
 
-from ksef2.domain.models.base import KSeFBaseModel, KSeFBaseParams
+from ksef2.domain.models.base import KSeFBaseModel
 
 
 class FormSchema(Enum):
@@ -23,36 +23,87 @@ class FormSchema(Enum):
         self.schema_version = schema_version
         self.schema_value = schema_value
 
+type SessionType = Literal["online", "batch"]
 
-class SessionType(StrEnum):
+
+type SessionStatus = Literal["in_progress", "succeeded", "failed", "cancelled"]
+
+class SessionTypeEnum(StrEnum):
     ONLINE = "Online"
     BATCH = "Batch"
 
 
-class SessionStatus(StrEnum):
+class SessionStatusEnum(StrEnum):
     IN_PROGRESS = "InProgress"
     SUCCEEDED = "Succeeded"
     FAILED = "Failed"
     CANCELLED = "Cancelled"
 
 
-class ListSessionsQuery(KSeFBaseParams):
-    page_size: int = Field(default=10, ge=1, le=100)
-    session_type: SessionType
-    reference_number: str | None = None
-    date_created_from: datetime | None = None
-    date_created_to: datetime | None = None
-    date_closed_from: datetime | None = None
-    date_closed_to: datetime | None = None
-    date_modified_from: datetime | None = None
-    date_modified_to: datetime | None = None
-    statuses: list[SessionStatus] | None = None
-
-
 class StatusInfo(KSeFBaseModel):
     code: int
     description: str
     details: list[str] | None = None
+
+
+class InvoiceStatusInfo(KSeFBaseModel):
+    code: int
+    description: str
+    details: list[str] | None = None
+    extensions: dict[str, str | None] | None = None
+
+
+class OpenOnlineSessionRequest(KSeFBaseModel):
+    encrypted_key: bytes
+    iv: bytes
+    form_code: FormSchema = FormSchema.FA3
+
+
+class OpenOnlineSessionResponse(KSeFBaseModel):
+    reference_number: str
+    valid_until: AwareDatetime
+
+
+class UpoPage(KSeFBaseModel):
+    reference_number: str
+    download_url: AnyUrl
+    download_url_expiration_date: AwareDatetime
+
+
+class Upo(KSeFBaseModel):
+    pages: list[UpoPage]
+
+
+class SessionStatusResponse(KSeFBaseModel):
+    status: StatusInfo
+    date_created: AwareDatetime
+    date_updated: AwareDatetime
+    valid_until: AwareDatetime | None = None
+    upo: Upo | None = None
+    invoice_count: int | None = None
+    successful_invoice_count: int | None = None
+    failed_invoice_count: int | None = None
+
+
+class SessionInvoiceStatusResponse(KSeFBaseModel):
+    ordinal_number: int
+    invoice_number: str | None = None
+    ksef_number: str | None = None
+    reference_number: str
+    invoice_hash: str
+    invoice_file_name: str | None = None
+    acquisition_date: AwareDatetime | None = None
+    invoicing_date: AwareDatetime
+    permanent_storage_date: AwareDatetime | None = None
+    upo_download_url: AnyUrl | None = None
+    upo_download_url_expiration_date: AwareDatetime | None = None
+    invoicing_mode: str | None = None
+    status: InvoiceStatusInfo
+
+
+class SessionInvoicesResponse(KSeFBaseModel):
+    continuation_token: str | None = None
+    invoices: list[SessionInvoiceStatusResponse]
 
 
 class SessionSummary(KSeFBaseModel):
@@ -96,7 +147,7 @@ class BaseSessionState(KSeFBaseModel):
 
     @field_validator("form_code", mode="before")
     @classmethod
-    def _coerce_form_code(cls, value: list[str] | tuple[str, ...]) -> object:
+    def _coerce_form_code(cls, value: object) -> object:
         """
         Pydantic serializes Enum values that are tuples as JSON arrays (lists).
         On restore, convert list -> tuple so Enum validation succeeds.
@@ -137,7 +188,7 @@ class OnlineSessionState(BaseSessionState):
         aes_key: bytes,
         iv: bytes,
         access_token: str,
-        valid_until: AwareDatetime,
+        valid_until: datetime,
         form_code: FormSchema,
     ) -> Self:
         """Create state from raw bytes (aes_key, iv).

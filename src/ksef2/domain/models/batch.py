@@ -34,6 +34,16 @@ class BatchFileInfo(KSeFBaseModel):
     """List of file parts. Max 50 parts, each max 100MB before encryption."""
 
 
+class OpenBatchSessionRequest(KSeFBaseModel):
+    """Request to open a batch session."""
+
+    encrypted_key: bytes
+    iv: bytes
+    batch_file: BatchFileInfo
+    form_code: FormSchema = FormSchema.FA3
+    offline_mode: bool = False
+
+
 class PartUploadRequest(KSeFBaseModel):
     """Upload endpoint information for a batch session part."""
 

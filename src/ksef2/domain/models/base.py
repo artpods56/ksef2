@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 from pydantic import BaseModel, ConfigDict, AliasGenerator
 from pydantic.alias_generators import to_camel
 
@@ -6,7 +8,7 @@ class KSeFBaseModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class KSeFBaseParams(KSeFBaseModel):
+class KSeFBaseParams[ParamsT](KSeFBaseModel):
     model_config = ConfigDict(
         extra="forbid",
         populate_by_name=True,
@@ -17,3 +19,8 @@ class KSeFBaseParams(KSeFBaseModel):
         use_enum_values=True,
         serialize_by_alias=True,
     )
+
+    def to_query_params(self) -> ParamsT:
+        return cast(
+            ParamsT, self.model_dump(by_alias=True, exclude_none=True, mode="json")
+        )

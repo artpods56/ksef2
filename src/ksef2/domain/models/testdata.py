@@ -1,43 +1,57 @@
-from __future__ import annotations
-
 from datetime import date
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import AwareDatetime
 
 from ksef2.domain.models.base import KSeFBaseModel
 
-
-class SubjectType(StrEnum):
-    ENFORCEMENT_AUTHORITY = "EnforcementAuthority"
-    VAT_GROUP = "VatGroup"
-    JST = "JST"
-
-
-class IdentifierType(StrEnum):
-    NIP = "Nip"
-    PESEL = "Pesel"
-    FINGERPRINT = "Fingerprint"
-    System = "System"
-
-
-class AuthContextIdentifierType(StrEnum):
-    NIP = "Nip"
-    INTERNAL_ID = "InternalId"
-    NIP_VAT_UE = "NipVatUe"
-    PEPPOL_ID = "PeppolId"
+type SubjectType = Literal["enforcement_authority", "vat_group", "jst"]
+type IdentifierType = Literal["nip", "pesel", "fingerprint", "system"]
+type AuthContextIdentifierType = Literal["nip", "internal_id", "nip_vat_ue", "peppol_id"]
+type PermissionType = Literal[
+    "invoice_read",
+    "invoice_write",
+    "pef_invoice_write",
+    "introspection",
+    "credentials_read",
+    "credentials_manage",
+    "enforcement_operations",
+    "subunit_manage",
+    "vat_ue_manage",
+]
 
 
-class PermissionType(StrEnum):
-    INVOICE_READ = "InvoiceRead"
-    INVOICE_WRITE = "InvoiceWrite"
-    PEF_INVOICE_WRITE = "PefInvoiceWrite"
-    INTROSPECTION = "Introspection"
-    CREDENTIALS_READ = "CredentialsRead"
-    CREDENTIALS_MANAGE = "CredentialsManage"
-    ENFORCEMENT_OPERATIONS = "EnforcementOperations"
-    SUBUNIT_MANAGE = "SubunitManage"
-    VAT_UE_MANAGE = "VatUeManage"
+class SubjectTypeEnum(StrEnum):
+    ENFORCEMENT_AUTHORITY = "enforcement_authority"
+    VAT_GROUP = "vat_group"
+    JST = "jst"
+
+
+class IdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    PESEL = "pesel"
+    FINGERPRINT = "fingerprint"
+    SYSTEM = "system"
+
+
+class AuthContextIdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    INTERNAL_ID = "internal_id"
+    NIP_VAT_UE = "nip_vat_ue"
+    PEPPOL_ID = "peppol_id"
+
+
+class PermissionTypeEnum(StrEnum):
+    INVOICE_READ = "invoice_read"
+    INVOICE_WRITE = "invoice_write"
+    PEF_INVOICE_WRITE = "pef_invoice_write"
+    INTROSPECTION = "introspection"
+    CREDENTIALS_READ = "credentials_read"
+    CREDENTIALS_MANAGE = "credentials_manage"
+    ENFORCEMENT_OPERATIONS = "enforcement_operations"
+    SUBUNIT_MANAGE = "subunit_manage"
+    VAT_UE_MANAGE = "vat_ue_manage"
 
 
 class SubUnit(KSeFBaseModel):
@@ -68,6 +82,46 @@ class CreateSubjectRequest(KSeFBaseModel):
     created_date: AwareDatetime | None = None
 
 
+class DeleteSubjectRequest(KSeFBaseModel):
+    subject_nip: str
+
+
+class CreatePersonRequest(KSeFBaseModel):
+    nip: str
+    pesel: str
+    description: str
+    is_bailiff: bool = False
+    is_deceased: bool = False
+    created_date: AwareDatetime | None = None
+
+
+class DeletePersonRequest(KSeFBaseModel):
+    nip: str
+
+
+class GrantPermissionsRequest(KSeFBaseModel):
+    permissions: list[Permission]
+    grant_to: Identifier
+    in_context_of: Identifier
+
+
+class RevokePermissionsRequest(KSeFBaseModel):
+    revoke_from: Identifier
+    in_context_of: Identifier
+
+
+class EnableAttachmentsRequest(KSeFBaseModel):
+    nip: str
+
+
 class RevokeAttachmentsRequest(KSeFBaseModel):
     nip: str
     expected_end_date: date | None = None
+
+
+class BlockContextRequest(KSeFBaseModel):
+    context: AuthContextIdentifier
+
+
+class UnblockContextRequest(KSeFBaseModel):
+    context: AuthContextIdentifier
