@@ -189,6 +189,7 @@ For the full API surface, see the guide docs below.
 ```bash
 just sync          # Install all dependencies (including dev)
 just test          # Run unit tests
+just release-check # Run the pre-release verification suite and build artifacts
 just regenerate-models  # Regenerate OpenAPI models
 ```
 
@@ -212,6 +213,14 @@ The SDK covers **77 of 77** KSeF API endpoints (100%). See feature docs for deta
 - [Certificates](docs/guides/certificates.md) — enroll, query, revoke KSeF certificates
 - [Limits](docs/guides/limits.md) — query and modify API rate limits
 - [Test Data](docs/guides/testdata.md) — create test subjects, manage test environment
+
+## Stability And Releases
+
+The SDK is still in the pre-`1.0.0` stabilization phase.
+
+- Track release notes in [CHANGELOG.md](CHANGELOG.md)
+- Follow the documented release flow in [docs/releasing.md](docs/releasing.md)
+- Expect `0.x` minor releases to contain public API cleanup when needed
 
 ## License
 

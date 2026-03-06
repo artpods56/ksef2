@@ -15,6 +15,14 @@ test:
     uv run pytest tests/unit/ -v
 
 
+release-check:
+    just lint
+    just format-check
+    just typecheck
+    just test
+    uv build
+
+
 coverage:
     uv run python scripts/api_coverage.py
 

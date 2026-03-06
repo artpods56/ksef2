@@ -30,3 +30,5 @@ Good starting points:
 
 - [KSeF API docs](https://api-test.ksef.mf.gov.pl/docs/v2)
 - [Generated API reference](API_DOCS.md)
+- [Release process and versioning policy](releasing.md)
+- [Project changelog](../CHANGELOG.md)
