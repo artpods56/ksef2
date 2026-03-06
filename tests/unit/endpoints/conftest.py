@@ -3,8 +3,8 @@ import pytest
 from ksef2.domain.models.pagination import (
     OffsetPaginationParams,
     PermissionsQueryParams,
-    CertificateQueryParams,
-    InvoiceQueryParams,
+    OffsetPaginationParams,
+    InvoiceMetadataParams,
 )
 
 
@@ -24,10 +24,10 @@ def permissions_params() -> PermissionsQueryParams:
 
 
 @pytest.fixture
-def certificate_params() -> CertificateQueryParams:
-    return CertificateQueryParams()
+def certificate_params() -> OffsetPaginationParams:
+    return OffsetPaginationParams()
 
 
 @pytest.fixture
-def invoice_params() -> InvoiceQueryParams:
-    return InvoiceQueryParams()
+def invoice_params() -> InvoiceMetadataParams:
+    return InvoiceMetadataParams()

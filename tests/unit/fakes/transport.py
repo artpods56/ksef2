@@ -18,7 +18,7 @@ class RecordedCall:
 
 @final
 @dataclass()
-class FakeTransport:
+class FakeTransport(protocols.Middleware):
     calls: list[RecordedCall] = field(default_factory=list)
     responses: list[httpx.Response] = field(default_factory=list)
 
@@ -32,7 +32,6 @@ class FakeTransport:
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
     ) -> httpx.Response:
-
         self.calls.append(
             RecordedCall(
                 method=method,
@@ -79,7 +78,7 @@ class FakeTransport:
 
     def enqueue(
         self,
-        json_body: dict[str, Any] | None = None,
+        json_body: Any | None = None,
         status_code: int = 200,
         content: bytes | None = None,
         headers: dict[str, str] | None = None,
@@ -102,6 +101,3 @@ class FakeTransport:
         if not self.responses:
             raise RuntimeError("FakeTransport: no more queued responses")
         return self.responses.pop(0)
-
-    def _(self) -> protocols.Middleware:
-        return self

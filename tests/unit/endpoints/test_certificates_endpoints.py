@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from ksef2.core import exceptions
 from ksef2.core.routes import CertificateRoutes
-from ksef2.endpoints.certificates import CertificateEndpoints
+from ksef2.endpoints.certificates import CertificatesEndpoints
 from tests.unit.fakes import transport
 from tests.unit.factories.certificates import (
     CertificateLimitsResponseFactory,
@@ -41,26 +41,28 @@ def resp_factory(request: pytest.FixtureRequest) -> BaseFactory[BaseModel]:
 
 class TestCertificateEndpoints:
     @pytest.fixture
-    def cert_eps(self, fake_transport: transport.FakeTransport) -> CertificateEndpoints:
-        return CertificateEndpoints(fake_transport)
+    def cert_eps(
+        self, fake_transport: transport.FakeTransport
+    ) -> CertificatesEndpoints:
+        return CertificatesEndpoints(fake_transport)
 
     @pytest.fixture
     def handled_cert_eps(
         self, fake_transport: transport.FakeTransport
-    ) -> CertificateEndpoints:
-        return CertificateEndpoints(KSeFExceptionMiddleware(fake_transport))
+    ) -> CertificatesEndpoints:
+        return CertificatesEndpoints(KSeFExceptionMiddleware(fake_transport))
 
     @pytest.mark.parametrize(
         ["target_path", "method", "resp_factory"],
         [
             (
                 CertificateRoutes.LIMITS,
-                CertificateEndpoints.get_limits,
+                CertificatesEndpoints.get_limits,
                 "cert_limits_resp",
             ),
             (
                 CertificateRoutes.ENROLLMENT_DATA,
-                CertificateEndpoints.get_enrollment_data,
+                CertificatesEndpoints.get_enrollment_data,
                 "cert_enrollment_data_resp",
             ),
         ],
@@ -68,7 +70,7 @@ class TestCertificateEndpoints:
     )
     def test_happy_path_get(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         target_path: str,
         method: Callable[[], BaseModel],
@@ -95,12 +97,12 @@ class TestCertificateEndpoints:
         [
             (
                 CertificateRoutes.LIMITS,
-                CertificateEndpoints.get_limits,
+                CertificatesEndpoints.get_limits,
                 "cert_limits_resp",
             ),
             (
                 CertificateRoutes.ENROLLMENT_DATA,
-                CertificateEndpoints.get_enrollment_data,
+                CertificatesEndpoints.get_enrollment_data,
                 "cert_enrollment_data_resp",
             ),
         ],
@@ -108,7 +110,7 @@ class TestCertificateEndpoints:
     )
     def test_response_validation_get(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         target_path: str,
         method: Callable[[], BaseModel],
@@ -127,12 +129,12 @@ class TestCertificateEndpoints:
         [
             (
                 CertificateRoutes.LIMITS,
-                CertificateEndpoints.get_limits,
+                CertificatesEndpoints.get_limits,
                 "cert_limits_resp",
             ),
             (
                 CertificateRoutes.ENROLLMENT_DATA,
-                CertificateEndpoints.get_enrollment_data,
+                CertificatesEndpoints.get_enrollment_data,
                 "cert_enrollment_data_resp",
             ),
         ],
@@ -140,7 +142,7 @@ class TestCertificateEndpoints:
     )
     def test_transport_error_get(
         self,
-        handled_cert_eps: CertificateEndpoints,
+        handled_cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         target_path: str,
         method: Callable[[], BaseModel],
@@ -176,7 +178,7 @@ class TestCertificateEndpoints:
 
     def test_enroll(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_enroll_req: EnrollCertificateRequestFactory,
         cert_enroll_resp: EnrollCertificateResponseFactory,
@@ -203,7 +205,7 @@ class TestCertificateEndpoints:
 
     def test_enroll_response_validation(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_enroll_req: EnrollCertificateRequestFactory,
     ):
@@ -218,7 +220,7 @@ class TestCertificateEndpoints:
 
     def test_enroll_transport_error(
         self,
-        handled_cert_eps: CertificateEndpoints,
+        handled_cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_enroll_req: EnrollCertificateRequestFactory,
         cert_enroll_resp: EnrollCertificateResponseFactory,
@@ -256,7 +258,7 @@ class TestCertificateEndpoints:
 
     def test_get_enrollment_status(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_enrollment_status_resp: CertificateEnrollmentStatusResponseFactory,
     ):
@@ -281,7 +283,7 @@ class TestCertificateEndpoints:
 
     def test_get_enrollment_status_response_validation(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
     ):
         invalid_response = InvalidContent(invalid_field="invalid")
@@ -294,7 +296,7 @@ class TestCertificateEndpoints:
 
     def test_get_enrollment_status_transport_error(
         self,
-        handled_cert_eps: CertificateEndpoints,
+        handled_cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_enrollment_status_resp: CertificateEnrollmentStatusResponseFactory,
     ):
@@ -334,7 +336,7 @@ class TestCertificateEndpoints:
 
     def test_retrieve(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_retrieve_req: RetrieveCertificatesRequestFactory,
         cert_retrieve_resp: RetrieveCertificatesResponseFactory,
@@ -361,7 +363,7 @@ class TestCertificateEndpoints:
 
     def test_retrieve_response_validation(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_retrieve_req: RetrieveCertificatesRequestFactory,
     ):
@@ -376,7 +378,7 @@ class TestCertificateEndpoints:
 
     def test_retrieve_transport_error(
         self,
-        handled_cert_eps: CertificateEndpoints,
+        handled_cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_retrieve_req: RetrieveCertificatesRequestFactory,
         cert_retrieve_resp: RetrieveCertificatesResponseFactory,
@@ -414,7 +416,7 @@ class TestCertificateEndpoints:
 
     def test_revoke(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_revoke_req: RevokeCertificateRequestFactory,
     ):
@@ -437,7 +439,7 @@ class TestCertificateEndpoints:
 
     def test_revoke_without_body(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
     ):
         certificate_serial_number = "ABC123DEF456"
@@ -456,7 +458,7 @@ class TestCertificateEndpoints:
 
     def test_revoke_transport_error(
         self,
-        handled_cert_eps: CertificateEndpoints,
+        handled_cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
     ):
         certificate_serial_number = "ABC123DEF456"
@@ -487,7 +489,7 @@ class TestCertificateEndpoints:
 
     def test_query(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_query_req: QueryCertificatesRequestFactory,
         cert_query_resp: QueryCertificatesResponseFactory,
@@ -516,7 +518,7 @@ class TestCertificateEndpoints:
 
     def test_query_response_validation(
         self,
-        cert_eps: CertificateEndpoints,
+        cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_query_req: QueryCertificatesRequestFactory,
     ):
@@ -531,7 +533,7 @@ class TestCertificateEndpoints:
 
     def test_query_transport_error(
         self,
-        handled_cert_eps: CertificateEndpoints,
+        handled_cert_eps: CertificatesEndpoints,
         fake_transport: transport.FakeTransport,
         cert_query_req: QueryCertificatesRequestFactory,
         cert_query_resp: QueryCertificatesResponseFactory,

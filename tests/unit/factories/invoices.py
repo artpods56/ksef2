@@ -1,16 +1,27 @@
-from ksef2.infra.schema.api import spec
-from ksef2.infra.schema.api.supp.invoices import (
-    InvoiceExportRequest,
-    QueryInvoicesMetadataRequest,
-    SendInvoiceRequest,
+from datetime import datetime, timedelta, timezone
+
+from ksef2.domain.models.invoices import (
+    ExportHandle,
+    InvoicePackage,
+    InvoicesFilter,
+    PackagePart,
 )
+from ksef2.infra.schema.api import spec
 from polyfactory.factories.pydantic_factory import ModelFactory
+from polyfactory.factories import DataclassFactory
 from polyfactory.pytest_plugin import register_fixture
+
+_NOW = datetime.now(timezone.utc)
+_EARLIER = _NOW - timedelta(days=7)
+
+"""
+Request/Response Factories for spec models
+"""
 
 
 @register_fixture(name="inv_query_metadata_req")
 class QueryInvoicesMetadataRequestFactory(
-    ModelFactory[QueryInvoicesMetadataRequest]
+    ModelFactory[spec.QueryInvoicesMetadataRequest]
 ): ...
 
 
@@ -21,7 +32,7 @@ class QueryInvoicesMetadataResponseFactory(
 
 
 @register_fixture(name="inv_export_req")
-class InvoiceExportRequestFactory(ModelFactory[InvoiceExportRequest]): ...
+class InvoiceExportRequestFactory(ModelFactory[spec.InvoiceExportRequest]): ...
 
 
 @register_fixture(name="inv_export_resp")
@@ -35,7 +46,7 @@ class InvoiceExportStatusResponseFactory(
 
 
 @register_fixture(name="inv_send_req")
-class SendInvoiceRequestFactory(ModelFactory[SendInvoiceRequest]): ...
+class SendInvoiceRequestFactory(ModelFactory[spec.SendInvoiceRequest]): ...
 
 
 @register_fixture(name="inv_send_resp")
@@ -54,3 +65,41 @@ class SessionInvoicesResponseFactory(ModelFactory[spec.SessionInvoicesResponse])
 class SessionInvoiceStatusResponseFactory(
     ModelFactory[spec.SessionInvoiceStatusResponse]
 ): ...
+
+
+"""Factories for public API models
+"""
+
+
+@register_fixture(name="inv_export_filters")
+class InvoicesFilterFactory(ModelFactory[InvoicesFilter]):
+    role = "seller"
+    date_type = "issue_date"
+    date_from = _EARLIER
+    date_to = _NOW
+    currency_codes = None
+    amount_type = "brutto"
+    amount_min = 10.0
+    amount_max = 100.0
+    seller_nip = "1234567890"
+    buyer_nip = None
+    buyer_vat_ue = None
+    buyer_other_id = None
+    invoice_number = None
+    ksef_number = None
+    invoice_schema = None
+    invoice_types = None
+    has_attachment = False
+    invoicing_mode = "Online"
+    is_self_invoicing = False
+
+
+@register_fixture(name="inv_package_part")
+class PackagePartFactory(ModelFactory[PackagePart]): ...
+
+
+@register_fixture(name="inv_package")
+class InvoicePackageFactory(ModelFactory[InvoicePackage]): ...
+
+
+class ExportHandleFactory(DataclassFactory[ExportHandle]): ...

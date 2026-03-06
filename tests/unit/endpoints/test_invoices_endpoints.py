@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from ksef2.core import exceptions
 from ksef2.core.routes import InvoiceRoutes
-from ksef2.endpoints.invoices import InvoiceEndpoints
+from ksef2.endpoints.invoices import InvoicesEndpoints
 from tests.unit.fakes import transport
 from tests.unit.factories.invoices import (
     QueryInvoicesMetadataRequestFactory,
@@ -43,8 +43,8 @@ class InvalidContent(BaseModel):
 
 
 @pytest.fixture
-def req_factory(request: pytest.FixtureRequest) -> BaseFactory[BaseModel]:
-    return cast(BaseFactory[BaseModel], request.getfixturevalue(request.param))
+def req_factory(request: pytest.FixtureRequest) -> object:
+    return request.getfixturevalue(request.param)
 
 
 @pytest.fixture
@@ -52,16 +52,23 @@ def resp_factory(request: pytest.FixtureRequest) -> BaseFactory[BaseModel]:
     return cast(BaseFactory[BaseModel], request.getfixturevalue(request.param))
 
 
+@pytest.fixture
+def inv_query_metadata_body(
+    inv_query_metadata_req: QueryInvoicesMetadataRequestFactory,
+):
+    return inv_query_metadata_req.build().filters
+
+
 class TestInvoiceEndpoints:
     @pytest.fixture
-    def invoice_eps(self, fake_transport: transport.FakeTransport) -> InvoiceEndpoints:
-        return InvoiceEndpoints(fake_transport)
+    def invoice_eps(self, fake_transport: transport.FakeTransport) -> InvoicesEndpoints:
+        return InvoicesEndpoints(fake_transport)
 
     @pytest.fixture
     def handled_invoice_eps(
         self, fake_transport: transport.FakeTransport
-    ) -> InvoiceEndpoints:
-        return InvoiceEndpoints(KSeFExceptionMiddleware(fake_transport))
+    ) -> InvoicesEndpoints:
+        return InvoicesEndpoints(KSeFExceptionMiddleware(fake_transport))
 
     # ===== POST body -> response =====
 
@@ -71,7 +78,7 @@ class TestInvoiceEndpoints:
             (
                 "query_metadata",
                 InvoiceRoutes.QUERY_METADATA,
-                "inv_query_metadata_req",
+                "inv_query_metadata_body",
                 "inv_query_metadata_resp",
                 [],
             ),
@@ -94,15 +101,15 @@ class TestInvoiceEndpoints:
     )
     def test_post(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
         route: str,
-        req_factory: BaseFactory[BaseModel],
+        req_factory: object,
         resp_factory: BaseFactory[BaseModel],
         prefix_args: list[str],
     ):
-        request = req_factory.build()
+        request = req_factory.build() if hasattr(req_factory, "build") else req_factory
         request_dump = request.model_dump(mode="json")
         expected = resp_factory.build()
 
@@ -123,7 +130,7 @@ class TestInvoiceEndpoints:
     @pytest.mark.parametrize(
         ["method_name", "req_factory", "prefix_args"],
         [
-            ("query_metadata", "inv_query_metadata_req", []),
+            ("query_metadata", "inv_query_metadata_body", []),
             ("export", "inv_export_req", []),
             ("send", "inv_send_req", [_REF]),
         ],
@@ -131,13 +138,13 @@ class TestInvoiceEndpoints:
     )
     def test_post_response_validation(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
-        req_factory: BaseFactory[BaseModel],
+        req_factory: object,
         prefix_args: list[str],
     ):
-        request = req_factory.build()
+        request = req_factory.build() if hasattr(req_factory, "build") else req_factory
         invalid_response = InvalidContent(invalid_field="invalid")
 
         with pytest.raises(exceptions.KSeFValidationError):
@@ -152,7 +159,7 @@ class TestInvoiceEndpoints:
             (
                 "query_metadata",
                 InvoiceRoutes.QUERY_METADATA,
-                "inv_query_metadata_req",
+                "inv_query_metadata_body",
                 "inv_query_metadata_resp",
                 [],
             ),
@@ -175,15 +182,15 @@ class TestInvoiceEndpoints:
     )
     def test_post_transport_error(
         self,
-        handled_invoice_eps: InvoiceEndpoints,
+        handled_invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
         route: str,
-        req_factory: BaseFactory[BaseModel],
+        req_factory: object,
         resp_factory: BaseFactory[BaseModel],
         prefix_args: list[str],
     ):
-        request = req_factory.build()
+        request = req_factory.build() if hasattr(req_factory, "build") else req_factory
         response = resp_factory.build()
 
         for exc, code in _TRANSPORT_ERRORS:
@@ -208,12 +215,12 @@ class TestInvoiceEndpoints:
 
     def test_query_metadata_with_params(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
-        inv_query_metadata_req: QueryInvoicesMetadataRequestFactory,
+        inv_query_metadata_body,
         inv_query_metadata_resp: QueryInvoicesMetadataResponseFactory,
     ):
-        request = inv_query_metadata_req.build()
+        request = inv_query_metadata_body
         expected = inv_query_metadata_resp.build()
 
         fake_transport.enqueue(expected.model_dump(mode="json"))
@@ -229,7 +236,7 @@ class TestInvoiceEndpoints:
         assert call.params.get("sortOrder") == "ASC"
         assert fake_transport.responses == []
 
-    # ===== GET -> model =====
+    # ===== GET -> request =====
 
     @pytest.mark.parametrize(
         ["method_name", "call_args", "expected_path", "resp_factory"],
@@ -260,7 +267,7 @@ class TestInvoiceEndpoints:
     )
     def test_get_model(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
         call_args: list[str],
@@ -292,7 +299,7 @@ class TestInvoiceEndpoints:
     )
     def test_get_model_response_validation(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
         call_args: list[str],
@@ -334,7 +341,7 @@ class TestInvoiceEndpoints:
     )
     def test_get_model_transport_error(
         self,
-        handled_invoice_eps: InvoiceEndpoints,
+        handled_invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
         call_args: list[str],
@@ -389,7 +396,7 @@ class TestInvoiceEndpoints:
     )
     def test_get_bytes(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
         call_args: list[str],
@@ -436,7 +443,7 @@ class TestInvoiceEndpoints:
     )
     def test_get_bytes_transport_error(
         self,
-        handled_invoice_eps: InvoiceEndpoints,
+        handled_invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
         call_args: list[str],
@@ -471,7 +478,7 @@ class TestInvoiceEndpoints:
     )
     def test_list_invoices(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         inv_session_invoices_resp: SessionInvoicesResponseFactory,
         method_name: str,
@@ -506,7 +513,7 @@ class TestInvoiceEndpoints:
     )
     def test_list_invoices_continuation_token(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         inv_session_invoices_resp: SessionInvoicesResponseFactory,
         method_name: str,
@@ -534,7 +541,7 @@ class TestInvoiceEndpoints:
     )
     def test_list_invoices_response_validation(
         self,
-        invoice_eps: InvoiceEndpoints,
+        invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         method_name: str,
     ):
@@ -558,7 +565,7 @@ class TestInvoiceEndpoints:
     )
     def test_list_invoices_transport_error(
         self,
-        handled_invoice_eps: InvoiceEndpoints,
+        handled_invoice_eps: InvoicesEndpoints,
         fake_transport: transport.FakeTransport,
         inv_session_invoices_resp: SessionInvoicesResponseFactory,
         method_name: str,
