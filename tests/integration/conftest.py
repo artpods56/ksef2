@@ -12,7 +12,7 @@ import pytest
 # On macOS with Homebrew these live under /opt/homebrew/lib and the dynamic
 # linker only finds them when DYLD_FALLBACK_LIBRARY_PATH includes that path.
 # Interactive shells typically pick this up from .zshrc, but pytest and CI
-# runners often don't source the user profile, so we set it explicitly.
+# runners often don'request source the user profile, so we set it explicitly.
 if sys.platform == "darwin":
     _brew_lib = "/opt/homebrew/lib"
     _cur = os.environ.get("DYLD_FALLBACK_LIBRARY_PATH", "")
@@ -22,14 +22,11 @@ if sys.platform == "darwin":
         )
 
 from ksef2 import Client
+from ksef2.clients.testdata import TemporalTestData
 from ksef2.config import Environment
 from ksef2.core.exceptions import KSeFApiError
 from ksef2.core.xades import generate_test_certificate
 from ksef2.clients.authenticated import AuthenticatedClient
-from ksef2.domain.models.testdata import (
-    SubjectType,
-)
-from ksef2.services.testdata import TemporalTestData
 
 
 from dotenv import load_dotenv
@@ -100,7 +97,7 @@ def _ensure_subject_exists(td: TemporalTestData, nip: str) -> None:
     try:
         td.create_subject(
             nip=nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Integration test subject",
         )
     except KSeFApiError as e:
@@ -143,7 +140,7 @@ def xades_authenticated_context(
 ) -> Generator[tuple[Client, AuthenticatedClient], None, None]:
     """Create an authenticated context using XAdES with self-signed certificate.
 
-    This is the entry point for tests that don't have a KSeF token yet.
+    This is the entry point for tests that don'request have a KSeF token yet.
     Uses self-signed certificate for authentication (allowed on TEST env only).
 
     Sets up:

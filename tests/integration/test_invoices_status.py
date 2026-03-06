@@ -20,13 +20,10 @@ from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import SessionType, SessionStatus, ListSessionsResponse
+from ksef2.domain.models.session import SessionTypeEnum, SessionStatusEnum, ListSessionsResponse
 from ksef2.domain.models.testdata import (
     Identifier,
-    IdentifierType,
     Permission,
-    PermissionType,
-    SubjectType,
 )
 from ksef2.infra.schema.api import spec
 
@@ -56,12 +53,12 @@ def session_with_invoice():
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Integration test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Integration test buyer",
         )
         temp.create_person(
@@ -72,16 +69,16 @@ def session_with_invoice():
         temp.grant_permissions(
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE,
+                    type="invoice_write",
                     description="Send invoices",
                 ),
                 Permission(
-                    type=PermissionType.INTROSPECTION,
+                    type="introspection",
                     description="Introspect sessions",
                 ),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=person_nip),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=seller_nip),
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=seller_nip),
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
@@ -120,8 +117,8 @@ def test_list_sessions(xades_authenticated_context: tuple[Client, AuthenticatedC
     """List sessions filtered by type."""
     _client, auth = xades_authenticated_context
 
-    response = auth.session_log.list_page(
-        session_type=SessionType.ONLINE,
+    response = auth.session_log.query(
+        session_type=SessionTypeEnum.ONLINE,
     )
 
     assert isinstance(response, ListSessionsResponse)
@@ -136,8 +133,8 @@ def test_list_sessions_batch(
     """List batch sessions."""
     _client, auth = xades_authenticated_context
 
-    response = auth.session_log.list_page(
-        session_type=SessionType.BATCH,
+    response = auth.session_log.query(
+        session_type=SessionTypeEnum.BATCH,
     )
 
     assert isinstance(response, ListSessionsResponse)
@@ -150,9 +147,9 @@ def test_list_sessions_with_status_filter(
     """List sessions filtered by statuses."""
     _client, auth = xades_authenticated_context
 
-    response = auth.session_log.list_page(
-        session_type=SessionType.ONLINE,
-        statuses=[SessionStatus.SUCCEEDED, SessionStatus.IN_PROGRESS],
+    response = auth.session_log.query(
+        session_type=SessionTypeEnum.ONLINE,
+        statuses=[SessionStatusEnum.SUCCEEDED, SessionStatusEnum.IN_PROGRESS],
     )
 
     assert isinstance(response, ListSessionsResponse)

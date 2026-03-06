@@ -71,7 +71,7 @@ class TestBatchSession:
         assert upload_req.headers
 
     def test_batch_file_info_model(self) -> None:
-        """Test that BatchFileInfo model validates correctly."""
+        """Test that BatchFileInfo request validates correctly."""
         batch_file = BatchFileInfo(
             file_size=1000,
             file_hash="WO86CC+1Lef11wEosItld/NPwxGN8tobOMLqk9PQjgs=",

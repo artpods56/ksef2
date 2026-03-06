@@ -18,7 +18,7 @@ def test_list_active_sessions(
 
     assert response is not None
     assert hasattr(response, "items")
-    assert hasattr(response, "continuationToken")
+    assert hasattr(response, "continuation_token")
 
 
 @pytest.mark.integration
@@ -48,6 +48,6 @@ def test_terminate_specific_session(xades_authenticated_context):
     sessions_response = auth.sessions.list_page()
 
     if sessions_response.items:
-        ref_to_delete = sessions_response.items[0].referenceNumber
+        ref_to_delete = sessions_response.items[0].reference_number
 
         auth.sessions.close(reference_number=ref_to_delete)

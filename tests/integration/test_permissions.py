@@ -27,10 +27,6 @@ from ksef2.domain.models.permissions import (
     EntityPermissionType,
     SubunitIdentifierType,
 )
-from ksef2.domain.models.testdata import (
-    IdentifierType,
-    PermissionType,
-)
 
 
 if TYPE_CHECKING:
@@ -176,7 +172,7 @@ def test_query_personal(permissions_context: PermissionContext):
 
 @pytest.mark.integration
 def test_query_persons(permissions_context: PermissionContext):
-    """Query person permissions and verify domain response model."""
+    """Query person permissions and verify domain response request."""
     from ksef2.domain.models.permissions import (
         PersonPermissionDetail,
         PersonPermissionsQueryRequest,
@@ -309,9 +305,9 @@ def test_grant_person_permission(permissions_context: PermissionContext):
     person_nip = generate_nip()
 
     response = auth.permissions.grant_person(
-        subject_identifier=IdentifierType.NIP,
+        subject_identifier="nip",
         subject_value=person_nip,
-        permissions=[PermissionType.INVOICE_READ],
+        permissions=["invoice_read"],
         description="Test person permission grant",
         first_name="Test",
         last_name="Person",
@@ -329,7 +325,7 @@ def test_grant_subunit_permission(permissions_context: PermissionContext):
     seller_nip = permissions_context["seller_nip"]
 
     response = auth.permissions.grant_subunit(
-        subject_identifier=IdentifierType.NIP,
+        subject_identifier="nip",
         subject_value=seller_nip,
         context_identifier=SubunitIdentifierType.NIP,
         context_value=seller_nip,
@@ -373,11 +369,11 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
         AuthorizationPermissionsQueryRequest,
         QueryType,
     )
-    from ksef2.domain.models.pagination import PaginationParams
+    from ksef2.domain.models.pagination import OffsetPaginationParams
 
     query_response = auth.permissions.query_authorizations(
         query=AuthorizationPermissionsQueryRequest(query_type=QueryType.GRANTED),
-        params=PaginationParams(page_size=100),
+        params=OffsetPaginationParams(page_size=100),
     )
 
     # Find our permission by description
@@ -397,7 +393,7 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
         assert hasattr(revoke_response, "reference_number")
         assert revoke_response.reference_number
     else:
-        # If we didn't find it, the test still passes as we verified grant worked
+        # If we didn'request find it, the test still passes as we verified grant worked
         # The permission might not have been processed yet or might be in a different context
         pytest.skip(
             "Permission not found in query results - likely still being processed"
@@ -432,11 +428,11 @@ def test_revoke_common_permission(permissions_context: PermissionContext):
 
     # Query personal permissions to find the one we just created
     from ksef2.domain.models.permissions import PersonalPermissionsQueryRequest
-    from ksef2.domain.models.pagination import PaginationParams
+    from ksef2.domain.models.pagination import OffsetPaginationParams
 
     query_response = auth.permissions.query_personal(
         query=PersonalPermissionsQueryRequest(),
-        params=PaginationParams(page_size=100),
+        params=OffsetPaginationParams(page_size=100),
     )
 
     # Find our permission by description
@@ -456,7 +452,7 @@ def test_revoke_common_permission(permissions_context: PermissionContext):
         assert hasattr(revoke_response, "reference_number")
         assert revoke_response.reference_number
     else:
-        # If we didn't find it, the test still passes as we verified grant worked
+        # If we didn'request find it, the test still passes as we verified grant worked
         # The permission might not have been processed yet or might be in a different context
         pytest.skip(
             "Permission not found in query results - likely still being processed"

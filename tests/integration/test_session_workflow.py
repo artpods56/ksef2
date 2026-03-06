@@ -23,10 +23,7 @@ from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.session import OnlineSessionState
 from ksef2.domain.models.testdata import (
     Identifier,
-    IdentifierType,
     Permission,
-    PermissionType,
-    SubjectType,
 )
 from ksef2.infra.schema.api import spec
 
@@ -57,12 +54,12 @@ def workflow_context():
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Workflow test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Workflow test buyer",
         )
         temp.create_person(
@@ -73,16 +70,16 @@ def workflow_context():
         temp.grant_permissions(
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE,
+                    type="invoice_write",
                     description="Send invoices",
                 ),
                 Permission(
-                    type=PermissionType.INTROSPECTION,
+                    type="introspection",
                     description="Introspect sessions",
                 ),
             ],
-            grant_to=Identifier(type=IdentifierType.NIP, value=person_nip),
-            in_context_of=Identifier(type=IdentifierType.NIP, value=seller_nip),
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=seller_nip),
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
@@ -150,14 +147,16 @@ def test_get_state_returns_session_state(workflow_context):
 @pytest.mark.integration
 def test_download_invoice_returns_xml_bytes(workflow_context):
     """download_invoice returns non-empty XML bytes."""
-    session: OnlineSessionClient = workflow_context["session"]
+    from ksef2.clients.authenticated import AuthenticatedClient
+
+    auth: AuthenticatedClient = workflow_context["auth"]
     invoices_list = workflow_context["invoices_list"]
 
     if not invoices_list.invoices or not invoices_list.invoices[0].ksefNumber:
         pytest.skip("No processed invoice with ksefNumber available")
 
     ksef_number = invoices_list.invoices[0].ksefNumber
-    xml_bytes = session.download_invoice(ksef_number=ksef_number)
+    xml_bytes = auth.invoices.download_invoice(ksef_number=ksef_number)
 
     assert isinstance(xml_bytes, bytes)
     assert len(xml_bytes) > 0

@@ -24,7 +24,6 @@ from ksef2 import Client, Environment, FormSchema
 from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import SubjectType
 
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -57,12 +56,12 @@ def test_cli_export_invoices_with_pem(tmp_path: Path) -> None:
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="CLI test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="CLI test buyer",
         )
 

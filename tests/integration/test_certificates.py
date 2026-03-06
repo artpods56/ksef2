@@ -6,9 +6,9 @@ from ksef2.domain.models.certificates import (
     CertificateEnrollmentData,
     CertificateLimitsResponse,
     CertificateStatus,
-    CertificateType,
     QueryCertificatesResponse,
 )
+from ksef2.clients.certificates import CertificateType
 
 
 @pytest.mark.integration
@@ -50,7 +50,7 @@ def test_get_enrollment_data(xades_authenticated_context):
 
 @pytest.mark.integration
 def test_query_certificates_no_filters(xades_authenticated_context):
-    """Query all certificates without filters."""
+    """Query all certificates without filter."""
     client, auth = xades_authenticated_context
 
     result = auth.certificates.query()
@@ -109,7 +109,7 @@ def test_query_certificates_with_name_filter(xades_authenticated_context):
     if not all_certs.certificates:
         pytest.skip("No certificates available to test name filtering")
 
-    # Use part of the first certificate's name
+    # Use part of the first certificate'request name
     first_cert_name = all_certs.certificates[0].name
     if len(first_cert_name) < 3:
         pytest.skip("Certificate name too short for partial match test")
