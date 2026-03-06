@@ -44,9 +44,9 @@ Get the current API rate limits.
 
 ```python
 rate_limits = auth.limits.get_api_rate_limits()
-print(f"Invoice send: {rate_limits.invoice_send.per_second}/s  {rate_limits.invoice_send.per_minute}/m  {rate_limits.invoice_send.per_hour}/h")
-print(f"Online session: {rate_limits.online_session.per_second}/s  {rate_limits.online_session.per_minute}/m  {rate_limits.online_session.per_hour}/h")
-print(f"Invoice download: {rate_limits.invoice_download.per_second}/s  {rate_limits.invoice_download.per_minute}/m  {rate_limits.invoice_download.per_hour}/h")
+print(f"Invoice send: {rate_limits.invoice_send.per_second}/request  {rate_limits.invoice_send.per_minute}/m  {rate_limits.invoice_send.per_hour}/h")
+print(f"Online session: {rate_limits.online_session.per_second}/request  {rate_limits.online_session.per_minute}/m  {rate_limits.online_session.per_hour}/h")
+print(f"Invoice download: {rate_limits.invoice_download.per_second}/request  {rate_limits.invoice_download.per_minute}/m  {rate_limits.invoice_download.per_hour}/h")
 ```
 
 > Full example: [`scripts/examples/limits/limits_query.py`](../../scripts/examples/limits/limits_query.py)

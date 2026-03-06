@@ -135,7 +135,9 @@ class GenerateTokenMapper:
 Create the endpoint in the appropriate file under `src/ksef2/endpoints/`.
 
 **Example** (from `endpoints/auth.py`):
+
 ```python
+import ksef2.core.middlewares.exceptions
 from typing import final
 from urllib.parse import urlencode
 
@@ -147,15 +149,15 @@ from ksef2.infra.schema.api import spec as spec
 class ListActiveSessionsEndpoint:
     url: str = "/auth/sessions"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: ksef2.core.middlewares.exceptions.KSeFExceptionMiddleware):
         self._transport = transport
 
     def send(
-        self,
-        bearer_token: str,
-        *,
-        page_size: int | None = None,
-        continuation_token: str | None = None,
+            self,
+            bearer_token: str,
+            *,
+            page_size: int | None = None,
+            continuation_token: str | None = None,
     ) -> spec.AuthenticationListResponse:
         # Build headers
         headers_dict = headers.KSeFHeaders.bearer(bearer_token)
@@ -181,7 +183,7 @@ class ListActiveSessionsEndpoint:
 class TerminateCurrentSessionEndpoint:
     url: str = "/auth/sessions/current"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: ksef2.core.middlewares.exceptions.KSeFExceptionMiddleware):
         self._transport = transport
 
     def send(self, bearer_token: str) -> None:
@@ -195,7 +197,7 @@ class TerminateCurrentSessionEndpoint:
 class TerminateAuthSessionEndpoint:
     url: str = "/auth/sessions/{referenceNumber}"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: ksef2.core.middlewares.exceptions.KSeFExceptionMiddleware):
         self._transport = transport
 
     def get_url(self, *, reference_number: str) -> str:
@@ -244,25 +246,25 @@ from ksef2.infra.mappers.requests.tokens import GenerateTokenMapper
 
 @final
 class TokenService:
-   def __init__(self, transport: protocols.Middleware) -> None:
-      self._generate_ep = GenerateTokenEndpoint(transport)
+    def __init__(self, transport: protocols.Middleware) -> None:
+        self._generate_ep = GenerateTokenEndpoint(transport)
 
-   def generate(
-           self,
-           *,
-           access_token: str,
-           permissions: list[TokenPermission],
-           description: str,
-   ) -> GenerateTokenResponse:
-      # 1. Map domain → spec (request)
-      body = GenerateTokenMapper.map_request(permissions, description)
-      # 2. Call endpoint with spec model
-      spec_resp = self._generate_ep.send(
-         access_token=access_token,
-         body=body.model_dump(),
-      )
-      # 3. Map spec → domain (response)
-      return GenerateTokenMapper.map_response(spec_resp)
+    def generate(
+            self,
+            *,
+            access_token: str,
+            permissions: list[TokenPermission],
+            description: str,
+    ) -> GenerateTokenResponse:
+        # 1. Map domain → spec (request)
+        body = GenerateTokenMapper.map_request(permissions, description)
+        # 2. Call endpoint with spec request
+        spec_resp = self._generate_ep.send(
+            access_token=access_token,
+            body=body.model_dump(),
+        )
+        # 3. Map spec → domain (response)
+        return GenerateTokenMapper.map_response(spec_resp)
 ```
 
 **Key pattern:** mapper.map_request() → endpoint.send() → mapper.map_response()
@@ -288,12 +290,12 @@ Add to `tests/unit/test_[feature]_endpoints.py`:
 def test_list_sessions_returns_active_sessions(fake_transport):
     """Test listing active sessions."""
     ep = ListActiveSessionsEndpoint(fake_transport)
-    
-    response = ep.send(
+
+    response = ep.grant_person(
         bearer_token="test_token",
         page_size=10,
     )
-    
+
     assert isinstance(response, spec.AuthenticationListResponse)
 ```
 
@@ -306,7 +308,7 @@ def test_list_active_sessions(xades_authenticated_context):
     """List active authentication sessions."""
     client, auth = xades_authenticated_context
 
-    response = auth.sessions.list_page()
+    response = auth.sessions.query()
 
     assert response is not None
     assert hasattr(response, "items")
@@ -352,7 +354,7 @@ Update the relevant guide in `docs/guides/`:
 # GET
 self._transport.get(url, headers=headers_dict)
 
-# POST with JSON body
+# POST with JSON request
 self._transport.post(url, headers=headers_dict, json=body)
 
 # POST with raw content (XML, etc.)
@@ -424,11 +426,14 @@ Some endpoints return `200 OK` with no response body (e.g., testdata endpoints l
 3. **Endpoint returns `None`** or ignores the response:
 
 ```python
+import ksef2.core.middlewares.exceptions
+
+
 @final
 class BlockContextEndpoint:
     url: str = "/testdata/context/block"
 
-    def __init__(self, transport: middleware.KSeFProtocol):
+    def __init__(self, transport: ksef2.core.middlewares.exceptions.KSeFExceptionMiddleware):
         self._transport = transport
 
     def send(self, body: dict[str, Any]) -> None:
@@ -439,7 +444,7 @@ class BlockContextEndpoint:
 
 ```python
 def block_context(self, *, context_identifier: AuthContextIdentifier) -> None:
-   self._block_context_ep.send(
-      TestDataMapper.block_context(context=context_identifier)
-   )
+    self._block_context_ep.grant_person(
+        TestDataMapper.block_context(context=context_identifier)
+    )
 ```

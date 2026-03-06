@@ -1,41 +1,21 @@
 # Test Data
 
-The TEST environment provides test data APIs for setting up integration tests.
+`client.testdata` is available only on `Environment.TEST`.
+It helps create disposable subjects, people, permissions, attachment state, and blocked auth contexts.
 
-**Note:** These endpoints are only available on the TEST environment, not PRODUCTION or DEMO.
-
----
-
-## Operations
-
-### Create Subject
-
-Create a test subject (organization/entity).
-
-**SDK Endpoint:** `POST /testdata/subject`
+## Create Subjects and People
 
 ```python
 from ksef2 import Client, Environment
-from ksef2.domain.models.testdata import SubjectType
 
-client = Client(environment=Environment.TEST)
+client = Client(Environment.TEST)
 
 client.testdata.create_subject(
     nip="1234567890",
-    subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+    subject_type="enforcement_authority",
     description="Test organization",
 )
-```
 
----
-
-### Create Person
-
-Create a test person associated with a subject.
-
-**SDK Endpoint:** `POST /testdata/person`
-
-```python
 client.testdata.create_person(
     nip="1234567890",
     pesel="12345678901",
@@ -43,236 +23,104 @@ client.testdata.create_person(
 )
 ```
 
----
+SDK endpoints:
+- `POST /testdata/subject`
+- `POST /testdata/person`
 
-### Grant Permissions
-
-Grant permissions to a person for a subject context.
-
-**SDK Endpoint:** `POST /testdata/permissions`
+## Grant and Revoke Permissions
 
 ```python
-from ksef2.domain.models.testdata import Identifier, IdentifierType, Permission, PermissionType
+from ksef2.domain.models.testdata import Identifier, Permission
 
-client.testdata.grant_permissions(permissions=[
-    Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
-    Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-], grant_to=Identifier(type=IdentifierType.NIP, value="0987654321"),
-    in_context_of=Identifier(type=IdentifierType.NIP, value="1234567890"))
+client.testdata.grant_permissions(
+    permissions=[
+        Permission(type="invoice_read", description="Read invoices"),
+        Permission(type="invoice_write", description="Send invoices"),
+    ],
+    grant_to=Identifier(type="nip", value="0987654321"),
+    in_context_of=Identifier(type="nip", value="1234567890"),
+)
+
+client.testdata.revoke_permissions(
+    revoke_from=Identifier(type="nip", value="0987654321"),
+    in_context_of=Identifier(type="nip", value="1234567890"),
+)
 ```
 
----
+SDK endpoints:
+- `POST /testdata/permissions`
+- `POST /testdata/permissions/revoke`
 
-### Revoke Permissions
-
-Revoke previously granted permissions.
-
-**SDK Endpoint:** `POST /testdata/permissions/revoke`
-
-```python
-client.testdata.revoke_permissions(revoke_from=Identifier(type=IdentifierType.NIP, value="0987654321"),
-                                   in_context_of=Identifier(type=IdentifierType.NIP, value="1234567890"))
-```
-
----
-
-### Delete Subject
-
-Delete a test subject.
-
-**SDK Endpoint:** `POST /testdata/subject/remove`
-
-```python
-client.testdata.delete_subject(nip="1234567890")
-```
-
----
-
-### Delete Person
-
-Delete a test person.
-
-**SDK Endpoint:** `POST /testdata/person/remove`
-
-```python
-client.testdata.delete_person(nip="1234567890")
-```
-
----
-
-### Enable Attachments
-
-Enable attachment sending for a subject.
-
-**SDK Endpoint:** `POST /testdata/attachment/enable`
-
-```python
-client.testdata.enable_attachments(nip="1234567890")
-```
-
----
-
-### Revoke Attachments
-
-Revoke attachment sending permissions for a subject.
-
-**SDK Endpoint:** `POST /testdata/attachment/revoke`
+## Attachment Permissions
 
 ```python
 from datetime import date, timedelta
 
-# Revoke immediately
+client.testdata.enable_attachments(nip="1234567890")
 client.testdata.revoke_attachments(nip="1234567890")
-
-# Revoke with expected end date
 client.testdata.revoke_attachments(
     nip="1234567890",
     expected_end_date=date.today() + timedelta(days=30),
 )
 ```
 
----
+SDK endpoints:
+- `POST /testdata/attachment`
+- `POST /testdata/attachment/revoke`
 
-### Block Context
-
-Block authentication for a context. This prevents the context from authenticating.
-
-**SDK Endpoint:** `POST /testdata/context/block`
+## Block and Unblock Auth Contexts
 
 ```python
-from ksef2.domain.models.testdata import AuthContextIdentifier, AuthContextIdentifierType
+from ksef2.domain.models.testdata import AuthContextIdentifier
 
-context_id = AuthContextIdentifier(
-    type=AuthContextIdentifierType.NIP,
-    value="1234567890",
-)
-
-client.testdata.block_context(context=context_id)
+context = AuthContextIdentifier(type="nip", value="1234567890")
+client.testdata.block_context(context=context)
+client.testdata.unblock_context(context=context)
 ```
 
----
+SDK endpoints:
+- `POST /testdata/context/block`
+- `POST /testdata/context/unblock`
 
-### Unblock Context
+## Automatic Cleanup with `temporal()`
 
-Unblock authentication for a previously blocked context.
-
-**SDK Endpoint:** `POST /testdata/context/unblock`
-
-```python
-client.testdata.unblock_context(context=context_id)
-```
-
----
-
-## Automatic Cleanup
-
-Use `temporal()` for automatic cleanup. The context manager tracks created entities and cleans them up on exit, even if errors occur. Duplicate creation errors are suppressed within the context manager.
+Use `temporal()` whenever possible so cleanup happens automatically:
 
 ```python
-from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.domain.models.testdata import (
-    Identifier, IdentifierType, Permission, PermissionType, SubjectType,
-)
+from ksef2.domain.models.testdata import Identifier, Permission
 
-ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
-client = Client(environment=Environment.TEST)
+org_nip = generate_nip()
+person_nip = generate_nip()
+person_pesel = generate_pesel()
 
 with client.testdata.temporal() as temp:
     temp.create_subject(
-        nip=ORG_NIP,
-        subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+        nip=org_nip,
+        subject_type="enforcement_authority",
         description="Example organization",
     )
     temp.create_person(
-        nip=PERSON_NIP, pesel=PERSON_PESEL, description="Example person",
+        nip=person_nip,
+        pesel=person_pesel,
+        description="Example person",
     )
-    temp.grant_permissions(permissions=[
-        Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
-        Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-    ], grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
+    temp.grant_permissions(
+        permissions=[
+            Permission(type="invoice_read", description="Read invoices"),
+            Permission(type="invoice_write", description="Send invoices"),
+        ],
+        grant_to=Identifier(type="nip", value=person_nip),
+        in_context_of=Identifier(type="nip", value=org_nip),
+    )
 
-    # Tests run here
-
-# Automatic cleanup on exit:
-# 1. Revoke permissions
-# 2. Delete person
-# 3. Delete subject
+    # tests or demos go here
 ```
 
-## Manual Cleanup
-
-You can also manage test data manually, but this requires explicit cleanup and error handling:
-
-```python
-from ksef2.core import exceptions
-
-# Create
-client.testdata.create_subject(
-    nip=ORG_NIP,
-    subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
-    description="Example organization",
-)
-client.testdata.create_person(
-    nip=PERSON_NIP, pesel=PERSON_PESEL, description="Example person",
-)
-client.testdata.grant_permissions(permissions=[
-    Permission(type=PermissionType.INVOICE_READ, description="Read invoices"),
-    Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-], grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-    in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
-
-# Clean up (must be done manually)
-client.testdata.revoke_permissions(revoke_from=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-                                   in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
-client.testdata.delete_person(nip=PERSON_NIP)
-client.testdata.delete_subject(nip=ORG_NIP)
-```
-
-> Full example: [`scripts/examples/testdata/setup_test_data.py`](../../scripts/examples/testdata/setup_test_data.py)
-
----
-
-## Subject Types
-
-| Type | Description |
-|------|-------------|
-| `VAT_GROUP` | VAT group |
-| `ENFORCEMENT_AUTHORITY` | Enforcement authority |
-| `JST` | Local government |
-
----
-
-## Permission Types
-
-| Permission | Description |
-|------------|-------------|
-| `INVOICE_READ` | Read invoices |
-| `INVOICE_WRITE` | Send invoices |
-| `INTROSPECTION` | Search invoices |
-| `CREDENTIALS_READ` | Read credentials |
-| `CREDENTIALS_MANAGE` | Manage credentials |
-| `ENFORCEMENT_OPERATIONS` | Enforcement operations |
-| `SUBUNIT_MANAGE` | Manage subunits |
-
----
-
-## Auth Context Identifier Types
-
-| Type | Description |
-|------|-------------|
-| `NIP` | Polish tax identification number |
-| `INTERNAL_ID` | KSeF internal identifier |
-| `NIP_VAT_UE` | EU VAT number |
-| `PEPPOL_ID` | PEPPOL participant ID |
-
----
+Example:
+- [`scripts/examples/testdata/setup_test_data.py`](../../scripts/examples/testdata/setup_test_data.py)
 
 ## Related
 
-- [Authentication](authentication.md) - Using XAdES auth
-- [Tokens](tokens.md) - Token generation
-- [Limits](limits.md) - Managing API limits
+- [Authentication](authentication.md)
+- [Limits](limits.md)

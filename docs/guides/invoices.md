@@ -1,216 +1,167 @@
 # Invoices
 
-Send, download, and manage structured invoices in KSeF.
+Use online sessions to send invoices and `auth.invoices` for metadata queries, exports, and downloads.
 
-## Operations
-
-### Send Invoice
-
-Upload a structured invoice to KSeF.
-
-**SDK Endpoint:** `POST /sessions/online/{referenceNumber}/invoices`
+## Send an Invoice
 
 ```python
+from datetime import date
+from pathlib import Path
+
+from ksef2 import FormSchema
 from ksef2.core.invoices import InvoiceFactory
 
-template_xml = "path/to/invoice-template.xml".read_text(encoding="utf-8")
+template_xml = Path("invoice-template.xml").read_text(encoding="utf-8")
 invoice_xml = InvoiceFactory.create(
     template_xml,
     {
-        "#nip#": ORG_NIP,
+        "#nip#": "5261040828",
         "#invoicing_date#": date.today().isoformat(),
-        "#invoice_number#": "123/2024",
+        "#invoice_number#": "123/2026",
     },
 )
-invoice_ref = session.send_invoice(invoice_xml=invoice_xml)
-print(f"Invoice sent: {invoice_ref.reference_number}")
+
+with auth.online_session(form_code=FormSchema.FA3) as session:
+    result = session.send_invoice(invoice_xml=invoice_xml)
+    print(result.reference_number)
+
+    status = session.wait_for_invoice_ready(
+        invoice_reference_number=result.reference_number
+    )
+    print(status.ksef_number)
 ```
 
----
+SDK endpoint: `POST /sessions/online/{referenceNumber}/invoices`
 
-### List Invoices
-
-List all invoices in the current session.
-
-**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/invoices`
+## Session Invoice Operations
 
 ```python
+status = session.get_invoice_status(invoice_reference_number="invoice-reference")
+print(status.ksef_number, status.status.description)
+
+ready = session.wait_for_invoice_ready(invoice_reference_number="invoice-reference")
+print(ready.ksef_number)
+
 invoices = session.list_invoices()
 for invoice in invoices.invoices:
-    print(f"KSeF Number: {invoice.ksefNumber}, Status: {invoice.status}")
-```
+    print(invoice.reference_number, invoice.ksef_number, invoice.status.description)
 
----
-
-### List Failed Invoices
-
-List invoices that failed processing.
-
-**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/invoices/failed`
-
-```python
 failed = session.list_failed_invoices()
-print(f"Failed invoices: {failed}")
+print(len(failed.invoices))
 ```
 
----
+SDK endpoints:
+- `GET /sessions/{referenceNumber}/invoices`
+- `GET /sessions/{referenceNumber}/invoices/failed`
+- `GET /sessions/{referenceNumber}/invoices/{invoiceReferenceNumber}`
 
-### Get UPO
+`wait_for_invoice_ready()` is an SDK helper built on top of `GET /sessions/{referenceNumber}/invoices/{invoiceReferenceNumber}`.
 
-Get the UPO (Urzędowe Poświadczenie Odbioru - Official Receipt Confirmation) for an invoice.
-
-**SDK Endpoint:** `GET /invoices/ksef/{ksefNumber}/upo`
+UPO downloads also stay on the session client:
 
 ```python
-upo = session.get_invoice_upo_by_ksef_number(ksef_number="KSEF-NUMBER")
-print(f"UPO size: {len(upo)} bytes")
+upo_by_ref = session.get_invoice_upo_by_reference(
+    invoice_reference_number="invoice-reference",
+)
+upo_by_ksef = session.get_invoice_upo_by_ksef_number(
+    ksef_number="KSeF-number",
+)
+print(len(upo_by_ref), len(upo_by_ksef))
 ```
 
----
+SDK endpoints:
+- `GET /sessions/{referenceNumber}/invoices/{invoiceReferenceNumber}/upo`
+- `GET /sessions/{referenceNumber}/invoices/ksef/{ksefNumber}/upo`
 
-### Download Invoice
+## Download a Processed Invoice
 
-Download an invoice by its KSeF reference number.
-
-**SDK Endpoint:** `GET /invoices/ksef/{ksefNumber}`
-
----
-
-## Example
-
-All invoice operations require an active session. The example below sets up test data, authenticates, opens a session, and sends an invoice:
+Once you have a `ksef_number`, download the XML directly from `auth.invoices`:
 
 ```python
-from ksef2 import Client, FormSchema, Environment
-from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import (
-    Identifier, IdentifierType, Permission, PermissionType, SubjectType,
+xml_bytes = auth.invoices.download_invoice(ksef_number="KSeF-number")
+print(len(xml_bytes))
+```
+
+SDK endpoint: `GET /invoices/ksef/{ksefNumber}`
+
+## Query Invoice Metadata
+
+Metadata queries and exports use `InvoicesFilter`.
+`amount_type` is required by the current public model.
+
+```python
+from datetime import datetime, timedelta, timezone
+
+from ksef2.domain.models import InvoicesFilter
+
+filters = InvoicesFilter(
+    role="seller",
+    date_type="issue_date",
+    date_from=datetime.now(tz=timezone.utc) - timedelta(days=7),
+    date_to=datetime.now(tz=timezone.utc),
+    amount_type="brutto",
 )
 
-ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
-
-client = Client(environment=Environment.TEST)
-
-with client.testdata.temporal() as temp:
-    temp.create_subject(
-        nip=ORG_NIP,
-        subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
-        description="SDK test seller",
-    )
-    temp.create_person(
-        nip=PERSON_NIP, pesel=PERSON_PESEL, description="Example person",
-    )
-    temp.grant_permissions(permissions=[
-        Permission(type=PermissionType.INVOICE_WRITE, description="Send invoices"),
-    ], grant_to=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
-        in_context_of=Identifier(type=IdentifierType.NIP, value=ORG_NIP))
-
-    cert, private_key = generate_test_certificate(PERSON_NIP)
-    auth = client.authentication.with_xades(
-        nip=PERSON_NIP, cert=cert, private_key=private_key,
-    )
-
-    with auth.online_session(form_code=FormSchema.FA3) as session:
-        with open("invoice.xml", "rb") as f:
-            result = session.send_invoice(f.read())
-        print(f"Invoice sent, reference number: {result.reference_number}")
-
+result = auth.invoices.query_metadata(filters=filters)
+print(len(result.invoices))
 ```
 
-> Full example: [`scripts/examples/invoices/send_invoice.py`](../../scripts/examples/invoices/send_invoice.py)
+SDK endpoint: `POST /invoices/query/metadata`
 
-**Session SDK endpoints:**
-- `POST /sessions/online` - Open session
-- `POST /sessions/online/{referenceNumber}/close` - Terminate session
-
----
-
-### Get Invoice Status
-
-Check the processing status of a sent invoice.
-
-**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/invoices/{invoiceReferenceNumber}/status`
+If you need to wait for invoices to become visible:
 
 ```python
-status = session.get_invoice_status(invoice_reference_number="INVOICE-REF")
-print(status.model_dump_json(indent=2))
+result = auth.invoices.wait_for_invoices(filters=filters, timeout=120.0)
+print(len(result.invoices))
 ```
 
----
-
-### Schedule Invoices Export
-
-Schedule a bulk export of invoices matching the given filters.
-
-**SDK Endpoint:** `POST /sessions/online/{referenceNumber}/query/invoice/async/init`
+## Export Invoices
 
 ```python
-from ksef2.domain.models import (
-    InvoiceQueryFilters,
-    InvoiceSubjectType,
-    InvoiceQueryDateRange,
-    DateType,
+export = auth.invoices.schedule_export(filters=filters)
+print(export.reference_number)
+
+package = auth.invoices.wait_for_export_package(
+    reference_number=export.reference_number,
+    timeout=120.0,
+    poll_interval=2.0,
 )
-from datetime import datetime, timezone
 
-export = session.schedule_invoices_export(
-    filters=InvoiceQueryFilters(
-        subject_type=InvoiceSubjectType.SELLER,
-        date_range=InvoiceQueryDateRange(
-            date_type=DateType.ISSUE,
-            from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
-            to=datetime.now(tz=timezone.utc),
-        ),
-    ),
+paths = auth.invoices.fetch_package(
+    package=package,
+    export=export,
+    target_directory="downloads",
 )
-print(f"Export scheduled: {export.reference_number}")
+for path in paths:
+    print(path)
 ```
 
----
+SDK endpoints:
+- `POST /invoices/exports`
+- `GET /invoices/exports/{referenceNumber}`
 
-### Get Export Status
-
-Poll the status of a scheduled export.
-
-**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/query/invoice/async/status/{queryReferenceNumber}`
+If you prefer to keep ZIP contents in memory:
 
 ```python
-result = session.get_export_status(reference_number=export.reference_number)
-print(result.model_dump_json(indent=2))
+zip_parts = auth.invoices.fetch_package_bytes(package=package, export=export)
+print(len(zip_parts))
 ```
 
----
-
-### Fetch Export Package
-
-Download the ZIP package produced by a completed export.
-
-**SDK Endpoint:** `GET /sessions/online/{referenceNumber}/query/invoice/async/fetch`
+Or perform the whole export flow in one call:
 
 ```python
-from pathlib import Path
-
-if package := result.package:
-    for path in session.fetch_package(
-        package=package, target_directory=Path("downloads"),
-    ):
-        print(f"Downloaded: {path} ({len(path.read_bytes())} bytes)")
+zip_parts = auth.invoices.export_and_download(filters=filters)
+print(len(zip_parts))
 ```
 
----
+## Examples
 
-## Full Lifecycle Example
-
-The example below sends an invoice, checks its status, schedules an export, and downloads the results:
-
-> Full example: [`scripts/examples/invoices/send_query_export_download.py`](../../scripts/examples/invoices/send_query_export_download.py)
-
----
+- [`scripts/examples/invoices/send_invoice.py`](../../scripts/examples/invoices/send_invoice.py)
+- [`scripts/examples/invoices/send_query_export_download.py`](../../scripts/examples/invoices/send_query_export_download.py)
+- [`scripts/examples/invoices/download_purchase_invoices.py`](../../scripts/examples/invoices/download_purchase_invoices.py)
+- [`scripts/examples/invoices/download_purchase_invoices_test.py`](../../scripts/examples/invoices/download_purchase_invoices_test.py)
 
 ## Related
 
-- [Authentication](authentication.md) - Getting access tokens
-- [Sessions](sessions.md) - Session management
+- [Sessions](sessions.md)
+- [Authentication](authentication.md)

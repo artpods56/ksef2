@@ -1,9 +1,9 @@
 <div align="center">
-<a href="https://github.com/artpods56/KUL_Notarius" title="TrendRadar">
+<a href="https://github.com/artpods56/ksef2" title="KSeF Toolkit">
   <img src="https://raw.githubusercontent.com/artpods56/ksef2/master/docs/assets/logo.png" alt="KSeF Toolkit" width="50%">
 </a>
 
-**Python SDK and Tools for Poland's KSeF (Krajowy System e-Faktur) v2.0 API.**
+**Python SDK for Poland's KSeF (Krajowy System e-Faktur) v2 API.**
 
 ![API Coverage](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/artpods56/ksef2/master/coverage.json&query=$.message&label=KSeF%20API%20coverage&color=$.color)
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/) 
@@ -31,57 +31,62 @@ Requires Python 3.12+.
 
 ## Features
 
-- **Type-Safe** — Full type annotations with Pydantic models, excellent IDE support and autocomplete
-- **Pythonic API** — Context managers for sessions, clean interfaces, intuitive method chaining
-- **Both Auth Methods** — XAdES (certificate-based) and token authentication supported
-- **Automatic Encryption** — Invoice encryption/decryption handled transparently (AES-CBC, RSA-OAEP)
-- **Session Resume** — Serialize session state and resume later, perfect for worker processes and long-running exports
-- **Test Environment Support** — Self-signed certificates, test data setup with automatic cleanup via `temporal()` context manager
+- **Typed public API** for authentication, sessions, invoices, tokens, permissions, limits, certificates, and PEPPOL
+- **XAdES and KSeF token authentication** through a single `Client.authentication` entry point
+- **Online and batch sessions** with resumable session state for long-running jobs
+- **Built-in encryption helpers** for invoice sending and export package decryption
+- **TEST environment tooling** including self-signed certificates and disposable test data contexts
+- **Runnable examples and guide docs** for the common KSeF workflows
 
 ## Quick Start
 
 ```python
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
 from ksef2 import Client, Environment, FormSchema
-from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models import (
-    InvoiceQueryFilters, InvoiceSubjectType, InvoiceQueryDateRange, DateType,
-)
+from ksef2.domain.models import InvoicesFilter
 
 NIP = "5261040828"
 client = Client(Environment.TEST)
 
 # Authenticate (XAdES — TEST environment)
-cert, key = generate_test_certificate(NIP)
-auth = client.authentication.with_xades(nip=NIP, cert=cert, private_key=key)
+auth = client.authentication.with_test_certificate(nip=NIP)
 
 with auth.online_session(form_code=FormSchema.FA3) as session:
     # Send an invoice
-    result = session.send_invoice(open("invoice.xml", "rb").read())
+    result = session.send_invoice(invoice_xml=Path("invoice.xml").read_bytes())
     print(result.reference_number)
 
-    # Check processing status
-    status = session.get_invoice_status(invoice_reference_number=result.reference_number)
-
-    # Export invoices matching a query
-    export = session.schedule_invoices_export(
-        filters=InvoiceQueryFilters(
-            subject_type=InvoiceSubjectType.SELLER,
-            date_range=InvoiceQueryDateRange(
-                date_type=DateType.ISSUE,
-                from_=datetime(2026, 1, 1, tzinfo=timezone.utc),
-                to=datetime.now(tz=timezone.utc),
-            ),
-        ),
+    # Wait until KSeF finishes processing it
+    status = session.wait_for_invoice_ready(
+        invoice_reference_number=result.reference_number
     )
+    print(status.status.description)
 
-    # Download the exported package
-    export_result = session.get_export_status(export.reference_number)
-    if package := export_result.package:
-        for path in session.fetch_package(package=package, target_directory="downloads"):
-            print(f"Downloaded: {path}")
+# Export invoices (no session required)
+export = auth.invoices.schedule_export(
+    filters=InvoicesFilter(
+        role="seller",
+        date_type="issue_date",
+        date_from=datetime.now(tz=timezone.utc) - timedelta(days=1),
+        date_to=datetime.now(tz=timezone.utc),
+        amount_type="brutto",
+    ),
+)
+
+# Download the exported package
+package = auth.invoices.wait_for_export_package(reference_number=export.reference_number)
+for path in auth.invoices.fetch_package(
+    package=package,
+    export=export,
+    target_directory="downloads",
+):
+    print(f"Downloaded: {path}")
 ```
-> Full runnable version: [`send_query_export_download.py`](scripts/examples/invoices/send_query_export_download.py) — more examples in [`scripts/examples`](scripts/examples).
+> Runnable TEST examples:
+> [`scripts/examples/quickstart.py`](scripts/examples/quickstart.py) and
+> [`scripts/examples/invoices/send_query_export_download.py`](scripts/examples/invoices/send_query_export_download.py)
 
 ### XAdES on DEMO / PRODUCTION (MCU certificate)
 
@@ -90,65 +95,94 @@ DEMO and PRODUCTION require a certificate issued by MCU — use the provided hel
 
 ```python
 from ksef2 import Client, Environment
-from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
+from ksef2.core.xades import (
+    load_certificate_and_key_from_p12,
+    load_certificate_from_pem,
+    load_private_key_from_pem,
+)
 
 cert = load_certificate_from_pem("cert.pem")  # downloaded from MCU
 key = load_private_key_from_pem("key.pem")
 
 auth = Client(Environment.DEMO).authentication.with_xades(
-    nip=NIP, cert=cert, private_key=key, verify_chain=False,
+    nip="5261040828",
+    cert=cert,
+    private_key=key,
 )
-```
 
-> If your certificate is a `.p12` archive: `load_certificate_and_key_from_p12("cert.p12", password=b"...")`
+cert, key = load_certificate_and_key_from_p12("cert.p12", password=b"secret")
+```
 
 ### Token Authentication
 
-For production, or when you have a pre-generated KSeF token:
+Use this when you already have a KSeF token issued for the target context:
 
 ```python
 from ksef2 import Client
 
 client = Client()  # uses production environment by default
 
-auth = client.authentication.with_token(ksef_token="your-ksef-token", nip=NIP)
+auth = client.authentication.with_token(
+    ksef_token="your-ksef-token",
+    nip="5261040828",
+)
 print(auth.access_token)
 ```
 
-## Authenticated Operations
+## Authenticated Client
 
-After authentication, you get an `AuthenticatedClient` with access to various services — no need to open an invoice session for these operations:
+After `with_xades()` or `with_token()`, you get an `AuthenticatedClient`. Its main entry points are:
+
+- `auth.online_session()` and `auth.batch_session()` for invoice sessions
+- `auth.invoices` for metadata queries, exports, downloads, and package fetches
+- `auth.tokens` for KSeF authorization token lifecycle management
+- `auth.permissions` for grant, revoke, and query operations
+- `auth.certificates` for certificate enrollment, retrieval, query, and revocation
+- `auth.sessions` for active authentication session management
+- `auth.limits` for TEST-environment limit inspection and overrides
+
+Invoice sending stays on `auth.online_session()` because it depends on an opened KSeF session and its session-specific encryption keys. Metadata queries, exports, and downloads live on `auth.invoices` because they only require the authenticated bearer context.
+
+Common examples:
 
 ```python
-auth = client.authentication.with_xades(nip=NIP, cert=cert, private_key=key)
+from datetime import datetime, timedelta, timezone
 
-# Manage KSeF authorization tokens
+from ksef2.domain.models import InvoicesFilter
+
 token = auth.tokens.generate(
-    permissions=[TokenPermission.INVOICE_READ, TokenPermission.INVOICE_WRITE],
+    permissions=["invoice_read", "invoice_write"],
     description="API integration token",
 )
-print(f"Generated token: {token.token}")
+print(token.reference_number, token.token)
 
-# Query and modify API limits (TEST environment)
 limits = auth.limits.get_context_limits()
-print(f"Max invoices per session: {limits.online_session.max_invoices}")
+print(limits.online_session.max_invoices)
 
-# Manage permissions
-auth.permissions.grant_person(
-    subject_identifier=IdentifierType.PESEL,
-    subject_value="12345678901",
-    permissions=[PermissionType.INVOICE_READ],
-    description="Read access for accountant",
-    first_name="Jan", last_name="Kowalski",
+sessions = auth.sessions.list_page(page_size=10)
+print(len(sessions.items))
+
+metadata = auth.invoices.query_metadata(
+    filters=InvoicesFilter(
+        role="seller",
+        date_type="issue_date",
+        date_from=datetime.now(tz=timezone.utc) - timedelta(days=7),
+        date_to=datetime.now(tz=timezone.utc),
+        amount_type="brutto",
+    )
 )
-
-# List and terminate authentication sessions
-sessions = auth.sessions.list_page()
-auth.sessions.terminate_current()
-
-# Manage KSeF certificates
-certs = auth.certificates.query(status=CertificateStatus.ACTIVE)
+print(len(metadata.invoices))
 ```
+
+For the full API surface, see the guide docs below.
+
+## Examples
+
+- [`scripts/examples/quickstart.py`](scripts/examples/quickstart.py) - minimal TEST-environment invoice send
+- [`scripts/examples/auth/auth_xades.py`](scripts/examples/auth/auth_xades.py) - XAdES authentication
+- [`scripts/examples/auth/auth_token.py`](scripts/examples/auth/auth_token.py) - KSeF token authentication
+- [`scripts/examples/invoices/send_query_export_download.py`](scripts/examples/invoices/send_query_export_download.py) - send, inspect, export, and download invoices
+- [`scripts/examples/session/session_resume.py`](scripts/examples/session/session_resume.py) - persist and resume an online session
 
 ## Development
 
