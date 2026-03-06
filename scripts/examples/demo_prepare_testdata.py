@@ -115,8 +115,8 @@ def main() -> None:
         cert_path = CREDS_DIR / "buyer_cert.pem"
         key_path = CREDS_DIR / "buyer_key.pem"
 
-        cert_path.write_bytes(buyer_cert.public_bytes(Encoding.PEM))
-        key_path.write_bytes(
+        _ = cert_path.write_bytes(buyer_cert.public_bytes(Encoding.PEM))
+        _ = key_path.write_bytes(
             buyer_key.private_bytes(
                 Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption()
             )

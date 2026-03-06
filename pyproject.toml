@@ -52,7 +52,7 @@ name = "cz_conventional_commits"
 version = "0.8.0"
 version_files = [
     "pyproject.toml:version",
-    "__version__.py"
+    "src/ksef2/__version__.py"
 ]
 
 
