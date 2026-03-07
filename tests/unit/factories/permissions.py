@@ -87,6 +87,18 @@ class QueryEntityAuthorizationPermissionsResponseFactory(
 ): ...
 
 
+@register_fixture(name="perm_query_entity_req")
+class EntityPermissionsQueryRequestFactory(
+    ModelFactory[spec.EntityPermissionsQueryRequest]
+): ...
+
+
+@register_fixture(name="perm_query_entity_resp")
+class QueryEntityPermissionsResponseFactory(
+    ModelFactory[spec.QueryEntityPermissionsResponse]
+): ...
+
+
 @register_fixture(name="perm_query_eu_entity_req")
 class EuEntityPermissionsQueryRequestFactory(
     ModelFactory[spec.EuEntityPermissionsQueryRequest]
@@ -261,6 +273,19 @@ class EntityRoleFactory(ModelFactory[spec.EntityRole]):
     startDate = _START
 
 
+@register_fixture(name="perm_entity_permission_item")
+class EntityPermissionItemFactory(ModelFactory[spec.EntityPermissionItem]):
+    id = _UUID
+    contextIdentifier = spec.EntityPermissionsContextIdentifier(
+        type=spec.EntityPermissionsContextIdentifierType.Nip,
+        value="1234567890",
+    )
+    permissionScope = spec.EntityPermissionItemScope.InvoiceRead
+    description = "Entity permission"
+    startDate = _START
+    canDelegate = True
+
+
 @register_fixture(name="perm_personal_permission_item")
 class PersonalPermissionFactory(ModelFactory[spec.PersonalPermission]):
     id = _UUID
@@ -410,6 +435,14 @@ class DomainAuthorizationPermissionsQueryFactory(
     authorizing_value = None
     authorized_type = None
     authorized_value = None
+
+
+@register_fixture(name="domain_perm_query_entities")
+class DomainEntityPermissionsQueryFactory(
+    ModelFactory[domain_permissions.EntityPermissionsQuery]
+):
+    context_type = None
+    context_value = None
 
 
 @register_fixture(name="domain_perm_query_personal")

@@ -7,6 +7,7 @@ from ksef2.domain.models.pagination import OffsetPaginationParams
 from ksef2.infra.schema.api import spec
 from tests.unit.factories.permissions import (
     DomainAuthorizationPermissionsQueryFactory,
+    DomainEntityPermissionsQueryFactory,
     DomainEuEntityPermissionsQueryFactory,
     DomainGrantAuthorizationPermissionsRequestFactory,
     DomainGrantEntityPermissionsRequestFactory,
@@ -236,6 +237,23 @@ class TestPermissionsClient:
         call = fake_transport.calls[0]
         assert call.method == "POST"
         assert str(call.path) == QueryPermissionsRoutes.QUERY_AUTHORIZATIONS_GRANTS
+
+    def test_query_entities(
+        self,
+        permissions_client: PermissionsClient,
+        fake_transport: FakeTransport,
+        perm_query_entity_resp: BaseFactory[spec.QueryEntityPermissionsResponse],
+    ):
+        expected = perm_query_entity_resp.build()
+        fake_transport.enqueue(expected.model_dump(mode="json"))
+
+        query = DomainEntityPermissionsQueryFactory.build()
+        result = permissions_client.query_entities(query=query)
+
+        assert isinstance(result, domain_permissions.EntityPermissionsQueryResponse)
+        call = fake_transport.calls[0]
+        assert call.method == "POST"
+        assert str(call.path) == QueryPermissionsRoutes.QUERY_ENTITIES_GRANTS
 
     def test_query_personal(
         self,

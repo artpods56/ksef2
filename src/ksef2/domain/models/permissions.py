@@ -24,6 +24,8 @@ type PersonContextIdentifierType = Literal["nip", "internal_id"]
 
 type EntityIdentifierType = Literal["nip"]
 
+type EntityPermissionsContextIdentifierType = Literal["nip", "internal_id"]
+
 type PersonPermissionScope = Literal[
     "invoice_read",
     "invoice_write",
@@ -348,6 +350,37 @@ class EntityRolesResponse(KSeFBaseModel):
     """One page of entity roles."""
 
     roles: list[EntityRole]
+    has_more: bool
+
+
+# ---------------------------------------------------------------------------
+# Query: entities
+# ---------------------------------------------------------------------------
+
+
+class EntityPermissionsQuery(KSeFBaseModel):
+    """Filters for querying entity permission grants in the current context."""
+
+    context_type: EntityPermissionsContextIdentifierType | None = None
+    context_value: str | None = None
+
+
+class EntityPermissionDetail(KSeFBaseModel):
+    """Permission record returned from entity permission queries."""
+
+    id: Annotated[str, Field(max_length=36, min_length=36)]
+    context_type: EntityPermissionsContextIdentifierType
+    context_value: str
+    permission_type: EntityPermissionType
+    description: str
+    start_date: datetime
+    can_delegate: bool
+
+
+class EntityPermissionsQueryResponse(KSeFBaseModel):
+    """One page of entity permission query results."""
+
+    permissions: list[EntityPermissionDetail]
     has_more: bool
 
 

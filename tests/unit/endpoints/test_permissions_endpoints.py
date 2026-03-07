@@ -435,6 +435,12 @@ class TestQueryPermissionsEndpoints:
         ["target_path", "method", "req_factory", "resp_factory"],
         [
             (
+                QueryPermissionsRoutes.QUERY_ENTITIES_GRANTS,
+                QueryPermissionsEndpoints.query_entities_grants,
+                "perm_query_entity_req",
+                "perm_query_entity_resp",
+            ),
+            (
                 QueryPermissionsRoutes.QUERY_PERSONAL_GRANTS,
                 QueryPermissionsEndpoints.query_personal_grants,
                 "perm_query_personal_req",
@@ -529,6 +535,11 @@ class TestQueryPermissionsEndpoints:
         ["method", "req_factory", "resp_factory"],
         [
             (
+                QueryPermissionsEndpoints.query_entities_grants,
+                "perm_query_entity_req",
+                "perm_query_entity_resp",
+            ),
+            (
                 QueryPermissionsEndpoints.query_personal_grants,
                 "perm_query_personal_req",
                 "perm_query_personal_resp",
@@ -589,6 +600,10 @@ class TestQueryPermissionsEndpoints:
     @pytest.mark.parametrize(
         ["method", "req_factory"],
         [
+            (
+                QueryPermissionsEndpoints.query_entities_grants,
+                "perm_query_entity_req",
+            ),
             (
                 QueryPermissionsEndpoints.query_personal_grants,
                 "perm_query_personal_req",
@@ -682,6 +697,11 @@ class TestQueryPermissionsEndpoints:
     @pytest.mark.parametrize(
         ["method", "req_factory", "resp_factory"],
         [
+            (
+                QueryPermissionsEndpoints.query_entities_grants,
+                "perm_query_entity_req",
+                "perm_query_entity_resp",
+            ),
             (
                 QueryPermissionsEndpoints.query_personal_grants,
                 "perm_query_personal_req",

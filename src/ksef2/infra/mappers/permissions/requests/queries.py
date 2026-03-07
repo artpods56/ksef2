@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from ksef2.domain.models.permissions import (
     AuthorizationPermissionsQuery,
+    EntityPermissionsQuery,
     EuEntityPermissionsQuery,
     EuEntityQueryPermissionTypeEnum,
     IdentifierTypeEnum,
@@ -123,6 +124,18 @@ def context_identifier_from_literal(
             return spec.PersonPermissionsContextIdentifierType.InternalId
         case _:
             raise ValueError(f"Unknown context identifier type: {value!r}")
+
+
+def entity_context_identifier_from_literal(
+    value: str,
+) -> spec.EntityPermissionsContextIdentifierType:
+    match value:
+        case "nip":
+            return spec.EntityPermissionsContextIdentifierType.Nip
+        case "internal_id":
+            return spec.EntityPermissionsContextIdentifierType.InternalId
+        case _:
+            raise ValueError(f"Unknown entity context identifier type: {value!r}")
 
 
 def person_authorized_identifier_from_literal(
@@ -355,6 +368,12 @@ def to_spec(
 
 @overload
 def to_spec(
+    request: EntityPermissionsQuery,
+) -> spec.EntityPermissionsQueryRequest: ...
+
+
+@overload
+def to_spec(
     request: PersonalPermissionsQuery,
 ) -> spec.PersonalPermissionsQueryRequest: ...
 
@@ -466,6 +485,17 @@ def _(
         if request.permission_types
         else None,
     )
+
+
+@_to_spec.register
+def _(request: EntityPermissionsQuery) -> spec.EntityPermissionsQueryRequest:
+    context_id = None
+    if request.context_type and request.context_value:
+        context_id = spec.EntityPermissionsContextIdentifier(
+            type=entity_context_identifier_from_literal(request.context_type),
+            value=request.context_value,
+        )
+    return spec.EntityPermissionsQueryRequest(contextIdentifier=context_id)
 
 
 @_to_spec.register

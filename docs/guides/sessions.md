@@ -3,7 +3,7 @@
 The SDK exposes two different session concepts:
 
 1. Authentication sessions through `auth.sessions`
-2. Invoice sessions through `auth.online_session()`, `auth.batch_session()`, and historical listings on `auth.sessions`
+2. Invoice sessions through `auth.online_session()`, `auth.batch_session()`, and historical listings on `auth.invoice_sessions`
 
 This guide focuses on invoice sessions.
 

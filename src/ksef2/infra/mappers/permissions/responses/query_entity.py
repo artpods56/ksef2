@@ -13,6 +13,10 @@ from ksef2.domain.models.permissions import (
     AuthorizationSubjectIdentifierType,
     CertificateSubjectIdentifierType,
     EntityIdentifierType,
+    EntityPermissionDetail,
+    EntityPermissionsContextIdentifierType,
+    EntityPermissionsQueryResponse,
+    EntityPermissionType,
     EntityRole,
     EntityRoleType,
     EntityRolesResponse,
@@ -50,6 +54,24 @@ def _map_entity_role(response: spec.EntityRoleType) -> EntityRoleType:
             return "vat_group_sub_unit"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
+
+
+@overload
+def entity_from_spec(
+    response: spec.EntityPermissionsContextIdentifierType,
+) -> EntityPermissionsContextIdentifierType: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.EntityPermissionItem,
+) -> EntityPermissionDetail: ...
+
+
+@overload
+def entity_from_spec(
+    response: spec.QueryEntityPermissionsResponse,
+) -> EntityPermissionsQueryResponse: ...
 
 
 @overload
@@ -161,6 +183,60 @@ def _entity_identifier_from_value(
             return "nip"
         case _:
             raise ValueError(f"Unknown entity identifier type: {value!r}")
+
+
+def _entity_context_identifier_from_value(
+    value: str,
+) -> EntityPermissionsContextIdentifierType:
+    match value:
+        case "Nip":
+            return "nip"
+        case "InternalId":
+            return "internal_id"
+        case _:
+            raise ValueError(f"Unknown entity context identifier type: {value!r}")
+
+
+def _map_entity_permission_scope(
+    response: spec.EntityPermissionItemScope,
+) -> EntityPermissionType:
+    match response:
+        case spec.EntityPermissionItemScope.InvoiceRead:
+            return "invoice_read"
+        case spec.EntityPermissionItemScope.InvoiceWrite:
+            return "invoice_write"
+        case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
+            assert_never(unreachable)
+
+
+@_from_spec.register
+def _(
+    response: spec.EntityPermissionsContextIdentifierType,
+) -> EntityPermissionsContextIdentifierType:
+    return _entity_context_identifier_from_value(response.value)
+
+
+@_from_spec.register
+def _(response: spec.EntityPermissionItem) -> EntityPermissionDetail:
+    return EntityPermissionDetail(
+        id=response.id,
+        context_type=entity_from_spec(response.contextIdentifier.type),
+        context_value=response.contextIdentifier.value,
+        permission_type=_map_entity_permission_scope(response.permissionScope),
+        description=response.description,
+        start_date=response.startDate,
+        can_delegate=response.canDelegate,
+    )
+
+
+@_from_spec.register
+def _(response: spec.QueryEntityPermissionsResponse) -> EntityPermissionsQueryResponse:
+    return EntityPermissionsQueryResponse(
+        permissions=[
+            entity_from_spec(permission) for permission in response.permissions
+        ],
+        has_more=response.hasMore,
+    )
 
 
 @_from_spec.register

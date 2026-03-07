@@ -88,11 +88,13 @@ SDK endpoint: `GET /invoices/ksef/{ksefNumber}`
 
 Metadata queries and exports use `InvoicesFilter`.
 `amount_type` is required by the current public model.
+Public filter literals use lowercase SDK values such as `"online"` and `"vat"`;
+the SDK maps them to the schema-native enum values internally.
 
 ```python
 from datetime import datetime, timedelta, timezone
 
-from ksef2.domain.models import InvoicesFilter
+from ksef2.domain.models import InvoicesFilter, InvoiceMetadataParams
 
 filters = InvoicesFilter(
     role="seller",
@@ -100,9 +102,14 @@ filters = InvoicesFilter(
     date_from=datetime.now(tz=timezone.utc) - timedelta(days=7),
     date_to=datetime.now(tz=timezone.utc),
     amount_type="brutto",
+    invoicing_mode="online",
+    invoice_types=["vat"],
 )
 
-result = auth.invoices.query_metadata(filters=filters)
+result = auth.invoices.query_metadata(
+    filters=filters,
+    params=InvoiceMetadataParams(sort_order="asc"),
+)
 print(len(result.invoices))
 ```
 

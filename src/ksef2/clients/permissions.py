@@ -12,6 +12,8 @@ from ksef2.domain.models.permissions import (
     AuthorizationSubjectIdentifierType,
     CertificateSubjectIdentifierType,
     EntityPermission,
+    EntityPermissionsQuery,
+    EntityPermissionsQueryResponse,
     EntityRolesResponse,
     EuEntityAdminContextIdentifierType,
     EuEntityPermissionsQuery,
@@ -286,6 +288,21 @@ class PermissionsClient:
     ) -> AuthorizationPermissionsQueryResponse:
         """Fetch one page of authorization grants matching the provided filters."""
         spec_resp = self._query_eps.query_authorizations_grants(
+            request=query_to_spec(query),
+            **params.to_query_params()
+            if params
+            else OffsetPaginationParams().to_query_params(),
+        )
+        return entity_from_spec(spec_resp)
+
+    def query_entities(
+        self,
+        *,
+        query: EntityPermissionsQuery,
+        params: OffsetPaginationParams | None = None,
+    ) -> EntityPermissionsQueryResponse:
+        """Fetch one page of entity permission grants matching the provided filters."""
+        spec_resp = self._query_eps.query_entities_grants(
             request=query_to_spec(query),
             **params.to_query_params()
             if params

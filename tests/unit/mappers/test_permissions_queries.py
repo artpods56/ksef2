@@ -11,6 +11,7 @@ from ksef2.infra.mappers.permissions.requests import (
     authorizing_entity_identifier_from_literal,
     authorization_permission_query_from_literal,
     context_identifier_from_literal,
+    entity_context_identifier_from_literal,
     eu_query_permission_from_enum,
     eu_query_permission_from_literal,
     permission_state_from_enum,
@@ -119,6 +120,27 @@ class TestPermissionsQueryRequestMapper:
             spec.InvoicePermissionType.PefInvoicing,
         ]
 
+    def test_maps_entity_query_context_identifier(
+        self,
+        domain_perm_query_entities: BaseFactory[
+            domain_permissions.EntityPermissionsQuery
+        ],
+    ) -> None:
+        request = domain_perm_query_entities.build(
+            context_type="internal_id",
+            context_value="1234567890-12345",
+        )
+
+        output = query_to_spec(request)
+
+        assert isinstance(output, spec.EntityPermissionsQueryRequest)
+        assert output.contextIdentifier is not None
+        assert (
+            output.contextIdentifier.type
+            == spec.EntityPermissionsContextIdentifierType.InternalId
+        )
+        assert output.contextIdentifier.value == "1234567890-12345"
+
     def test_maps_personal_query_vat_ue_permission(
         self,
         domain_perm_query_personal: BaseFactory[
@@ -157,6 +179,7 @@ class TestPermissionsQueryRequestMapper:
             (authorizing_entity_identifier_from_literal, "peppol_id"),
             (authorization_permission_query_from_literal, "invoice_read"),
             (context_identifier_from_literal, "all_partners"),
+            (entity_context_identifier_from_literal, "all_partners"),
             (eu_query_permission_from_literal, "credentials_manage"),
             (permission_state_from_literal, "pending"),
             (person_permission_type_from_literal, "vat_ue_manage"),
@@ -345,6 +368,26 @@ class TestPermissionsQueryResponseMapper:
         assert isinstance(output, domain_permissions.EntityRole)
         assert output.parent_entity_id_type == "nip"
         assert output.parent_entity_id_value == "1234567890"
+
+    def test_maps_entity_permission_item(
+        self,
+        perm_entity_permission_item: BaseFactory[spec.EntityPermissionItem],
+    ) -> None:
+        mapped_input = perm_entity_permission_item.build(
+            contextIdentifier=spec.EntityPermissionsContextIdentifier(
+                type=spec.EntityPermissionsContextIdentifierType.InternalId,
+                value="1234567890-12345",
+            ),
+            permissionScope=spec.EntityPermissionItemScope.InvoiceWrite,
+        )
+
+        output = entity_from_spec(mapped_input)
+
+        assert isinstance(output, domain_permissions.EntityPermissionDetail)
+        assert output.context_type == "internal_id"
+        assert output.context_value == "1234567890-12345"
+        assert output.permission_type == "invoice_write"
+        assert output.can_delegate is True
 
     def test_maps_personal_permission_item(
         self,

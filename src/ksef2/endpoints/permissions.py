@@ -129,6 +129,21 @@ class RevokePermissionsEndpoints(BaseEndpoints):
 class QueryPermissionsEndpoints(BaseEndpoints):
     """Raw endpoints for permission query operations."""
 
+    def query_entities_grants(
+        self,
+        request: spec.EntityPermissionsQueryRequest,
+        **params: Unpack[OffsetPaginationQueryParams],
+    ) -> spec.QueryEntityPermissionsResponse:
+        """Fetch one page of entity permission grants."""
+        return self._parse(
+            self._transport.post(
+                path=routes.QueryPermissionsRoutes.QUERY_ENTITIES_GRANTS,
+                params=self.build_params(params),
+                json=request.model_dump(mode="json", by_alias=True),
+            ),
+            spec.QueryEntityPermissionsResponse,
+        )
+
     def query_personal_grants(
         self,
         request: spec.PersonalPermissionsQueryRequest,

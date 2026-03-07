@@ -19,6 +19,7 @@ class RevokePermissionsRoutes(StrEnum):
 
 
 class QueryPermissionsRoutes(StrEnum):
+    QUERY_ENTITIES_GRANTS = "/permissions/query/entities/grants"
     QUERY_PERSONAL_GRANTS = "/permissions/query/personal/grants"
     QUERY_ATTACHMENTS_STATUS = "/permissions/attachments/status"
     QUERY_OPERATIONS_STATUS = "/permissions/operations/{referenceNumber}"
