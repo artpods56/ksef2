@@ -18,17 +18,20 @@ This directory contains the maintained human-facing documentation for the curren
 ## Example Scripts
 
 Runnable examples live in [`scripts/examples`](../scripts/examples).
+Run them as modules with `uv run -m ...`; direct execution by file path is not supported.
 The guide pages above link to the most relevant scripts for each area.
+The structure and conventions for maintaining them are documented in
+[`scripts/examples/README.md`](../scripts/examples/README.md).
 
 Good starting points:
 
 - [`scripts/examples/quickstart.py`](../scripts/examples/quickstart.py)
+- [`scripts/examples/invoices/send_batch.py`](../scripts/examples/invoices/send_batch.py)
+- [`scripts/examples/invoices/submit_batch.py`](../scripts/examples/invoices/submit_batch.py)
 - [`scripts/examples/invoices/send_query_export_download.py`](../scripts/examples/invoices/send_query_export_download.py)
-- [`scripts/examples/session/session_resume.py`](../scripts/examples/session/session_resume.py)
+- [`scripts/examples/scenarios/session_workflow.py`](../scripts/examples/scenarios/session_workflow.py)
 
 ## Reference Material
 
 - [KSeF API docs](https://api-test.ksef.mf.gov.pl/docs/v2)
-- [Generated API reference](API_DOCS.md)
-- [Release process and versioning policy](releasing.md)
 - [Project changelog](../CHANGELOG.md)

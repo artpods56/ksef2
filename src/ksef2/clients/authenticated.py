@@ -10,6 +10,7 @@ from ksef2.clients.permissions import PermissionsClient
 from ksef2.clients.session_log import InvoiceSessionLogClient
 from ksef2.clients.session_management import SessionManagementClient
 from ksef2.clients.tokens import TokensClient
+from ksef2.core import exceptions
 from ksef2.core.crypto import generate_session_key, encrypt_symmetric_key
 from ksef2.core.protocols import Middleware
 from ksef2.core.middlewares.auth import BearerTokenMiddleware
@@ -18,6 +19,7 @@ from ksef2.domain.models import (
     BatchFileInfo,
     BatchSessionState,
     OpenBatchSessionRequest,
+    PreparedBatch,
 )
 from ksef2.domain.models.auth import AuthTokens
 from ksef2.domain.models.session import (
@@ -29,6 +31,7 @@ from ksef2.infra.mappers.encryption import from_spec as encryption_from_spec
 from ksef2.infra.mappers.sessions import from_spec as session_from_spec
 from ksef2.infra.mappers.sessions import to_spec as session_to_spec
 from ksef2.endpoints import encryption, session
+from ksef2.services.batch import BatchService
 from ksef2.services.invoices import InvoicesService
 
 
@@ -113,12 +116,83 @@ class AuthenticatedClient:
     def batch_session(
         self,
         *,
-        batch_file: BatchFileInfo,
+        prepared_batch: PreparedBatch | None = None,
+        batch_file: BatchFileInfo | None = None,
         form_code: FormSchema = FormSchema.FA3,
         offline_mode: bool = False,
     ) -> BatchSessionClient:
-        """Open a new batch session and return a bound batch client."""
+        """Open a batch session for upload work.
+
+        Args:
+            prepared_batch: Prepared batch payload created by ``auth.batch.prepare_batch()``.
+            batch_file: Declared ZIP package metadata and encrypted part metadata.
+            form_code: Invoice schema declared for the batch session when ``batch_file``
+                is provided directly.
+            offline_mode: Whether to declare offline invoicing mode for the batch when
+                ``batch_file`` is provided directly.
+
+        Returns:
+            A bound batch session client exposing presigned upload instructions.
+        """
+        if prepared_batch is not None and batch_file is not None:
+            raise exceptions.KSeFValidationError(
+                "Pass either prepared_batch or batch_file when opening a batch session."
+            )
+
+        if prepared_batch is not None:
+            encryption = prepared_batch.encryption
+            return self.open_batch_session(
+                batch_file=prepared_batch.batch_file,
+                aes_key=encryption.get_aes_key_bytes(),
+                iv=encryption.get_iv_bytes(),
+                encrypted_key=encryption.get_encrypted_key_bytes(),
+                form_code=prepared_batch.form_code,
+                offline_mode=prepared_batch.offline_mode,
+                prepared_batch=prepared_batch,
+            )
+
+        if batch_file is None:
+            raise exceptions.KSeFValidationError(
+                "prepared_batch or batch_file is required when opening a batch session."
+            )
+
         aes_key, iv, encrypted_key = self.get_encryption_key()
+
+        return self.open_batch_session(
+            batch_file=batch_file,
+            aes_key=aes_key,
+            iv=iv,
+            encrypted_key=encrypted_key,
+            form_code=form_code,
+            offline_mode=offline_mode,
+        )
+
+    def open_batch_session(
+        self,
+        *,
+        batch_file: BatchFileInfo,
+        aes_key: bytes,
+        iv: bytes,
+        encrypted_key: bytes,
+        form_code: FormSchema = FormSchema.FA3,
+        offline_mode: bool = False,
+        prepared_batch: PreparedBatch | None = None,
+    ) -> BatchSessionClient:
+        """Open a batch session using caller-prepared encryption metadata.
+
+        Args:
+            batch_file: Declared ZIP package metadata and encrypted part metadata.
+            aes_key: Raw symmetric key used for part encryption.
+            iv: Initialization vector paired with ``aes_key``.
+            encrypted_key: RSA-encrypted symmetric key sent to KSeF.
+            form_code: Invoice schema declared for the batch session.
+            offline_mode: Whether to declare offline invoicing mode for the batch.
+            prepared_batch: Optional prepared batch payload to attach to the returned
+                session so ``session.upload_parts()`` can operate without extra args.
+
+        Returns:
+            A bound batch session client exposing presigned upload instructions.
+        """
 
         request = OpenBatchSessionRequest(
             encrypted_key=encrypted_key,
@@ -139,7 +213,12 @@ class AuthenticatedClient:
             form_code=form_code,
             part_upload_requests=session_response.part_upload_requests,
         )
-        return BatchSessionClient(transport=self._authed_transport, state=state)
+        return BatchSessionClient(
+            transport=self._authed_transport,
+            state=state,
+            upload_transport=self._transport,
+            prepared_batch=prepared_batch,
+        )
 
     def resume_online_session(self, state: OnlineSessionState) -> OnlineSessionClient:
         """Rebind an existing serialized online session state to this client."""
@@ -147,7 +226,11 @@ class AuthenticatedClient:
 
     def resume_batch_session(self, state: "BatchSessionState") -> BatchSessionClient:
         """Rebind an existing serialized batch session state to this client."""
-        return BatchSessionClient(transport=self._authed_transport, state=state)
+        return BatchSessionClient(
+            transport=self._authed_transport,
+            state=state,
+            upload_transport=self._transport,
+        )
 
     @cached_property
     def limits(self) -> LimitsClient:
@@ -183,4 +266,18 @@ class AuthenticatedClient:
             ensure_encryption_certificates_loaded=(
                 self._ensure_encryption_certificates_loaded
             ),
+        )
+
+    @cached_property
+    def batch(self) -> BatchService:
+        """Return the high-level batch upload workflow service.
+
+        The service orchestrates package preparation, session opening,
+        presigned part uploads, session closing, and status polling.
+        """
+        return BatchService(
+            authed_transport=self._authed_transport,
+            upload_transport=self._transport,
+            get_encryption_key=self.get_encryption_key,
+            open_batch_session=self.open_batch_session,
         )

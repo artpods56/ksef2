@@ -3,9 +3,24 @@
 from __future__ import annotations
 
 import base64
+from typing import Self
 
 from ksef2.domain.models.base import KSeFBaseModel
 from ksef2.domain.models.session import BaseSessionState, FormSchema
+
+
+class BatchInvoice(KSeFBaseModel):
+    """Single invoice payload to include in a batch ZIP."""
+
+    file_name: str
+    content: bytes
+
+
+class BatchInvoiceHash(KSeFBaseModel):
+    """Correlation data between a ZIP entry and the original XML hash."""
+
+    file_name: str
+    invoice_hash: str
 
 
 class BatchFilePart(KSeFBaseModel):
@@ -32,6 +47,57 @@ class BatchFileInfo(KSeFBaseModel):
 
     parts: list[BatchFilePart]
     """List of file parts. Max 50 parts, each max 100MB before encryption."""
+
+
+class BatchEncryptionData(KSeFBaseModel):
+    """Encryption material used for the prepared batch payload."""
+
+    aes_key: str
+    iv: str
+    encrypted_key: str
+
+    @classmethod
+    def from_bytes(
+        cls,
+        *,
+        aes_key: bytes,
+        iv: bytes,
+        encrypted_key: bytes,
+    ) -> Self:
+        return cls(
+            aes_key=base64.b64encode(aes_key).decode(),
+            iv=base64.b64encode(iv).decode(),
+            encrypted_key=base64.b64encode(encrypted_key).decode(),
+        )
+
+    def get_aes_key_bytes(self) -> bytes:
+        return base64.b64decode(self.aes_key)
+
+    def get_iv_bytes(self) -> bytes:
+        return base64.b64decode(self.iv)
+
+    def get_encrypted_key_bytes(self) -> bytes:
+        return base64.b64decode(self.encrypted_key)
+
+
+class BatchPreparedPart(KSeFBaseModel):
+    """Prepared encrypted batch part ready for upload."""
+
+    ordinal_number: int
+    content: bytes
+    file_size: int
+    file_hash: str
+
+
+class PreparedBatch(KSeFBaseModel):
+    """Prepared batch package with encrypted parts and upload metadata."""
+
+    form_code: FormSchema = FormSchema.FA3
+    offline_mode: bool = False
+    batch_file: BatchFileInfo
+    parts: list[BatchPreparedPart]
+    encryption: BatchEncryptionData
+    invoices: list[BatchInvoiceHash]
 
 
 class OpenBatchSessionRequest(KSeFBaseModel):

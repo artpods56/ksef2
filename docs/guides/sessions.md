@@ -33,6 +33,56 @@ SDK endpoints:
 - `POST /sessions/online`
 - `POST /sessions/online/{referenceNumber}/close`
 
+## Prepare and Send a Batch
+
+```python
+from pathlib import Path
+
+from ksef2.domain.models import BatchInvoice
+
+prepared_batch = auth.batch.prepare_batch(
+    invoices=[
+        BatchInvoice(
+            file_name="invoice-1.xml",
+            content=Path("invoice-1.xml").read_bytes(),
+        ),
+        BatchInvoice(
+            file_name="invoice-2.xml",
+            content=Path("invoice-2.xml").read_bytes(),
+        ),
+    ]
+)
+
+with auth.batch_session(prepared_batch=prepared_batch) as session:
+    session.upload_parts()
+    reference_number = session.reference_number
+
+status = auth.batch.wait_for_completion(session=reference_number)
+print(status.status.code, status.status.description)
+```
+
+For staged workflows, `auth.batch` also exposes:
+- `prepare_batch()` / `prepare_batch_from_paths()`
+- `open_session()`
+- `get_status()`, `list_invoices()`, `list_failed_invoices()`, `get_upo()`
+
+`session.upload_parts()` lives on the opened batch session because uploads are only
+valid while the session is open. Closing the session triggers KSeF batch processing,
+so `wait_for_completion()` happens after the `with` block.
+
+For the one-shot workflow:
+
+```python
+state = auth.batch.submit_batch(invoices=[...])
+status = auth.batch.wait_for_completion(session=state)
+```
+
+Low-level SDK endpoints used by the batch workflow:
+- `POST /sessions/batch`
+- `POST /sessions/batch/{referenceNumber}/close`
+- presigned part uploads returned in `partUploadRequests`
+- `GET /sessions/{referenceNumber}`
+
 ## Session Status and Contents
 
 ```python
@@ -68,7 +118,7 @@ Example:
 Use `auth.session_log` to inspect previously opened invoice sessions.
 
 ```python
-sessions = auth.session_log.query(session_type="online")
+sessions = auth.session_log.query()
 for item in sessions.sessions:
     print(item.reference_number, item.status.description)
 ```
@@ -84,9 +134,11 @@ SDK endpoint: `GET /sessions`
 
 ## Examples
 
-- [`scripts/examples/session/workflow.py`](../../scripts/examples/session/workflow.py)
+- [`scripts/examples/scenarios/session_workflow.py`](../../scripts/examples/scenarios/session_workflow.py)
 - [`scripts/examples/session/session_resume.py`](../../scripts/examples/session/session_resume.py)
 - [`scripts/examples/session/session_management.py`](../../scripts/examples/session/session_management.py)
+- [`scripts/examples/invoices/send_batch.py`](../../scripts/examples/invoices/send_batch.py)
+- [`scripts/examples/invoices/submit_batch.py`](../../scripts/examples/invoices/submit_batch.py)
 
 ## Related
 

@@ -15,12 +15,17 @@ from ksef2.domain.models.session import (
     UpoPage,
 )
 from ksef2.domain.models.batch import (
+    BatchEncryptionData,
     BatchFileInfo,
     BatchFilePart,
+    BatchInvoice,
+    BatchInvoiceHash,
+    BatchPreparedPart,
     OpenBatchSessionRequest,
     BatchSessionState,
     OpenBatchSessionResponse,
     PartUploadRequest,
+    PreparedBatch,
 )
 from ksef2.domain.models.invoices import (
     BuyerIdentifierType,
@@ -177,10 +182,15 @@ __all__ = [
     # batch
     "BatchFileInfo",
     "BatchFilePart",
+    "BatchInvoice",
+    "BatchInvoiceHash",
+    "BatchPreparedPart",
+    "BatchEncryptionData",
     "OpenBatchSessionRequest",
     "BatchSessionState",
     "OpenBatchSessionResponse",
     "PartUploadRequest",
+    "PreparedBatch",
     # invoices
     "ExportHandle",
     "BuyerIdentifierType",

@@ -196,3 +196,18 @@ class KSeFInvoiceProcessingTimeoutError(KSeFException):
             invoice_reference_number=invoice_reference_number,
             timeout=timeout,
         )
+
+
+class KSeFBatchSessionTimeoutError(KSeFException):
+    """Raised when polling for a batch session to finish processing exceeds the timeout."""
+
+    code: str = "BATCH_SESSION_TIMEOUT"
+
+    def __init__(self, reference_number: str, timeout: float) -> None:
+        self.reference_number = reference_number
+        self.timeout = timeout
+        super().__init__(
+            f"Batch session {reference_number} not ready after {timeout}s",
+            reference_number=reference_number,
+            timeout=timeout,
+        )

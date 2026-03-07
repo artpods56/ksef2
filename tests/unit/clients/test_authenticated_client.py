@@ -15,13 +15,22 @@ from ksef2.clients.tokens import TokensClient
 from ksef2.core.routes import EncryptionRoutes, SessionRoutes, TokenRoutes
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models.auth import AuthTokens
-from ksef2.domain.models.batch import BatchFileInfo, BatchSessionState
+from ksef2.domain.models.batch import (
+    BatchEncryptionData,
+    BatchFileInfo,
+    BatchFilePart,
+    BatchPreparedPart,
+    BatchSessionState,
+    PreparedBatch,
+)
 from ksef2.domain.models.encryption import PublicKeyCertificate
 from ksef2.domain.models.session import FormSchema, OnlineSessionState
 from ksef2.infra.schema.api import spec
+from ksef2.services.batch import BatchService
 from ksef2.services.invoices import InvoicesService
 from tests.unit.conftest import _TOKEN
 from tests.unit.fakes.transport import FakeTransport
+from ksef2.core.crypto import sha256_b64
 
 
 def _build_client(  # [TODO] maybe we could just have client as a fixture, im not sure if rebuilding is necessary for every test
@@ -62,6 +71,7 @@ class TestAuthenticatedClientFacade:
         assert isinstance(client.limits, LimitsClient)
         assert isinstance(client.session_log, InvoiceSessionLogClient)
         assert isinstance(client.invoices, InvoicesService)
+        assert isinstance(client.batch, BatchService)
 
     def test_leaf_accessors_are_cached(
         self,
@@ -77,6 +87,7 @@ class TestAuthenticatedClientFacade:
         assert client.limits is client.limits
         assert client.session_log is client.session_log
         assert client.invoices is client.invoices
+        assert client.batch is client.batch
 
     def test_tokens_accessor_uses_bearer_transport(
         self,
@@ -224,6 +235,73 @@ class TestEncryptionAndSessions:
         assert call.path == SessionRoutes.OPEN_BATCH
         assert call.headers == {"Authorization": f"Bearer {_TOKEN}"}
         assert batch_client.access_token == _TOKEN
+
+    def test_open_batch_session_uses_supplied_encryption_material(
+        self,
+        fake_transport: FakeTransport,
+        domain_auth_tokens: BaseFactory[AuthTokens],
+        domain_batch_file_info: BaseFactory[BatchFileInfo],
+        session_open_batch_resp: BaseFactory[spec.OpenBatchSessionResponse],
+    ) -> None:
+        fake_transport.enqueue(session_open_batch_resp.build().model_dump(mode="json"))
+        client = _build_client(fake_transport, domain_auth_tokens.build())
+
+        batch_client = client.open_batch_session(
+            batch_file=domain_batch_file_info.build(),
+            aes_key=b"a" * 32,
+            iv=b"b" * 16,
+            encrypted_key=b"enc-key",
+        )
+
+        assert isinstance(batch_client, BatchSessionClient)
+        assert batch_client.aes_key == b"a" * 32
+        assert batch_client.iv == b"b" * 16
+        assert fake_transport.calls[0].path == SessionRoutes.OPEN_BATCH
+
+    def test_batch_session_accepts_prepared_batch(
+        self,
+        fake_transport: FakeTransport,
+        domain_auth_tokens: BaseFactory[AuthTokens],
+        session_open_batch_resp: BaseFactory[spec.OpenBatchSessionResponse],
+    ) -> None:
+        fake_transport.enqueue(session_open_batch_resp.build().model_dump(mode="json"))
+        client = _build_client(fake_transport, domain_auth_tokens.build())
+        prepared_batch = PreparedBatch(
+            form_code=FormSchema.FA3,
+            offline_mode=False,
+            batch_file=BatchFileInfo(
+                file_size=10,
+                file_hash=sha256_b64(b"plaintext"),
+                parts=[
+                    BatchFilePart(
+                        ordinal_number=1,
+                        file_size=12,
+                        file_hash=sha256_b64(b"encrypted"),
+                    )
+                ],
+            ),
+            parts=[
+                BatchPreparedPart(
+                    ordinal_number=1,
+                    content=b"encrypted",
+                    file_size=len(b"encrypted"),
+                    file_hash=sha256_b64(b"encrypted"),
+                )
+            ],
+            encryption=BatchEncryptionData.from_bytes(
+                aes_key=b"a" * 32,
+                iv=b"b" * 16,
+                encrypted_key=b"enc-key",
+            ),
+            invoices=[],
+        )
+
+        batch_client = client.batch_session(prepared_batch=prepared_batch)
+
+        assert isinstance(batch_client, BatchSessionClient)
+        assert batch_client.aes_key == b"a" * 32
+        assert batch_client.iv == b"b" * 16
+        assert fake_transport.calls[0].path == SessionRoutes.OPEN_BATCH
 
     def test_resume_online_session_reuses_authenticated_transport(
         self,
