@@ -20,6 +20,8 @@ from ksef2.infra.schema.api.supp.testdata import (
 
 @final
 class TestDataEndpoints(BaseEndpoints):
+    __test__ = False
+
     """Raw TEST-only endpoints used to seed and mutate sandbox data."""
 
     def create_subject(self, body: CreateSubjectRequest) -> None:
