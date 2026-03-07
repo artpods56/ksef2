@@ -59,14 +59,14 @@ class TokenContextIdentifierTypeEnum(StrEnum):
 class TokenAuthorIdentifier(KSeFBaseModel):
     """Identifies the subject that created the token."""
 
-    type: TokenAuthorIdentifierTypeEnum
+    type: TokenAuthorIdentifierType
     value: str
 
 
 class TokenContextIdentifier(KSeFBaseModel):
     """Identifies the taxpayer or organizational context bound to a token."""
 
-    type: TokenContextIdentifierTypeEnum
+    type: TokenContextIdentifierType
     value: str
 
 

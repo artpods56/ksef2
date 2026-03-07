@@ -1,7 +1,5 @@
 """Mappings from permission query models to generated API schema payloads."""
 
-from __future__ import annotations
-
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -22,7 +20,6 @@ from ksef2.domain.models.permissions import (
     SubordinateEntityRolesQuery,
     SubunitPermissionsQuery,
 )
-from ksef2.infra.mappers.permissions.requests import shared
 from ksef2.infra.schema.api import spec
 
 
@@ -104,6 +101,18 @@ def authorization_subject_identifier_from_literal(
             )
 
 
+def authorized_entity_identifier_from_literal(
+    value: str,
+) -> spec.EntityAuthorizationsAuthorizedEntityIdentifierType:
+    match value:
+        case "nip":
+            return spec.EntityAuthorizationsAuthorizedEntityIdentifierType.Nip
+        case "peppol_id":
+            return spec.EntityAuthorizationsAuthorizedEntityIdentifierType.PeppolId
+        case _:
+            raise ValueError(f"Unknown authorized entity identifier type: {value!r}")
+
+
 def context_identifier_from_literal(
     value: str,
 ) -> spec.PersonPermissionsContextIdentifierType:
@@ -114,6 +123,60 @@ def context_identifier_from_literal(
             return spec.PersonPermissionsContextIdentifierType.InternalId
         case _:
             raise ValueError(f"Unknown context identifier type: {value!r}")
+
+
+def person_authorized_identifier_from_literal(
+    value: str,
+) -> spec.CertificateSubjectIdentifierType:
+    match value:
+        case "nip":
+            return spec.CertificateSubjectIdentifierType.Nip
+        case "pesel":
+            return spec.CertificateSubjectIdentifierType.Pesel
+        case "fingerprint":
+            return spec.CertificateSubjectIdentifierType.Fingerprint
+        case _:
+            raise ValueError(f"Unknown authorized identifier type: {value!r}")
+
+
+def person_target_identifier_from_literal(
+    value: str,
+) -> spec.PersonPermissionsTargetIdentifierType:
+    match value:
+        case "nip":
+            return spec.PersonPermissionsTargetIdentifierType.Nip
+        case "all_partners":
+            return spec.PersonPermissionsTargetIdentifierType.AllPartners
+        case "internal_id":
+            return spec.PersonPermissionsTargetIdentifierType.InternalId
+        case _:
+            raise ValueError(f"Unknown target identifier type: {value!r}")
+
+
+def personal_context_identifier_from_literal(
+    value: str,
+) -> spec.PersonalPermissionsContextIdentifierType:
+    match value:
+        case "nip":
+            return spec.PersonalPermissionsContextIdentifierType.Nip
+        case "internal_id":
+            return spec.PersonalPermissionsContextIdentifierType.InternalId
+        case _:
+            raise ValueError(f"Unknown personal context identifier type: {value!r}")
+
+
+def personal_target_identifier_from_literal(
+    value: str,
+) -> spec.PersonalPermissionsTargetIdentifierType:
+    match value:
+        case "nip":
+            return spec.PersonalPermissionsTargetIdentifierType.Nip
+        case "all_partners":
+            return spec.PersonalPermissionsTargetIdentifierType.AllPartners
+        case "internal_id":
+            return spec.PersonalPermissionsTargetIdentifierType.InternalId
+        case _:
+            raise ValueError(f"Unknown personal target identifier type: {value!r}")
 
 
 def eu_query_permission_from_literal(
@@ -182,33 +245,31 @@ def permission_state_from_enum(request: PermissionStateEnum) -> spec.PermissionS
             assert_never(unreachable)
 
 
-def personal_permission_scope_from_literal(
+def personal_permission_type_from_literal(
     value: str,
-) -> spec.PersonalPermissionScope:
+) -> spec.PersonalPermissionType:
     match value:
         case "invoice_read":
-            return spec.PersonalPermissionScope.InvoiceRead
+            return spec.PersonalPermissionType.InvoiceRead
         case "invoice_write":
-            return spec.PersonalPermissionScope.InvoiceWrite
+            return spec.PersonalPermissionType.InvoiceWrite
         case "introspection":
-            return spec.PersonalPermissionScope.Introspection
+            return spec.PersonalPermissionType.Introspection
         case "credentials_read":
-            return spec.PersonalPermissionScope.CredentialsRead
+            return spec.PersonalPermissionType.CredentialsRead
         case "credentials_manage":
-            return spec.PersonalPermissionScope.CredentialsManage
+            return spec.PersonalPermissionType.CredentialsManage
         case "enforcement_operations":
-            return spec.PersonalPermissionScope.EnforcementOperations
+            return spec.PersonalPermissionType.EnforcementOperations
         case "subunit_manage":
-            return spec.PersonalPermissionScope.SubunitManage
+            return spec.PersonalPermissionType.SubunitManage
         case "vat_ue_manage":
-            return spec.PersonalPermissionScope.VatUeManage
+            return spec.PersonalPermissionType.VatUeManage
         case _:
             raise ValueError(f"Unknown personal permission type: {value!r}")
 
 
-def person_permission_scope_from_literal(
-    value: str,
-) -> spec.PersonPermissionScope:
+def person_permission_type_from_literal(value: str) -> spec.PersonPermissionScope:
     match value:
         case "invoice_read":
             return spec.PersonPermissionScope.InvoiceRead
@@ -341,7 +402,7 @@ def _(request: PersonPermissionsQuery) -> spec.PersonPermissionsQueryRequest:
     authorized_id = None
     if request.authorized_type and request.authorized_value:
         authorized_id = spec.PersonPermissionsAuthorizedIdentifier(
-            type=shared.cert_subject_identifier_from_literal(request.authorized_type),
+            type=person_authorized_identifier_from_literal(request.authorized_type),
             value=request.authorized_value,
         )
 
@@ -355,7 +416,7 @@ def _(request: PersonPermissionsQuery) -> spec.PersonPermissionsQueryRequest:
     target_id = None
     if request.target_type and request.target_value:
         target_id = spec.PersonPermissionsTargetIdentifier(
-            type=shared.indirect_target_identifier_from_literal(request.target_type),
+            type=person_target_identifier_from_literal(request.target_type),
             value=request.target_value,
         )
 
@@ -365,7 +426,7 @@ def _(request: PersonPermissionsQuery) -> spec.PersonPermissionsQueryRequest:
         contextIdentifier=context_id,
         targetIdentifier=target_id,
         permissionTypes=[
-            person_permission_scope_from_literal(p) for p in request.permission_types
+            person_permission_type_from_literal(p) for p in request.permission_types
         ]
         if request.permission_types
         else None,
@@ -390,7 +451,7 @@ def _(
     authorized_id = None
     if request.authorized_type and request.authorized_value:
         authorized_id = spec.EntityAuthorizationsAuthorizedEntityIdentifier(
-            type=authorization_subject_identifier_from_literal(request.authorized_type),
+            type=authorized_entity_identifier_from_literal(request.authorized_type),
             value=request.authorized_value,
         )
 
@@ -412,14 +473,14 @@ def _(request: PersonalPermissionsQuery) -> spec.PersonalPermissionsQueryRequest
     context_id = None
     if request.context_type and request.context_value:
         context_id = spec.PersonalPermissionsContextIdentifier(
-            type=context_identifier_from_literal(request.context_type),
+            type=personal_context_identifier_from_literal(request.context_type),
             value=request.context_value,
         )
 
     target_id = None
     if request.target_type and request.target_value:
         target_id = spec.PersonalPermissionsTargetIdentifier(
-            type=shared.indirect_target_identifier_from_literal(request.target_type),
+            type=personal_target_identifier_from_literal(request.target_type),
             value=request.target_value,
         )
 
@@ -427,7 +488,7 @@ def _(request: PersonalPermissionsQuery) -> spec.PersonalPermissionsQueryRequest
         contextIdentifier=context_id,
         targetIdentifier=target_id,
         permissionTypes=[
-            personal_permission_scope_from_literal(p) for p in request.permission_types
+            personal_permission_type_from_literal(p) for p in request.permission_types
         ]
         if request.permission_types
         else None,
@@ -455,7 +516,7 @@ def _(request: SubordinateEntityRolesQuery) -> spec.SubordinateEntityRolesQueryR
     sub_id = None
     if request.subordinate_nip:
         sub_id = spec.EntityPermissionsSubordinateEntityIdentifier(
-            type=authorizing_entity_identifier_from_literal("nip"),
+            type=spec.EntityPermissionsSubordinateEntityIdentifierType.Nip,
             value=request.subordinate_nip,
         )
     return spec.SubordinateEntityRolesQueryRequest(
@@ -468,7 +529,7 @@ def _(request: SubunitPermissionsQuery) -> spec.SubunitPermissionsQueryRequest:
     sub_id = None
     if request.subunit_nip:
         sub_id = spec.SubunitPermissionsSubunitIdentifier(
-            type=subunit_context_identifier_from_literal("nip"),
+            type=spec.SubunitPermissionsSubunitIdentifierType.Nip,
             value=request.subunit_nip,
         )
     return spec.SubunitPermissionsQueryRequest(

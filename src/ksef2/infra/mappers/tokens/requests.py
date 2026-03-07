@@ -74,6 +74,8 @@ def _(request: TokenPermissionEnum) -> spec.TokenPermissionType:
             return spec.TokenPermissionType.InvoiceRead
         case TokenPermissionEnum.INVOICE_WRITE:
             return spec.TokenPermissionType.InvoiceWrite
+        case TokenPermissionEnum.INTROSPECTION:
+            return spec.TokenPermissionType.Introspection
         case TokenPermissionEnum.CREDENTIALS_READ:
             return spec.TokenPermissionType.CredentialsRead
         case TokenPermissionEnum.CREDENTIALS_MANAGE:

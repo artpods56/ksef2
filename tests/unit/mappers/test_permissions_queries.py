@@ -15,7 +15,8 @@ from ksef2.infra.mappers.permissions.requests import (
     eu_query_permission_from_literal,
     permission_state_from_enum,
     permission_state_from_literal,
-    personal_permission_scope_from_literal,
+    personal_permission_type_from_literal,
+    person_permission_type_from_literal,
     person_query_type_from_enum,
     person_query_type_from_literal,
     query_to_spec,
@@ -79,7 +80,7 @@ class TestPermissionsQueryRequestMapper:
         assert output.targetIdentifier is not None
         assert (
             output.targetIdentifier.type
-            == spec.IndirectPermissionsTargetIdentifierType.AllPartners
+            == spec.PersonPermissionsTargetIdentifierType.AllPartners
         )
         assert output.permissionTypes == [
             spec.PersonPermissionScope.InvoiceRead,
@@ -136,16 +137,16 @@ class TestPermissionsQueryRequestMapper:
         output = query_to_spec(request)
 
         assert isinstance(output, spec.PersonalPermissionsQueryRequest)
-        assert output.permissionTypes == [spec.PersonalPermissionScope.VatUeManage]
+        assert output.permissionTypes == [spec.PersonalPermissionType.VatUeManage]
         assert output.contextIdentifier is not None
         assert (
             output.contextIdentifier.type
-            == spec.PersonPermissionsContextIdentifierType.InternalId
+            == spec.PersonalPermissionsContextIdentifierType.InternalId
         )
         assert output.targetIdentifier is not None
         assert (
             output.targetIdentifier.type
-            == spec.IndirectPermissionsTargetIdentifierType.Nip
+            == spec.PersonalPermissionsTargetIdentifierType.Nip
         )
         assert output.permissionState == spec.PermissionState.Active
 
@@ -158,7 +159,8 @@ class TestPermissionsQueryRequestMapper:
             (context_identifier_from_literal, "all_partners"),
             (eu_query_permission_from_literal, "credentials_manage"),
             (permission_state_from_literal, "pending"),
-            (personal_permission_scope_from_literal, "pef_invoice_write"),
+            (person_permission_type_from_literal, "vat_ue_manage"),
+            (personal_permission_type_from_literal, "pef_invoice_write"),
             (person_query_type_from_literal, "received"),
             (query_type_from_literal, "in_context"),
         ],
@@ -287,7 +289,7 @@ class TestPermissionsQueryResponseMapper:
             ),
             contextIdentifier=None,
             targetIdentifier=spec.PersonPermissionsTargetIdentifier(
-                type=spec.IndirectPermissionsTargetIdentifierType.AllPartners,
+                type=spec.PersonPermissionsTargetIdentifierType.AllPartners,
                 value=None,
             ),
             subjectPersonDetails=None,
@@ -362,11 +364,11 @@ class TestPermissionsQueryResponseMapper:
         mapped_input = perm_personal_permission_item.build(
             contextIdentifier=perm_personal_context_identifier.build(),
             authorizedIdentifier=perm_personal_authorized_identifier.build(
-                type=spec.CertificateSubjectIdentifierType.Nip,
+                type=spec.PersonalPermissionsAuthorizedIdentifierType.Nip,
                 value="1234567890",
             ),
             targetIdentifier=perm_personal_target_identifier.build(
-                type=spec.IndirectPermissionsTargetIdentifierType.Nip,
+                type=spec.PersonalPermissionsTargetIdentifierType.Nip,
                 value="1234567890",
             ),
             subjectPersonDetails=perm_subject_person_details.build(

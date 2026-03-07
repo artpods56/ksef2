@@ -3,13 +3,14 @@ from typing import final, Any, override
 import httpx
 from pydantic import BaseModel, ValidationError
 
-from ksef2.core import middlewares, protocols
+from ksef2.core import protocols
+from ksef2.core.middlewares.base import BaseMiddleware
 from ksef2.infra.mappers.exceptions import ExceptionsMapper
 from ksef2.infra.schema.api import spec
 
 
 @final
-class KSeFExceptionMiddleware(middlewares.BaseMiddleware):
+class KSeFExceptionMiddleware(BaseMiddleware):
     def __init__(self, transport: protocols.Middleware) -> None:
         self._next = transport
 

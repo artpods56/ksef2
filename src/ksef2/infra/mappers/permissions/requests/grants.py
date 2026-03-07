@@ -18,7 +18,9 @@ from ksef2.domain.models.permissions import (
     IndirectPermissionTypeEnum,
     PersonPermissionTypeEnum,
 )
-from ksef2.infra.mappers.permissions.requests import shared
+from ksef2.infra.mappers.permissions.requests.shared import (
+    indirect_target_identifier_from_literal,
+)
 from ksef2.infra.schema.api import spec
 
 
@@ -130,6 +132,26 @@ def person_permission_scope_from_literal(value: str) -> spec.PersonPermissionSco
             raise ValueError(f"Unknown person permission type: {value!r}")
 
 
+def person_permission_type_from_literal(value: str) -> spec.PersonPermissionType:
+    match value:
+        case "invoice_read":
+            return spec.PersonPermissionType.InvoiceRead
+        case "invoice_write":
+            return spec.PersonPermissionType.InvoiceWrite
+        case "introspection":
+            return spec.PersonPermissionType.Introspection
+        case "credentials_read":
+            return spec.PersonPermissionType.CredentialsRead
+        case "credentials_manage":
+            return spec.PersonPermissionType.CredentialsManage
+        case "enforcement_operations":
+            return spec.PersonPermissionType.EnforcementOperations
+        case "subunit_manage":
+            return spec.PersonPermissionType.SubunitManage
+        case _:
+            raise ValueError(f"Unknown person permission type: {value!r}")
+
+
 def person_permission_scope_from_enum(
     request: PersonPermissionTypeEnum,
 ) -> spec.PersonPermissionScope:
@@ -170,6 +192,58 @@ def subunit_context_identifier_from_literal(
             return spec.SubunitPermissionsContextIdentifierType.InternalId
         case _:
             raise ValueError(f"Unknown subunit identifier type: {value!r}")
+
+
+def person_subject_identifier_from_literal(
+    value: str,
+) -> spec.PersonPermissionsSubjectIdentifierType:
+    match value:
+        case "nip":
+            return spec.PersonPermissionsSubjectIdentifierType.Nip
+        case "pesel":
+            return spec.PersonPermissionsSubjectIdentifierType.Pesel
+        case "fingerprint":
+            return spec.PersonPermissionsSubjectIdentifierType.Fingerprint
+        case _:
+            raise ValueError(f"Unknown person subject identifier type: {value!r}")
+
+
+def indirect_subject_identifier_from_literal(
+    value: str,
+) -> spec.IndirectPermissionsSubjectIdentifierType:
+    match value:
+        case "nip":
+            return spec.IndirectPermissionsSubjectIdentifierType.Nip
+        case "pesel":
+            return spec.IndirectPermissionsSubjectIdentifierType.Pesel
+        case "fingerprint":
+            return spec.IndirectPermissionsSubjectIdentifierType.Fingerprint
+        case _:
+            raise ValueError(f"Unknown indirect subject identifier type: {value!r}")
+
+
+def subunit_subject_identifier_from_literal(
+    value: str,
+) -> spec.SubunitPermissionsSubjectIdentifierType:
+    match value:
+        case "nip":
+            return spec.SubunitPermissionsSubjectIdentifierType.Nip
+        case "pesel":
+            return spec.SubunitPermissionsSubjectIdentifierType.Pesel
+        case "fingerprint":
+            return spec.SubunitPermissionsSubjectIdentifierType.Fingerprint
+        case _:
+            raise ValueError(f"Unknown subunit subject identifier type: {value!r}")
+
+
+def eu_entity_permission_from_literal(value: str) -> spec.EuEntityPermissionType:
+    match value:
+        case "invoice_read":
+            return spec.EuEntityPermissionType.InvoiceRead
+        case "invoice_write":
+            return spec.EuEntityPermissionType.InvoiceWrite
+        case _:
+            raise ValueError(f"Unknown EU entity permission type: {value!r}")
 
 
 @overload
@@ -231,11 +305,11 @@ def _to_spec(request: BaseModel | Enum) -> object:
 def _(request: GrantPersonPermissionsRequest) -> spec.PersonPermissionsGrantRequest:
     return spec.PersonPermissionsGrantRequest(
         subjectIdentifier=spec.PersonPermissionsSubjectIdentifier(
-            type=shared.cert_subject_identifier_from_literal(request.subject_type),
+            type=person_subject_identifier_from_literal(request.subject_type),
             value=request.subject_value,
         ),
         permissions=[
-            person_permission_scope_from_literal(p) for p in request.permissions
+            person_permission_type_from_literal(p) for p in request.permissions
         ],
         description=request.description,
         subjectDetails=spec.PersonPermissionSubjectDetails(
@@ -252,7 +326,7 @@ def _(request: GrantPersonPermissionsRequest) -> spec.PersonPermissionsGrantRequ
 def _(request: GrantEntityPermissionsRequest) -> spec.EntityPermissionsGrantRequest:
     return spec.EntityPermissionsGrantRequest(
         subjectIdentifier=spec.EntityPermissionsSubjectIdentifier(
-            type=spec.EntityAuthorizationsAuthorizingEntityIdentifierType.Nip,
+            type=spec.EntityPermissionsSubjectIdentifierType.Nip,
             value=request.subject_value,
         ),
         permissions=[
@@ -291,13 +365,13 @@ def _(request: GrantIndirectPermissionsRequest) -> spec.IndirectPermissionsGrant
     target_id = None
     if request.target_type and request.target_value:
         target_id = spec.IndirectPermissionsTargetIdentifier(
-            type=shared.indirect_target_identifier_from_literal(request.target_type),
+            type=indirect_target_identifier_from_literal(request.target_type),
             value=request.target_value,
         )
 
     return spec.IndirectPermissionsGrantRequest(
         subjectIdentifier=spec.IndirectPermissionsSubjectIdentifier(
-            type=shared.cert_subject_identifier_from_literal(request.subject_type),
+            type=indirect_subject_identifier_from_literal(request.subject_type),
             value=request.subject_value,
         ),
         targetIdentifier=target_id,
@@ -317,7 +391,7 @@ def _(request: GrantIndirectPermissionsRequest) -> spec.IndirectPermissionsGrant
 def _(request: GrantSubunitPermissionsRequest) -> spec.SubunitPermissionsGrantRequest:
     return spec.SubunitPermissionsGrantRequest(
         subjectIdentifier=spec.SubunitPermissionsSubjectIdentifier(
-            type=shared.cert_subject_identifier_from_literal(request.subject_type),
+            type=subunit_subject_identifier_from_literal(request.subject_type),
             value=request.subject_value,
         ),
         contextIdentifier=spec.SubunitPermissionsContextIdentifier(
@@ -340,10 +414,10 @@ def _(request: GrantSubunitPermissionsRequest) -> spec.SubunitPermissionsGrantRe
 def _(request: GrantEuEntityPermissionsRequest) -> spec.EuEntityPermissionsGrantRequest:
     return spec.EuEntityPermissionsGrantRequest(
         subjectIdentifier=spec.EuEntityPermissionsSubjectIdentifier(
-            type=spec.EuEntityAdministrationPermissionsSubjectIdentifierType.Fingerprint,
+            type=spec.EuEntityPermissionsSubjectIdentifierType.Fingerprint,
             value=request.subject_value,
         ),
-        permissions=[entity_permission_from_literal(p) for p in request.permissions],
+        permissions=[eu_entity_permission_from_literal(p) for p in request.permissions],
         description=request.description,
         subjectDetails=spec.EuEntityPermissionSubjectDetails(
             subjectDetailsType=spec.EuEntityPermissionSubjectDetailsType.EntityByFingerprint,

@@ -10,7 +10,6 @@ from ksef2.domain.models.pagination import (
     AuthSessionListParams,
     InvoiceMetadataParams,
 )
-from ksef2.domain.models.session import SessionTypeEnum
 
 
 @pytest.fixture
@@ -40,7 +39,7 @@ def token_pagination_params() -> TokenPaginationParams:
 
 @pytest.fixture
 def session_list_params() -> SessionListParams:
-    return SessionListParams(session_type=SessionTypeEnum.ONLINE)
+    return SessionListParams(session_type="online")
 
 
 @pytest.fixture

@@ -28,7 +28,7 @@ class DomainOpenOnlineSessionRequestFactory(
 
 @register_fixture(name="domain_session_list_query")
 class DomainListSessionsQueryFactory(ModelFactory[ListSessionsQuery]):
-    session_type: domain_session.SessionTypeEnum = domain_session.SessionTypeEnum.ONLINE
+    session_type: domain_session.SessionType = "online"
     reference_number = None
     date_created_from = None
     date_created_to = None

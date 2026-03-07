@@ -7,7 +7,7 @@ from typing import assert_never, overload
 from pydantic import BaseModel
 
 from ksef2.domain.models.permissions import (
-    IdentifierType,
+    EntityIdentifierType,
     SubordinateEntityRoleDetail,
     SubordinateEntityRolesQueryResponse,
     SubordinateEntityRoleType,
@@ -15,7 +15,7 @@ from ksef2.domain.models.permissions import (
 from ksef2.infra.schema.api import spec
 
 
-def _entity_identifier_from_value(value: str) -> IdentifierType:
+def _entity_identifier_from_value(value: str) -> EntityIdentifierType:
     match value:
         case "Nip":
             return "nip"
@@ -44,13 +44,13 @@ def subordinate_roles_from_spec(
 @overload
 def subordinate_roles_from_spec(
     response: spec.EntityAuthorizationsAuthorizingEntityIdentifierType,
-) -> IdentifierType: ...
+) -> EntityIdentifierType: ...
 
 
 @overload
 def subordinate_roles_from_spec(
     response: spec.SubordinateRoleSubordinateEntityIdentifierType,
-) -> IdentifierType: ...
+) -> EntityIdentifierType: ...
 
 
 @overload
@@ -72,24 +72,16 @@ def _from_spec(response: BaseModel | Enum) -> object:
     )
 
 
-@_from_spec.register
-def _(
-    response: spec.EntityAuthorizationsAuthorizingEntityIdentifierType,
-) -> IdentifierType:
-    return _entity_identifier_from_value(response.value)
-
-
-@_from_spec.register
-def _(
+def _map_subordinate_entity_identifier(
     response: spec.SubordinateRoleSubordinateEntityIdentifierType,
-) -> IdentifierType:
+) -> EntityIdentifierType:
     return _entity_identifier_from_value(response.value)
 
 
 @_from_spec.register
 def _(response: spec.SubordinateEntityRole) -> SubordinateEntityRoleDetail:
     return SubordinateEntityRoleDetail(
-        subordinate_entity_type=subordinate_roles_from_spec(
+        subordinate_entity_type=_map_subordinate_entity_identifier(
             response.subordinateEntityIdentifier.type
         ),
         subordinate_entity_value=response.subordinateEntityIdentifier.value,

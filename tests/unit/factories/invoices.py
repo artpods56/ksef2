@@ -90,7 +90,7 @@ class InvoicesFilterFactory(ModelFactory[InvoicesFilter]):
     invoice_schema = None
     invoice_types = None
     has_attachment = False
-    invoicing_mode = "Online"
+    invoicing_mode = "online"
     is_self_invoicing = False
 
 

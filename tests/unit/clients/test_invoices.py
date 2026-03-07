@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from unittest.mock import patch, MagicMock
 
 from polyfactory import BaseFactory
@@ -8,7 +6,6 @@ from ksef2.clients.invoices import InvoicesClient
 from ksef2.core.routes import InvoiceRoutes
 from ksef2.domain.models import invoices
 from ksef2.domain.models.pagination import InvoiceMetadataParams
-from ksef2.domain.models.invoices import SortOrder
 from ksef2.infra.schema.api import spec
 from tests.unit.fakes.transport import FakeTransport
 
@@ -32,7 +29,7 @@ class TestInvoicesClient:
             params=InvoiceMetadataParams(
                 page_size=20,
                 page_offset=1,
-                sort_order=SortOrder.ASC,
+                sort_order="asc",
             ),
         )
 

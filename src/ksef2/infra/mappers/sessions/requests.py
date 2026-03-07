@@ -25,6 +25,14 @@ def to_spec(request: OpenBatchSessionRequest) -> spec.OpenBatchSessionRequest: .
 def to_spec(request: FormSchema) -> spec.FormCode: ...
 
 
+@overload
+def to_spec(request: BatchFilePart) -> spec.BatchFilePartInfo: ...
+
+
+@overload
+def to_spec(request: BatchFileInfo) -> spec.BatchFileInfo: ...
+
+
 def to_spec(request: BaseModel | FormSchema) -> object:
     return _to_spec(request)
 

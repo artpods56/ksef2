@@ -7,15 +7,17 @@ from typing import assert_never, overload
 from pydantic import BaseModel
 
 from ksef2.domain.models.permissions import (
+    CertificateSubjectIdentifierType,
     EuEntityPermission,
     EuEntityPermissionsQueryResponse,
     EuEntityQueryPermissionType,
-    IdentifierType,
 )
 from ksef2.infra.schema.api import spec
 
 
-def _certificate_subject_identifier_from_value(value: str) -> IdentifierType:
+def _certificate_subject_identifier_from_value(
+    value: str,
+) -> CertificateSubjectIdentifierType:
     match value:
         case "Nip":
             return "nip"
@@ -50,13 +52,13 @@ def eu_entity_from_spec(response: spec.EuEntityPermission) -> EuEntityPermission
 @overload
 def eu_entity_from_spec(
     response: spec.CertificateSubjectIdentifierType,
-) -> IdentifierType: ...
+) -> CertificateSubjectIdentifierType: ...
 
 
 @overload
 def eu_entity_from_spec(
     response: spec.EuEntityPermissionsAuthorIdentifierType,
-) -> IdentifierType: ...
+) -> CertificateSubjectIdentifierType: ...
 
 
 @overload
@@ -78,13 +80,9 @@ def _from_spec(response: BaseModel | Enum) -> object:
     )
 
 
-@_from_spec.register
-def _(response: spec.CertificateSubjectIdentifierType) -> IdentifierType:
-    return _certificate_subject_identifier_from_value(response.value)
-
-
-@_from_spec.register
-def _(response: spec.EuEntityPermissionsAuthorIdentifierType) -> IdentifierType:
+def _map_author_identifier_type(
+    response: spec.EuEntityPermissionsAuthorIdentifierType,
+) -> CertificateSubjectIdentifierType:
     return _certificate_subject_identifier_from_value(response.value)
 
 
@@ -110,7 +108,7 @@ def _(
 
     return EuEntityPermission(
         id=response.id,
-        author_type=eu_entity_from_spec(response.authorIdentifier.type),
+        author_type=_map_author_identifier_type(response.authorIdentifier.type),
         author_value=response.authorIdentifier.value,
         vat_ue_identifier=response.vatUeIdentifier,
         eu_entity_name=response.euEntityName,

@@ -166,7 +166,7 @@ class PersonPermissionsTargetIdentifierFactory(
 class PersonalPermissionsContextIdentifierFactory(
     ModelFactory[spec.PersonalPermissionsContextIdentifier]
 ):
-    type = spec.PersonPermissionsContextIdentifierType.InternalId
+    type = spec.PersonalPermissionsContextIdentifierType.InternalId
     value = "1234567890-12345"
 
 
@@ -174,7 +174,7 @@ class PersonalPermissionsContextIdentifierFactory(
 class PersonalPermissionsAuthorizedIdentifierFactory(
     ModelFactory[spec.PersonalPermissionsAuthorizedIdentifier]
 ):
-    type = spec.CertificateSubjectIdentifierType.Nip
+    type = spec.PersonalPermissionsAuthorizedIdentifierType.Nip
     value = "1234567890"
 
 

@@ -7,28 +7,35 @@ from typing import assert_never, overload
 from pydantic import BaseModel
 
 from ksef2.domain.models.permissions import (
-    IdentifierType,
     PersonPermissionDetail,
     PersonPermissionScope,
+    PersonPermissionsAuthorizedIdentifierType,
+    PersonPermissionsContextIdentifierType,
     PersonPermissionsQueryResponse,
+    PersonPermissionsTargetIdentifierType,
     PermissionState,
     PersonAuthorIdentifierType,
-    CertificateSubjectIdentifierType,
 )
 from ksef2.infra.schema.api import spec
 
 
-def _context_identifier_from_value(value: str) -> IdentifierType:
+def _map_person_context_identifier_type(
+    response: spec.PersonPermissionsContextIdentifierType,
+) -> PersonPermissionsContextIdentifierType:
+    value = response.value
     match value:
         case "Nip":
             return "nip"
         case "InternalId":
             return "internal_id"
         case _:
-            raise ValueError(f"Unknown context identifier type: {value!r}")
+            raise ValueError(f"Unknown person context identifier type: {value!r}")
 
 
-def _target_identifier_from_value(value: str) -> IdentifierType:
+def _map_person_target_identifier_type(
+    response: spec.PersonPermissionsTargetIdentifierType,
+) -> PersonPermissionsTargetIdentifierType:
+    value = response.value
     match value:
         case "Nip":
             return "nip"
@@ -37,7 +44,7 @@ def _target_identifier_from_value(value: str) -> IdentifierType:
         case "AllPartners":
             return "all_partners"
         case _:
-            raise ValueError(f"Unknown target identifier type: {value!r}")
+            raise ValueError(f"Unknown person target identifier type: {value!r}")
 
 
 def _map_author_identifier_type(
@@ -58,7 +65,7 @@ def _map_author_identifier_type(
 
 def _map_cert_subject_identifier_type(
     response: spec.CertificateSubjectIdentifierType,
-) -> CertificateSubjectIdentifierType:
+) -> PersonPermissionsAuthorizedIdentifierType:
     match response:
         case spec.CertificateSubjectIdentifierType.Nip:
             return "nip"
@@ -108,36 +115,6 @@ def person_from_spec(response: spec.PersonPermission) -> PersonPermissionDetail:
 
 @overload
 def person_from_spec(
-    response: spec.PersonPermissionsContextIdentifierType,
-) -> IdentifierType: ...
-
-
-@overload
-def person_from_spec(
-    response: spec.PersonalPermissionsContextIdentifierType,
-) -> IdentifierType: ...
-
-
-@overload
-def person_from_spec(
-    response: spec.IndirectPermissionsTargetIdentifierType,
-) -> IdentifierType: ...
-
-
-@overload
-def person_from_spec(
-    response: spec.PersonPermissionsTargetIdentifierType,
-) -> IdentifierType: ...
-
-
-@overload
-def person_from_spec(
-    response: spec.PersonalPermissionsTargetIdentifierType,
-) -> IdentifierType: ...
-
-
-@overload
-def person_from_spec(
     response: spec.QueryPersonPermissionsResponse,
 ) -> PersonPermissionsQueryResponse: ...
 
@@ -153,31 +130,6 @@ def _from_spec(response: BaseModel | Enum) -> object:
         f"No mapper registered for {type(response).__name__}. "
         f"Register one with @_from_spec.register"
     )
-
-
-@_from_spec.register
-def _(response: spec.PersonPermissionsContextIdentifierType) -> IdentifierType:
-    return _context_identifier_from_value(response.value)
-
-
-@_from_spec.register
-def _(response: spec.PersonalPermissionsContextIdentifierType) -> IdentifierType:
-    return _context_identifier_from_value(response.value)
-
-
-@_from_spec.register
-def _(response: spec.IndirectPermissionsTargetIdentifierType) -> IdentifierType:
-    return _target_identifier_from_value(response.value)
-
-
-@_from_spec.register
-def _(response: spec.PersonPermissionsTargetIdentifierType) -> IdentifierType:
-    return _target_identifier_from_value(response.value)
-
-
-@_from_spec.register
-def _(response: spec.PersonalPermissionsTargetIdentifierType) -> IdentifierType:
-    return _target_identifier_from_value(response.value)
 
 
 @_from_spec.register
@@ -210,13 +162,15 @@ def _(
         authorized_value=response.authorizedIdentifier.value
         if response.authorizedIdentifier.value
         else None,
-        context_type=person_from_spec(response.contextIdentifier.type)
+        context_type=_map_person_context_identifier_type(
+            response.contextIdentifier.type
+        )
         if response.contextIdentifier
         else None,
         context_value=response.contextIdentifier.value
         if response.contextIdentifier
         else None,
-        target_type=person_from_spec(response.targetIdentifier.type)
+        target_type=_map_person_target_identifier_type(response.targetIdentifier.type)
         if response.targetIdentifier
         else None,
         target_value=response.targetIdentifier.value

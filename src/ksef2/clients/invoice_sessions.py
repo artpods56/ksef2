@@ -3,7 +3,11 @@ from typing import final
 
 from ksef2.core.protocols import Middleware
 from ksef2.domain.models.pagination import ListSessionsQuery
-from ksef2.domain.models.session import ListSessionsResponse, SessionTypeEnum
+from ksef2.domain.models.session import (
+    ListSessionsResponse,
+    SessionStatus,
+    normalize_session_type,
+)
 from ksef2.endpoints.session import SessionEndpoints
 from ksef2.infra.mappers.sessions import from_spec
 
@@ -19,24 +23,13 @@ class InvoiceSessionsClient:
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = SessionEndpoints(transport)
 
-    @staticmethod
-    def _coerce_session_type(session_type: str) -> SessionTypeEnum:
-        """Normalize user-friendly session type strings into enum values."""
-        try:
-            return SessionTypeEnum[session_type.upper()]
-        except KeyError as exc:
-            raise ValueError(
-                f"Invalid session type: {session_type}. "
-                f"Valid session types are: {', '.join(SessionTypeEnum.__members__)}"
-            ) from exc
-
     def query(
         self,
         *,
         session_type: str,
         continuation_token: str | None = None,
         params: ListSessionsQuery | None = None,
-        statuses: list[str] | None = None,
+        statuses: list[SessionStatus] | None = None,
     ) -> ListSessionsResponse:
         """Fetch one page of invoice session history for the chosen session type.
 
@@ -51,7 +44,7 @@ class InvoiceSessionsClient:
             One page of historical invoice sessions.
         """
         parameters = params or ListSessionsQuery(
-            session_type=self._coerce_session_type(session_type),
+            session_type=normalize_session_type(session_type),
         )
         if statuses is not None:
             parameters = parameters.model_copy(update={"statuses": list(statuses)})
@@ -81,7 +74,7 @@ class InvoiceSessionsClient:
             returning a continuation token.
         """
         parameters = params or ListSessionsQuery(
-            session_type=self._coerce_session_type(session_type),
+            session_type=normalize_session_type(session_type),
         )
 
         response = self.query(

@@ -2,13 +2,12 @@
 
 from enum import Enum
 from functools import singledispatch
-from typing import assert_never, overload
+from typing import Literal, assert_never, overload
 
 from pydantic import BaseModel
 
 from ksef2.domain.models.testdata import (
     AuthContextIdentifier,
-    AuthContextIdentifierType,
     AuthContextIdentifierTypeEnum,
     BlockContextRequest,
     CreatePersonRequest,
@@ -18,14 +17,11 @@ from ksef2.domain.models.testdata import (
     EnableAttachmentsRequest,
     GrantPermissionsRequest,
     Identifier,
-    IdentifierType,
     IdentifierTypeEnum,
     Permission,
-    PermissionType,
     PermissionTypeEnum,
     RevokeAttachmentsRequest,
     RevokePermissionsRequest,
-    SubjectType,
     SubjectTypeEnum,
     SubUnit,
     UnblockContextRequest,
@@ -42,6 +38,23 @@ class ValidTestDataEnums(Enum):
 
 
 VALID_TESTDATA_ENUMS = [v.value for v in ValidTestDataEnums.__members__.values()]
+
+type SuppSubjectType = Literal["EnforcementAuthority", "VatGroup", "JST"]
+type SuppIdentifierType = Literal["Nip", "Pesel", "Fingerprint", "System"]
+type SuppAuthContextIdentifierType = Literal[
+    "Nip", "InternalId", "NipVatUe", "PeppolId"
+]
+type SuppPermissionType = Literal[
+    "InvoiceRead",
+    "InvoiceWrite",
+    "PefInvoiceWrite",
+    "Introspection",
+    "CredentialsRead",
+    "CredentialsManage",
+    "EnforcementOperations",
+    "SubunitManage",
+    "VatUeManage",
+]
 
 
 @overload
@@ -85,19 +98,37 @@ def to_spec(request: UnblockContextRequest) -> supp.UnblockContextRequest: ...
 
 
 @overload
-def to_spec(request: SubjectType) -> str: ...
+def to_spec(request: SubjectTypeEnum) -> SuppSubjectType: ...
 
 
 @overload
-def to_spec(request: IdentifierType) -> str: ...
+def to_spec(request: IdentifierTypeEnum) -> SuppIdentifierType: ...
 
 
 @overload
-def to_spec(request: AuthContextIdentifierType) -> str: ...
+def to_spec(
+    request: AuthContextIdentifierTypeEnum,
+) -> SuppAuthContextIdentifierType: ...
 
 
 @overload
-def to_spec(request: PermissionType) -> str: ...
+def to_spec(request: PermissionTypeEnum) -> SuppPermissionType: ...
+
+
+@overload
+def to_spec(request: SubUnit) -> supp.SubUnit: ...
+
+
+@overload
+def to_spec(request: Identifier) -> supp.IdentifierInput: ...
+
+
+@overload
+def to_spec(request: AuthContextIdentifier) -> supp.AuthContextIdentifierInput: ...
+
+
+@overload
+def to_spec(request: Permission) -> supp.PermissionInput: ...
 
 
 def to_spec(request: BaseModel | Enum | str) -> object:
@@ -131,7 +162,7 @@ def _to_spec(request: BaseModel | Enum | str) -> object:
 
 
 @_to_spec.register
-def _(request: SubjectTypeEnum) -> str:
+def _(request: SubjectTypeEnum) -> SuppSubjectType:
     match request:
         case SubjectTypeEnum.ENFORCEMENT_AUTHORITY:
             return "EnforcementAuthority"
@@ -144,7 +175,7 @@ def _(request: SubjectTypeEnum) -> str:
 
 
 @_to_spec.register
-def _(request: IdentifierTypeEnum) -> str:
+def _(request: IdentifierTypeEnum) -> SuppIdentifierType:
     match request:
         case IdentifierTypeEnum.NIP:
             return "Nip"
@@ -159,7 +190,7 @@ def _(request: IdentifierTypeEnum) -> str:
 
 
 @_to_spec.register
-def _(request: AuthContextIdentifierTypeEnum) -> str:
+def _(request: AuthContextIdentifierTypeEnum) -> SuppAuthContextIdentifierType:
     match request:
         case AuthContextIdentifierTypeEnum.NIP:
             return "Nip"
@@ -174,7 +205,7 @@ def _(request: AuthContextIdentifierTypeEnum) -> str:
 
 
 @_to_spec.register
-def _(request: PermissionTypeEnum) -> str:
+def _(request: PermissionTypeEnum) -> SuppPermissionType:
     match request:
         case PermissionTypeEnum.INVOICE_READ:
             return "InvoiceRead"

@@ -65,12 +65,12 @@ def _map_amount_type(value: str) -> spec.AmountType:
 
 
 def _map_invoicing_mode(
-    value: str | None,
+    value: invoices.InvoicingMode | None,
 ) -> spec.InvoicingMode | None:
     match value:
-        case "Online":
+        case "online":
             return spec.InvoicingMode.Online
-        case "Offline":
+        case "offline":
             return spec.InvoicingMode.Offline
         case None:
             return None
@@ -145,10 +145,33 @@ def _map_invoice_types(
 
     spec_codes: list[spec.InvoiceType] = []
     for invoice_type in request.invoice_types:
-        try:
-            spec_codes.append(spec.InvoiceType(invoice_type))
-        except ValueError as exc:
-            raise ValueError(f"Invalid invoice type: {invoice_type!r}") from exc
+        match invoice_type:
+            case "vat":
+                spec_codes.append(spec.InvoiceType.Vat)
+            case "zal":
+                spec_codes.append(spec.InvoiceType.Zal)
+            case "kor":
+                spec_codes.append(spec.InvoiceType.Kor)
+            case "roz":
+                spec_codes.append(spec.InvoiceType.Roz)
+            case "upr":
+                spec_codes.append(spec.InvoiceType.Upr)
+            case "kor_zal":
+                spec_codes.append(spec.InvoiceType.KorZal)
+            case "kor_roz":
+                spec_codes.append(spec.InvoiceType.KorRoz)
+            case "vat_pef":
+                spec_codes.append(spec.InvoiceType.VatPef)
+            case "vat_pef_sp":
+                spec_codes.append(spec.InvoiceType.VatPefSp)
+            case "kor_pef":
+                spec_codes.append(spec.InvoiceType.KorPef)
+            case "vat_rr":
+                spec_codes.append(spec.InvoiceType.VatRr)
+            case "kor_vat_rr":
+                spec_codes.append(spec.InvoiceType.KorVatRr)
+            case _:
+                raise ValueError(f"Invalid invoice type: {invoice_type!r}")
 
     return spec_codes
 

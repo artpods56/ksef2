@@ -14,13 +14,13 @@ def _map_buyer_identifier_type(
 ) -> invoices.BuyerIdentifierType:
     match response:
         case spec.BuyerIdentifierType.Nip:
-            return invoices.BuyerIdentifierType.NIP
+            return "nip"
         case spec.BuyerIdentifierType.VatUe:
-            return invoices.BuyerIdentifierType.VAT_UE
+            return "vat_ue"
         case spec.BuyerIdentifierType.Other:
-            return invoices.BuyerIdentifierType.OTHER
+            return "other"
         case spec.BuyerIdentifierType.None_:
-            return invoices.BuyerIdentifierType.NONE
+            return "none"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 
@@ -30,15 +30,15 @@ def _map_third_subject_identifier_type(
 ) -> invoices.ThirdSubjectIdentifierType:
     match response:
         case spec.ThirdSubjectIdentifierType.Nip:
-            return invoices.ThirdSubjectIdentifierType.NIP
+            return "nip"
         case spec.ThirdSubjectIdentifierType.InternalId:
-            return invoices.ThirdSubjectIdentifierType.INTERNAL_ID
+            return "internal_id"
         case spec.ThirdSubjectIdentifierType.VatUe:
-            return invoices.ThirdSubjectIdentifierType.VAT_UE
+            return "vat_ue"
         case spec.ThirdSubjectIdentifierType.Other:
-            return invoices.ThirdSubjectIdentifierType.OTHER
+            return "other"
         case spec.ThirdSubjectIdentifierType.None_:
-            return invoices.ThirdSubjectIdentifierType.NONE
+            return "none"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 
@@ -46,9 +46,9 @@ def _map_third_subject_identifier_type(
 def _map_invoicing_mode(response: spec.InvoicingMode) -> invoices.InvoicingMode:
     match response:
         case spec.InvoicingMode.Online:
-            return invoices.InvoicingMode.ONLINE
+            return "online"
         case spec.InvoicingMode.Offline:
-            return invoices.InvoicingMode.OFFLINE
+            return "offline"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 
@@ -56,29 +56,29 @@ def _map_invoicing_mode(response: spec.InvoicingMode) -> invoices.InvoicingMode:
 def _map_invoice_type(response: spec.InvoiceType) -> invoices.InvoiceType:
     match response:
         case spec.InvoiceType.Vat:
-            return invoices.InvoiceType.VAT
+            return "vat"
         case spec.InvoiceType.Zal:
-            return invoices.InvoiceType.ZAL
+            return "zal"
         case spec.InvoiceType.Kor:
-            return invoices.InvoiceType.KOR
+            return "kor"
         case spec.InvoiceType.Roz:
-            return invoices.InvoiceType.ROZ
+            return "roz"
         case spec.InvoiceType.Upr:
-            return invoices.InvoiceType.UPR
+            return "upr"
         case spec.InvoiceType.KorZal:
-            return invoices.InvoiceType.KOR_ZAL
+            return "kor_zal"
         case spec.InvoiceType.KorRoz:
-            return invoices.InvoiceType.KOR_ROZ
+            return "kor_roz"
         case spec.InvoiceType.VatPef:
-            return invoices.InvoiceType.VAT_PEF
+            return "vat_pef"
         case spec.InvoiceType.VatPefSp:
-            return invoices.InvoiceType.VAT_PEF_SP
+            return "vat_pef_sp"
         case spec.InvoiceType.KorPef:
-            return invoices.InvoiceType.KOR_PEF
+            return "kor_pef"
         case spec.InvoiceType.VatRr:
-            return invoices.InvoiceType.VAT_RR
+            return "vat_rr"
         case spec.InvoiceType.KorVatRr:
-            return invoices.InvoiceType.KOR_VAT_RR
+            return "kor_vat_rr"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 
@@ -296,7 +296,7 @@ def _(response: spec.InvoicePackagePart) -> invoices.PackagePart:
         ordinal_number=response.ordinalNumber,
         part_name=response.partName,
         method=response.method,
-        url=response.url,
+        url=str(response.url),
         part_size=response.partSize,
         part_hash=response.partHash,
         encrypted_part_size=response.encryptedPartSize,

@@ -1,7 +1,5 @@
 """Domain models for permission grants, queries, and operation status."""
 
-from __future__ import annotations
-
 from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Literal
@@ -29,7 +27,16 @@ type EntityIdentifierType = Literal["nip"]
 type PersonPermissionScope = Literal[
     "invoice_read",
     "invoice_write",
-    "pef_invoice_write",
+    "introspection",
+    "credentials_read",
+    "credentials_manage",
+    "enforcement_operations",
+    "subunit_manage",
+]
+
+type PersonalPermissionScope = Literal[
+    "invoice_read",
+    "invoice_write",
     "introspection",
     "credentials_read",
     "credentials_manage",
@@ -72,6 +79,24 @@ type OperationStatusCode = Literal[100, 200, 400, 410, 420, 430, 440, 450, 500, 
 type QueryType = Literal["granted", "received"]
 
 type PersonPermissionsQueryType = Literal["in_context", "granted_in_context"]
+
+type PersonPermissionsAuthorizedIdentifierType = Literal["nip", "pesel", "fingerprint"]
+
+type PersonPermissionsContextIdentifierType = Literal["nip", "internal_id"]
+
+type PersonPermissionsTargetIdentifierType = Literal[
+    "nip", "all_partners", "internal_id"
+]
+
+type PersonalPermissionsAuthorizedIdentifierType = Literal[
+    "nip", "pesel", "fingerprint"
+]
+
+type PersonalPermissionsContextIdentifierType = Literal["nip", "internal_id"]
+
+type PersonalPermissionsTargetIdentifierType = Literal[
+    "nip", "all_partners", "internal_id"
+]
 
 type SubordinateEntityRoleType = Literal[
     "local_government_sub_unit", "vat_group_sub_unit"
@@ -339,11 +364,11 @@ class PersonPermissionsQuery(KSeFBaseModel):
     permission_state: PermissionState | None = None
     author_type: PersonAuthorIdentifierType | None = None
     author_value: str | None = None
-    authorized_type: CertificateSubjectIdentifierType | None = None
+    authorized_type: PersonPermissionsAuthorizedIdentifierType | None = None
     authorized_value: str | None = None
-    context_type: PersonContextIdentifierType | None = None
+    context_type: PersonPermissionsContextIdentifierType | None = None
     context_value: str | None = None
-    target_type: IndirectTargetIdentifierType | None = None
+    target_type: PersonPermissionsTargetIdentifierType | None = None
     target_value: str | None = None
 
 
@@ -353,11 +378,11 @@ class PersonPermissionDetail(KSeFBaseModel):
     id: Annotated[str, Field(max_length=36, min_length=36)]
     author_type: PersonAuthorIdentifierType | None = None
     author_value: str | None = None
-    authorized_type: CertificateSubjectIdentifierType | None = None
+    authorized_type: PersonPermissionsAuthorizedIdentifierType | None = None
     authorized_value: str | None = None
-    context_type: PersonContextIdentifierType | None = None
+    context_type: PersonPermissionsContextIdentifierType | None = None
     context_value: str | None = None
-    target_type: IndirectTargetIdentifierType | None = None
+    target_type: PersonPermissionsTargetIdentifierType | None = None
     target_value: str | None = None
     permission_state: PermissionState
     permission_type: PersonPermissionScope
@@ -424,11 +449,11 @@ class AuthorizationPermissionsQueryResponse(KSeFBaseModel):
 class PersonalPermissionsQuery(KSeFBaseModel):
     """Filters for querying permissions held by the authenticated subject."""
 
-    permission_types: list[PersonPermissionScope] | None = None
+    permission_types: list[PersonalPermissionScope] | None = None
     permission_state: PermissionState | None = None
-    context_type: PersonContextIdentifierType | None = None
+    context_type: PersonalPermissionsContextIdentifierType | None = None
     context_value: str | None = None
-    target_type: IndirectTargetIdentifierType | None = None
+    target_type: PersonalPermissionsTargetIdentifierType | None = None
     target_value: str | None = None
 
 
@@ -436,13 +461,13 @@ class PersonalPermissionDetail(KSeFBaseModel):
     """Permission record returned from personal permission queries."""
 
     id: Annotated[str, Field(max_length=36, min_length=36)]
-    context_type: PersonContextIdentifierType | None = None
+    context_type: PersonalPermissionsContextIdentifierType | None = None
     context_value: str | None = None
-    authorized_type: CertificateSubjectIdentifierType | None = None
+    authorized_type: PersonalPermissionsAuthorizedIdentifierType | None = None
     authorized_value: str | None = None
-    target_type: IndirectTargetIdentifierType | None = None
+    target_type: PersonalPermissionsTargetIdentifierType | None = None
     target_value: str | None = None
-    permission_type: PersonPermissionScope
+    permission_type: PersonalPermissionScope
     description: str
     subject_first_name: str | None = None
     subject_last_name: str | None = None

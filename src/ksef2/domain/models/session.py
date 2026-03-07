@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import base64
 from datetime import datetime
 from enum import Enum, StrEnum
@@ -29,6 +27,11 @@ type SessionType = Literal["online", "batch"]
 
 type SessionStatus = Literal["in_progress", "succeeded", "failed", "cancelled"]
 
+type SessionTypeSpecValue = Literal["Online", "Batch"]
+
+
+type SessionStatusSpecValue = Literal["InProgress", "Succeeded", "Failed", "Cancelled"]
+
 
 class SessionTypeEnum(StrEnum):
     ONLINE = "Online"
@@ -40,6 +43,72 @@ class SessionStatusEnum(StrEnum):
     SUCCEEDED = "Succeeded"
     FAILED = "Failed"
     CANCELLED = "Cancelled"
+
+
+_SESSION_TYPE_TO_SPEC: dict[SessionType, SessionTypeSpecValue] = {
+    "online": "Online",
+    "batch": "Batch",
+}
+_SESSION_STATUS_TO_SPEC: dict[SessionStatus, SessionStatusSpecValue] = {
+    "in_progress": "InProgress",
+    "succeeded": "Succeeded",
+    "failed": "Failed",
+    "cancelled": "Cancelled",
+}
+_SESSION_TYPE_FROM_SPEC: dict[SessionTypeSpecValue, SessionType] = {
+    value: key for key, value in _SESSION_TYPE_TO_SPEC.items()
+}
+_SESSION_STATUS_FROM_SPEC: dict[SessionStatusSpecValue, SessionStatus] = {
+    value: key for key, value in _SESSION_STATUS_TO_SPEC.items()
+}
+
+
+def normalize_session_type(value: SessionType | SessionTypeEnum | str) -> SessionType:
+    if isinstance(value, SessionTypeEnum):
+        return _SESSION_TYPE_FROM_SPEC[value.value]
+
+    lowered_value = value.strip().lower()
+    if lowered_value in _SESSION_TYPE_TO_SPEC:
+        return lowered_value  # pyright: ignore[reportReturnType]
+
+    if value in _SESSION_TYPE_FROM_SPEC:
+        return _SESSION_TYPE_FROM_SPEC[value]
+
+    raise ValueError(
+        f"Invalid session type: {value}. Valid session types are: "
+        f"{', '.join(_SESSION_TYPE_TO_SPEC)}"
+    )
+
+
+def normalize_session_status(
+    value: SessionStatus | SessionStatusEnum | str,
+) -> SessionStatus:
+    if isinstance(value, SessionStatusEnum):
+        return _SESSION_STATUS_FROM_SPEC[value.value]
+
+    lowered_value = value.strip().lower()
+    if lowered_value in _SESSION_STATUS_TO_SPEC:
+        return lowered_value  # pyright: ignore[reportReturnType]
+
+    if value in _SESSION_STATUS_FROM_SPEC:
+        return _SESSION_STATUS_FROM_SPEC[value]
+
+    raise ValueError(
+        f"Invalid session status: {value}. Valid session statuses are: "
+        f"{', '.join(_SESSION_STATUS_TO_SPEC)}"
+    )
+
+
+def session_type_to_spec(
+    value: SessionType | SessionTypeEnum | str,
+) -> SessionTypeSpecValue:
+    return _SESSION_TYPE_TO_SPEC[normalize_session_type(value)]
+
+
+def session_status_to_spec(
+    value: SessionStatus | SessionStatusEnum | str,
+) -> SessionStatusSpecValue:
+    return _SESSION_STATUS_TO_SPEC[normalize_session_status(value)]
 
 
 class StatusInfo(KSeFBaseModel):

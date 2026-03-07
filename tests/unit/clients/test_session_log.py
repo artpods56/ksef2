@@ -37,7 +37,7 @@ class TestInvoiceSessionsClient:
         session_list_resp: BaseFactory[spec.SessionsQueryResponse],
     ) -> None:
         fake_transport.enqueue(session_list_resp.build().model_dump(mode="json"))
-        params = ListSessionsQuery(page_size=25, session_type="Online")
+        params = ListSessionsQuery(page_size=25, session_type="online")
 
         _ = invoice_sessions_client.query(session_type="online", params=params)
 

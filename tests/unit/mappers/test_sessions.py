@@ -72,7 +72,7 @@ class TestSessionRequestMapper:
     ) -> None:
         request = domain_session_list_query.build(
             page_size=25,
-            session_type="Online",
+            session_type="online",
             date_created_from="2026-03-05T10:00:00+00:00",
         ).to_query_params()
 

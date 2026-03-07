@@ -3,26 +3,38 @@ from datetime import date, datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import AwareDatetime, AnyUrl
+from pydantic import field_validator
 
 from ksef2.domain.models.base import KSeFBaseModel
-from ksef2.domain.types import CurrencyCodes, KsefInvoiceTypes
 from ksef2.domain.models.session import FormSchema
+from ksef2.domain.types import CurrencyCodes, KsefInvoiceTypes
 
 
-class SortOrder(StrEnum):
+type SortOrder = Literal["asc", "desc"]
+type BuyerIdentifierType = Literal["nip", "vat_ue", "other", "none"]
+type InvoiceType = KsefInvoiceTypes
+type InvoicingMode = Literal["online", "offline"]
+type ThirdSubjectIdentifierType = Literal[
+    "nip", "internal_id", "vat_ue", "other", "none"
+]
+
+type SortOrderSpecValue = Literal["Asc", "Desc"]
+type InvoicingModeSpecValue = Literal["Online", "Offline"]
+
+
+class SortOrderEnum(StrEnum):
     ASC = "Asc"
     DESC = "Desc"
 
 
-class BuyerIdentifierType(StrEnum):
+class BuyerIdentifierTypeEnum(StrEnum):
     NIP = "Nip"
     VAT_UE = "VatUe"
     OTHER = "Other"
     NONE = "None"
 
 
-class InvoiceType(StrEnum):
+class InvoiceTypeEnum(StrEnum):
     VAT = "Vat"
     ZAL = "Zal"
     KOR = "Kor"
@@ -37,17 +49,79 @@ class InvoiceType(StrEnum):
     KOR_VAT_RR = "KorVatRr"
 
 
-class InvoicingMode(StrEnum):
+class InvoicingModeEnum(StrEnum):
     ONLINE = "Online"
     OFFLINE = "Offline"
 
 
-class ThirdSubjectIdentifierType(StrEnum):
+class ThirdSubjectIdentifierTypeEnum(StrEnum):
     NIP = "Nip"
     INTERNAL_ID = "InternalId"
     VAT_UE = "VatUe"
     OTHER = "Other"
     NONE = "None"
+
+
+_SORT_ORDER_TO_SPEC: dict[SortOrder, SortOrderSpecValue] = {
+    "asc": "Asc",
+    "desc": "Desc",
+}
+_SORT_ORDER_FROM_SPEC: dict[SortOrderSpecValue, SortOrder] = {
+    value: key for key, value in _SORT_ORDER_TO_SPEC.items()
+}
+_INVOICING_MODE_TO_SPEC: dict[InvoicingMode, InvoicingModeSpecValue] = {
+    "online": "Online",
+    "offline": "Offline",
+}
+_INVOICING_MODE_FROM_SPEC: dict[InvoicingModeSpecValue, InvoicingMode] = {
+    value: key for key, value in _INVOICING_MODE_TO_SPEC.items()
+}
+
+
+def normalize_sort_order(value: SortOrder | SortOrderEnum | str) -> SortOrder:
+    if isinstance(value, SortOrderEnum):
+        return _SORT_ORDER_FROM_SPEC[value.value]
+
+    lowered_value = value.strip().lower()
+    if lowered_value in _SORT_ORDER_TO_SPEC:
+        return lowered_value  # pyright: ignore[reportReturnType]
+
+    if value in _SORT_ORDER_FROM_SPEC:
+        return _SORT_ORDER_FROM_SPEC[value]
+
+    raise ValueError(
+        f"Invalid sort order: {value}. Valid sort orders are: "
+        f"{', '.join(_SORT_ORDER_TO_SPEC)}"
+    )
+
+
+def sort_order_to_spec(value: SortOrder | SortOrderEnum | str) -> SortOrderSpecValue:
+    return _SORT_ORDER_TO_SPEC[normalize_sort_order(value)]
+
+
+def normalize_invoicing_mode(
+    value: InvoicingMode | InvoicingModeEnum | str,
+) -> InvoicingMode:
+    if isinstance(value, InvoicingModeEnum):
+        return _INVOICING_MODE_FROM_SPEC[value.value]
+
+    lowered_value = value.strip().lower()
+    if lowered_value in _INVOICING_MODE_TO_SPEC:
+        return lowered_value  # pyright: ignore[reportReturnType]
+
+    if value in _INVOICING_MODE_FROM_SPEC:
+        return _INVOICING_MODE_FROM_SPEC[value]
+
+    raise ValueError(
+        f"Invalid invoicing mode: {value}. Valid invoicing modes are: "
+        f"{', '.join(_INVOICING_MODE_TO_SPEC)}"
+    )
+
+
+def invoicing_mode_to_spec(
+    value: InvoicingMode | InvoicingModeEnum | str,
+) -> InvoicingModeSpecValue:
+    return _INVOICING_MODE_TO_SPEC[normalize_invoicing_mode(value)]
 
 
 # ---------------------------------------------------------------------------
@@ -117,9 +191,9 @@ class InvoiceMetadata(KSeFBaseModel):
     ksef_number: str
     invoice_number: str
     issue_date: date
-    invoicing_date: AwareDatetime
-    acquisition_date: AwareDatetime
-    permanent_storage_date: AwareDatetime
+    invoicing_date: datetime
+    acquisition_date: datetime
+    permanent_storage_date: datetime
     seller: InvoiceMetadataSeller
     buyer: InvoiceMetadataBuyer
     net_amount: float
@@ -142,7 +216,7 @@ class InvoiceMetadata(KSeFBaseModel):
 class QueryInvoicesMetadataResponse(KSeFBaseModel):
     has_more: bool
     is_truncated: bool
-    permanent_storage_hwm_date: AwareDatetime | None = None
+    permanent_storage_hwm_date: datetime | None = None
     invoices: list[InvoiceMetadata]
 
 
@@ -165,12 +239,12 @@ class PackagePart(KSeFBaseModel):
     ordinal_number: int
     part_name: str
     method: str
-    url: AnyUrl
+    url: str
     part_size: int
     part_hash: str
     encrypted_part_size: int
     encrypted_part_hash: str
-    expiration_date: AwareDatetime
+    expiration_date: datetime
 
 
 class InvoicePackage(KSeFBaseModel):
@@ -179,15 +253,15 @@ class InvoicePackage(KSeFBaseModel):
     parts: list[PackagePart]
     is_truncated: bool
     last_issue_date: date | None = None
-    last_invoicing_date: AwareDatetime | None = None
-    last_permanent_storage_date: AwareDatetime | None = None
-    permanent_storage_hwm_date: AwareDatetime | None = None
+    last_invoicing_date: datetime | None = None
+    last_permanent_storage_date: datetime | None = None
+    permanent_storage_hwm_date: datetime | None = None
 
 
 class InvoiceExportStatusResponse(KSeFBaseModel):
     status: ExportStatusInfo
-    completed_date: AwareDatetime | None = None
-    package_expiration_date: AwareDatetime | None = None
+    completed_date: datetime | None = None
+    package_expiration_date: datetime | None = None
     package: InvoicePackage | None = None
 
 
@@ -239,8 +313,15 @@ class InvoicesFilter(KSeFBaseModel):
     has_attachment: bool | None = None
 
     # others
-    invoicing_mode: Literal["Online", "Offline"] | None = None
+    invoicing_mode: InvoicingMode | None = None
     is_self_invoicing: bool | None = None
+
+    @field_validator("invoicing_mode", mode="before")
+    @classmethod
+    def _normalize_invoicing_mode(cls, value: object) -> object:
+        if isinstance(value, str):
+            return normalize_invoicing_mode(value)
+        return value
 
 
 class ExportInvoicesPayload(KSeFBaseModel):

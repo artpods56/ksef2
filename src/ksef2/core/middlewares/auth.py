@@ -1,11 +1,13 @@
 from typing import final, Any
+
 import httpx
-from ksef2.core import middlewares
+
+from ksef2.core.middlewares.base import BaseMiddleware
 from ksef2.core.protocols import Middleware
 
 
 @final
-class BearerTokenMiddleware(middlewares.BaseMiddleware):
+class BearerTokenMiddleware(BaseMiddleware):
     def __init__(self, transport: Middleware, token: str) -> None:
         self._next = transport
         self._token = token
