@@ -699,9 +699,14 @@ class EntityDetails(BaseModel):
     """
 
 
-class EntityPermissionType(StrEnum):
+class EntityPermissionItemScope(StrEnum):
     InvoiceWrite = "InvoiceWrite"
     InvoiceRead = "InvoiceRead"
+
+
+class EntityPermissionsContextIdentifierType(StrEnum):
+    Nip = "Nip"
+    InternalId = "InternalId"
 
 
 class EntityRoleType(StrEnum):
@@ -806,6 +811,51 @@ class ExceptionDetails(BaseModel):
     exceptionCode: int | None = None
     exceptionDescription: str | None = None
     details: list[str] | None = None
+
+
+class ForbiddenProblemDetails(BaseModel):
+    title: str
+    """
+    Forbidden
+    """
+    status: int
+    """
+    403
+    """
+    detail: str
+    """
+    Szczegółowy opis przyczyny odmowy dostępu.
+    """
+    instance: str | None = None
+    """
+    URI identyfikujące konkretne wystąpienie błędu.
+    """
+    reasonCode: str
+    """
+     Kod przyczyny odmowy dostępu.
+    | Code | Opis |  
+    |------|-------------|
+    | missing-permissions | Brak wymaganych uprawnień do wykonania operacji w bieżącym kontekście. | 
+    | ip-not-allowed | Żądanie pochodzi z adresu IP innego niż wskazany podczas uwierzytelnienia. | 
+    | insufficient-resource-access | Brak dostępu do wskazanego zasobu. | 
+    | auth-method-not-allowed | Ta operacja nie jest dostępna dla użytej metody uwierzytelnienia. | 
+    | security-service-blocked | Żądanie zostało zablokowane przez mechanizmy bezpieczeństwa. |
+    """
+    security: dict[str, Any] | None = None
+    """
+    Dodatkowe dane zależne od `reasonCode`.
+    | Code  | Security |
+    |------| ------------ |
+    | missing-permissions | requiredAnyOfPermissions: string[], presentPermissions: string[] |
+    | ip-not-allowed | clientIp: string |
+    | insufficient-resource-access  ||
+    | auth-method-not-allowed | authenticationMethodCategory: string  |
+    | security-service-blocked | incidentId: string, clientIp: string  |
+    """
+    traceId: str | None = None
+    """
+    Identyfikator śledzenia błędu.
+    """
 
 
 class FormCode(BaseModel):
@@ -976,7 +1026,7 @@ class InvoiceStatusInfo(BaseModel):
     """
     Dodatkowe szczegóły statusu
     """
-    extensions: dict[str, Any] | None = None
+    extensions: dict[str, str | None] | None = None
     """
     Zbiór dodatkowych informacji związanych ze statusem faktury, zapisanych jako pary klucz–wartość.
     Umożliwia rozszerzenie modelu o dane specyficzne dla danego przypadku.
@@ -1072,13 +1122,14 @@ class OpenOnlineSessionRequest(BaseModel):
     Schemat faktur wysyłanych w ramach sesji.
 
     Obsługiwane schematy:
-    | SystemCode | SchemaVersion | Value |
-    | --- | --- | --- |
-    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |
-    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |
-    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |
-    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |
-    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |
+    | SystemCode | SchemaVersion | Value | ValidFrom | ValidTo |
+    | --- | --- | --- | --- | --- |
+    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |  | 23.03.2026 |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-1E.xsd) | 1-1E | RR |  |  |
 
     """
     encryption: EncryptionInfo
@@ -1100,7 +1151,7 @@ class PartUploadRequest(BaseModel):
     """
     Adres pod który należy wysłać część pliku paczki.
     """
-    headers: dict[str, Any]
+    headers: dict[str, str | None]
     """
     Nagłówki, których należy użyć przy wysyłce części pliku paczki.
     """
@@ -1260,11 +1311,6 @@ class PersonPermissionsAuthorIdentifierType(StrEnum):
     Pesel = "Pesel"
     Fingerprint = "Fingerprint"
     System = "System"
-
-
-class PersonPermissionsContextIdentifierType(StrEnum):
-    Nip = "Nip"
-    InternalId = "InternalId"
 
 
 class PersonPermissionsQueryType(StrEnum):
@@ -1738,6 +1784,29 @@ class TooManyRequestsResponse(BaseModel):
     """
 
 
+class UnauthorizedProblemDetails(BaseModel):
+    title: str
+    """
+    Unauthorized
+    """
+    status: int
+    """
+    401
+    """
+    detail: str
+    """
+    Szczegółowy opis przyczyny odmowy dostępu.
+    """
+    instance: str | None = None
+    """
+    URI identyfikujące konkretne wystąpienie błędu.
+    """
+    traceId: str | None = None
+    """
+    Identyfikator śledzenia błędu.
+    """
+
+
 class UpoPageResponse(BaseModel):
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -1797,6 +1866,10 @@ class AuthenticationChallengeResponse(BaseModel):
     timestampMs: int
     """
     Czas wygenerowania challenge-a w milisekundach od 1 stycznia 1970 roku (Unix timestamp).
+    """
+    clientIp: str
+    """
+    Adres IP klienta.
     """
 
 
@@ -2180,13 +2253,43 @@ class EntityAuthorizationsAuthorizingEntityIdentifier(BaseModel):
 
 
 class EntityPermission(BaseModel):
-    type: EntityPermissionType
+    type: EntityPermissionItemScope
     """
     Rodzaj uprawnienia.
     """
     canDelegate: bool | None = None
     """
     Flaga pozwalająca na pośrednie przekazywanie danego uprawnienia
+    """
+
+
+class EntityPermissionsContextIdentifier(BaseModel):
+    """
+    Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
+    """
+
+    type: EntityPermissionsContextIdentifierType
+    """
+    Typ identyfikatora.
+    """
+    value: Annotated[str, Field(max_length=16, min_length=10)]
+    """
+    Wartość identyfikatora.
+    """
+
+
+class EntityPermissionsQueryRequest(BaseModel):
+    contextIdentifier: EntityPermissionsContextIdentifier | None = None
+    """
+    Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
     """
 
 
@@ -2839,7 +2942,7 @@ class PersonPermissionsContextIdentifier(BaseModel):
     | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
     """
 
-    type: PersonPermissionsContextIdentifierType
+    type: EntityPermissionsContextIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2898,22 +3001,13 @@ class PersonalPermissionsAuthorizedIdentifier(BaseModel):
     """
 
 
-class PersonalPermissionsContextIdentifier(BaseModel):
+class PersonalPermissionsContextIdentifier(EntityPermissionsContextIdentifier):
     """
     Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
     | Type | Value |
     | --- | --- |
     | Nip | 10 cyfrowy numer NIP |
     | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
-    """
-
-    type: PersonPermissionsContextIdentifierType
-    """
-    Typ identyfikatora.
-    """
-    value: Annotated[str, Field(max_length=16, min_length=10)]
-    """
-    Wartość identyfikatora.
     """
 
 
@@ -3534,6 +3628,37 @@ class EntityAuthorizationPermissionsQueryRequest(BaseModel):
     """
 
 
+class EntityPermissionItem(BaseModel):
+    id: Annotated[str, Field(max_length=36, min_length=36)]
+    """
+    Identyfikator uprawnienia.
+    """
+    contextIdentifier: EntityPermissionsContextIdentifier
+    """
+    Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
+    """
+    permissionScope: EntityPermissionItemScope
+    """
+    Rodzaj uprawnienia.
+    """
+    description: Annotated[str, Field(max_length=256, min_length=5)]
+    """
+    Opis uprawnienia.
+    """
+    startDate: AwareDatetime
+    """
+    Data rozpoczęcia obowiązywania uprawnienia.
+    """
+    canDelegate: bool
+    """
+    Flaga określająca, czy uprawnienie ma być możliwe do dalszego przekazywania.
+    """
+
+
 class EntityPermissionsGrantRequest(BaseModel):
     subjectIdentifier: EntityPermissionsSubjectIdentifier
     """
@@ -3666,11 +3791,12 @@ class OpenBatchSessionRequest(BaseModel):
     Schemat faktur wysyłanych w ramach sesji.
 
     Obsługiwane schematy:
-    | SystemCode | SchemaVersion | Value |
-    | --- | --- | --- |
-    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |
-    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |
-    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |
+    | SystemCode | SchemaVersion | Value | ValidFrom | ValidTo |
+    | --- | --- | --- | --- | --- |
+    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |  | 23.03.2026 |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-1E.xsd) | 1-1E | RR |  |  |
 
     """
     batchFile: BatchFileInfo
@@ -4062,6 +4188,17 @@ class QueryEntityAuthorizationPermissionsResponse(BaseModel):
     """
 
 
+class QueryEntityPermissionsResponse(BaseModel):
+    permissions: list[EntityPermissionItem]
+    """
+    Lista odczytanych uprawnień.
+    """
+    hasMore: bool
+    """
+    Flaga informująca o dostępności kolejnej strony wyników.
+    """
+
+
 class QueryEntityRolesResponse(BaseModel):
     roles: list[EntityRole]
     """
@@ -4323,7 +4460,7 @@ class EuEntityPermissionsGrantRequest(BaseModel):
     | --- | --- |
     | Fingerprint | Odcisk palca certyfikatu |
     """
-    permissions: list[EntityPermissionType]
+    permissions: list[EntityPermissionItemScope]
     """
     Lista nadawanych uprawnień. Każda wartość może wystąpić tylko raz.
     """
@@ -4484,13 +4621,14 @@ class InvoiceMetadata(BaseModel):
     Struktura dokumentu faktury.
 
     Obsługiwane schematy:
-    | SystemCode | SchemaVersion | Value |
-    | --- | --- | --- |
-    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |
-    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |
-    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |
-    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |
-    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |
+    | SystemCode | SchemaVersion | Value | ValidFrom | ValidTo |
+    | --- | --- | --- | --- | --- |
+    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |  | 23.03.2026 |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-1E.xsd) | 1-1E | RR |  |  |
 
     """
     isSelfInvoicing: bool
