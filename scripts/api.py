@@ -2,7 +2,7 @@ import time
 from datetime import datetime, timezone, timedelta, date
 
 from ksef2 import Client, Environment, FormSchema
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models import (
@@ -59,7 +59,7 @@ with client.testdata.temporal() as temp:
     with auth.online_session(form_code=FormSchema.FA3) as session:
         with open(invoice_url, "rb") as f:
             response = session.send_invoice(
-                invoice_xml=InvoiceFactory.create(
+                invoice_xml=InvoiceTemplater.create(
                     template_xml=f.read(),
                     replacements={
                         "#nip#": ORG_NIP,

@@ -17,7 +17,7 @@ import pytest
 
 from ksef2 import Client, FormSchema, Environment
 from ksef2.clients.authenticated import AuthenticatedClient
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.session import (
@@ -26,7 +26,6 @@ from ksef2.domain.models.session import (
     SessionInvoicesResponse,
     SessionStatusEnum,
     SessionStatusResponse,
-    SessionTypeEnum,
 )
 from ksef2.domain.models.testdata import (
     Identifier,
@@ -97,7 +96,7 @@ def session_with_invoice():
 
         with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
-            invoice_xml = InvoiceFactory.create(
+            invoice_xml = InvoiceTemplater.create(
                 template_xml,
                 {
                     "#nip#": seller_nip,
@@ -114,7 +113,7 @@ def session_with_invoice():
 
 
 # ---------------------------------------------------------------------------
-# List sessions (via auth.session_log)
+# List sessions (via auth.invoice_sessions)
 # ---------------------------------------------------------------------------
 
 
@@ -123,9 +122,7 @@ def test_list_sessions(xades_authenticated_context: tuple[Client, AuthenticatedC
     """List sessions filtered by type."""
     _client, auth = xades_authenticated_context
 
-    response = auth.session_log.query(
-        session_type=SessionTypeEnum.ONLINE,
-    )
+    response = auth.invoice_sessions.query(session_type="online")
 
     assert isinstance(response, ListSessionsResponse)
     assert hasattr(response, "sessions")
@@ -139,9 +136,7 @@ def test_list_sessions_batch(
     """List batch sessions."""
     _client, auth = xades_authenticated_context
 
-    response = auth.session_log.query(
-        session_type=SessionTypeEnum.BATCH,
-    )
+    response = auth.invoice_sessions.query(session_type="batch")
 
     assert isinstance(response, ListSessionsResponse)
 
@@ -153,8 +148,8 @@ def test_list_sessions_with_status_filter(
     """List sessions filtered by statuses."""
     _client, auth = xades_authenticated_context
 
-    response = auth.session_log.query(
-        session_type=SessionTypeEnum.ONLINE,
+    response = auth.invoice_sessions.query(
+        session_type="online",
         statuses=[SessionStatusEnum.SUCCEEDED, SessionStatusEnum.IN_PROGRESS],
     )
 

@@ -112,10 +112,10 @@ def run(config: ExampleConfig) -> None:
                 xml_bytes = auth.invoices.download_invoice(
                     ksef_number=status.ksef_number
                 )
-                print(f"Invoice size: {len(xml_bytes)} bytes")
+        print(f"Invoice size: {len(xml_bytes)} bytes")
 
         print("Listing online sessions:")
-        print(auth.session_log.query(session_type="online"))
+        print(auth.invoice_sessions.query(session_type="online"))
 
 
 def main() -> int:

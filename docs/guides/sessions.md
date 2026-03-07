@@ -3,7 +3,7 @@
 The SDK exposes two different session concepts:
 
 1. Authentication sessions through `auth.sessions`
-2. Invoice sessions through `auth.online_session()`, `auth.batch_session()`, and `auth.session_log`
+2. Invoice sessions through `auth.online_session()`, `auth.batch_session()`, and historical listings on `auth.sessions`
 
 This guide focuses on invoice sessions.
 
@@ -77,6 +77,9 @@ state = auth.batch.submit_batch(invoices=[...])
 status = auth.batch.wait_for_completion(session=state)
 ```
 
+If you already prepared the package separately, `auth.batch.submit_prepared_batch()`
+opens, uploads, and closes the session in one call.
+
 Low-level SDK endpoints used by the batch workflow:
 - `POST /sessions/batch`
 - `POST /sessions/batch/{referenceNumber}/close`
@@ -113,12 +116,26 @@ resumed.close()
 Example:
 - [`scripts/examples/session/session_resume.py`](../../scripts/examples/session/session_resume.py)
 
-## Query Historical Invoice Sessions
-
-Use `auth.session_log` to inspect previously opened invoice sessions.
+## Resume a Batch Session
 
 ```python
-sessions = auth.session_log.query()
+from ksef2.domain.models import BatchSessionState
+
+state = session.get_state()
+payload = state.model_dump_json()
+
+restored_state = BatchSessionState.model_validate_json(payload)
+resumed = auth.resume_batch_session(state=restored_state)
+print(resumed.reference_number)
+```
+
+## Query Historical Invoice Sessions
+
+Use `auth.invoice_sessions` to inspect previously opened invoice sessions.
+`session_type` is required and accepts `"online"` or `"batch"`.
+
+```python
+sessions = auth.invoice_sessions.query(session_type="online")
 for item in sessions.sessions:
     print(item.reference_number, item.status.description)
 ```
@@ -126,7 +143,7 @@ for item in sessions.sessions:
 To iterate all pages:
 
 ```python
-for page in auth.session_log.all(session_type="online"):
+for page in auth.invoice_sessions.all(session_type="online"):
     print(len(page.sessions))
 ```
 

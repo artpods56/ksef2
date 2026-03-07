@@ -94,10 +94,14 @@ for path in auth.invoices.fetch_package(
 - **TEST environment tooling** including self-signed certificates and disposable test data contexts
 - **Runnable examples and guide docs** for the common KSeF workflows
 
+## Root Client
 
-## Supported OpenAPI Version
+`Client` exposes both authenticated and public entry points:
 
-The SDK currently supports KSeF OpenAPI version `2.2.1`.
+- `client.authentication` for XAdES and KSeF-token authentication
+- `client.encryption` for public KSeF encryption certificates
+- `client.peppol` for public PEPPOL provider queries
+- `client.testdata` for TEST-only data setup and cleanup helpers
 
 ## Logging
 
@@ -169,6 +173,7 @@ After `with_xades()` or `with_token()`, you get an `AuthenticatedClient`. Its ma
 - `auth.permissions` for grant, revoke, and query operations
 - `auth.certificates` for certificate enrollment, retrieval, query, and revocation
 - `auth.sessions` for active authentication session management
+- `auth.invoice_sessions` for historical online and batch invoice sessions
 - `auth.limits` for TEST-environment limit inspection and overrides
 
 Invoice sending stays on `auth.online_session()` because it depends on an opened KSeF session and its session-specific encryption keys. Batch ZIP preparation and upload live on `auth.batch`, while metadata queries, exports, and downloads live on `auth.invoices` because they only require the authenticated bearer context.
@@ -189,7 +194,7 @@ print(token.reference_number, token.token)
 limits = auth.limits.get_context_limits()
 print(limits.online_session.max_invoices)
 
-sessions = auth.sessions.list_page(page_size=10)
+sessions = auth.sessions.query(page_size=10)
 print(len(sessions.items))
 
 metadata = auth.invoices.query_metadata(
@@ -216,6 +221,7 @@ Run examples as modules with `uv run -m ...`; direct execution by file path is n
 - [`scripts/examples/invoices/send_batch.py`](scripts/examples/invoices/send_batch.py) - staged batch upload with explicit session lifecycle
 - [`scripts/examples/invoices/submit_batch.py`](scripts/examples/invoices/submit_batch.py) - one-shot batch submission flow
 - [`scripts/examples/invoices/send_query_export_download.py`](scripts/examples/invoices/send_query_export_download.py) - send, inspect, export, and download invoices
+- [`scripts/examples/peppol/query_providers.py`](scripts/examples/peppol/query_providers.py) - query public PEPPOL providers
 - [`scripts/examples/scenarios/download_purchase_invoices.py`](scripts/examples/scenarios/download_purchase_invoices.py) - multi-buyer purchase-invoice export scenario
 - [`scripts/examples/session/session_resume.py`](scripts/examples/session/session_resume.py) - persist and resume an online session
 
@@ -241,12 +247,14 @@ just fetch-spec     # Fetch latest OpenAPI spec from KSeF
 The SDK covers **77 of 77** KSeF API endpoints (100%). See feature docs for details:
 
 - [Authentication](docs/guides/authentication.md) — XAdES, token auth, session management
+- [Encryption](docs/guides/encryption.md) — public KSeF encryption certificates
 - [Invoices](docs/guides/invoices.md) — send, download, query, export
 - [Sessions](docs/guides/sessions.md) — online/batch sessions, resume support
 - [Tokens](docs/guides/tokens.md) — generate and manage KSeF authorization tokens
 - [Permissions](docs/guides/permissions.md) — grant/query permissions for persons and entities
 - [Certificates](docs/guides/certificates.md) — enroll, query, revoke KSeF certificates
 - [Limits](docs/guides/limits.md) — query and modify API rate limits
+- [PEPPOL](docs/guides/peppol.md) — query registered PEPPOL providers
 - [Test Data](docs/guides/testdata.md) — create test subjects, manage test environment
 
 ## Stability And Releases
@@ -254,7 +262,7 @@ The SDK covers **77 of 77** KSeF API endpoints (100%). See feature docs for deta
 The SDK is still in the pre-`1.0.0` stabilization phase.
 
 - Track release notes in [CHANGELOG.md](CHANGELOG.md)
-- Follow the documented release flow in [docs/releasing.md](docs/releasing.md)
+- Run `just release-check` before publishing a release
 - Expect `0.x` minor releases to contain public API cleanup when needed
 
 ## License

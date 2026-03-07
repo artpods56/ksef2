@@ -2,11 +2,12 @@ import pytest
 
 from ksef2.clients.auth import AuthClient
 from ksef2.clients.certificates import CertificatesClient
+from ksef2.clients.invoice_sessions import InvoiceSessionsClient
 from ksef2.clients.invoices import InvoicesClient
 from ksef2.clients.limits import LimitsClient
 from ksef2.clients.peppol import PeppolClient
 from ksef2.clients.permissions import PermissionsClient
-from ksef2.clients.session_log import InvoiceSessionLogClient
+from ksef2.clients.session_management import SessionManagementClient
 from ksef2.clients.testdata import TestDataClient
 from ksef2.clients.tokens import TokensClient
 from ksef2.core.stores import CertificateStore
@@ -49,8 +50,13 @@ def limits_client(fake_transport: FakeTransport) -> LimitsClient:
 
 
 @pytest.fixture
-def session_log_client(fake_transport: FakeTransport) -> InvoiceSessionLogClient:
-    return InvoiceSessionLogClient(fake_transport)
+def session_management_client(fake_transport: FakeTransport) -> SessionManagementClient:
+    return SessionManagementClient(fake_transport)
+
+
+@pytest.fixture
+def invoice_sessions_client(fake_transport: FakeTransport) -> InvoiceSessionsClient:
+    return InvoiceSessionsClient(fake_transport)
 
 
 @pytest.fixture

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import os
 import sys
 from dataclasses import dataclass
@@ -24,16 +23,16 @@ if sys.platform == "darwin":
 from ksef2 import Client
 from ksef2.clients.testdata import TemporalTestData
 from ksef2.config import Environment
-from ksef2.core.exceptions import KSeFApiError
 from ksef2.core.xades import generate_test_certificate
 from ksef2.clients.authenticated import AuthenticatedClient
+from ksef2.logging import get_logger
 
 
 from dotenv import load_dotenv
 
 _ = load_dotenv(".env.test")
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass(frozen=True)
@@ -92,46 +91,6 @@ def test_context(real_client: Client, ksef_credentials: KSeFCredentials):
     return real_client.testdata.temporal()
 
 
-def _ensure_subject_exists(td: TemporalTestData, nip: str) -> None:
-    """Try to create subject, handling case where it already exists."""
-    try:
-        td.create_subject(
-            nip=nip,
-            subject_type="enforcement_authority",
-            description="Integration test subject",
-        )
-    except KSeFApiError as e:
-        if _is_already_exists_error(e):
-            logger.warning(f"Subject {nip} may already exist, continuing...")
-        else:
-            raise
-
-
-def _ensure_person_exists(td: TemporalTestData, nip: str, pesel: str) -> None:
-    """Try to create person, handling case where it already exists."""
-    try:
-        td.create_person(
-            nip=nip,
-            pesel=pesel,
-            description="Integration test person",
-        )
-    except KSeFApiError as e:
-        if _is_already_exists_error(e):
-            logger.warning(f"Person {nip}/{pesel} may already exist, continuing...")
-        else:
-            raise
-
-
-def _is_already_exists_error(e: KSeFApiError) -> bool:
-    """Check if the error is because the resource already exists."""
-    error_str = str(e).lower()
-    return (
-        "30001" in error_str
-        or "already exists" in error_str
-        or "już istnieje" in error_str
-    )
-
-
 @pytest.fixture
 def xades_authenticated_context(
     real_client: Client,
@@ -156,10 +115,6 @@ def xades_authenticated_context(
     Cleanup (automatic via TemporalTestData):
         1. Delete subject
     """
-    td = test_context
-
-    _ensure_subject_exists(td, ksef_credentials.subject_nip)
-
     cert, private_key = generate_test_certificate(ksef_credentials.subject_nip)
 
     tokens = real_client.authentication.with_xades(
@@ -192,10 +147,6 @@ def authenticated_context(
     Cleanup (automatic via TemporalTestData):
         1. Delete subject
     """
-    td = test_context
-
-    _ensure_subject_exists(td, ksef_credentials.subject_nip)
-
     cert, private_key = generate_test_certificate(ksef_credentials.subject_nip)
 
     tokens = real_client.authentication.with_xades(

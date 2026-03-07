@@ -6,10 +6,10 @@ from polyfactory import BaseFactory
 from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.clients.batch import BatchSessionClient
 from ksef2.clients.certificates import CertificatesClient
+from ksef2.clients.invoice_sessions import InvoiceSessionsClient
 from ksef2.clients.limits import LimitsClient
 from ksef2.clients.online import OnlineSessionClient
 from ksef2.clients.permissions import PermissionsClient
-from ksef2.clients.session_log import InvoiceSessionLogClient
 from ksef2.clients.session_management import SessionManagementClient
 from ksef2.clients.tokens import TokensClient
 from ksef2.core.routes import EncryptionRoutes, SessionRoutes, TokenRoutes
@@ -68,8 +68,8 @@ class TestAuthenticatedClientFacade:
         assert isinstance(client.certificates, CertificatesClient)
         assert isinstance(client.permissions, PermissionsClient)
         assert isinstance(client.sessions, SessionManagementClient)
+        assert isinstance(client.invoice_sessions, InvoiceSessionsClient)
         assert isinstance(client.limits, LimitsClient)
-        assert isinstance(client.session_log, InvoiceSessionLogClient)
         assert isinstance(client.invoices, InvoicesService)
         assert isinstance(client.batch, BatchService)
 
@@ -82,10 +82,10 @@ class TestAuthenticatedClientFacade:
 
         assert client.tokens is client.tokens
         assert client.sessions is client.sessions
+        assert client.invoice_sessions is client.invoice_sessions
         assert client.certificates is client.certificates
         assert client.permissions is client.permissions
         assert client.limits is client.limits
-        assert client.session_log is client.session_log
         assert client.invoices is client.invoices
         assert client.batch is client.batch
 
@@ -114,7 +114,7 @@ class TestAuthenticatedClientFacade:
         fake_transport.enqueue(auth_list_resp.build().model_dump(mode="json"))
         client = _build_client(fake_transport, domain_auth_tokens.build())
 
-        _ = client.sessions.list_page()
+        _ = client.sessions.query()
 
         call = fake_transport.calls[0]
         assert call.method == "GET"

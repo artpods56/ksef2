@@ -1,26 +1,38 @@
 from collections.abc import Iterator
 from typing import final
 
+from ksef2.core.protocols import Middleware
 from ksef2.domain.models.auth import AuthenticationSessionsResponse
 from ksef2.endpoints.auth import AuthEndpoints
-from ksef2.core.protocols import Middleware
 from ksef2.infra.mappers.auth import from_spec
 
 
 @final
 class SessionManagementClient:
-    """High-level access to authentication session listings and termination."""
+    """Manage authentication sessions opened through the auth API.
+
+    This client wraps the ``/auth/sessions`` endpoints, which are distinct from
+    invoice-processing sessions exposed by ``auth.invoice_sessions``.
+    """
 
     def __init__(self, transport: Middleware) -> None:
         self._auth_ep = AuthEndpoints(transport)
 
-    def list_page(
+    def query(
         self,
         *,
         page_size: int | None = None,
         continuation_token: str | None = None,
     ) -> AuthenticationSessionsResponse:
-        """Fetch one page of authentication sessions."""
+        """Fetch one page of authentication sessions.
+
+        Args:
+            page_size: Maximum number of sessions to request from KSeF.
+            continuation_token: Cursor returned by a previous page.
+
+        Returns:
+            One page of authentication sessions for the current subject.
+        """
         return from_spec(
             self._auth_ep.list_sessions(
                 continuation_token=continuation_token,
@@ -28,17 +40,25 @@ class SessionManagementClient:
             )
         )
 
-    def list(
+    def all(
         self,
         *,
         page_size: int | None = None,
     ) -> Iterator[AuthenticationSessionsResponse]:
-        """Iterate through all authentication session pages."""
-        response = self.list_page(page_size=page_size)
+        """Iterate through all authentication session pages.
+
+        Args:
+            page_size: Maximum number of sessions to request per page.
+
+        Yields:
+            Successive pages of authentication sessions until KSeF stops
+            returning a continuation token.
+        """
+        response = self.query(page_size=page_size)
         yield response
 
         while ct := response.continuation_token:
-            response = self.list_page(page_size=page_size, continuation_token=ct)
+            response = self.query(page_size=page_size, continuation_token=ct)
             yield response
 
     def terminate_current(self) -> None:
@@ -47,6 +67,4 @@ class SessionManagementClient:
 
     def close(self, *, reference_number: str) -> None:
         """Terminate an authentication session by reference number."""
-        self._auth_ep.terminate_auth_session(
-            reference_number=reference_number,
-        )
+        self._auth_ep.terminate_auth_session(reference_number=reference_number)

@@ -21,7 +21,7 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from ksef2 import Client, Environment, FormSchema
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
 
@@ -70,7 +70,7 @@ def test_cli_export_invoices_with_pem(tmp_path: Path) -> None:
             nip=seller_nip, cert=seller_cert, private_key=seller_key
         )
         with seller_auth.online_session(form_code=FormSchema.FA3) as session:
-            invoice_xml = InvoiceFactory.create(
+            invoice_xml = InvoiceTemplater.create(
                 template_xml=INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8"),
                 replacements={
                     "#nip#": seller_nip,

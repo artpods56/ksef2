@@ -57,14 +57,15 @@ class AuthEndpoints(BaseEndpoints):
         verify_chain: bool = False,
     ) -> spec.AuthenticationInitResponse:
         """Start authentication from an XAdES-signed XML payload."""
+
+        query_params: XadesAuthParams = {
+            "verifyCertificateChain": str(verify_chain).lower(),
+        }
         return self._parse(
             self._transport.request(
                 "POST",
                 routes.AuthRoutes.XADES_SIGNATURE,
-                params=self.build_params(
-                    {"verifyCertificateChain": str(verify_chain).lower()},
-                    self._XADES_AUTH_PARAMS,
-                ),
+                params=self.build_params(query_params, self._XADES_AUTH_PARAMS),
                 content=signed_xml,
                 headers={"Content-Type": "application/xml"},
             ),

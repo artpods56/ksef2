@@ -197,8 +197,8 @@ class TestCertificatesClient:
         fake_transport.enqueue(expected.model_dump(mode="json"))
 
         result = certificates_client.query(
-            certificate_serial_number="SN123",
             name="Test",
+            certificate_serial_number="SN123",
             certificate_type="authentication",
             status="active",
         )

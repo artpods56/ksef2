@@ -87,11 +87,11 @@ Example:
 Successful authentication also creates an auth session managed through `auth.sessions`.
 
 ```python
-sessions = auth.sessions.list_page(page_size=10)
+sessions = auth.sessions.query(page_size=10)
 for item in sessions.items:
     print(item.reference_number, item.authentication_method, item.is_current)
 
-for page in auth.sessions.list(page_size=10):
+for page in auth.sessions.all(page_size=10):
     print(len(page.items))
 
 auth.sessions.terminate_current()

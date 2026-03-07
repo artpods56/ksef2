@@ -1,24 +1,20 @@
-"""Download purchase invoices (faktury zakupowe) for multiple entities.
+"""Download purchase invoices for multiple entities.
 
-Intended for accounting firms or shared-service centres managing several
-companies. For each NIP the script authenticates with the certificate
+For each NIP the script authenticates with the certificate
 downloaded from MCU, schedules an export of all purchase invoices in the
 requested date range, and saves the resulting ZIP packages to disk.
 
 Directory layout expected for certificates (files downloaded from KSeF/MCU)::
 
-    certs/
-        1111111111.pem   # certificate - <NIP>.pem
-        1111111111.key   # private key  - <NIP>.key
-        2222222222.pem
-        2222222222.key
-        ...
+certs/
+    1111111111.pem   # certificate - <NIP>.pem
+    1111111111.key   # private key  - <NIP>.key
+    2222222222.pem
+    2222222222.key
+    ...
 
-Usage::
-
-    uv run -m scripts.examples.invoices.download_purchase_invoices
-
-Edit the config in `ExampleConfig` below to match your setup.
+Usage:
+uv run -m scripts.examples.invoices.download_purchase_invoices
 """
 
 from dataclasses import dataclass, field
@@ -26,7 +22,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from ksef2 import Client, Environment
-from ksef2.core import exceptions
 from ksef2.core.xades import load_certificate_from_pem, load_private_key_from_pem
 from ksef2.domain.models import InvoicesFilter
 from scripts.examples._common import repo_root
@@ -53,7 +48,6 @@ class ExampleConfig:
 
 
 def download_for_nip(client: Client, nip: str, config: ExampleConfig) -> None:
-    print(f"\n{'-' * 60}")
     print(f"[{nip}] Authenticating...")
 
     cert = load_certificate_from_pem(config.cert_dir / f"{nip}.pem")
@@ -80,15 +74,11 @@ def download_for_nip(client: Client, nip: str, config: ExampleConfig) -> None:
         )
     )
 
-    try:
-        package = auth.invoices.wait_for_export_package(
-            reference_number=export.reference_number,
-            timeout=config.poll_interval * config.max_poll_attempts,
-            poll_interval=config.poll_interval,
-        )
-    except exceptions.KSeFExportTimeoutError:
-        print(f"[{nip}] Export timed out - try increasing max_poll_attempts.")
-        return
+    package = auth.invoices.wait_for_export_package(
+        reference_number=export.reference_number,
+        timeout=config.poll_interval * config.max_poll_attempts,
+        poll_interval=config.poll_interval,
+    )
 
     for path in auth.invoices.fetch_package(
         package=package,
@@ -105,12 +95,9 @@ def run(config: ExampleConfig) -> None:
     client = Client(config.environment)
 
     for nip in config.nips:
-        try:
-            download_for_nip(client, nip, config)
-        except Exception as exc:  # noqa: BLE001
-            print(f"[{nip}] ERROR: {exc}")
+        download_for_nip(client, nip, config)
 
-    print("\nAll done.")
+    print("Done.")
 
 
 def main() -> int:

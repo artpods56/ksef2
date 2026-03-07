@@ -9,8 +9,12 @@ from ksef2.infra.mappers.sessions import from_spec
 
 
 @final
-class InvoiceSessionLogClient:
-    """Read historical online or batch session logs with pagination support."""
+class InvoiceSessionsClient:
+    """Browse historical online and batch invoice sessions.
+
+    This client wraps the ``/sessions`` history endpoint for invoice-processing
+    sessions. It does not manage authentication sessions from ``/auth/sessions``.
+    """
 
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = SessionEndpoints(transport)
@@ -34,7 +38,18 @@ class InvoiceSessionLogClient:
         params: ListSessionsQuery | None = None,
         statuses: list[str] | None = None,
     ) -> ListSessionsResponse:
-        """Fetch one page of session log results for the chosen session type."""
+        """Fetch one page of invoice session history for the chosen session type.
+
+        Args:
+            session_type: Invoice session family to browse, such as ``"online"``
+                or ``"batch"``.
+            continuation_token: Cursor returned by a previous page.
+            params: Optional query object with pagination and filter settings.
+            statuses: Optional list of status filters applied on top of ``params``.
+
+        Returns:
+            One page of historical invoice sessions.
+        """
         parameters = params or ListSessionsQuery(
             session_type=self._coerce_session_type(session_type),
         )
@@ -54,7 +69,17 @@ class InvoiceSessionLogClient:
         session_type: str,
         params: ListSessionsQuery | None = None,
     ) -> Iterator[ListSessionsResponse]:
-        """Iterate through all session log pages for the chosen session type."""
+        """Iterate through all pages of invoice session history.
+
+        Args:
+            session_type: Invoice session family to browse, such as ``"online"``
+                or ``"batch"``.
+            params: Optional query object with pagination and filter settings.
+
+        Yields:
+            Successive pages of historical invoice sessions until KSeF stops
+            returning a continuation token.
+        """
         parameters = params or ListSessionsQuery(
             session_type=self._coerce_session_type(session_type),
         )

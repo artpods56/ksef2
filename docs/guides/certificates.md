@@ -56,11 +56,8 @@ SDK endpoint: `GET /certificates/enrollments/{referenceNumber}`
 ```python
 from ksef2.domain.models.pagination import OffsetPaginationParams
 
-response = auth.certificates.query(
-    status="active",
-    certificate_type="authentication",
-    params=OffsetPaginationParams(page_offset=0, page_size=20),
-)
+response = auth.certificates.query(certificate_type="authentication", status="active",
+                                   params=OffsetPaginationParams(page_offset=0, page_size=20))
 
 for cert in response.certificates:
     print(cert.serial_number, cert.name, cert.status)

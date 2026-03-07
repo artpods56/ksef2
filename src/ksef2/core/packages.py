@@ -2,7 +2,8 @@ import io
 import zipfile
 from dataclasses import dataclass
 from pathlib import PurePosixPath
-from typing import Iterator, final
+from typing import final
+from collections.abc import Iterator
 
 _KNOWN_NON_INVOICE_FILES = frozenset(
     {

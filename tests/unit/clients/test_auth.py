@@ -281,7 +281,7 @@ class TestAuthClient:
 
 
 class TestSessionManagementClient:
-    def test_list_page(
+    def test_query_authentication_page(
         self,
         fake_transport: FakeTransport,
         auth_list_resp: BaseFactory[spec.AuthenticationListResponse],
@@ -290,7 +290,7 @@ class TestSessionManagementClient:
         response = auth_list_resp.build(continuationToken="next-page")
         fake_transport.enqueue(response.model_dump(mode="json"))
 
-        result = client.list_page(page_size=20)
+        result = client.query(page_size=20)
 
         assert isinstance(result, domain_auth.AuthenticationSessionsResponse)
         assert result.continuation_token == "next-page"
@@ -301,7 +301,7 @@ class TestSessionManagementClient:
         assert call.params is not None
         assert call.params["pageSize"] == "20"
 
-    def test_list_iterates_over_pages(
+    def test_all_authentication_iterates_over_pages(
         self,
         fake_transport: FakeTransport,
         auth_list_resp: BaseFactory[spec.AuthenticationListResponse],
@@ -312,7 +312,7 @@ class TestSessionManagementClient:
         fake_transport.enqueue(first.model_dump(mode="json"))
         fake_transport.enqueue(second.model_dump(mode="json"))
 
-        pages = list(client.list())
+        pages = list(client.all())
 
         assert len(pages) == 2
         assert fake_transport.calls[1].headers == {"x-continuation-token": "ct-2"}
