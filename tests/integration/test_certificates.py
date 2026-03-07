@@ -1,7 +1,7 @@
-from __future__ import annotations
-
 import pytest
 
+from ksef2 import Client
+from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.domain.models.certificates import (
     CertificateEnrollmentData,
     CertificateLimitsResponse,
@@ -10,7 +10,9 @@ from ksef2.domain.models.certificates import (
 
 
 @pytest.mark.integration
-def test_get_certificate_limits(xades_authenticated_context):
+def test_get_certificate_limits(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+) -> None:
     """Fetch certificate limits for the authenticated subject."""
     client, auth = xades_authenticated_context
 
@@ -25,7 +27,9 @@ def test_get_certificate_limits(xades_authenticated_context):
 
 
 @pytest.mark.integration
-def test_get_enrollment_data(xades_authenticated_context):
+def test_get_enrollment_data(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+) -> None:
     """Fetch certificate enrollment data for CSR preparation.
 
     Note: This endpoint may fail with self-signed certs because it requires
@@ -47,7 +51,9 @@ def test_get_enrollment_data(xades_authenticated_context):
 
 
 @pytest.mark.integration
-def test_query_certificates_no_filters(xades_authenticated_context):
+def test_query_certificates_no_filters(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+) -> None:
     """Query all certificates without filter."""
     client, auth = xades_authenticated_context
 
@@ -59,7 +65,9 @@ def test_query_certificates_no_filters(xades_authenticated_context):
 
 
 @pytest.mark.integration
-def test_query_certificates_with_status_filter(xades_authenticated_context):
+def test_query_certificates_with_status_filter(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+) -> None:
     """Query certificates filtering by status."""
     client, auth = xades_authenticated_context
 
@@ -72,7 +80,9 @@ def test_query_certificates_with_status_filter(xades_authenticated_context):
 
 
 @pytest.mark.integration
-def test_query_certificates_with_type_filter(xades_authenticated_context):
+def test_query_certificates_with_type_filter(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+) -> None:
     """Query certificates filtering by type."""
     client, auth = xades_authenticated_context
 
@@ -85,7 +95,9 @@ def test_query_certificates_with_type_filter(xades_authenticated_context):
 
 
 @pytest.mark.integration
-def test_query_certificates_with_pagination(xades_authenticated_context):
+def test_query_certificates_with_pagination(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+) -> None:
     """Query certificates with pagination parameters."""
     client, auth = xades_authenticated_context
 
@@ -97,7 +109,9 @@ def test_query_certificates_with_pagination(xades_authenticated_context):
 
 
 @pytest.mark.integration
-def test_query_certificates_with_name_filter(xades_authenticated_context):
+def test_query_certificates_with_name_filter(
+    xades_authenticated_context: tuple[Client, AuthenticatedClient],
+) -> None:
     """Query certificates with partial name match."""
     client, auth = xades_authenticated_context
 

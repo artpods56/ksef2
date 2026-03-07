@@ -1,15 +1,30 @@
+"""Authenticate with XAdES in the TEST environment.
+
+Prerequisites:
+- none; the script uses a generated TEST certificate identity
+
+What it demonstrates:
+- XAdES authentication in TEST
+- inspecting issued access and refresh tokens
+"""
+
+from dataclasses import dataclass
+
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 
-NIP = generate_nip()
+
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
 
 
-def main() -> None:
-    client = Client(environment=Environment.TEST)
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    nip = generate_nip()
 
-    # Authenticate with XAdES signature
-    print("Authenticating via XAdES ...")
-    auth = client.authentication.with_test_certificate(nip=NIP)
+    print("Authenticating via XAdES...")
+    auth = client.authentication.with_test_certificate(nip=nip)
 
     print(f"Access token:  {auth.access_token[:40]}…")
     print(f"  Valid until: {auth.auth_tokens.access_token.valid_until}")
@@ -17,5 +32,10 @@ def main() -> None:
     print(f"  Valid until: {auth.auth_tokens.refresh_token.valid_until}")
 
 
+def main() -> int:
+    run(ExampleConfig())
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

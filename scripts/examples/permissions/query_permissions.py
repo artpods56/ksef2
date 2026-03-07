@@ -1,4 +1,15 @@
+"""Query several permission views in the TEST environment.
+
+Prerequisites:
+- none; the script provisions and cleans up its own TEST-environment data
+
+What it demonstrates:
+- creating permission data to query
+- querying people, authorizations, entities, and subunits
+"""
+
 import time
+from dataclasses import dataclass
 
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
@@ -13,29 +24,33 @@ from ksef2.domain.models.permissions import (
     SubunitPermissionsQuery,
 )
 
-ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
-PARTNER_NIP = generate_nip()
 
-client = Client(environment=Environment.TEST)
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
 
 
-def main() -> None:
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    organization_nip = generate_nip()
+    partner_nip = generate_nip()
+    person_nip = generate_nip()
+    person_pesel = generate_pesel()
+
     with client.testdata.temporal() as temp:
         temp.create_subject(
-            nip=ORG_NIP,
+            nip=organization_nip,
             subject_type="enforcement_authority",
             description="SDK test org",
         )
         temp.create_subject(
-            nip=PARTNER_NIP,
+            nip=partner_nip,
             subject_type="enforcement_authority",
             description="SDK test partner",
         )
         temp.create_person(
-            nip=PERSON_NIP,
-            pesel=PERSON_PESEL,
+            nip=person_nip,
+            pesel=person_pesel,
             description="Example person",
         )
         temp.grant_permissions(
@@ -49,16 +64,14 @@ def main() -> None:
                     description="Read invoices",
                 ),
             ],
-            grant_to=Identifier(type="nip", value=PERSON_NIP),
-            in_context_of=Identifier(type="nip", value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=organization_nip),
         )
 
-        # Authenticate - no session needed for permission operations
-        auth = client.authentication.with_test_certificate(nip=ORG_NIP)
+        auth = client.authentication.with_test_certificate(nip=organization_nip)
 
-        # Grant some permissions so there is data to query.
         _ = auth.permissions.grant_entity(
-            subject_value=PARTNER_NIP,
+            subject_value=partner_nip,
             permissions=[
                 EntityPermission(type="invoice_read", can_delegate=False),
             ],
@@ -67,14 +80,14 @@ def main() -> None:
         )
         _ = auth.permissions.grant_authorization(
             subject_type="nip",
-            subject_value=PARTNER_NIP,
+            subject_value=partner_nip,
             permission="self_invoicing",
             description="Self-invoicing authorization",
             entity_name="Test Partner Entity",
         )
         _ = auth.permissions.grant_person(
             subject_type="pesel",
-            subject_value=PERSON_PESEL,
+            subject_value=person_pesel,
             permissions=["invoice_read", "invoice_write"],
             description="Person invoice access",
             first_name="John",
@@ -83,7 +96,7 @@ def main() -> None:
 
         time.sleep(5)
 
-        print("Get all persons permissions ...")
+        print("Get all persons permissions...")
         resp = auth.permissions.query_persons(
             query=PersonPermissionsQuery(
                 query_type="in_context",
@@ -91,7 +104,7 @@ def main() -> None:
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Get persons permissions with credentials manage permission ...")
+        print("Get persons permissions with credentials manage permission...")
         resp = auth.permissions.query_persons(
             query=PersonPermissionsQuery(
                 query_type="in_context",
@@ -100,7 +113,7 @@ def main() -> None:
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query granted authorizations ...")
+        print("Query granted authorizations...")
         resp = auth.permissions.query_authorizations(
             query=AuthorizationPermissionsQuery(
                 query_type="granted",
@@ -108,13 +121,13 @@ def main() -> None:
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query received authorizations ...")
+        print("Query received authorizations...")
         resp = auth.permissions.query_personal(
             query=PersonalPermissionsQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query active personal permissions ...")
+        print("Query active personal permissions...")
         resp = auth.permissions.query_personal(
             query=PersonalPermissionsQuery(
                 permission_state="active",
@@ -122,25 +135,25 @@ def main() -> None:
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query EU entities ...")
+        print("Query EU entities...")
         resp = auth.permissions.query_eu_entities(
             query=EuEntityPermissionsQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query subordinate entities ...")
+        print("Query subordinate entities...")
         resp = auth.permissions.query_subordinate_entities(
             query=SubordinateEntityRolesQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query subunits ...")
+        print("Query subunits...")
         resp = auth.permissions.query_subunits(
             query=SubunitPermissionsQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query authorizations (received, page_size=20) ...")
+        print("Query authorizations (received, page_size=20)...")
         resp = auth.permissions.query_authorizations(
             query=AuthorizationPermissionsQuery(
                 query_type="received",
@@ -150,5 +163,10 @@ def main() -> None:
         print(resp.model_dump_json(indent=2))
 
 
+def main() -> int:
+    run(ExampleConfig())
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

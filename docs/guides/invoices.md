@@ -9,10 +9,10 @@ from datetime import date
 from pathlib import Path
 
 from ksef2 import FormSchema
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.core.invoices import InvoiceTemplater
 
 template_xml = Path("invoice-template.xml").read_text(encoding="utf-8")
-invoice_xml = InvoiceFactory.create(
+invoice_xml = InvoiceTemplater.create(
     template_xml,
     {
         "#nip#": "5261040828",
@@ -158,8 +158,10 @@ print(len(zip_parts))
 
 - [`scripts/examples/invoices/send_invoice.py`](../../scripts/examples/invoices/send_invoice.py)
 - [`scripts/examples/invoices/send_query_export_download.py`](../../scripts/examples/invoices/send_query_export_download.py)
+- [`scripts/examples/invoices/batch_export_to_pdf.py`](../../scripts/examples/invoices/batch_export_to_pdf.py)
 - [`scripts/examples/invoices/download_purchase_invoices.py`](../../scripts/examples/invoices/download_purchase_invoices.py)
-- [`scripts/examples/invoices/download_purchase_invoices_test.py`](../../scripts/examples/invoices/download_purchase_invoices_test.py)
+- [`scripts/examples/scenarios/download_and_export_to_pdf.py`](../../scripts/examples/scenarios/download_and_export_to_pdf.py)
+- [`scripts/examples/scenarios/download_purchase_invoices.py`](../../scripts/examples/scenarios/download_purchase_invoices.py)
 
 ## Related
 

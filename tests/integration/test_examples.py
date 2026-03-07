@@ -10,8 +10,6 @@ Skipped examples (require external config not available in CI):
   - auth/auth_token.py         — needs KSEF_TEST_KSEF_TOKEN env var (skipped if absent)
 """
 
-from __future__ import annotations
-
 from pathlib import Path
 
 import pytest
@@ -20,7 +18,6 @@ import scripts.examples.auth.auth_refresh as auth_refresh_example
 import scripts.examples.auth.auth_token as auth_token_example
 import scripts.examples.auth.auth_xades as auth_xades_example
 import scripts.examples.auth.token_management as token_management_example
-import scripts.examples.invoices.download_purchase_invoices_test as download_example
 import scripts.examples.invoices.send_invoice as send_invoice_example
 import scripts.examples.invoices.send_query_export_download as send_example
 import scripts.examples.limits.limits_modify as limits_modify_example
@@ -30,7 +27,6 @@ import scripts.examples.permissions.query_permissions as query_permissions_examp
 import scripts.examples.quickstart as quickstart_example
 import scripts.examples.session.session_management as session_management_example
 import scripts.examples.session.session_resume as session_resume_example
-import scripts.examples.session.workflow as workflow_example
 import scripts.examples.testdata.attachments as attachments_example
 import scripts.examples.testdata.block_context as block_context_example
 import scripts.examples.testdata.setup_test_data as setup_test_data_example
@@ -102,6 +98,9 @@ def test_example_session_resume() -> None:
 
 
 @pytest.mark.integration
+@pytest.mark.skip(
+    reason="Session workflow example has been removed from scripts/examples."
+)
 def test_example_session_workflow() -> None:
     """Full online session workflow including invoice operations.
 
@@ -109,6 +108,8 @@ def test_example_session_workflow() -> None:
     send invoice → list failed invoices → get UPO → download invoice →
     list sessions.
     """
+    import scripts.examples.session.workflow as workflow_example
+
     workflow_example.main()
 
 
@@ -146,12 +147,17 @@ def test_example_send_query_export_download() -> None:
 
 
 @pytest.mark.integration
+@pytest.mark.skip(
+    reason="Purchase invoice download example requires MCU certificate files."
+)
 def test_example_download_purchase_invoices() -> None:
     """Purchase invoice download across multiple buyer entities.
 
     Covers: create seller + N buyers → send invoices as Subject2 →
     authenticate as each buyer → export Subject2 invoices → fetch packages.
     """
+    import scripts.examples.invoices.download_purchase_invoices as download_example
+
     download_example.main()
 
 
@@ -162,19 +168,20 @@ def test_example_download_and_export_to_pdf(tmp_path: Path) -> None:
     Covers: testdata setup → send invoice as seller → authenticate as buyer →
     wait for invoice → export and download package → render each invoice to PDF.
     """
-    import scripts.examples.invoices.download_and_export_to_pdf as pdf_export_example
+    import scripts.examples.scenarios.download_and_export_to_pdf as pdf_export_example
 
-    template_path = (
-        Path(__file__).parents[2]
-        / "docs"
-        / "assets"
-        / "sample_invoices"
-        / "fa3"
-        / "invoice-template-fa-3-with-custom-subject_2.xml"
-    )
-    pdf_export_example.main(
-        template_path=template_path,
-        downloads_dir=tmp_path,
+    pdf_export_example.run(
+        pdf_export_example.ExampleConfig(
+            template_path=(
+                Path(__file__).parents[2]
+                / "docs"
+                / "assets"
+                / "sample_invoices"
+                / "fa3"
+                / "invoice-template-fa-3-with-custom-subject_2.xml"
+            ),
+            downloads_dir=tmp_path,
+        )
     )
 
 
@@ -186,12 +193,17 @@ def test_example_batch_export_to_pdf(tmp_path: Path) -> None:
     """
     import scripts.examples.invoices.batch_export_to_pdf as batch_pdf_example
 
-    source_dir = (
-        Path(__file__).parents[2] / "docs" / "assets" / "sample_invoices" / "fa3"
-    )
-    batch_pdf_example.main(
-        source_dir=source_dir,
-        output_dir=tmp_path,
+    batch_pdf_example.run(
+        batch_pdf_example.ExampleConfig(
+            source_dir=(
+                Path(__file__).parents[2]
+                / "docs"
+                / "assets"
+                / "sample_invoices"
+                / "fa3"
+            ),
+            output_dir=tmp_path,
+        )
     )
 
 
