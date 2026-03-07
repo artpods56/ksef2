@@ -4,7 +4,7 @@ import pytest
 
 from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.exceptions import KSeFApiError
-from ksef2.domain.models.tokens import GenerateTokenResponse, TokenPermission
+from ksef2.domain.models.tokens import GenerateTokenResponse
 
 
 @pytest.mark.integration
@@ -37,7 +37,7 @@ def test_generate_ksef_token(xades_authenticated_context):
     This creates a KSeF token that can be used for future authenticate_token() calls
     instead of XAdES authentication.
 
-    Note: This may fail if the authenticated entity doesn't have CredentialsManage
+    Note: This may fail if the authenticated entity doesn'request have CredentialsManage
     permission. The testdata API requires granting permissions to a person (PESEL),
     not a subject (NIP).
     """
@@ -46,8 +46,8 @@ def test_generate_ksef_token(xades_authenticated_context):
     try:
         ksef_token_response = auth.tokens.generate(
             permissions=[
-                TokenPermission.INVOICE_WRITE,
-                TokenPermission.INVOICE_READ,
+                "invoice_write",
+                "invoice_read",
             ],
             description="Integration test KSeF token",
         )

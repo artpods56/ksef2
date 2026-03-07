@@ -1,32 +1,40 @@
 # KSeF SDK Documentation
 
-This directory contains detailed documentation for the KSeF SDK features.
+This directory contains the maintained human-facing documentation for the current `ksef2` public API.
 
-## Overview
+## Guides
 
-The SDK provides a Python interface to Poland's KSeF (Krajowy System e-Faktur) v2.0 API - the national e-invoicing system.
+| Area | What it covers |
+|------|----------------|
+| [Authentication](guides/authentication.md) | XAdES auth, KSeF token auth, refresh, auth-session management |
+| [Encryption](guides/encryption.md) | Public KSeF encryption certificates used for token and session encryption |
+| [Invoices](guides/invoices.md) | Sending invoices, session invoice status, metadata queries, exports, downloads |
+| [Sessions](guides/sessions.md) | Online session lifecycle, session resume, invoice session history |
+| [Tokens](guides/tokens.md) | Generating, listing, checking, and revoking KSeF tokens |
+| [Permissions](guides/permissions.md) | Grant, revoke, query, and operation-status flows |
+| [Certificates](guides/certificates.md) | Limits, enrollment, query, retrieval, and revocation |
+| [Limits](guides/limits.md) | Querying and modifying TEST-environment limits |
+| [PEPPOL](guides/peppol.md) | Querying the public PEPPOL provider registry |
+| [Test Data](guides/testdata.md) | TEST-environment subjects, people, permissions, attachments, and blocked contexts |
 
-## Feature Areas
+## Example Scripts
 
-| Area | Description | Guide |
-|------|-------------|-------|
-| [Authentication](guides/authentication.md) | XAdES, Token-based, Refresh | `/auth/*` |
-| [Invoices](guides/invoices.md) | Send, Download, Search | `/online/*` |
-| [Sessions](guides/sessions.md) | Session management | `/online/session` |
-| [Tokens](guides/tokens.md) | Token generation, refresh, revocation | `/token/manage` |
-| [Test Data](guides/testdata.md) | Test environment setup | `/testdata/*` |
-| [Permissions](guides/permissions.md) | Grant & query permissions | `/online/permissions` |
-| [Limits](guides/limits.md) | API limits and restrictions | `/limits/*`, `/rate-limits` |
+Runnable examples live in [`scripts/examples`](../scripts/examples).
+Run them as modules with `uv run -m ...`; direct execution by file path is not supported.
+The guide pages above link to the most relevant scripts for each area.
+The structure and conventions for maintaining them are documented in
+[`scripts/examples/README.md`](../scripts/examples/README.md).
 
-## Requirements
+Good starting points:
 
-### Runtime Requirements
-- Python 3.12+
-- `cryptography` - for XAdES signing
-- `httpx` - for HTTP client
-- `signxml` - for XAdES signatures
+- [`scripts/examples/quickstart.py`](../scripts/examples/quickstart.py)
+- [`scripts/examples/invoices/send_batch.py`](../scripts/examples/invoices/send_batch.py)
+- [`scripts/examples/invoices/submit_batch.py`](../scripts/examples/invoices/submit_batch.py)
+- [`scripts/examples/invoices/send_query_export_download.py`](../scripts/examples/invoices/send_query_export_download.py)
+- [`scripts/examples/peppol/query_providers.py`](../scripts/examples/peppol/query_providers.py)
+- [`scripts/examples/scenarios/session_workflow.py`](../scripts/examples/scenarios/session_workflow.py)
 
-## API Reference
+## Reference Material
 
-- [KSeF API Documentation](https://api-test.ksef.mf.gov.pl/docs/v2)
-- [OpenAPI Specification](../../openapi.json)
+- [KSeF API docs](https://api-test.ksef.mf.gov.pl/docs/v2)
+- [Project changelog](../CHANGELOG.md)

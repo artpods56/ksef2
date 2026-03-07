@@ -32,7 +32,7 @@ def test_full_auth_flow(authenticated_context):
 def test_invalid_ksef_token_fails(real_client: Client, ksef_credentials):
     """Verify proper error when using invalid KSeF token."""
     with pytest.raises(KSeFAuthError):
-        real_client.auth.authenticate_token(
+        real_client.authentication.with_token(
             ksef_token="invalid-token-that-does-not-exist",
             nip=ksef_credentials.subject_nip,
         )

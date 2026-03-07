@@ -1,3 +1,5 @@
+from typing import Literal
+
 from ksef2.infra.schema.api.supp.base import BaseSupp
 from ksef2.infra.schema.api.spec.models import FormCode
 
@@ -33,3 +35,31 @@ class OpenOnlineSessionRequest(BaseSupp):
     """
     Symetryczny klucz szyfrujący pliki XML, zaszyfrowany kluczem publicznym Ministerstwa Finansów.
     """
+
+
+ListSessionsQueryParams = Literal[
+    "sessionType",
+    "referenceNumber",
+    "dateCreatedFrom",
+    "dateCreatedTo",
+    "dateClosedFrom",
+    "dateClosedTo",
+    "dateModifiedFrom",
+    "dateModifiedTo",
+    "statuses",
+]
+
+
+class ListSessionsParams(BaseSupp):
+    pageSize: int | None = None
+    sessionType: Literal["Online", "Batch"]
+    referenceNumber: str | None = None
+    dateCreatedFrom: str | None = None
+    dateCreatedTo: str | None = None
+    dateClosedFrom: str | None = None
+    dateClosedTo: str | None = None
+    dateModifiedFrom: str | None = None
+    dateModifiedTo: str | None = None
+    statuses: list[Literal["InProgress", "Succeeded", "Failed", "Cancelled"]] | None = (
+        None
+    )

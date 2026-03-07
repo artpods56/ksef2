@@ -1,158 +1,107 @@
-from typing import final, Any
-from ksef2.core import headers, codecs, protocols
-from ksef2.infra.schema.api import spec as spec
+"""Session management endpoints."""
+
+from typing import Literal, NotRequired, TypedDict, Unpack, final
+
+from pydantic import TypeAdapter
+
+from ksef2.core import routes
+from ksef2.endpoints.base import BaseEndpoints
+from ksef2.infra.schema.api import spec
+from ksef2.infra.schema.api.supp.batch import OpenBatchSessionRequest
+from ksef2.infra.schema.api.supp.session import OpenOnlineSessionRequest
+
+ListSessionsQueryParams = TypedDict(
+    "ListSessionsQueryParams",
+    {
+        "pageSize": NotRequired[int | None],
+        "sessionType": Literal["Online", "Batch"],
+        "referenceNumber": NotRequired[str | None],
+        "dateCreatedFrom": NotRequired[str | None],
+        "dateCreatedTo": NotRequired[str | None],
+        "dateClosedFrom": NotRequired[str | None],
+        "dateClosedTo": NotRequired[str | None],
+        "dateModifiedFrom": NotRequired[str | None],
+        "dateModifiedTo": NotRequired[str | None],
+        "statuses": NotRequired[
+            list[Literal["InProgress", "Succeeded", "Failed", "Cancelled"]] | None
+        ],
+    },
+)
+_LIST_SESSIONS_PARAMS = TypeAdapter(ListSessionsQueryParams)
 
 
 @final
-class OpenSessionEndpoint:
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
+class SessionEndpoints(BaseEndpoints):
+    """Raw session endpoints backed by generated schema models."""
 
-    url: str = "/sessions/online"
-
-    def get_url(self) -> str:
-        return self.url
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
+    def open_online(
+        self, body: OpenOnlineSessionRequest
     ) -> spec.OpenOnlineSessionResponse:
-        return codecs.JsonResponseCodec.parse(
+        """Open an online session using a schema-native request payload."""
+        return self._parse(
             self._transport.post(
-                self.get_url(),
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.SessionRoutes.OPEN_ONLINE,
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.OpenOnlineSessionResponse,
         )
 
-
-@final
-class TerminateSessionEndpoint:
-    url: str = "/sessions/online/{referenceNumber}/close"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(
-        self,
-        access_token: str,
-        reference_number: str,
-    ) -> None:
+    def terminate_online(self, reference_number: str) -> None:
+        """Terminate an online session."""
         _ = self._transport.post(
-            self.get_url(reference_number=reference_number),
-            headers=headers.KSeFHeaders.bearer(access_token),
-        )
-
-
-@final
-class GetSessionUpoEndpoint:
-    """Get UPO (Official Proof of Receipt) for a session by UPO reference number.
-
-    Returns XML document containing the collective UPO for the session.
-    """
-
-    url: str = "/sessions/{referenceNumber}/upo/{upoReferenceNumber}"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str, upo_reference_number: str) -> str:
-        return self.url.format(
-            referenceNumber=reference_number,
-            upoReferenceNumber=upo_reference_number,
-        )
-
-    def send(
-        self,
-        access_token: str,
-        reference_number: str,
-        upo_reference_number: str,
-    ) -> bytes:
-        """Send the request and return the UPO XML content.
-
-        Args:
-            access_token: Bearer token for authentication.
-            reference_number: Session reference number.
-            upo_reference_number: UPO reference number.
-
-        Returns:
-            Raw XML bytes containing the UPO document.
-        """
-        resp = self._transport.get(
-            self.get_url(
-                reference_number=reference_number,
-                upo_reference_number=upo_reference_number,
+            path=routes.SessionRoutes.TERMINATE_ONLINE.format(
+                referenceNumber=reference_number
             ),
-            headers=headers.KSeFHeaders.bearer(access_token),
         )
-        return resp.content
 
-
-@final
-class OpenBatchSessionEndpoint:
-    """Open a batch session for sending invoices in bulk.
-
-    Requires InvoiceWrite or EnforcementOperations permission.
-    """
-
-    url: str = "/sessions/batch"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        access_token: str,
-        body: dict[str, Any],
+    def open_batch(
+        self, body: OpenBatchSessionRequest
     ) -> spec.OpenBatchSessionResponse:
-        return codecs.JsonResponseCodec.parse(
+        """Open a batch session using a schema-native request payload."""
+        return self._parse(
             self._transport.post(
-                self.url,
-                headers=headers.KSeFHeaders.bearer(access_token),
-                json=body,
+                path=routes.SessionRoutes.OPEN_BATCH,
+                json=body.model_dump(mode="json", by_alias=True),
             ),
             spec.OpenBatchSessionResponse,
         )
 
-
-@final
-class CloseBatchSessionEndpoint:
-    """Close a batch session and start processing the invoice batch.
-
-    This triggers processing of the invoice batch and generation of UPO
-    for valid invoices and a collective UPO for the session.
-
-    Requires InvoiceWrite or EnforcementOperations permission.
-    """
-
-    url: str = "/sessions/batch/{referenceNumber}/close"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(
-        self,
-        access_token: str,
-        reference_number: str,
-    ) -> None:
-        """Close the batch session.
-
-        Args:
-            access_token: Bearer token for authentication.
-            reference_number: Batch session reference number.
-
-        Returns:
-            None - returns 204 No Content on success.
-        """
+    def close_batch(self, reference_number: str) -> None:
+        """Close a batch session after all parts have been uploaded."""
         _ = self._transport.post(
-            self.get_url(reference_number=reference_number),
-            headers=headers.KSeFHeaders.bearer(access_token),
+            path=routes.SessionRoutes.CLOSE_BATCH.format(
+                referenceNumber=reference_number
+            ),
+        )
+
+    def get_session_upo(
+        self,
+        reference_number: str,
+        upo_reference_number: str,
+    ) -> bytes:
+        """Download the session UPO document as raw bytes."""
+        return self._transport.get(
+            path=routes.SessionRoutes.GET_SESSION_UPO.format(
+                referenceNumber=reference_number,
+                upoReferenceNumber=upo_reference_number,
+            ),
+        ).content
+
+    def list_sessions(
+        self,
+        continuation_token: str | None = None,
+        **params: Unpack[ListSessionsQueryParams],
+    ) -> spec.SessionsQueryResponse:
+        """Fetch one page of sessions using query filters and continuation state."""
+        headers = (
+            {"x-continuation-token": continuation_token} if continuation_token else None
+        )
+
+        return self._parse(
+            self._transport.get(
+                path=routes.SessionRoutes.LIST_SESSIONS,
+                params=self.build_params(params, _LIST_SESSIONS_PARAMS),
+                headers=headers,
+            ),
+            spec.SessionsQueryResponse,
         )

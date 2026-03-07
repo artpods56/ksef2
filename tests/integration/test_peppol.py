@@ -3,7 +3,7 @@
 import pytest
 
 from ksef2 import Client
-from ksef2.domain.models.pagination import PaginationParams
+from ksef2.domain.models.pagination import OffsetPaginationParams
 
 
 @pytest.mark.integration
@@ -17,7 +17,7 @@ class TestPeppolQuery:
         self, real_client: Client
     ) -> None:
         """Test querying Peppol providers with default pagination."""
-        response = real_client.peppol.query_providers()
+        response = real_client.peppol.query()
 
         # Response should have the expected structure
         assert hasattr(response, "providers")
@@ -27,9 +27,7 @@ class TestPeppolQuery:
 
     def test_query_peppol_providers_custom_page_size(self, real_client: Client) -> None:
         """Test querying Peppol providers with custom page size."""
-        response = real_client.peppol.query_providers(
-            params=PaginationParams(page_size=20)
-        )
+        response = real_client.peppol.query(params=OffsetPaginationParams(page_size=20))
 
         assert isinstance(response.providers, list)
         # Should return at most 20 providers
@@ -38,14 +36,14 @@ class TestPeppolQuery:
     def test_query_peppol_providers_pagination(self, real_client: Client) -> None:
         """Test pagination through Peppol providers."""
         # Get first page
-        page1 = real_client.peppol.query_providers(
-            params=PaginationParams(page_offset=0, page_size=10)
+        page1 = real_client.peppol.query(
+            params=OffsetPaginationParams(page_offset=0, page_size=10)
         )
 
-        # If there's more, get second page
+        # If there'request more, get second page
         if page1.has_more:
-            page2 = real_client.peppol.query_providers(
-                params=PaginationParams(page_offset=1, page_size=10)
+            page2 = real_client.peppol.query(
+                params=OffsetPaginationParams(page_offset=1, page_size=10)
             )
             assert isinstance(page2.providers, list)
 
@@ -55,7 +53,7 @@ class TestPeppolQuery:
 
     def test_peppol_provider_structure(self, real_client: Client) -> None:
         """Test that Peppol provider objects have expected fields."""
-        response = real_client.peppol.query_providers()
+        response = real_client.peppol.query()
 
         if response.providers:
             provider = response.providers[0]

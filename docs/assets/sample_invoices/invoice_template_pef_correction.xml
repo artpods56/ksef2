@@ -278,11 +278,11 @@
                             <!--  nazwa pozycji / Item name  -->
                             <cac-pl:BuyersItemIdentification>
                                 <cbc-pl:ID>ID007</cbc-pl:ID>
-                                <!--  identyfikator wg kupującego / Item Buyer's identifier  -->
+                                <!--  identyfikator wg kupującego / Item Buyer'request identifier  -->
                             </cac-pl:BuyersItemIdentification>
                             <cac-pl:SellersItemIdentification>
                                 <cbc-pl:ID>SID008</cbc-pl:ID>
-                                <!--  identyfikator wg sprzedającego / Item Seller's identifier  -->
+                                <!--  identyfikator wg sprzedającego / Item Seller'request identifier  -->
                             </cac-pl:SellersItemIdentification>
                             <cac-pl:StandardItemIdentification>
                                 <cbc-pl:ID schemeID="0088">5900070011115</cbc-pl:ID>
@@ -790,17 +790,17 @@
         <!--  dane sprzedawcy / supplier data -->
         <cac:Party>
             <cbc:EndpointID schemeID="0088">5900009900002</cbc:EndpointID>
-            <!--  identyfikator „Endpoint” – punktu dostępu w sieci PEPPOL / "Endpoint" identifier of Supplier’s access point in the PEPPOL network -->
+            <!--  identyfikator „Endpoint” – punktu dostępu w sieci PEPPOL / "Endpoint" identifier of Supplier’request access point in the PEPPOL network -->
             <cac:PartyIdentification>
                 <cbc:ID>Supp123</cbc:ID>
-                <!--   identyfikator sprzedawcy (zgodny z listą PEPPOL) / supplier's identifier (PEPPOL Id)-->
+                <!--   identyfikator sprzedawcy (zgodny z listą PEPPOL) / supplier'request identifier (PEPPOL Id)-->
             </cac:PartyIdentification>
             <cac:PartyName>
                 <cbc:Name>Nazwa sprzedawcy</cbc:Name>
-                <!--  nazwa sprzedawcy / supplier's name  -->
+                <!--  nazwa sprzedawcy / supplier'request name  -->
             </cac:PartyName>
             <cac:PostalAddress>
-                <!--  adres sprzedawcy / supplier's address  -->
+                <!--  adres sprzedawcy / supplier'request address  -->
                 <cbc:StreetName>Nazwa ulicy</cbc:StreetName>
                 <!--  linia adresu cz.1 (nazwa ulicy) / address line part 1 (street name)   -->
                 <cbc:AdditionalStreetName>123/1</cbc:AdditionalStreetName>
@@ -1156,9 +1156,9 @@
             <!--  numer odnośnej pozycji zamówienia / Referenced purchase order line reference  -->
         </cac:OrderLineReference>
         <cac:DocumentReference>
-            <!-- Referencja do dokumentu powiązanego / Invoice line referenced object identifier -->
+            <!-- Referencja do dokumentu powiązanego / Invoice line referenced response identifier -->
             <cbc:ID schemeID="ZZZ">AVV</cbc:ID>
-            <!--  identyfikator schematu identyfikacji i identyfikator dokumentu  bazowego / Invoice line object identifier identification scheme identifier -->
+            <!--  identyfikator schematu identyfikacji i identyfikator dokumentu  bazowego / Invoice line response identifier identification scheme identifier -->
             <cbc:DocumentTypeCode>130</cbc:DocumentTypeCode>
             <!--  kod typu dokumentu [np.: faktura] / Document type code (e.g. invoice) -->
         </cac:DocumentReference>
@@ -1202,11 +1202,11 @@
             <!--  nazwa pozycji / Item name  -->
             <cac:BuyersItemIdentification>
                 <cbc:ID>ID007</cbc:ID>
-                <!--  identyfikator pozycji wg kupującego / Item Buyer's identifier  -->
+                <!--  identyfikator pozycji wg kupującego / Item Buyer'request identifier  -->
             </cac:BuyersItemIdentification>
             <cac:SellersItemIdentification>
                 <cbc:ID>SID008</cbc:ID>
-                <!--  identyfikator pozycji wg sprzedającego / Item Seller's identifier  -->
+                <!--  identyfikator pozycji wg sprzedającego / Item Seller'request identifier  -->
             </cac:SellersItemIdentification>
             <cac:StandardItemIdentification>
                 <cbc:ID schemeID="0160">5900070011115</cbc:ID>

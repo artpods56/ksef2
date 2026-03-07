@@ -1,113 +1,95 @@
-from typing import final, Any
+"""Testdata endpoints for creating test data in KSeF."""
 
-from ksef2.core import protocols
+from typing import final
 
-
-@final
-class CreateSubjectEndpoint:
-    url: str = "/testdata/subject"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
-
-
-@final
-class DeleteSubjectEndpoint:
-    url: str = "/testdata/subject/remove"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
+from ksef2.core import routes
+from ksef2.endpoints.base import BaseEndpoints
+from ksef2.infra.schema.api.supp.testdata import (
+    BlockContextRequest,
+    CreatePersonRequest,
+    CreateSubjectRequest,
+    DeletePersonRequest,
+    DeleteSubjectRequest,
+    EnableAttachmentsRequest,
+    GrantPermissionsRequest,
+    RevokeAttachmentsRequest,
+    RevokePermissionsRequest,
+    UnblockContextRequest,
+)
 
 
 @final
-class CreatePersonEndpoint:
-    url: str = "/testdata/person"
+class TestDataEndpoints(BaseEndpoints):
+    __test__ = False
 
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
+    """Raw TEST-only endpoints used to seed and mutate sandbox data."""
 
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
+    def create_subject(self, body: CreateSubjectRequest) -> None:
+        """Create a test subject."""
+        self._transport.post(
+            path=routes.TestDataRoutes.CREATE_SUBJECT,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
+    def delete_subject(self, body: DeleteSubjectRequest) -> None:
+        """Delete a test subject."""
+        self._transport.post(
+            path=routes.TestDataRoutes.DELETE_SUBJECT,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
-@final
-class DeletePersonEndpoint:
-    url: str = "/testdata/person/remove"
+    def create_person(self, body: CreatePersonRequest) -> None:
+        """Create a test person."""
+        self._transport.post(
+            path=routes.TestDataRoutes.CREATE_PERSON,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
+    def delete_person(self, body: DeletePersonRequest) -> None:
+        """Delete a test person."""
+        self._transport.post(
+            path=routes.TestDataRoutes.DELETE_PERSON,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
+    def grant_permissions(self, body: GrantPermissionsRequest) -> None:
+        """Grant test permissions."""
+        self._transport.post(
+            path=routes.TestDataRoutes.GRANT_PERMISSIONS,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
+    def revoke_permissions(self, body: RevokePermissionsRequest) -> None:
+        """Revoke test permissions."""
+        self._transport.post(
+            path=routes.TestDataRoutes.REVOKE_PERMISSIONS,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
-@final
-class GrantPermissionsEndpoint:
-    url: str = "/testdata/permissions"
+    def enable_attachments(self, body: EnableAttachmentsRequest) -> None:
+        """Enable attachments for a test subject."""
+        self._transport.post(
+            path=routes.TestDataRoutes.ENABLE_ATTACHMENTS,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
+    def revoke_attachments(self, body: RevokeAttachmentsRequest) -> None:
+        """Revoke attachments for a test subject."""
+        self._transport.post(
+            path=routes.TestDataRoutes.REVOKE_ATTACHMENTS,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
+    def block_context(self, body: BlockContextRequest) -> None:
+        """Block authentication in a test context."""
+        self._transport.post(
+            path=routes.TestDataRoutes.BLOCK_CONTEXT,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
 
-
-@final
-class RevokePermissionsEndpoint:
-    url: str = "/testdata/permissions/revoke"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
-
-
-@final
-class EnableAttachmentsEndpoint:
-    url: str = "/testdata/attachment"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
-
-
-@final
-class RevokeAttachmentsEndpoint:
-    url: str = "/testdata/attachment/revoke"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
-
-
-@final
-class BlockContextEndpoint:
-    url: str = "/testdata/context/block"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
-
-
-@final
-class UnblockContextEndpoint:
-    url: str = "/testdata/context/unblock"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> None:
-        _ = self._transport.post(self.url, json=body)
+    def unblock_context(self, body: UnblockContextRequest) -> None:
+        """Unblock authentication in a test context."""
+        self._transport.post(
+            path=routes.TestDataRoutes.UNBLOCK_CONTEXT,
+            json=body.model_dump(mode="json", by_alias=True),
+        )

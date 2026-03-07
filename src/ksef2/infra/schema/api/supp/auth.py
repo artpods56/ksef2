@@ -10,7 +10,7 @@ from ksef2.infra.schema.api.supp.base import BaseSupp
 
 
 class InitTokenAuthenticationRequest(BaseSupp):
-    """Supplementary model with str field annotation instead of Base64Str"""
+    """Supplementary request with str field annotation instead of Base64Str"""
 
     challenge: Annotated[str, Field(max_length=36, min_length=36)]
     """

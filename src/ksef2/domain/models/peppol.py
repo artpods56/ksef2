@@ -1,8 +1,4 @@
-"""Domain models for Peppol service providers."""
-
-from __future__ import annotations
-
-from pydantic import AwareDatetime
+from datetime import datetime
 
 from ksef2.domain.models.base import KSeFBaseModel
 
@@ -13,14 +9,14 @@ class PeppolProvider(KSeFBaseModel):
     id: str
     """Provider ID in format P[A-Z]{2}[0-9]{6}, e.g. 'PPL123456'."""
 
-    name: str
+    name: str | None
     """Name of the Peppol service provider."""
 
-    date_created: AwareDatetime
+    date_created: datetime
     """Date when the provider was registered in the system."""
 
 
-class QueryPeppolProvidersResponse(KSeFBaseModel):
+class ListPeppolProvidersResponse(KSeFBaseModel):
     """Response from querying Peppol service providers."""
 
     providers: list[PeppolProvider]

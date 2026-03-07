@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ksef2"
-version = "0.8.1"
+version = "0.9.0"
 description = "Python SDK and Tools for Poland's KSeF (Krajowy System e-Faktur) API"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -19,6 +19,9 @@ dependencies = [
     "xsdata-pydantic>=24.5",
     "weasyprint>=63.0",
     "tenacity>=9.0",
+    "polyfactory>=3.3.0",
+    "beartype>=0.22.9",
+    "camel-converter>=5.1.0",
 ]
 
 [dependency-groups]
@@ -28,6 +31,8 @@ dev = [
     "pytest>=8.0",
     "respx>=0.22.0",
     "lxml-stubs>=0.5.1",
+    "commitizen>=4.13.9",
+    "pre-commit>=4.5.1",
 ]
 codegen = [
     "datamodel-code-generator[ruff]>=0.53.0",
@@ -41,3 +46,15 @@ addopts = "-m 'not integration'"
 markers = [
     "integration: tests that hit the real KSeF TEST environment",
 ]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.9.0"
+version_files = [
+    "pyproject.toml:version",
+    "src/ksef2/__version__.py"
+]
+
+
+[tool.ruff.lint]
+ignore = ["E731", "E402"]

@@ -15,27 +15,20 @@ Usage examples::
     python scripts/cli/export_invoices.py --nip 1234567890 --token "abc123" --env demo
 """
 
-from __future__ import annotations
-
 import argparse
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from ksef2 import Client, Environment, FormSchema
+from ksef2.core.packages import PackageReader
 from ksef2.core.exceptions import (
     KSeFApiError,
     KSeFAuthError,
     KSeFExportTimeoutError,
     KSeFInvoiceQueryTimeoutError,
 )
-from ksef2.domain.models import (
-    DateType,
-    InvoiceQueryDateRange,
-    InvoiceQueryFilters,
-    InvoiceSubjectType,
-)
-from ksef2.utils import PackageReader
+from ksef2.domain.models import InvoicesFilter
 
 ENVIRONMENTS = {
     "production": Environment.PRODUCTION,
@@ -63,7 +56,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
     # Auth: XAdES PEM
     _ = parser.add_argument("--cert", help="Path to PEM certificate file")
-    _ = parser.add_argument("--key", help="Path to PEM private key file (RSA or EC)")
+    _ = parser.add_argument("--key", help="Path to PEM private key file")
+    _ = parser.add_argument(
+        "--key-password", help="Password for the PEM private key (if encrypted)"
+    )
 
     # Auth: XAdES PKCS#12
     _ = parser.add_argument(
@@ -115,7 +111,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def authenticate(client: Client, args: argparse.Namespace):
     """Authenticate and return an AuthenticatedClient."""
     if args.token:
-        return client.auth.authenticate_token(ksef_token=args.token, nip=args.nip)
+        return client.authentication.with_token(ksef_token=args.token, nip=args.nip)
 
     if args.p12:
         from ksef2.core.xades import load_certificate_and_key_from_p12
@@ -129,15 +125,16 @@ def authenticate(client: Client, args: argparse.Namespace):
         )
 
         cert = load_certificate_from_pem(args.cert)
-        key = load_private_key_from_pem(args.key)
+        password = args.key_password.encode() if args.key_password else None
+        key = load_private_key_from_pem(args.key, password=password)
 
-    return client.auth.authenticate_xades(nip=args.nip, cert=cert, private_key=key)
+    return client.authentication.with_xades(nip=args.nip, cert=cert, private_key=key)
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     environment = ENVIRONMENTS[args.env]
-    form_schema = FORM_SCHEMAS[args.form]
+    _ = FORM_SCHEMAS[args.form]
 
     client = Client(environment=environment)
 
@@ -148,39 +145,34 @@ def main(argv: list[str] | None = None) -> None:
         print(f"Authentication failed: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    query_filters = InvoiceQueryFilters(
-        subject_type=InvoiceSubjectType.SUBJECT2,
-        date_range=InvoiceQueryDateRange(
-            date_type=DateType.ISSUE,
-            from_=datetime.now(tz=timezone.utc) - timedelta(days=args.days),
-            to=datetime.now(tz=timezone.utc),
-        ),
+    query_filters = InvoicesFilter(
+        role="buyer",
+        date_type="issue_date",
+        date_from=datetime.now(tz=timezone.utc) - timedelta(days=args.days),
+        date_to=datetime.now(tz=timezone.utc),
+        amount_type="brutto",
     )
 
     try:
-        with client.sessions.open_online(
-            access_token=auth.access_token,
-            form_code=form_schema,
-        ) as session:
-            print(f"Waiting for invoices (last {args.days} days) ...")
-            metadata = session.wait_for_invoices(filters=query_filters)
-            print(f"Found {len(metadata.invoices)} invoice(s). Exporting ...")
+        print(f"Waiting for invoices (last {args.days} days) ...")
+        metadata = auth.invoices.wait_for_invoices(filters=query_filters)
+        print(f"Found {len(metadata.invoices)} invoice(s). Exporting ...")
 
-            zip_parts = session.export_and_download(filters=query_filters)
+        zip_parts = auth.invoices.export_and_download(filters=query_filters)
 
-            from ksef2.services.renderers import InvoicePDFExporter
+        from ksef2.services.renderers import InvoicePDFExporter
 
-            output_dir = args.output
-            output_dir.mkdir(parents=True, exist_ok=True)
-            exporter = InvoicePDFExporter()
-            count = 0
+        output_dir = args.output
+        output_dir.mkdir(parents=True, exist_ok=True)
+        exporter = InvoicePDFExporter()
+        count = 0
 
-            for invoice in PackageReader(zip_parts):
-                pdf_bytes = exporter.export_from_string(invoice_xml=invoice.xml)
-                pdf_path = output_dir / f"{Path(invoice.name).stem}.pdf"
-                pdf_path.write_bytes(pdf_bytes)
-                print(f"  Saved: {pdf_path}")
-                count += 1
+        for invoice in PackageReader(zip_parts):
+            pdf_bytes = exporter.export_from_string(invoice_xml=invoice.xml)
+            pdf_path = output_dir / f"{Path(invoice.name).stem}.pdf"
+            pdf_path.write_bytes(pdf_bytes)
+            print(f"  Saved: {pdf_path}")
+            count += 1
 
     except KSeFInvoiceQueryTimeoutError:
         print(

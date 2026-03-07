@@ -33,6 +33,28 @@ class KSeFException(Exception):
         self.context["code"] = self.code
 
 
+class KSeFClientClosedError(KSeFException):
+    """Raised when an SDK client is used after it has been closed."""
+
+    code: str = "CLIENT_CLOSED"
+
+
+class KSeFUnsupportedEnvironmentError(KSeFException):
+    """Raised when an operation is not available in the selected environment."""
+
+    code: str = "UNSUPPORTED_ENVIRONMENT"
+
+
+class KSeFValidationError(KSeFException):
+    """Raised when validation fails."""
+
+    code: str = "VALIDATION_ERROR"
+
+    def __init__(self, message: str, **context: Any):
+        super().__init__(message, **context)
+        self.context["code"] = self.code
+
+
 class KSeFInvoiceRenderingError(KSeFException):
     """Raised when invoice rendering fails."""
 
@@ -157,5 +179,35 @@ class KSeFInvoiceQueryTimeoutError(KSeFException):
         self.timeout = timeout
         super().__init__(
             f"No invoices found after polling for {timeout}s",
+            timeout=timeout,
+        )
+
+
+class KSeFInvoiceProcessingTimeoutError(KSeFException):
+    """Raised when polling for a session invoice to finish processing exceeds the timeout."""
+
+    code: str = "INVOICE_PROCESSING_TIMEOUT"
+
+    def __init__(self, invoice_reference_number: str, timeout: float) -> None:
+        self.invoice_reference_number = invoice_reference_number
+        self.timeout = timeout
+        super().__init__(
+            f"Invoice {invoice_reference_number} not ready after {timeout}s",
+            invoice_reference_number=invoice_reference_number,
+            timeout=timeout,
+        )
+
+
+class KSeFBatchSessionTimeoutError(KSeFException):
+    """Raised when polling for a batch session to finish processing exceeds the timeout."""
+
+    code: str = "BATCH_SESSION_TIMEOUT"
+
+    def __init__(self, reference_number: str, timeout: float) -> None:
+        self.reference_number = reference_number
+        self.timeout = timeout
+        super().__init__(
+            f"Batch session {reference_number} not ready after {timeout}s",
+            reference_number=reference_number,
             timeout=timeout,
         )

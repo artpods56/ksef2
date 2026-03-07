@@ -1,140 +1,163 @@
 # Sessions
 
-Manage KSeF sessions for invoice operations.
+The SDK exposes two different session concepts:
 
-## Session Types
+1. Authentication sessions through `auth.sessions`
+2. Invoice sessions through `auth.online_session()`, `auth.batch_session()`, and historical listings on `auth.invoice_sessions`
 
-KSeF has two types of sessions:
+This guide focuses on invoice sessions.
 
-1. **Authentication Sessions** (`/auth/sessions/*`) - Manage authenticated sessions and refresh tokens
-2. **Invoice Sessions** (`/sessions/online`, `/sessions/batch`) - Send and process invoices
-
-For authentication session management, see [Authentication](guides/authentication.md).
-
-## Invoice Sessions
-
-### Open Session
-
-Start a new online session for invoice operations. Sessions can be used as context managers for automatic cleanup, or managed manually.
-
-**SDK Endpoint:** `POST /sessions/online`
+## Open an Online Session
 
 ```python
-from ksef2 import Client, Environment, FormSchema
+from pathlib import Path
 
-client = Client(Environment.TEST)
+from ksef2 import FormSchema
 
-# Context manager (recommended) — session terminates automatically
-with client.sessions.open_online(
-    access_token=auth.access_token,
-    form_code=FormSchema.FA3,
-) as session:
-    with open("invoice.xml", "rb") as f:
-        result = session.send_invoice(f.read())
+with auth.online_session(form_code=FormSchema.FA3) as session:
+    result = session.send_invoice(invoice_xml=Path("invoice.xml").read_bytes())
     print(result.reference_number)
-
-# Manual management
-session = client.sessions.open_online(
-    access_token=auth.access_token,
-    form_code=FormSchema.FA3,
-)
-try:
-    with open("invoice.xml", "rb") as f:
-        result = session.send_invoice(f.read())
-finally:
-    session.terminate()
 ```
 
----
+Manual lifecycle is also supported:
 
-### Get Session Status
+```python
+session = auth.online_session(form_code=FormSchema.FA3)
+try:
+    result = session.send_invoice(invoice_xml=b"<Invoice />")
+finally:
+    session.close()
+```
 
-Get the current status of an active session.
+SDK endpoints:
+- `POST /sessions/online`
+- `POST /sessions/online/{referenceNumber}/close`
+
+## Prepare and Send a Batch
+
+```python
+from pathlib import Path
+
+from ksef2.domain.models import BatchInvoice
+
+prepared_batch = auth.batch.prepare_batch(
+    invoices=[
+        BatchInvoice(
+            file_name="invoice-1.xml",
+            content=Path("invoice-1.xml").read_bytes(),
+        ),
+        BatchInvoice(
+            file_name="invoice-2.xml",
+            content=Path("invoice-2.xml").read_bytes(),
+        ),
+    ]
+)
+
+with auth.batch_session(prepared_batch=prepared_batch) as session:
+    session.upload_parts()
+    reference_number = session.reference_number
+
+status = auth.batch.wait_for_completion(session=reference_number)
+print(status.status.code, status.status.description)
+```
+
+For staged workflows, `auth.batch` also exposes:
+- `prepare_batch()` / `prepare_batch_from_paths()`
+- `open_session()`
+- `get_status()`, `list_invoices()`, `list_failed_invoices()`, `get_upo()`
+
+`session.upload_parts()` lives on the opened batch session because uploads are only
+valid while the session is open. Closing the session triggers KSeF batch processing,
+so `wait_for_completion()` happens after the `with` block.
+
+For the one-shot workflow:
+
+```python
+state = auth.batch.submit_batch(invoices=[...])
+status = auth.batch.wait_for_completion(session=state)
+```
+
+If you already prepared the package separately, `auth.batch.submit_prepared_batch()`
+opens, uploads, and closes the session in one call.
+
+Low-level SDK endpoints used by the batch workflow:
+- `POST /sessions/batch`
+- `POST /sessions/batch/{referenceNumber}/close`
+- presigned part uploads returned in `partUploadRequests`
+- `GET /sessions/{referenceNumber}`
+
+## Session Status and Contents
 
 ```python
 status = session.get_status()
-print(f"Status: {status}")
+print(status.status.code, status.status.description)
 
 state = session.get_state()
-print(f"Reference: {state.reference_number}")
-print(f"Valid until: {state.valid_until}")
+print(state.reference_number, state.valid_until)
+
+invoices = session.list_invoices()
+failed = session.list_failed_invoices()
+print(len(invoices.invoices), len(failed.invoices))
 ```
 
----
-
-### List Sessions
-
-List all active invoice sessions.
-
-**SDK Endpoint:** `GET /sessions`
-
-```python
-from ksef2.domain.models.session import QuerySessionsList, SessionType
-
-sessions = client.sessions.list(
-    access_token=access_token,
-    query=QuerySessionsList(session_type=SessionType.ONLINE),
-)
-print(sessions)
-```
-
----
-
-### Resume Session
-
-Resume an existing session from saved state. The session state is a Pydantic model that can be serialized/deserialized for passing between processes.
-
-**SDK Endpoint:** Uses stored session state
+## Resume an Online Session
 
 ```python
 from ksef2.domain.models.session import OnlineSessionState
 
-# Save session state
-state: OnlineSessionState = session.get_state()
-state_json = state.model_dump_json()
+state = session.get_state()
+payload = state.model_dump_json()
 
-# --- Pass state_json to another process (e.g. via database or message queue) ---
-
-# Restore and resume
-restored_state = OnlineSessionState.model_validate_json(state_json)
-resumed_session = client.sessions.resume(state=restored_state)
-
-# Use the resumed session as normal
-# resumed_session.send_invoice(invoice_xml)
-
-# Terminate manually when done
-resumed_session.terminate()
+restored_state = OnlineSessionState.model_validate_json(payload)
+resumed = auth.resume_online_session(state=restored_state)
+resumed.close()
 ```
 
-> Full example: [`scripts/examples/session/session_resume.py`](../../scripts/examples/session/session_resume.py)
+Example:
+- [`scripts/examples/session/session_resume.py`](../../scripts/examples/session/session_resume.py)
 
----
+## Resume a Batch Session
 
-### Terminate Session
+```python
+from ksef2.domain.models import BatchSessionState
 
-End an active session.
+state = session.get_state()
+payload = state.model_dump_json()
 
-**SDK Endpoint:** `POST /sessions/online/{referenceNumber}/close`
-
----
-
-## Session Lifecycle
-
-```
-1. Open Session
-   POST /sessions/online → {referenceNumber, ...}
-
-2. Perform Operations
-   - send_invoice()
-   - download_invoice()
-
-3. Terminate Session
-   POST /sessions/online/{referenceNumber}/close
+restored_state = BatchSessionState.model_validate_json(payload)
+resumed = auth.resume_batch_session(state=restored_state)
+print(resumed.reference_number)
 ```
 
----
+## Query Historical Invoice Sessions
+
+Use `auth.invoice_sessions` to inspect previously opened invoice sessions.
+`session_type` is required and accepts `"online"` or `"batch"`.
+
+```python
+sessions = auth.invoice_sessions.query(session_type="online")
+for item in sessions.sessions:
+    print(item.reference_number, item.status.description)
+```
+
+To iterate all pages:
+
+```python
+for page in auth.invoice_sessions.all(session_type="online"):
+    print(len(page.sessions))
+```
+
+SDK endpoint: `GET /sessions`
+
+## Examples
+
+- [`scripts/examples/scenarios/session_workflow.py`](../../scripts/examples/scenarios/session_workflow.py)
+- [`scripts/examples/session/session_resume.py`](../../scripts/examples/session/session_resume.py)
+- [`scripts/examples/session/session_management.py`](../../scripts/examples/session/session_management.py)
+- [`scripts/examples/invoices/send_batch.py`](../../scripts/examples/invoices/send_batch.py)
+- [`scripts/examples/invoices/submit_batch.py`](../../scripts/examples/invoices/submit_batch.py)
 
 ## Related
 
-- [Invoices](invoices.md) - Invoice operations within sessions
-- [Authentication](authentication.md) - Getting access tokens
+- [Invoices](invoices.md)
+- [Authentication](authentication.md)

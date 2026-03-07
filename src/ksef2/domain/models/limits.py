@@ -1,13 +1,19 @@
+"""Domain models for effective and overrideable KSeF limits."""
+
 from ksef2.domain.models import KSeFBaseModel
 
 
 class SessionLimits(KSeFBaseModel):
+    """Invoice count and payload size limits for one session type."""
+
     max_invoice_size_mb: int
     max_invoice_with_attachment_size_mb: int
     max_invoices: int
 
 
 class ContextLimits(KSeFBaseModel):
+    """Limits applied separately to online and batch sessions."""
+
     online_session: SessionLimits
     batch_session: SessionLimits
 
@@ -21,17 +27,23 @@ class SubjectEnrollmentLimits(KSeFBaseModel):
 
 
 class SubjectLimits(KSeFBaseModel):
+    """Subject-level limits for certificate enrollment and issuance."""
+
     certificate: SubjectCertificateLimits | None = None
     enrollment: SubjectEnrollmentLimits | None = None
 
 
 class RateLimitValues(KSeFBaseModel):
+    """Per-second, per-minute, and per-hour caps for one API category."""
+
     per_second: int
     per_minute: int
     per_hour: int
 
 
 class ApiRateLimits(KSeFBaseModel):
+    """Rate limits grouped by API operation family."""
+
     online_session: RateLimitValues
     batch_session: RateLimitValues
     invoice_send: RateLimitValues

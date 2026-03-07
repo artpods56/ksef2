@@ -16,19 +16,16 @@ from pathlib import Path
 import pytest
 
 from ksef2 import Client, FormSchema, Environment
-from ksef2.clients.session import OnlineSessionClient
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.clients.online import OnlineSessionClient
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import OnlineSessionState
+from ksef2.domain.models.session import OnlineSessionState, SessionStatusResponse
 from ksef2.domain.models.testdata import (
     Identifier,
-    IdentifierType,
     Permission,
-    PermissionType,
-    SubjectType,
 )
-from ksef2.infra.schema.api import spec
+from ksef2.endpoints.session import SessionEndpoints
 
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -57,12 +54,12 @@ def workflow_context():
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Workflow test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Workflow test buyer",
         )
         temp.create_person(
@@ -71,34 +68,31 @@ def workflow_context():
             description="Workflow test person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=seller_nip),
-            authorized=Identifier(type=IdentifierType.NIP, value=person_nip),
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE,
+                    type="invoice_write",
                     description="Send invoices",
                 ),
                 Permission(
-                    type=PermissionType.INTROSPECTION,
+                    type="introspection",
                     description="Introspect sessions",
                 ),
             ],
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=seller_nip),
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=seller_nip,
             cert=cert,
             private_key=private_key,
         )
         access_token = auth.access_token
 
-        with client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
-            invoice_xml = InvoiceFactory.create(
+            invoice_xml = InvoiceTemplater.create(
                 template_xml,
                 {
                     "#nip#": seller_nip,
@@ -116,6 +110,7 @@ def workflow_context():
 
             yield {
                 "client": client,
+                "auth": auth,
                 "access_token": access_token,
                 "session": session,
                 "invoice_ref": result.reference_number,
@@ -152,14 +147,16 @@ def test_get_state_returns_session_state(workflow_context):
 @pytest.mark.integration
 def test_download_invoice_returns_xml_bytes(workflow_context):
     """download_invoice returns non-empty XML bytes."""
-    session: OnlineSessionClient = workflow_context["session"]
+    from ksef2.clients.authenticated import AuthenticatedClient
+
+    auth: AuthenticatedClient = workflow_context["auth"]
     invoices_list = workflow_context["invoices_list"]
 
-    if not invoices_list.invoices or not invoices_list.invoices[0].ksefNumber:
-        pytest.skip("No processed invoice with ksefNumber available")
+    if not invoices_list.invoices or not invoices_list.invoices[0].ksef_number:
+        pytest.skip("No processed invoice with ksef_number available")
 
-    ksef_number = invoices_list.invoices[0].ksefNumber
-    xml_bytes = session.download_invoice(ksef_number=ksef_number)
+    ksef_number = invoices_list.invoices[0].ksef_number
+    xml_bytes = auth.invoices.download_invoice(ksef_number=ksef_number)
 
     assert isinstance(xml_bytes, bytes)
     assert len(xml_bytes) > 0
@@ -176,10 +173,10 @@ def test_get_invoice_upo_by_ksef_number(workflow_context):
     session: OnlineSessionClient = workflow_context["session"]
     invoices_list = workflow_context["invoices_list"]
 
-    if not invoices_list.invoices or not invoices_list.invoices[0].ksefNumber:
-        pytest.skip("No processed invoice with ksefNumber available")
+    if not invoices_list.invoices or not invoices_list.invoices[0].ksef_number:
+        pytest.skip("No processed invoice with ksef_number available")
 
-    ksef_number = invoices_list.invoices[0].ksefNumber
+    ksef_number = invoices_list.invoices[0].ksef_number
     upo = session.get_invoice_upo_by_ksef_number(ksef_number=ksef_number)
 
     assert isinstance(upo, bytes)
@@ -211,7 +208,9 @@ def test_get_invoice_upo_by_reference(workflow_context):
 @pytest.mark.integration
 def test_resume_session_from_state(workflow_context):
     """Resume a session from serialized state and use it."""
-    client: Client = workflow_context["client"]
+    from ksef2.clients.authenticated import AuthenticatedClient
+
+    auth: AuthenticatedClient = workflow_context["auth"]
     session: OnlineSessionClient = workflow_context["session"]
 
     state = session.get_state()
@@ -220,13 +219,13 @@ def test_resume_session_from_state(workflow_context):
     state_json = state.model_dump_json()
     restored_state = OnlineSessionState.model_validate_json(state_json)
 
-    resumed = client.sessions.resume(state=restored_state)
+    resumed = auth.resume_online_session(state=restored_state)
 
     assert isinstance(resumed, OnlineSessionClient)
 
     # The resumed session should be able to query status
     status = resumed.get_status()
-    assert isinstance(status, spec.SessionStatusResponse)
+    assert isinstance(status, SessionStatusResponse)
     assert status.status is not None
 
 
@@ -236,33 +235,79 @@ def test_resume_session_from_state(workflow_context):
 
 
 @pytest.mark.integration
-@pytest.mark.skip(
-    reason="Session UPO requires completed session with UPO reference number"
-)
-def test_get_session_upo_by_reference(workflow_context):
-    """Test getting collective UPO for a session by UPO reference number.
+def test_get_session_upo_by_reference():
+    """A closed online session exposes a collective UPO by reference number."""
+    client = Client(environment=Environment.TEST)
+    seller_nip = generate_nip()
+    buyer_nip = generate_nip()
+    person_nip = generate_nip()
+    person_pesel = generate_pesel()
 
-    Note: This test is skipped because:
-    1. The session UPO is only available after the session is closed
-    2. We need a valid upoReferenceNumber from the session status
-    3. The workflow_context keeps the session open for other tests
+    with client.testdata.temporal() as temp:
+        temp.create_subject(
+            nip=seller_nip,
+            subject_type="enforcement_authority",
+            description="Session UPO test seller",
+        )
+        temp.create_subject(
+            nip=buyer_nip,
+            subject_type="enforcement_authority",
+            description="Session UPO test buyer",
+        )
+        temp.create_person(
+            nip=person_nip,
+            pesel=person_pesel,
+            description="Session UPO test person",
+        )
+        temp.grant_permissions(
+            permissions=[
+                Permission(type="invoice_write", description="Send invoices"),
+                Permission(type="introspection", description="Inspect sessions"),
+            ],
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=seller_nip),
+        )
 
-    The endpoint (GET /sessions/{referenceNumber}/upo/{upoReferenceNumber})
-    returns the collective UPO XML for the entire session, which is different
-    from the per-invoice UPO endpoints.
-    """
-    _ = workflow_context  # noqa: F841 - context used in real implementation
+        cert, private_key = generate_test_certificate(seller_nip)
+        auth = client.authentication.with_xades(
+            nip=seller_nip,
+            cert=cert,
+            private_key=private_key,
+        )
 
-    # In a real scenario, you would:
-    # 1. Close the session
-    # 2. Get the session status which includes upoReferenceNumber
-    # 3. Call GetSessionUpoEndpoint with both reference numbers
+        template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    # This is the endpoint structure (not actually callable in this test):
-    # endpoint = GetSessionUpoEndpoint(client._transport)
-    # upo_xml = endpoint.send(
-    #     access_token=workflow_context["access_token"],
-    #     reference_number=session.reference_number,
-    #     upo_reference_number="<upo-ref-from-session-status>",
-    # )
-    pass
+        with auth.online_session(form_code=FormSchema.FA3) as session:
+            invoice_xml = InvoiceTemplater.create(
+                template_xml,
+                {
+                    "#nip#": seller_nip,
+                    "#subject2nip#": buyer_nip,
+                    "#invoicing_date#": "2026-02-16",
+                    "#invoice_number#": f"UPO-{int(time.time())}",
+                },
+            )
+            _ = session.send_invoice(invoice_xml=invoice_xml)
+            state = session.get_state()
+
+        resumed = auth.resume_online_session(state=state)
+
+        deadline = time.monotonic() + 90.0
+        status = resumed.get_status()
+        while (
+            status.upo is None or not status.upo.pages
+        ) and time.monotonic() < deadline:
+            time.sleep(2.0)
+            status = resumed.get_status()
+
+        assert status.upo is not None
+        assert status.upo.pages
+
+        upo_reference_number = status.upo.pages[0].reference_number
+        upo_xml = SessionEndpoints(auth._authed_transport).get_session_upo(
+            state.reference_number,
+            upo_reference_number,
+        )
+
+        assert isinstance(upo_xml, bytes)
+        assert len(upo_xml) > 0

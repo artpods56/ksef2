@@ -2255,7 +2255,7 @@
 								<xsd:annotation>
 									<xsd:documentation>Znacznik jednostki podrzędnej JST.
 
-Wartość "1" oznacza, że faktura dotyczy jednostki podrzędnej JST. W takim przypadku, aby udostępnić fakturę jednostce podrzędnej JST, należy wypełnić sekcję Podmiot3, w szczególności podać NIP lub ID-Wew i określić rolę jako 8.                  
+Wartość "1" oznacza, że faktura dotyczy jednostki podrzędnej JST. W takim przypadku, aby udostępnić fakturę jednostce podrzędnej JST, należy wypełnić sekcję Podmiot3, w szczególności podać NIP lub ID-Wew i określić rolę jako 8.
 Wartość "2" oznacza, że faktura nie dotyczy jednostki podrzędnej JST</xsd:documentation>
 								</xsd:annotation>
 								<xsd:simpleType>

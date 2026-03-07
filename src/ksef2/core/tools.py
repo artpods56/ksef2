@@ -12,7 +12,7 @@ def generate_nip(rng: random.Random | None = None) -> str:
     """Return a random but valid 10-digit NIP."""
     r = rng or random.Random()
     while True:
-        # First digit must be 1-9, digits 2-3 can't both be 0 (tax office prefix).
+        # First digit must be 1-9, digits 2-3 can'request both be 0 (tax office prefix).
         digits = [r.randint(1, 9)]
         d2, d3 = r.randint(0, 9), r.randint(0, 9)
         if d2 == 0 and d3 == 0:

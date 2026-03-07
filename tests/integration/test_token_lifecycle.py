@@ -12,20 +12,15 @@ from ksef2 import Client, Environment
 from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
+from ksef2.domain.models.pagination import TokenListParams
 from ksef2.domain.models.testdata import (
     Identifier,
-    IdentifierType,
     Permission,
-    PermissionType,
-    SubjectType,
 )
 from ksef2.domain.models.tokens import (
     GenerateTokenResponse,
     QueryTokensResponse,
     TokenAuthorIdentifier,
-    TokenAuthorIdentifierType,
-    TokenPermission,
-    TokenStatus,
     TokenStatusResponse,
 )
 
@@ -45,7 +40,7 @@ def token_context():
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=org_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Token lifecycle test",
         )
         temp.create_person(
@@ -54,33 +49,33 @@ def token_context():
             description="Token lifecycle person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=org_nip),
-            authorized=Identifier(type=IdentifierType.NIP, value=person_nip),
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE,
+                    type="invoice_write",
                     description="Send invoices",
                 ),
                 Permission(
-                    type=PermissionType.INVOICE_READ,
+                    type="invoice_read",
                     description="Read invoices",
                 ),
                 Permission(
-                    type=PermissionType.CREDENTIALS_MANAGE,
+                    type="credentials_manage",
                     description="Manage credentials",
                 ),
             ],
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=org_nip),
         )
 
         cert, private_key = generate_test_certificate(org_nip)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=org_nip,
             cert=cert,
             private_key=private_key,
         )
 
         generated = auth.tokens.generate(
-            permissions=[TokenPermission.INVOICE_READ],
+            permissions=["invoice_read"],
             description="Integration test token",
         )
 
@@ -110,7 +105,7 @@ def test_token_status(token_context):
 
     assert isinstance(status, TokenStatusResponse)
     assert status.reference_number == generated.reference_number
-    assert status.status == TokenStatus.ACTIVE
+    assert status.status == "active"
 
 
 @pytest.mark.integration
@@ -126,7 +121,7 @@ def test_revoke_token(token_context):
         reference_number=generated.reference_number,
     )
 
-    assert status.status in (TokenStatus.REVOKING, TokenStatus.REVOKED)
+    assert status.status in ("revoking", "revoked")
 
 
 @pytest.mark.integration
@@ -134,7 +129,7 @@ def test_list_tokens(token_context):
     """List tokens and verify the generated token appears."""
     _client, auth, generated = token_context
 
-    response = auth.tokens.list()
+    response = auth.tokens.list_page()
 
     assert isinstance(response, QueryTokensResponse)
     assert isinstance(response.tokens, list)
@@ -150,14 +145,14 @@ def test_list_tokens_with_status_filter(token_context):
     _client, auth, _generated = token_context
 
     # Filter by ACTIVE and REVOKED statuses
-    response = auth.tokens.list(
-        status=[TokenStatus.ACTIVE, TokenStatus.REVOKED],
+    response = auth.tokens.list_page(
+        params=TokenListParams(status=["active", "revoked"])
     )
 
     assert isinstance(response, QueryTokensResponse)
     # All returned tokens should have ACTIVE or REVOKED status
     for token in response.tokens:
-        assert token.status in (TokenStatus.ACTIVE, TokenStatus.REVOKED)
+        assert token.status in ("active", "revoked")
 
 
 @pytest.mark.integration
@@ -165,8 +160,8 @@ def test_list_tokens_with_description_filter(token_context):
     """List tokens filtered by description."""
     _client, auth, _generated = token_context
 
-    response = auth.tokens.list(
-        description="Integration test",
+    response = auth.tokens.list_page(
+        params=TokenListParams(description="Integration test"),
     )
 
     assert isinstance(response, QueryTokensResponse)
@@ -181,20 +176,23 @@ def test_list_tokens_with_author_filter(token_context):
     _client, auth, _generated = token_context
 
     # First, get all tokens to find an author NIP
-    all_tokens = auth.tokens.list()
+    all_tokens = auth.tokens.list_page()
     if not all_tokens.tokens:
         pytest.skip("No tokens available to test author filter")
 
-    # Use the first token's author for filtering
+    # Use the first token'request author for filtering
     first_author = all_tokens.tokens[0].author_identifier
 
     author_filter = TokenAuthorIdentifier(
-        type=TokenAuthorIdentifierType(first_author.type.value),
+        type=first_author.type,
         value=first_author.value,
     )
 
-    response = auth.tokens.list(
-        author_filter=author_filter,
+    response = auth.tokens.list_page(
+        params=TokenListParams(
+            author_identifier=author_filter.value,
+            author_identifier_type=author_filter.type,
+        )
     )
 
     assert isinstance(response, QueryTokensResponse)

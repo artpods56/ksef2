@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import base64
 import hashlib
 import os
@@ -30,7 +28,7 @@ def select_certificate(
 ) -> PublicKeyCertificate:
     """Select the first valid certificate matching *usage*.
 
-    *usage* should be ``"KsefTokenEncryption"`` or ``"SymmetricKeyEncryption"``.
+    *usage* should be ``"ksef_token_encryption"`` or ``"symmetric_key_encryption"``.
     """
     for cert in certificates:
         if usage in cert.usage:
@@ -62,7 +60,7 @@ def generate_session_key() -> tuple[bytes, bytes]:
     return os.urandom(32), os.urandom(16)
 
 
-def encrypt_symmetric_key(key: bytes, cert_b64: str) -> str:
+def encrypt_symmetric_key(key: bytes, cert_b64: str) -> bytes:
     """RSA-OAEP encrypt the AES key and return Base64."""
     public_key = _load_public_key(cert_b64)
     assert isinstance(public_key, rsa.RSAPublicKey), "Expected RSA public key"
@@ -77,7 +75,7 @@ def encrypt_symmetric_key(key: bytes, cert_b64: str) -> str:
         )
     except Exception as exc:
         raise KSeFEncryptionError(f"Symmetric key encryption failed: {exc}") from exc
-    return base64.b64encode(ciphertext).decode()
+    return ciphertext
 
 
 def encrypt_invoice(xml_bytes: bytes, key: bytes, iv: bytes) -> bytes:

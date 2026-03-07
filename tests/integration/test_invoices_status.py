@@ -17,18 +17,20 @@ import pytest
 
 from ksef2 import Client, FormSchema, Environment
 from ksef2.clients.authenticated import AuthenticatedClient
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.session import QuerySessionsList, SessionType, SessionStatus
+from ksef2.domain.models.session import (
+    ListSessionsResponse,
+    SessionInvoiceStatusResponse,
+    SessionInvoicesResponse,
+    SessionStatusEnum,
+    SessionStatusResponse,
+)
 from ksef2.domain.models.testdata import (
     Identifier,
-    IdentifierType,
     Permission,
-    PermissionType,
-    SubjectType,
 )
-from ksef2.infra.schema.api import spec
 
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -56,12 +58,12 @@ def session_with_invoice():
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Integration test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="Integration test buyer",
         )
         temp.create_person(
@@ -70,34 +72,31 @@ def session_with_invoice():
             description="Integration test person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=seller_nip),
-            authorized=Identifier(type=IdentifierType.NIP, value=person_nip),
             permissions=[
                 Permission(
-                    type=PermissionType.INVOICE_WRITE,
+                    type="invoice_write",
                     description="Send invoices",
                 ),
                 Permission(
-                    type=PermissionType.INTROSPECTION,
+                    type="introspection",
                     description="Introspect sessions",
                 ),
             ],
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=seller_nip),
         )
 
         cert, private_key = generate_test_certificate(seller_nip)
-        auth = client.auth.authenticate_xades(
+        auth = client.authentication.with_xades(
             nip=seller_nip,
             cert=cert,
             private_key=private_key,
         )
         access_token = auth.access_token
 
-        with client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
-            invoice_xml = InvoiceFactory.create(
+            invoice_xml = InvoiceTemplater.create(
                 template_xml,
                 {
                     "#nip#": seller_nip,
@@ -114,24 +113,20 @@ def session_with_invoice():
 
 
 # ---------------------------------------------------------------------------
-# List sessions (via client.sessions.list — uses QuerySessionsList model)
+# List sessions (via auth.invoice_sessions)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.integration
 def test_list_sessions(xades_authenticated_context: tuple[Client, AuthenticatedClient]):
     """List sessions filtered by type."""
-    client, auth = xades_authenticated_context
-    token = auth.access_token
+    _client, auth = xades_authenticated_context
 
-    response = client.sessions.list(
-        access_token=token,
-        query=QuerySessionsList(session_type=SessionType.ONLINE),
-    )
+    response = auth.invoice_sessions.query(session_type="online")
 
-    assert isinstance(response, spec.SessionsQueryResponse)
+    assert isinstance(response, ListSessionsResponse)
     assert hasattr(response, "sessions")
-    assert hasattr(response, "continuationToken")
+    assert hasattr(response, "continuation_token")
 
 
 @pytest.mark.integration
@@ -139,15 +134,11 @@ def test_list_sessions_batch(
     xades_authenticated_context: tuple[Client, AuthenticatedClient],
 ):
     """List batch sessions."""
-    client, auth = xades_authenticated_context
-    token = auth.access_token
+    _client, auth = xades_authenticated_context
 
-    response = client.sessions.list(
-        access_token=token,
-        query=QuerySessionsList(session_type=SessionType.BATCH),
-    )
+    response = auth.invoice_sessions.query(session_type="batch")
 
-    assert isinstance(response, spec.SessionsQueryResponse)
+    assert isinstance(response, ListSessionsResponse)
 
 
 @pytest.mark.integration
@@ -155,18 +146,14 @@ def test_list_sessions_with_status_filter(
     xades_authenticated_context: tuple[Client, AuthenticatedClient],
 ):
     """List sessions filtered by statuses."""
-    client, auth = xades_authenticated_context
-    token = auth.access_token
+    _client, auth = xades_authenticated_context
 
-    response = client.sessions.list(
-        access_token=token,
-        query=QuerySessionsList(
-            session_type=SessionType.ONLINE,
-            statuses=[SessionStatus.SUCCEEDED, SessionStatus.IN_PROGRESS],
-        ),
+    response = auth.invoice_sessions.query(
+        session_type="online",
+        statuses=[SessionStatusEnum.SUCCEEDED, SessionStatusEnum.IN_PROGRESS],
     )
 
-    assert isinstance(response, spec.SessionsQueryResponse)
+    assert isinstance(response, ListSessionsResponse)
 
 
 # ---------------------------------------------------------------------------
@@ -181,10 +168,10 @@ def test_get_session_status(session_with_invoice):
 
     response = session.get_status()
 
-    assert isinstance(response, spec.SessionStatusResponse)
+    assert isinstance(response, SessionStatusResponse)
     assert response.status is not None
     assert response.status.code is not None
-    assert response.dateCreated is not None
+    assert response.date_created is not None
 
 
 @pytest.mark.integration
@@ -194,7 +181,7 @@ def test_list_session_invoices(session_with_invoice):
 
     response = session.list_invoices(page_size=10)
 
-    assert isinstance(response, spec.SessionInvoicesResponse)
+    assert isinstance(response, SessionInvoicesResponse)
     assert len(response.invoices) >= 1
 
 
@@ -203,10 +190,10 @@ def test_get_session_invoice_status(session_with_invoice):
     """Get status of a specific invoice in a session."""
     _client, _token, _session_ref, invoice_ref, session = session_with_invoice
 
-    response = session.get_invoice_status(invoice_ref)
+    response = session.get_invoice_status(invoice_reference_number=invoice_ref)
 
-    assert isinstance(response, spec.SessionInvoiceStatusResponse)
-    assert response.referenceNumber == invoice_ref
+    assert isinstance(response, SessionInvoiceStatusResponse)
+    assert response.reference_number == invoice_ref
     assert response.status is not None
 
 
@@ -217,5 +204,5 @@ def test_list_failed_session_invoices(session_with_invoice):
 
     response = session.list_failed_invoices(page_size=10)
 
-    assert isinstance(response, spec.SessionInvoicesResponse)
+    assert isinstance(response, SessionInvoicesResponse)
     assert hasattr(response, "invoices")

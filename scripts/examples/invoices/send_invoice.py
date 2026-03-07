@@ -1,74 +1,82 @@
-from __future__ import annotations
+"""Send one invoice in TEST, wait for processing, and download it back.
 
-import time
+Prerequisites:
+- none; the script provisions and cleans up its own TEST-environment data
+
+What it demonstrates:
+- test subject provisioning
+- invoice submission in an online session
+- waiting for processing and downloading by KSeF number
+"""
+
+from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 
-from ksef2 import Client, FormSchema, Environment
-from ksef2.core.invoices import InvoiceFactory
+from ksef2 import Client, Environment, FormSchema
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip
-from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import SubjectType
 from scripts.examples._common import repo_root
 
-ORG_NIP = generate_nip()
 
-INVOICE_TEMPLATE_PATH = (
-    repo_root()
-    / "docs"
-    / "assets"
-    / "sample_invoices"
-    / "fa3"
-    / "invoice-template-fa-3-with-custom-subject_2.xml"
-)
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
+    template_path: Path = (
+        repo_root()
+        / "docs"
+        / "assets"
+        / "sample_invoices"
+        / "fa3"
+        / "invoice-template-fa-3-with-custom-subject_2.xml"
+    )
 
 
-def main() -> None:
-    client = Client(environment=Environment.TEST)
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    seller_nip = generate_nip()
+    buyer_nip = generate_nip()
 
     with client.testdata.temporal() as temp:
         temp.create_subject(
-            nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            nip=seller_nip,
+            subject_type="enforcement_authority",
             description="SDK test seller",
         )
-        cert, private_key = generate_test_certificate(ORG_NIP)
 
-        auth = client.auth.authenticate_xades(
-            nip=ORG_NIP,
-            cert=cert,
-            private_key=private_key,
-        )
-        access_token = auth.access_token
+        auth = client.authentication.with_test_certificate(nip=seller_nip)
+        template_xml = config.template_path.read_text(encoding="utf-8")
 
-        with client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
-            template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
+        with auth.online_session(form_code=FormSchema.FA3) as session:
             result = session.send_invoice(
-                invoice_xml=InvoiceFactory.create(
+                invoice_xml=InvoiceTemplater.create(
                     template_xml,
                     {
-                        "#nip#": ORG_NIP,
-                        "#subject2nip#": generate_nip(),
+                        "#nip#": seller_nip,
+                        "#subject2nip#": buyer_nip,
                         "#invoicing_date#": date.today().isoformat(),
-                        "#invoice_number#": str(int(time.time())),
+                        "#invoice_number#": f"DEMO-{date.today():%Y%m%d}-{buyer_nip[-4:]}",
                     },
                 )
             )
 
             print(f"Invoice has been sent, reference number: {result.reference_number}")
 
-            # KSeF assigns a ksefNumber after processing — wait briefly then fetch it
-            time.sleep(5)
-            status = session.get_invoice_status(result.reference_number)
+            status = session.wait_for_invoice_ready(
+                invoice_reference_number=result.reference_number
+            )
 
-            if status.ksefNumber:
-                downloaded_invoice = session.download_invoice(
-                    ksef_number=status.ksefNumber
+            if status.ksef_number:
+                downloaded_invoice = auth.invoices.download_invoice(
+                    ksef_number=status.ksef_number
                 )
                 print(f"Downloaded invoice of size {len(downloaded_invoice)} bytes")
 
 
+def main() -> int:
+    run(ExampleConfig())
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -1,197 +1,76 @@
 # Tokens
 
-Manage KSeF tokens for authentication and authorization.
+KSeF tokens are generated and managed through `auth.tokens`.
+They are different from access tokens and refresh tokens.
 
-## Token Types
-
-### KSeF Token
-
-A separate credential used for token-based authentication (`authenticate_token`).
-
-**Note:** KSeF tokens are different from access/refresh tokens. They must be generated after authentication with appropriate permissions.
-
----
-
-## Operations
-
-### Generate Token
-
-Create a new KSeF token for future authentication.
-
-**SDK Endpoint:** `POST /tokens`
-
-**Requirements:**
-- Valid access token with `CREDENTIALS_MANAGE` permission
+## Generate a KSeF Token
 
 ```python
-from ksef2.domain.models.tokens import TokenPermission
-
 result = auth.tokens.generate(
-    permissions=[
-        TokenPermission.INVOICE_READ,
-        TokenPermission.INVOICE_WRITE,
-    ],
+    permissions=["invoice_read", "invoice_write"],
     description="Example API token",
 )
-print(f"Token:     {result.token[:40]}...")
-print(f"Reference: {result.reference_number}")
+
+print(result.reference_number)
+print(result.token)
 ```
 
----
+SDK endpoint: `POST /tokens`
 
-### List Tokens
+## List Tokens
 
-List all generated tokens with optional filtering.
-
-**SDK Endpoint:** `GET /tokens`
+The token client exposes `list_page()` for one page and `list_all()` for iteration across all pages.
 
 ```python
-from ksef2.domain.models.tokens import TokenStatus
+from ksef2.domain.models.pagination import TokenListParams
 
-# List all tokens
-response = auth.tokens.list()
-for token in response.tokens:
-    print(f"{token.reference_number}: {token.status.value} - {token.description}")
-
-# Filter by status
-response = auth.tokens.list(
-    status=[TokenStatus.ACTIVE],
-)
-
-# Filter by description (min 3 chars, case-insensitive)
-response = auth.tokens.list(
-    description="API token",
-)
-
-# Filter by author
-from ksef2.domain.models.tokens import TokenAuthorIdentifier, TokenAuthorIdentifierType
-
-response = auth.tokens.list(
-    author_filter=TokenAuthorIdentifier(
-        type=TokenAuthorIdentifierType.NIP,
-        value="1234567890",
-    ),
-)
-
-# Pagination
-response = auth.tokens.list(
-    page_size=20,
-)
-if response.continuation_token:
-    next_page = auth.tokens.list(
-        continuation_token=response.continuation_token,
+page = auth.tokens.list_page(
+    params=TokenListParams(
+        status=["active"],
+        description="API token",
+        page_size=20,
     )
+)
+for token in page.tokens:
+    print(token.reference_number, token.status, token.description)
+
+for page in auth.tokens.list_all(
+    params=TokenListParams(status=["active"])
+):
+    print(len(page.tokens))
 ```
 
----
+SDK endpoint: `GET /tokens`
 
-### Token Status
-
-Check the status of a token generation request.
-
-**SDK Endpoint:** `GET /tokens/{referenceNumber}`
+## Check Token Status
 
 ```python
-status = auth.tokens.status(
-    reference_number=result.reference_number,
-)
-print(f"Status: {status.status.value}")
+status = auth.tokens.status(reference_number=result.reference_number)
+print(status.status)
 ```
 
----
+SDK endpoint: `GET /tokens/{referenceNumber}`
 
-### Revoke Token
-
-Revoke an existing KSeF token.
-
-**SDK Endpoint:** `DELETE /tokens/{referenceNumber}`
+## Revoke a Token
 
 ```python
-auth.tokens.revoke(
-    reference_number=result.reference_number,
-)
+auth.tokens.revoke(reference_number=result.reference_number)
 ```
 
----
+SDK endpoint: `DELETE /tokens/{referenceNumber}`
 
-## Full Example
+## Common Status Values
 
-Full token lifecycle — generate, list, check status, and revoke:
+- `pending`
+- `active`
+- `revoking`
+- `revoked`
+- `failed`
 
-```python
-from ksef2.domain.models.tokens import TokenPermission, TokenStatus
+## Example
 
-# Generate a new KSeF token (requires CREDENTIALS_MANAGE permission)
-result = auth.tokens.generate(
-    permissions=[
-        TokenPermission.INVOICE_READ,
-        TokenPermission.INVOICE_WRITE,
-    ],
-    description="Example API token",
-)
-print(f"Token:     {result.token[:40]}...")
-print(f"Reference: {result.reference_number}")
-
-# List all active tokens
-response = auth.tokens.list(
-    status=[TokenStatus.ACTIVE],
-)
-print(f"Active tokens: {len(response.tokens)}")
-
-# Check token status
-status = auth.tokens.status(
-    reference_number=result.reference_number,
-)
-print(f"Status: {status.status.value}")
-
-# Revoke the token
-auth.tokens.revoke(
-    reference_number=result.reference_number,
-)
-```
-
-> Full example: [`scripts/examples/auth/token_management.py`](../../scripts/examples/auth/token_management.py)
-
----
-
-## Token Permissions
-
-| Permission | Description |
-|------------|-------------|
-| `INVOICE_READ` | Read/download invoices |
-| `INVOICE_WRITE` | Send invoices |
-| `INTROSPECTION` | Search invoices |
-| `CREDENTIALS_READ` | Read token info |
-| `CREDENTIALS_MANAGE` | Generate/revoke tokens |
-| `ENFORCEMENT_OPERATIONS` | Enforcement operations |
-| `SUBUNIT_MANAGE` | Manage subunits |
-
----
-
-## Token Statuses
-
-| Status | Description |
-|--------|-------------|
-| `PENDING` | Token created but still activating |
-| `ACTIVE` | Token is active and can be used |
-| `REVOKING` | Token is being revoked |
-| `REVOKED` | Token has been revoked |
-| `FAILED` | Token activation failed |
-
----
-
-## Author Identifier Types
-
-Used for filtering tokens by author:
-
-| Type | Description |
-|------|-------------|
-| `NIP` | Polish tax identification number |
-| `PESEL` | Polish personal identification number |
-| `FINGERPRINT` | Certificate fingerprint |
-
----
+- [`scripts/examples/auth/token_management.py`](../../scripts/examples/auth/token_management.py)
 
 ## Related
 
-- [Authentication](authentication.md) - Using tokens for authentication
+- [Authentication](authentication.md)

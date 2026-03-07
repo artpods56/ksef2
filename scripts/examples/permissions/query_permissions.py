@@ -1,103 +1,94 @@
+"""Query several permission views in the TEST environment.
+
+Prerequisites:
+- none; the script provisions and cleans up its own TEST-environment data
+
+What it demonstrates:
+- creating permission data to query
+- querying people, authorizations, entities, and subunits
+"""
+
 import time
+from dataclasses import dataclass
 
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models import (
-    AuthorizationPermissionType,
-    AuthorizationSubjectIdentifierType,
-    EntityPermission,
-    EntityPermissionType,
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
-from ksef2.domain.models.pagination import PaginationParams
+from ksef2.domain.models import EntityPermission, Identifier, Permission
+from ksef2.domain.models.pagination import OffsetPaginationParams
 from ksef2.domain.models.permissions import (
-    AuthorizationPermissionsQueryRequest,
-    EuEntityPermissionsQueryRequest,
-    PersonalPermissionsQueryRequest,
-    PersonPermissionsQueryRequest,
-    PermissionsQueryType,
-    PermissionState,
-    QueryType,
-    SubordinateEntityRolesQueryRequest,
-    SubunitPermissionsQueryRequest,
+    AuthorizationPermissionsQuery,
+    EuEntityPermissionsQuery,
+    PersonalPermissionsQuery,
+    PersonPermissionsQuery,
+    SubordinateEntityRolesQuery,
+    SubunitPermissionsQuery,
 )
 
-ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
-PARTNER_NIP = generate_nip()
 
-client = Client(environment=Environment.TEST)
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
 
 
-def main():
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    organization_nip = generate_nip()
+    partner_nip = generate_nip()
+    person_nip = generate_nip()
+    person_pesel = generate_pesel()
+
     with client.testdata.temporal() as temp:
         temp.create_subject(
-            nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            nip=organization_nip,
+            subject_type="enforcement_authority",
             description="SDK test org",
         )
         temp.create_subject(
-            nip=PARTNER_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            nip=partner_nip,
+            subject_type="enforcement_authority",
             description="SDK test partner",
         )
         temp.create_person(
-            nip=PERSON_NIP,
-            pesel=PERSON_PESEL,
+            nip=person_nip,
+            pesel=person_pesel,
             description="Example person",
         )
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
                 Permission(
-                    type=PermissionType.CREDENTIALS_MANAGE,
+                    type="credentials_manage",
                     description="Manage credentials",
                 ),
                 Permission(
-                    type=PermissionType.INVOICE_READ,
+                    type="invoice_read",
                     description="Read invoices",
                 ),
             ],
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=organization_nip),
         )
 
-        cert, private_key = generate_test_certificate(ORG_NIP)
+        auth = client.authentication.with_test_certificate(nip=organization_nip)
 
-        # Authenticate - no session needed for permission operations
-        auth = client.auth.authenticate_xades(
-            nip=ORG_NIP,
-            cert=cert,
-            private_key=private_key,
-        )
-
-        # Grant some permissions so there's data to query
         _ = auth.permissions.grant_entity(
-            subject_value=PARTNER_NIP,
+            subject_value=partner_nip,
             permissions=[
-                EntityPermission(
-                    type=EntityPermissionType.INVOICE_READ, can_delegate=False
-                ),
+                EntityPermission(type="invoice_read", can_delegate=False),
             ],
             description="Partner invoice read access",
             entity_name="Test Partner Entity",
         )
         _ = auth.permissions.grant_authorization(
-            subject_type=AuthorizationSubjectIdentifierType.NIP,
-            subject_value=PARTNER_NIP,
-            permission=AuthorizationPermissionType.SELF_INVOICING,
+            subject_type="nip",
+            subject_value=partner_nip,
+            permission="self_invoicing",
             description="Self-invoicing authorization",
             entity_name="Test Partner Entity",
         )
         _ = auth.permissions.grant_person(
-            subject_identifier=IdentifierType.PESEL,
-            subject_value=PERSON_PESEL,
-            permissions=[PermissionType.INVOICE_READ, PermissionType.INVOICE_WRITE],
+            subject_type="pesel",
+            subject_value=person_pesel,
+            permissions=["invoice_read", "invoice_write"],
             description="Person invoice access",
             first_name="John",
             last_name="Doe",
@@ -105,72 +96,77 @@ def main():
 
         time.sleep(5)
 
-        print("Get all persons permissions ...")
+        print("Get all persons permissions...")
         resp = auth.permissions.query_persons(
-            query=PersonPermissionsQueryRequest(
-                query_type=PermissionsQueryType.PERMISSIONS_IN_CURRENT_CONTEXT,
+            query=PersonPermissionsQuery(
+                query_type="in_context",
             ),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Get persons permissions with credentials manage permission ...")
+        print("Get persons permissions with credentials manage permission...")
         resp = auth.permissions.query_persons(
-            query=PersonPermissionsQueryRequest(
-                query_type=PermissionsQueryType.PERMISSIONS_IN_CURRENT_CONTEXT,
-                permission_types=[PermissionType.CREDENTIALS_MANAGE],
+            query=PersonPermissionsQuery(
+                query_type="in_context",
+                permission_types=["credentials_manage"],
             ),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query granted authorizations ...")
+        print("Query granted authorizations...")
         resp = auth.permissions.query_authorizations(
-            query=AuthorizationPermissionsQueryRequest(
-                query_type=QueryType.GRANTED,
+            query=AuthorizationPermissionsQuery(
+                query_type="granted",
             ),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query received authorizations ...")
+        print("Query received authorizations...")
         resp = auth.permissions.query_personal(
-            query=PersonalPermissionsQueryRequest(),
+            query=PersonalPermissionsQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query active personal permissions ...")
+        print("Query active personal permissions...")
         resp = auth.permissions.query_personal(
-            query=PersonalPermissionsQueryRequest(
-                permission_state=PermissionState.ACTIVE,
+            query=PersonalPermissionsQuery(
+                permission_state="active",
             ),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query EU entities ...")
+        print("Query EU entities...")
         resp = auth.permissions.query_eu_entities(
-            query=EuEntityPermissionsQueryRequest(),
+            query=EuEntityPermissionsQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query subordinate entities ...")
+        print("Query subordinate entities...")
         resp = auth.permissions.query_subordinate_entities(
-            query=SubordinateEntityRolesQueryRequest(),
+            query=SubordinateEntityRolesQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query subunits ...")
+        print("Query subunits...")
         resp = auth.permissions.query_subunits(
-            query=SubunitPermissionsQueryRequest(),
+            query=SubunitPermissionsQuery(),
         )
         print(resp.model_dump_json(indent=2))
 
-        print("Query authorizations (received, page_size=20) ...")
+        print("Query authorizations (received, page_size=20)...")
         resp = auth.permissions.query_authorizations(
-            query=AuthorizationPermissionsQueryRequest(
-                query_type=QueryType.RECEIVED,
+            query=AuthorizationPermissionsQuery(
+                query_type="received",
             ),
-            params=PaginationParams(page_offset=0, page_size=20),
+            params=OffsetPaginationParams(page_offset=0, page_size=20),
         )
         print(resp.model_dump_json(indent=2))
+
+
+def main() -> int:
+    run(ExampleConfig())
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

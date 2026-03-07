@@ -9,4 +9,4 @@ class JsonResponseCodec:
 
     @staticmethod
     def parse_list[T: BaseModel](resp: httpx.Response, model: type[T]) -> list[T]:
-        return [model.model_construct(**item) for item in resp.json()]
+        return [model.model_validate(item) for item in resp.json()]

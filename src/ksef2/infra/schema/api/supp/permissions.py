@@ -72,7 +72,7 @@ class PersonPermissionsAuthorizedIdentifier(BaseSupp):
 
 
 class PersonPermissionsQueryRequest(BaseSupp):
-    """Supplementary model for person permissions query request."""
+    """Supplementary request for person permissions query request."""
 
     authorIdentifier: PersonPermissionsAuthorIdentifier | None = None
     """
@@ -116,7 +116,7 @@ class PersonPermissionsQueryRequest(BaseSupp):
     """
     permissionState: PermissionState | None = None
     """
-    Stan uprawnienia. 
+    Stan uprawnienia.
     | Type | Value |
     | --- | --- |
     | Active | Uprawnienia aktywne |
@@ -204,6 +204,8 @@ class PersonPermission(BaseSupp):
 
 
 class QueryPersonPermissionsResponse(BaseSupp):
+    """Supplementary response for person permissions query response."""
+
     permissions: list[PersonPermission]
     """
     Lista odczytanych uprawnień.

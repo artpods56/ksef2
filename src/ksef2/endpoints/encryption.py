@@ -1,29 +1,17 @@
+"""Encryption endpoints for public key certificates."""
+
 from typing import final
 
-from ksef2.core import protocols
-from ksef2.core.codecs import JsonResponseCodec
-from ksef2.infra.schema.api import spec as spec
+from ksef2.core import routes
+from ksef2.endpoints.base import BaseEndpoints
+from ksef2.infra.schema.api import spec
 
 
 @final
-class CertificateEndpoint:
-    """Endpoint for fetching public-key certificates.
-
-    API Documentation:
-        `https://api-test.ksef.mf.gov.pl/docs/v2/index.html#tag/Certyfikaty-klucza-publicznego/paths/~1security~1public-key-certificates/get`
-    """
-
-    url: str = "/security/public-key-certificates"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def fetch(
-        self,
-    ) -> list[spec.PublicKeyCertificate]:
-        return JsonResponseCodec.parse_list(
-            self._transport.get(
-                self.url,
-            ),
+class EncryptionEndpoints(BaseEndpoints):
+    def fetch_public_certificates(self) -> list[spec.PublicKeyCertificate]:
+        """Fetch public certificates used for token and session-key encryption."""
+        return self._parse_list(
+            self._transport.get(routes.EncryptionRoutes.PUBLIC_KEY_CERTIFICATES),
             spec.PublicKeyCertificate,
         )

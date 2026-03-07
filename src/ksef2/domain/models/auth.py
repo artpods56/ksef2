@@ -1,56 +1,135 @@
-from enum import Enum
+"""Domain models for authentication flows and auth sessions."""
 
-from pydantic import AwareDatetime
+from datetime import datetime
+from enum import StrEnum
+from typing import Literal
 
 from ksef2.domain.models.base import KSeFBaseModel
 
+type ContextIdentifierType = Literal["nip", "internal_id", "nip_vat_ue", "peppol_id"]
 
-class ContextIdentifierType(Enum):
-    NIP = "Nip"
-    INTERNAL_ID = "InternalId"
-    NIP_VAT_UE = "NipVatUe"
-    PEPPOL_ID = "PeppolId"
+type AuthenticationMethod = Literal[
+    "token",
+    "trusted_profile",
+    "internal_certificate",
+    "qualified_signature",
+    "qualified_seal",
+    "personal_signature",
+    "peppol_signature",
+]
+
+type AuthenticationMethodCategory = Literal[
+    "xades_signature",
+    "national_node",
+    "token",
+    "other",
+]
 
 
-class AuthenticationMethod(Enum):
-    TOKEN = "Token"
-    TRUSTED_PROFILE = "TrustedProfile"
-    INTERNAL_CERTIFICATE = "InternalCertificate"
-    QUALIFIED_SIGNATURE = "QualifiedSignature"
-    QUALIFIED_SEAL = "QualifiedSeal"
-    PERSONAL_SIGNATURE = "PersonalSignature"
-    PEPPOL_SIGNATURE = "PeppolSignature"
+class ContextIdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    INTERNAL_ID = "internal_id"
+    NIP_VAT_UE = "nip_vat_ue"
+    PEPPOL_ID = "peppol_id"
+
+
+class AuthenticationMethodEnum(StrEnum):
+    TOKEN = "token"
+    TRUSTED_PROFILE = "trusted_profile"
+    INTERNAL_CERTIFICATE = "internal_certificate"
+    QUALIFIED_SIGNATURE = "qualified_signature"
+    QUALIFIED_SEAL = "qualified_seal"
+    PERSONAL_SIGNATURE = "personal_signature"
+    PEPPOL_SIGNATURE = "peppol_signature"
+
+
+class AuthenticationMethodCategoryEnum(StrEnum):
+    XADES_SIGNATURE = "xades_signature"
+    NATIONAL_NODE = "national_node"
+    TOKEN = "token"
+    OTHER = "other"
+
+
+class InitTokenAuthenticationRequest(KSeFBaseModel):
+    """Payload used to authenticate with a previously generated KSeF token."""
+
+    challenge: str
+    context_type: ContextIdentifierType
+    context_value: str
+    encrypted_token: str
 
 
 class ChallengeResponse(KSeFBaseModel):
+    """Challenge material returned before token or XAdES authentication starts."""
+
     challenge: str
-    timestamp: AwareDatetime
+    timestamp: datetime
     timestamp_ms: int
 
 
 class TokenCredentials(KSeFBaseModel):
+    """A bearer token together with its expiration time."""
+
     token: str
-    valid_until: AwareDatetime
+    valid_until: datetime
 
 
 class AuthInitResponse(KSeFBaseModel):
+    """Initial authentication response containing the short-lived auth token."""
+
     reference_number: str
     authentication_token: TokenCredentials
 
 
 class AuthOperationStatus(KSeFBaseModel):
-    start_date: AwareDatetime
+    """Status of an in-progress authentication operation."""
+
+    start_date: datetime
     authentication_method: AuthenticationMethod
+    authentication_method_category: AuthenticationMethodCategory
+    authentication_method_code: str
+    authentication_method_display_name: str
     status_code: int
     status_description: str
     status_details: list[str] | None = None
     is_token_redeemed: bool | None = None
+    last_token_refresh_date: datetime | None = None
+    refresh_token_valid_until: datetime | None = None
+
+
+class AuthenticationSession(KSeFBaseModel):
+    """Metadata describing an authentication session visible in session listings."""
+
+    reference_number: str
+    start_date: datetime
+    authentication_method: AuthenticationMethod
+    authentication_method_category: AuthenticationMethodCategory
+    authentication_method_code: str
+    authentication_method_display_name: str
+    status_code: int
+    status_description: str
+    status_details: list[str] | None = None
+    is_token_redeemed: bool | None = None
+    last_token_refresh_date: datetime | None = None
+    refresh_token_valid_until: datetime | None = None
+    is_current: bool | None = None
+
+
+class AuthenticationSessionsResponse(KSeFBaseModel):
+    """A single page of authentication sessions."""
+
+    continuation_token: str | None = None
+    items: list[AuthenticationSession]
 
 
 class AuthTokens(KSeFBaseModel):
+    """Access and refresh tokens returned after successful authentication."""
+
     access_token: TokenCredentials
     refresh_token: TokenCredentials
 
 
 class RefreshedToken(KSeFBaseModel):
+    """Access token returned by the refresh endpoint."""
+
     access_token: TokenCredentials

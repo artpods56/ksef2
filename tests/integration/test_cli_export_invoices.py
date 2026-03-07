@@ -21,10 +21,9 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from ksef2 import Client, Environment, FormSchema
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
-from ksef2.domain.models.testdata import SubjectType
 
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -57,24 +56,21 @@ def test_cli_export_invoices_with_pem(tmp_path: Path) -> None:
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="CLI test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            subject_type="enforcement_authority",
             description="CLI test buyer",
         )
 
         # Send an invoice as the seller (buyer = Subject2)
-        seller_auth = client.auth.authenticate_xades(
+        seller_auth = client.authentication.with_xades(
             nip=seller_nip, cert=seller_cert, private_key=seller_key
         )
-        with client.sessions.open_online(
-            access_token=seller_auth.access_token,
-            form_code=FormSchema.FA3,
-        ) as session:
-            invoice_xml = InvoiceFactory.create(
+        with seller_auth.online_session(form_code=FormSchema.FA3) as session:
+            invoice_xml = InvoiceTemplater.create(
                 template_xml=INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8"),
                 replacements={
                     "#nip#": seller_nip,

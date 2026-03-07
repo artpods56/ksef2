@@ -1,93 +1,80 @@
-from __future__ import annotations
+"""Open an online session, serialize its state, and resume it later.
 
+Prerequisites:
+- none; the script provisions and cleans up its own TEST-environment data
+
+What it demonstrates:
+- temporary test subject and person setup
+- permission grants for invoice work
+- serializing and restoring online session state
+"""
+
+from dataclasses import dataclass
 
 from ksef2 import Client, Environment, FormSchema
 from ksef2.core.tools import generate_nip, generate_pesel
-from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.session import OnlineSessionState
-from ksef2.domain.models.testdata import (
-    Identifier,
-    IdentifierType,
-    Permission,
-    PermissionType,
-    SubjectType,
-)
-
-ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
+from ksef2.domain.models.testdata import Identifier, Permission
 
 
-def main() -> None:
-    client = Client(environment=Environment.TEST)
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
+
+
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    organization_nip = generate_nip()
+    person_nip = generate_nip()
+    person_pesel = generate_pesel()
 
     with client.testdata.temporal() as temp:
-        print("Creating test subject ...")
+        print("Creating test subject...")
         temp.create_subject(
-            nip=ORG_NIP,
-            subject_type=SubjectType.ENFORCEMENT_AUTHORITY,
+            nip=organization_nip,
+            subject_type="enforcement_authority",
             description="Session resume test",
         )
 
-        print("Creating test person ...")
+        print("Creating test person...")
         temp.create_person(
-            nip=PERSON_NIP,
-            pesel=PERSON_PESEL,
+            nip=person_nip,
+            pesel=person_pesel,
             description="Example person",
         )
 
         temp.grant_permissions(
-            context=Identifier(type=IdentifierType.NIP, value=ORG_NIP),
-            authorized=Identifier(type=IdentifierType.NIP, value=PERSON_NIP),
             permissions=[
-                Permission(
-                    type=PermissionType.INVOICE_WRITE, description="Send invoices"
-                ),
+                Permission(type="invoice_write", description="Send invoices"),
             ],
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=organization_nip),
         )
 
-        # we are using self-signed certificate here, this will only work in test environment
-        cert, private_key = generate_test_certificate(PERSON_NIP)
-        auth = client.auth.authenticate_xades(
-            nip=PERSON_NIP, cert=cert, private_key=private_key
-        )
-        access_token = auth.access_token
+        auth = client.authentication.with_test_certificate(nip=person_nip)
+        print("Opening session (manual mode)...")
+        session = auth.online_session(form_code=FormSchema.FA3)
 
-        # Open a session WITHOUT context manager (manual lifecycle)
-        print("Opening session (manual mode) ...")
-        session = client.sessions.open_online(
-            access_token=access_token,
-            form_code=FormSchema.FA3,
-        )
-
-        # Save the session state, its a pydantic model so we can easly serialize it
-        state: OnlineSessionState = (
-            session.get_state()
-        )  # [TODO] state should probably be secured somehow
+        state: OnlineSessionState = session.get_state()
         state_json = state.model_dump_json()
 
         print(f"Session state saved ({len(state_json)} bytes)")
         print(f"  Reference: {state.reference_number}")
         print(f"  Valid until: {state.valid_until}")
 
-        # --- Simulate passing state to another process ---
-        # In a real app you would store state_json in a database or message queue
-
-        # Resume the session from saved state
-        print("Resuming session from saved state ...")
+        print("Resuming session from saved state...")
         restored_state = OnlineSessionState.model_validate_json(state_json)
-        resumed_session = client.sessions.resume(state=restored_state)
+        resumed_session = auth.resume_online_session(state=restored_state)
 
-        # The resumed session can send invoices, download, etc. as long as it is valid
-        # Values stored in state should be properly secured
-        # resumed_session.send_invoice(invoice_xml)
-
-        # Terminate manually when done
-        print("Terminating session ...")
-        resumed_session.terminate()
-
+        print("Terminating session...")
+        resumed_session.close()
         print("Session terminated.")
 
 
+def main() -> int:
+    run(ExampleConfig())
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -1,4 +1,3 @@
-from __future__ import annotations
 from collections.abc import Iterable
 
 from datetime import datetime, timezone
@@ -22,8 +21,9 @@ class CertificateStore:
         return list(self._certificates)
 
     def get_valid(
-        self, usage: encryption.CertUsage
-    ) -> encryption.PublicKeyCertificate | None:
+        self,
+        usage: encryption.CertUsage | encryption.CertUsageEnum | str,
+    ) -> encryption.PublicKeyCertificate:
         """Get a valid certificate for given usage.
 
         Raises:
@@ -57,8 +57,11 @@ class CertificateStore:
 
     def by_usage(
         self,
-        usage: encryption.CertUsage,
+        usage: encryption.CertUsage | encryption.CertUsageEnum | str,
         *,
         at: datetime | None = None,
     ) -> list[encryption.PublicKeyCertificate]:
-        return [cert for cert in self.list_valid(at=at) if usage in cert.usage]
+        normalized_usage = encryption.normalize_cert_usage(usage)
+        return [
+            cert for cert in self.list_valid(at=at) if normalized_usage in cert.usage
+        ]

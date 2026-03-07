@@ -1,190 +1,146 @@
-from typing import Any, final
+"""Authentication endpoints."""
 
-from urllib.parse import urlencode
+from typing import NotRequired, TypedDict, Unpack, final
 
-from ksef2.core import headers, codecs, protocols
-from ksef2.infra.schema.api import spec as spec
+from pydantic import TypeAdapter
+
+from ksef2.core import headers, routes
+from ksef2.endpoints.base import BaseEndpoints
+from ksef2.infra.schema.api import spec
+from ksef2.infra.schema.api.supp.auth import InitTokenAuthenticationRequest
+
+AuthSessionsQueryParams = TypedDict(
+    "AuthSessionsQueryParams",
+    {
+        "pageSize": NotRequired[int | None],
+    },
+)
+
+XadesAuthParams = TypedDict(
+    "XadesAuthParams",
+    {
+        "verifyCertificateChain": NotRequired[str | None],
+    },
+)
 
 
 @final
-class ChallengeEndpoint:
-    url: str = "/auth/challenge"
+class AuthEndpoints(BaseEndpoints):
+    """Raw authentication endpoints backed by generated schema models."""
 
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
+    _AUTH_SESSIONS_PARAMS = TypeAdapter(AuthSessionsQueryParams)
 
-    def send(self) -> spec.AuthenticationChallengeResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(self.url),
-            spec.AuthenticationChallengeResponse,
+    def list_sessions(
+        self,
+        continuation_token: str | None = None,
+        **params: Unpack[AuthSessionsQueryParams],
+    ) -> spec.AuthenticationListResponse:
+        """Fetch one page of authentication sessions."""
+        req_headers = (
+            {"x-continuation-token": continuation_token} if continuation_token else None
         )
 
-
-@final
-class TokenAuthEndpoint:
-    url: str = "/auth/ksef-token"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, body: dict[str, Any]) -> spec.AuthenticationInitResponse:
-        return codecs.JsonResponseCodec.parse(
-            self._transport.post(self.url, json=body),
-            spec.AuthenticationInitResponse,
+        return self._parse(
+            self._transport.get(
+                path=routes.AuthRoutes.LIST_SESSIONS,
+                params=self.build_params(params, self._AUTH_SESSIONS_PARAMS),
+                headers=req_headers,
+            ),
+            spec.AuthenticationListResponse,
         )
 
+    _XADES_AUTH_PARAMS = TypeAdapter(XadesAuthParams)
 
-@final
-class XAdESAuthEndpoint:
-    url: str = "/auth/xades-signature"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, verify_chain: bool = False) -> str:
-        return f"{self.url}?verifyCertificateChain={str(verify_chain).lower()}"
-
-    def send(
+    def xades_auth(
         self,
         signed_xml: bytes,
-        *,
         verify_chain: bool = False,
     ) -> spec.AuthenticationInitResponse:
-        return codecs.JsonResponseCodec.parse(
+        """Start authentication from an XAdES-signed XML payload."""
+
+        query_params: XadesAuthParams = {
+            "verifyCertificateChain": str(verify_chain).lower(),
+        }
+        return self._parse(
             self._transport.request(
                 "POST",
-                self.get_url(verify_chain=verify_chain),
+                routes.AuthRoutes.XADES_SIGNATURE,
+                params=self.build_params(query_params, self._XADES_AUTH_PARAMS),
                 content=signed_xml,
                 headers={"Content-Type": "application/xml"},
             ),
             spec.AuthenticationInitResponse,
         )
 
+    def challenge(self) -> spec.AuthenticationChallengeResponse:
+        """Create an authentication challenge."""
+        return self._parse(
+            self._transport.post(
+                path=routes.AuthRoutes.CHALLENGE,
+            ),
+            spec.AuthenticationChallengeResponse,
+        )
 
-@final
-class AuthStatusEndpoint:
-    url: str = "/auth/{referenceNumber}"
+    def token_auth(
+        self, body: InitTokenAuthenticationRequest
+    ) -> spec.AuthenticationInitResponse:
+        """Start token-based authentication."""
+        return self._parse(
+            self._transport.post(
+                path=routes.AuthRoutes.TOKEN_AUTH,
+                json=body.model_dump(mode="json", by_alias=True),
+            ),
+            spec.AuthenticationInitResponse,
+        )
 
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(
+    def auth_status(
         self,
         bearer_token: str,
         reference_number: str,
     ) -> spec.AuthenticationOperationStatusResponse:
-        return codecs.JsonResponseCodec.parse(
+        """Fetch the status of an in-progress authentication operation."""
+        return self._parse(
             self._transport.get(
-                self.get_url(reference_number=reference_number),
+                path=routes.AuthRoutes.AUTH_STATUS.format(
+                    referenceNumber=reference_number
+                ),
                 headers=headers.KSeFHeaders.bearer(bearer_token),
             ),
             spec.AuthenticationOperationStatusResponse,
         )
 
-
-@final
-class RedeemTokenEndpoint:
-    url: str = "/auth/token/redeem"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        bearer_token: str,
-    ) -> spec.AuthenticationTokensResponse:
-        return codecs.JsonResponseCodec.parse(
+    def redeem_token(self, bearer_token: str) -> spec.AuthenticationTokensResponse:
+        """Redeem a temporary authentication token for access and refresh tokens."""
+        return self._parse(
             self._transport.post(
-                self.url,
+                path=routes.AuthRoutes.REDEEM_TOKEN,
                 headers=headers.KSeFHeaders.bearer(bearer_token),
             ),
             spec.AuthenticationTokensResponse,
         )
 
-
-@final
-class RefreshTokenEndpoint:
-    url: str = "/auth/token/refresh"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        bearer_token: str,
+    def refresh_token(
+        self, bearer_token: str
     ) -> spec.AuthenticationTokenRefreshResponse:
-        return codecs.JsonResponseCodec.parse(
+        """Refresh an access token using a refresh token bearer header."""
+        return self._parse(
             self._transport.post(
-                self.url,
+                path=routes.AuthRoutes.REFRESH_TOKEN,
                 headers=headers.KSeFHeaders.bearer(bearer_token),
             ),
             spec.AuthenticationTokenRefreshResponse,
         )
 
+    def terminate_current_session(self) -> None:
+        """Terminate the current authentication session."""
+        _ = self._transport.delete(
+            path=routes.AuthRoutes.TERMINATE_CURRENT_SESSION,
+        )
 
-@final
-class ListActiveSessionsEndpoint:
-    url: str = "/auth/sessions"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(
-        self,
-        bearer_token: str,
-        *,
-        page_size: int | None = None,
-        continuation_token: str | None = None,
-    ) -> spec.AuthenticationListResponse:
-        headers_dict = headers.KSeFHeaders.bearer(bearer_token)
-        if continuation_token:
-            headers_dict["x-continuation-token"] = continuation_token
-
-        query_params: list[tuple[str, str]] = []
-        if page_size is not None:
-            query_params.append(("pageSize", str(page_size)))
-
-        query_string = urlencode(query_params) if query_params else ""
-        path = f"{self.url}?{query_string}" if query_string else self.url
-
-        return codecs.JsonResponseCodec.parse(
-            self._transport.get(
-                path,
-                headers=headers_dict,
+    def terminate_auth_session(self, reference_number: str) -> None:
+        """Terminate an authentication session by reference number."""
+        _ = self._transport.delete(
+            path=routes.AuthRoutes.TERMINATE_AUTH_SESSION.format(
+                referenceNumber=reference_number
             ),
-            spec.AuthenticationListResponse,
-        )
-
-
-@final
-class TerminateCurrentSessionEndpoint:
-    url: str = "/auth/sessions/current"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def send(self, bearer_token: str) -> None:
-        _ = self._transport.delete(
-            self.url,
-            headers=headers.KSeFHeaders.bearer(bearer_token),
-        )
-
-
-@final
-class TerminateAuthSessionEndpoint:
-    url: str = "/auth/sessions/{referenceNumber}"
-
-    def __init__(self, transport: protocols.Middleware):
-        self._transport = transport
-
-    def get_url(self, *, reference_number: str) -> str:
-        return self.url.format(referenceNumber=reference_number)
-
-    def send(self, bearer_token: str, reference_number: str) -> None:
-        _ = self._transport.delete(
-            self.get_url(reference_number=reference_number),
-            headers=headers.KSeFHeaders.bearer(bearer_token),
         )

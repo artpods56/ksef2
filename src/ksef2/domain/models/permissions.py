@@ -1,328 +1,627 @@
-from __future__ import annotations
+"""Domain models for permission grants, queries, and operation status."""
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, BaseModel
 
-from ksef2.domain.models.testdata import Identifier, PermissionType
 from ksef2.domain.models.base import KSeFBaseModel
 
+# ---------------------------------------------------------------------------
+# Type aliases (replace StrEnums)
+# ---------------------------------------------------------------------------
 
-class EntityPermissionType(StrEnum):
-    INVOICE_READ = "InvoiceRead"
-    INVOICE_WRITE = "InvoiceWrite"
+type IdentifierType = Literal[
+    "nip", "pesel", "fingerprint", "system", "internal_id", "all_partners", "peppol_id"
+]
+
+type CertificateSubjectIdentifierType = Literal["nip", "pesel", "fingerprint"]
+
+type PersonAuthorIdentifierType = Literal["nip", "pesel", "fingerprint", "system"]
+
+type PersonContextIdentifierType = Literal["nip", "internal_id"]
+
+type EntityIdentifierType = Literal["nip"]
+
+type EntityPermissionsContextIdentifierType = Literal["nip", "internal_id"]
+
+type PersonPermissionScope = Literal[
+    "invoice_read",
+    "invoice_write",
+    "introspection",
+    "credentials_read",
+    "credentials_manage",
+    "enforcement_operations",
+    "subunit_manage",
+]
+
+type PersonalPermissionScope = Literal[
+    "invoice_read",
+    "invoice_write",
+    "introspection",
+    "credentials_read",
+    "credentials_manage",
+    "enforcement_operations",
+    "subunit_manage",
+    "vat_ue_manage",
+]
+
+type EntityPermissionType = Literal["invoice_read", "invoice_write"]
+
+type AuthorizationPermissionType = Literal[
+    "self_invoicing", "rr_invoicing", "tax_representative", "pef_invoicing"
+]
+
+type AuthorizationSubjectIdentifierType = Literal["nip", "peppol_id"]
+
+type IndirectPermissionType = Literal["invoice_read", "invoice_write"]
+
+type IndirectTargetIdentifierType = Literal["nip", "all_partners", "internal_id"]
+
+type SubunitIdentifierType = Literal["nip", "internal_id"]
+
+type EuEntityPermissionType = Literal["invoice_read", "invoice_write"]
+
+type EuEntityAdminContextIdentifierType = Literal["nip_vat_ue"]
+
+type EntityRoleType = Literal[
+    "court_bailiff",
+    "enforcement_authority",
+    "local_government_unit",
+    "local_government_sub_unit",
+    "vat_group_unit",
+    "vat_group_sub_unit",
+]
+
+type PermissionState = Literal["active", "inactive"]
+
+type OperationStatusCode = Literal[100, 200, 400, 410, 420, 430, 440, 450, 500, 550]
+
+type QueryType = Literal["granted", "received"]
+
+type PersonPermissionsQueryType = Literal["in_context", "granted_in_context"]
+
+type PersonPermissionsAuthorizedIdentifierType = Literal["nip", "pesel", "fingerprint"]
+
+type PersonPermissionsContextIdentifierType = Literal["nip", "internal_id"]
+
+type PersonPermissionsTargetIdentifierType = Literal[
+    "nip", "all_partners", "internal_id"
+]
+
+type PersonalPermissionsAuthorizedIdentifierType = Literal[
+    "nip", "pesel", "fingerprint"
+]
+
+type PersonalPermissionsContextIdentifierType = Literal["nip", "internal_id"]
+
+type PersonalPermissionsTargetIdentifierType = Literal[
+    "nip", "all_partners", "internal_id"
+]
+
+type SubordinateEntityRoleType = Literal[
+    "local_government_sub_unit", "vat_group_sub_unit"
+]
+
+type EuEntityQueryPermissionType = Literal[
+    "vat_ue_manage", "invoice_write", "invoice_read", "introspection"
+]
 
 
-class AuthorizationPermissionType(StrEnum):
-    SELF_INVOICING = "SelfInvoicing"
-    RR_INVOICING = "RRInvoicing"
-    TAX_REPRESENTATIVE = "TaxRepresentative"
-    PEF_INVOICING = "PefInvoicing"
+class IdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    PESEL = "pesel"
+    FINGERPRINT = "fingerprint"
+    SYSTEM = "system"
+    INTERNAL_ID = "internal_id"
+    ALL_PARTNERS = "all_partners"
+    PEPPOL_ID = "peppol_id"
 
 
-class AuthorizationSubjectIdentifierType(StrEnum):
-    NIP = "Nip"
-    PEPPOL_ID = "PeppolId"
+class PersonPermissionTypeEnum(StrEnum):
+    INVOICE_READ = "invoice_read"
+    INVOICE_WRITE = "invoice_write"
+    PEF_INVOICE_WRITE = "pef_invoice_write"
+    INTROSPECTION = "introspection"
+    CREDENTIALS_READ = "credentials_read"
+    CREDENTIALS_MANAGE = "credentials_manage"
+    ENFORCEMENT_OPERATIONS = "enforcement_operations"
+    SUBUNIT_MANAGE = "subunit_manage"
+    VAT_UE_MANAGE = "vat_ue_manage"
 
 
-class IndirectPermissionType(StrEnum):
-    INVOICE_READ = "InvoiceRead"
-    INVOICE_WRITE = "InvoiceWrite"
+class EntityPermissionTypeEnum(StrEnum):
+    INVOICE_READ = "invoice_read"
+    INVOICE_WRITE = "invoice_write"
 
 
-class IndirectTargetIdentifierType(StrEnum):
-    NIP = "Nip"
-    ALL_PARTNERS = "AllPartners"
-    INTERNAL_ID = "InternalId"
+class AuthorizationPermissionTypeEnum(StrEnum):
+    SELF_INVOICING = "self_invoicing"
+    RR_INVOICING = "rr_invoicing"
+    TAX_REPRESENTATIVE = "tax_representative"
+    PEF_INVOICING = "pef_invoicing"
 
 
-class SubunitIdentifierType(StrEnum):
-    NIP = "Nip"
-    INTERNAL_ID = "InternalId"
+class AuthorizationSubjectIdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    PEPPOL_ID = "peppol_id"
 
 
-class EuEntityPermissionType(StrEnum):
-    INVOICE_READ = "InvoiceRead"
-    INVOICE_WRITE = "InvoiceWrite"
+class IndirectPermissionTypeEnum(StrEnum):
+    INVOICE_READ = "invoice_read"
+    INVOICE_WRITE = "invoice_write"
 
 
-class EuEntityAdminContextIdentifierType(StrEnum):
-    NIP_VAT_UE = "NipVatUe"
+class IndirectTargetIdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    ALL_PARTNERS = "all_partners"
+    INTERNAL_ID = "internal_id"
 
 
-class EntityRoleType(StrEnum):
-    COURT_BAILIFF = "CourtBailiff"
-    ENFORCEMENT_AUTHORITY = "EnforcementAuthority"
-    LOCAL_GOVERNMENT_UNIT = "LocalGovernmentUnit"
-    LOCAL_GOVERNMENT_SUB_UNIT = "LocalGovernmentSubUnit"
-    VAT_GROUP_UNIT = "VatGroupUnit"
-    VAT_GROUP_SUB_UNIT = "VatGroupSubUnit"
+class SubunitIdentifierTypeEnum(StrEnum):
+    NIP = "nip"
+    INTERNAL_ID = "internal_id"
 
 
-class PermissionState(StrEnum):
-    ACTIVE = "Active"
-    INACTIVE = "Inactive"
+class EuEntityPermissionTypeEnum(StrEnum):
+    INVOICE_READ = "invoice_read"
+    INVOICE_WRITE = "invoice_write"
+
+
+class EuEntityAdminContextIdentifierTypeEnum(StrEnum):
+    NIP_VAT_UE = "nip_vat_ue"
+
+
+class EntityRoleTypeEnum(StrEnum):
+    COURT_BAILIFF = "court_bailiff"
+    ENFORCEMENT_AUTHORITY = "enforcement_authority"
+    LOCAL_GOVERNMENT_UNIT = "local_government_unit"
+    LOCAL_GOVERNMENT_SUB_UNIT = "local_government_sub_unit"
+    VAT_GROUP_UNIT = "vat_group_unit"
+    VAT_GROUP_SUB_UNIT = "vat_group_sub_unit"
+
+
+class PermissionStateEnum(StrEnum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+
+class QueryTypeEnum(StrEnum):
+    GRANTED = "granted"
+    RECEIVED = "received"
+
+
+class PersonPermissionsQueryTypeEnum(StrEnum):
+    IN_CONTEXT = "in_context"
+    GRANTED_IN_CONTEXT = "granted_in_context"
+
+
+class SubordinateEntityRoleTypeEnum(StrEnum):
+    LOCAL_GOVERNMENT_SUB_UNIT = "local_government_sub_unit"
+    VAT_GROUP_SUB_UNIT = "vat_group_sub_unit"
+
+
+class EuEntityQueryPermissionTypeEnum(StrEnum):
+    VAT_UE_MANAGE = "vat_ue_manage"
+    INVOICE_WRITE = "invoice_write"
+    INVOICE_READ = "invoice_read"
+    INTROSPECTION = "introspection"
+
+
+class ScopeLiteralEnum(StrEnum):
+    INVOICE_READ = "invoice_read"
+    INVOICE_WRITE = "invoice_write"
+
+
+# ---------------------------------------------------------------------------
+# Grant models
+# ---------------------------------------------------------------------------
 
 
 class EntityPermission(KSeFBaseModel):
+    """Entity permission scope together with delegation capability."""
+
     type: EntityPermissionType
     can_delegate: bool = False
 
 
 class GrantPermissionsResponse(KSeFBaseModel):
+    """Reference returned after starting a permission grant or revoke operation."""
+
     reference_number: str
 
 
-class OperationStatusCode(StrEnum):
-    ACCEPTED = "100"
-    SUCCESS = "200"
-    FAILED = "400"
-    IDENTIFIERS_MISMATCH = "410"
-    CREDENTIALS_NO_PERMISSION = "420"
-    CONTEXT_MISMATCH = "430"
-    FORBIDDEN_RELATION = "440"
-    FORBIDDEN_IDENTIFIER = "450"
-    UNKNOWN_ERROR = "500"
-    CANCELLED = "550"
+class GrantPersonPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions directly to a person."""
+
+    subject_type: CertificateSubjectIdentifierType
+    subject_value: str
+    permissions: list[PersonPermissionScope]
+    description: str
+    first_name: str
+    last_name: str
+
+
+class GrantEntityPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions to an entity."""
+
+    subject_value: str
+    permissions: list[EntityPermission]
+    description: str
+    entity_name: str
+
+
+class GrantAuthorizationPermissionsRequest(KSeFBaseModel):
+    """Payload for granting invoice authorization rights to an entity."""
+
+    subject_type: AuthorizationSubjectIdentifierType
+    subject_value: str
+    permission: AuthorizationPermissionType
+    description: str
+    entity_name: str
+
+
+class GrantIndirectPermissionsRequest(KSeFBaseModel):
+    """Payload for granting indirect permissions, optionally scoped to a target."""
+
+    subject_type: CertificateSubjectIdentifierType
+    subject_value: str
+    permissions: list[IndirectPermissionType]
+    description: str
+    first_name: str
+    last_name: str
+    target_type: IndirectTargetIdentifierType | None = None
+    target_value: str | None = None
+
+
+class GrantSubunitPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions in a subunit context."""
+
+    subject_type: CertificateSubjectIdentifierType
+    subject_value: str
+    context_type: SubunitIdentifierType
+    context_value: str
+    description: str
+    first_name: str
+    last_name: str
+    subunit_name: str | None = None
+
+
+class GrantEuEntityPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions to an EU entity."""
+
+    subject_value: str
+    permissions: list[EuEntityPermissionType]
+    description: str
+
+
+class GrantEuEntityAdministrationRequest(KSeFBaseModel):
+    """Payload for granting EU-entity administration rights in a VAT UE context."""
+
+    subject_value: str
+    context_type: EuEntityAdminContextIdentifierType
+    context_value: str
+    description: str
+    eu_entity_name: str
+
+
+# ---------------------------------------------------------------------------
+# Status models
+# ---------------------------------------------------------------------------
 
 
 class OperationStatus(KSeFBaseModel):
+    """Operation status code and description returned by asynchronous permission APIs."""
+
     code: OperationStatusCode
     description: str
 
 
 class PermissionOperationStatusResponse(KSeFBaseModel):
+    """Status wrapper for a permission grant or revoke operation."""
+
     status: OperationStatus
 
 
 class AttachmentPermissionStatus(KSeFBaseModel):
+    """Current attachment availability for the authenticated subject."""
+
     is_attachment_allowed: bool
     revoked_date: datetime | None = None
 
 
+# ---------------------------------------------------------------------------
+# Entity roles
+# ---------------------------------------------------------------------------
+
+
 class EntityRole(KSeFBaseModel):
+    """Role assigned to the authenticated entity, optionally within a parent entity."""
+
     role: EntityRoleType
     description: str
     start_date: datetime
-    parent_entity_identifier_type: str | None = None
-    parent_entity_identifier_value: str | None = None
+    parent_entity_id_type: EntityIdentifierType | None = None
+    parent_entity_id_value: str | None = None
 
 
 class EntityRolesResponse(KSeFBaseModel):
+    """One page of entity roles."""
+
     roles: list[EntityRole]
     has_more: bool
 
 
-class PermissionsQueryType(StrEnum):
-    PERMISSIONS_IN_CURRENT_CONTEXT = "PermissionsInCurrentContext"
-    PERMISSIONS_GRANTED_IN_CURRENT_CONTEXT = "PermissionsGrantedInCurrentContext"
+# ---------------------------------------------------------------------------
+# Query: entities
+# ---------------------------------------------------------------------------
 
 
-class PersonPermissionsBase(KSeFBaseModel):
-    """Shared identifier/filter fields for person permissions."""
+class EntityPermissionsQuery(KSeFBaseModel):
+    """Filters for querying entity permission grants in the current context."""
 
-    author_identifier: Identifier | None = None
-    authorized_identifier: Identifier | None = None
-    context_identifier: Identifier | None = None
-    target_identifier: Identifier | None = None
-    permission_state: PermissionState | None = None
+    context_type: EntityPermissionsContextIdentifierType | None = None
+    context_value: str | None = None
 
 
-class PersonPermissionsQueryRequest(PersonPermissionsBase):
-    """Query request — adds filter and query type fields."""
-
-    permission_types: list[PermissionType] | None = None
-    query_type: PermissionsQueryType
-
-
-class SubjectPersonDetails(KSeFBaseModel):
-    first_name: str
-    last_name: str
-
-
-class SubjectEntityDetails(KSeFBaseModel):
-    full_name: str
-
-
-class PersonPermissionDetail(PersonPermissionsBase):
-    """Single permission result — adds result-specific fields."""
+class EntityPermissionDetail(KSeFBaseModel):
+    """Permission record returned from entity permission queries."""
 
     id: Annotated[str, Field(max_length=36, min_length=36)]
-    permission_type: PermissionType
+    context_type: EntityPermissionsContextIdentifierType
+    context_value: str
+    permission_type: EntityPermissionType
     description: str
     start_date: datetime
     can_delegate: bool
-    subject_person_details: SubjectPersonDetails | None = None
-    subject_entity_details: SubjectEntityDetails | None = None
+
+
+class EntityPermissionsQueryResponse(KSeFBaseModel):
+    """One page of entity permission query results."""
+
+    permissions: list[EntityPermissionDetail]
+    has_more: bool
+
+
+# ---------------------------------------------------------------------------
+# Query: persons
+# ---------------------------------------------------------------------------
+
+
+class PersonPermissionsQuery(KSeFBaseModel):
+    """Filters for querying person-related permission grants."""
+
+    query_type: PersonPermissionsQueryType
+    permission_types: list[PersonPermissionScope] | None = None
+    permission_state: PermissionState | None = None
+    author_type: PersonAuthorIdentifierType | None = None
+    author_value: str | None = None
+    authorized_type: PersonPermissionsAuthorizedIdentifierType | None = None
+    authorized_value: str | None = None
+    context_type: PersonPermissionsContextIdentifierType | None = None
+    context_value: str | None = None
+    target_type: PersonPermissionsTargetIdentifierType | None = None
+    target_value: str | None = None
+
+
+class PersonPermissionDetail(KSeFBaseModel):
+    """Permission record returned from person permission queries."""
+
+    id: Annotated[str, Field(max_length=36, min_length=36)]
+    author_type: PersonAuthorIdentifierType | None = None
+    author_value: str | None = None
+    authorized_type: PersonPermissionsAuthorizedIdentifierType | None = None
+    authorized_value: str | None = None
+    context_type: PersonPermissionsContextIdentifierType | None = None
+    context_value: str | None = None
+    target_type: PersonPermissionsTargetIdentifierType | None = None
+    target_value: str | None = None
+    permission_state: PermissionState
+    permission_type: PersonPermissionScope
+    description: str
+    start_date: datetime
+    can_delegate: bool
+    person_first_name: str | None = None
+    person_last_name: str | None = None
+    entity_first_name: str | None = None
+    entity_last_name: str | None = None
 
 
 class PersonPermissionsQueryResponse(KSeFBaseModel):
-    """Paginated query response."""
+    """One page of person permission query results."""
 
     permissions: list[PersonPermissionDetail]
     has_more: bool
 
 
 # ---------------------------------------------------------------------------
-# Query type enum (shared by authorizations, eu_entities, personal, subunits)
+# Query: authorizations
 # ---------------------------------------------------------------------------
 
 
-class QueryType(StrEnum):
-    GRANTED = "Granted"
-    RECEIVED = "Received"
+class AuthorizationPermissionsQuery(KSeFBaseModel):
+    """Filters for querying authorization grants between entities."""
 
-
-class SubordinateEntityRoleType(StrEnum):
-    LOCAL_GOVERNMENT_SUB_UNIT = "LocalGovernmentSubUnit"
-    VAT_GROUP_SUB_UNIT = "VatGroupSubUnit"
-
-
-class EuEntityQueryPermissionType(StrEnum):
-    VAT_UE_MANAGE = "VatUeManage"
-    INVOICE_WRITE = "InvoiceWrite"
-    INVOICE_READ = "InvoiceRead"
-    INTROSPECTION = "Introspection"
-
-
-# ---------------------------------------------------------------------------
-# 1. query_authorizations
-# ---------------------------------------------------------------------------
-
-
-class AuthorizationPermissionsQueryRequest(KSeFBaseModel):
-    authorizing_identifier: Identifier | None = None
-    authorized_identifier: Identifier | None = None
     query_type: QueryType
     permission_types: list[AuthorizationPermissionType] | None = None
+    authorizing_type: EntityIdentifierType | None = None
+    authorizing_value: str | None = None
+    authorized_type: AuthorizationSubjectIdentifierType | None = None
+    authorized_value: str | None = None
 
 
 class AuthorizationGrantDetail(KSeFBaseModel):
+    """Authorization grant returned from authorization queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
-    author_identifier: Identifier | None = None
-    authorized_entity_identifier: Identifier
-    authorizing_entity_identifier: Identifier
+    author_type: CertificateSubjectIdentifierType | None = None
+    author_value: str | None = None
+    authorized_entity_type: AuthorizationSubjectIdentifierType
+    authorized_entity_value: str
+    authorizing_entity_type: EntityIdentifierType
+    authorizing_entity_value: str
     authorization_scope: AuthorizationPermissionType
     description: str
-    subject_entity_details: SubjectEntityDetails | None = None
+    entity_full_name: str | None = None
     start_date: datetime
 
 
 class AuthorizationPermissionsQueryResponse(KSeFBaseModel):
+    """One page of authorization grant query results."""
+
     authorization_grants: list[AuthorizationGrantDetail]
     has_more: bool
 
 
 # ---------------------------------------------------------------------------
-# 2. query_personal
+# Query: personal
 # ---------------------------------------------------------------------------
 
 
-class PersonalPermissionsQueryRequest(KSeFBaseModel):
-    context_identifier: Identifier | None = None
-    target_identifier: Identifier | None = None
-    permission_types: list[PermissionType] | None = None
+class PersonalPermissionsQuery(KSeFBaseModel):
+    """Filters for querying permissions held by the authenticated subject."""
+
+    permission_types: list[PersonalPermissionScope] | None = None
     permission_state: PermissionState | None = None
+    context_type: PersonalPermissionsContextIdentifierType | None = None
+    context_value: str | None = None
+    target_type: PersonalPermissionsTargetIdentifierType | None = None
+    target_value: str | None = None
 
 
 class PersonalPermissionDetail(KSeFBaseModel):
+    """Permission record returned from personal permission queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
-    context_identifier: Identifier | None = None
-    authorized_identifier: Identifier | None = None
-    target_identifier: Identifier | None = None
-    permission_type: PermissionType
+    context_type: PersonalPermissionsContextIdentifierType | None = None
+    context_value: str | None = None
+    authorized_type: PersonalPermissionsAuthorizedIdentifierType | None = None
+    authorized_value: str | None = None
+    target_type: PersonalPermissionsTargetIdentifierType | None = None
+    target_value: str | None = None
+    permission_type: PersonalPermissionScope
     description: str
-    subject_person_details: SubjectPersonDetails | None = None
-    subject_entity_details: SubjectEntityDetails | None = None
+    subject_first_name: str | None = None
+    subject_last_name: str | None = None
+    entity_first_name: str | None = None
+    entity_address: str | None = None
     permission_state: PermissionState
     start_date: datetime
     can_delegate: bool
 
 
 class PersonalPermissionsQueryResponse(KSeFBaseModel):
+    """One page of personal permission query results."""
+
     permissions: list[PersonalPermissionDetail]
     has_more: bool
 
 
 # ---------------------------------------------------------------------------
-# 3. query_eu_entities
+# Query: EU entities
 # ---------------------------------------------------------------------------
 
 
-class EuEntityDetails(KSeFBaseModel):
-    full_name: str
-    address: str | None = None
+class EuEntityPermissionsQuery(KSeFBaseModel):
+    """Filters for querying EU-entity permissions."""
 
-
-class EuEntityPermissionsQueryRequest(KSeFBaseModel):
     vat_ue_identifier: str | None = None
     authorized_fingerprint_identifier: str | None = None
     permission_types: list[EuEntityQueryPermissionType] | None = None
 
 
-class EuEntityPermissionDetail(KSeFBaseModel):
+class EuEntityPermission(KSeFBaseModel):
+    """Permission record returned from EU-entity permission queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
-    author_identifier: Identifier
+    author_type: CertificateSubjectIdentifierType
+    author_value: str
     vat_ue_identifier: str
     eu_entity_name: str
     authorized_fingerprint_identifier: str
     permission_type: EuEntityQueryPermissionType
     description: str
-    subject_person_details: SubjectPersonDetails | None = None
-    subject_entity_details: SubjectEntityDetails | None = None
-    eu_entity_details: EuEntityDetails | None = None
+    subject_first_name: str | None = None
+    subject_last_name: str | None = None
+    entity_full_name: str | None = None
+    entity_address: str | None = None
     start_date: datetime
 
 
 class EuEntityPermissionsQueryResponse(KSeFBaseModel):
-    permissions: list[EuEntityPermissionDetail]
+    """One page of EU-entity permission query results."""
+
+    permissions: list[EuEntityPermission]
     has_more: bool
 
 
 # ---------------------------------------------------------------------------
-# 4. query_subordinate_entities
+# Query: subordinate entities
 # ---------------------------------------------------------------------------
 
 
-class SubordinateEntityRolesQueryRequest(KSeFBaseModel):
-    subordinate_entity_identifier: Identifier | None = None
+class SubordinateEntityRolesQuery(KSeFBaseModel):
+    """Filters for querying subordinate entity roles."""
+
+    subordinate_nip: str | None = None
 
 
 class SubordinateEntityRoleDetail(KSeFBaseModel):
-    subordinate_entity_identifier: Identifier
+    """Role record returned from subordinate-entity role queries."""
+
+    subordinate_entity_type: EntityIdentifierType
+    subordinate_entity_value: str
     role: SubordinateEntityRoleType
     description: str
     start_date: datetime
 
 
 class SubordinateEntityRolesQueryResponse(KSeFBaseModel):
+    """One page of subordinate entity role query results."""
+
     roles: list[SubordinateEntityRoleDetail]
     has_more: bool
 
 
 # ---------------------------------------------------------------------------
-# 5. query_subunits
+# Query: subunits
 # ---------------------------------------------------------------------------
 
 
-class SubunitPermissionsQueryRequest(KSeFBaseModel):
-    subunit_identifier: Identifier | None = None
+class SubunitPermissionsQuery(KSeFBaseModel):
+    """Filters for querying permissions assigned to subunits."""
+
+    subunit_nip: str | None = None
 
 
-class SubunitPermissionDetail(KSeFBaseModel):
+class SubunitPermission(KSeFBaseModel):
+    """Permission record returned from subunit permission queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
-    authorized_identifier: Identifier
-    subunit_identifier: Identifier
-    author_identifier: Identifier
-    permission_type: PermissionType
+    authorized_type: CertificateSubjectIdentifierType
+    authorized_value: str
+    subunit_type: SubunitIdentifierType
+    subunit_value: str
+    author_type: CertificateSubjectIdentifierType
+    author_value: str
+    permission_type: PersonPermissionScope
     description: str
-    subject_person_details: SubjectPersonDetails | None = None
+    subject_first_name: str | None = None
+    subject_last_name: str | None = None
+    entity_first_name: str | None = None
+    entity_last_name: str | None = None
     subunit_name: str | None = None
     start_date: datetime
 
 
 class SubunitPermissionsQueryResponse(KSeFBaseModel):
-    permissions: list[SubunitPermissionDetail]
+    """One page of subunit permission query results."""
+
+    permissions: list[SubunitPermission]
+    has_more: bool
+
+
+class ItemsListResponse[ItemT: BaseModel](KSeFBaseModel):
+    items: list[ItemT]
     has_more: bool

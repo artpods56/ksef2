@@ -589,8 +589,19 @@ class CurrencyCode(StrEnum):
     ZWL = "ZWL"
 
 
-class EffectiveApiRateLimitValues(ApiRateLimitValuesOverride):
-    pass
+class EffectiveApiRateLimitValues(BaseModel):
+    perSecond: int
+    """
+    Limit na sekundę.
+    """
+    perMinute: int
+    """
+    Limit na minutę.
+    """
+    perHour: int
+    """
+    Limit na godzinę.
+    """
 
 
 class EffectiveApiRateLimits(BaseModel):
@@ -677,6 +688,17 @@ class EntityAuthorizationPermissionsSubjectIdentifierType(StrEnum):
     PeppolId = "PeppolId"
 
 
+class EntityAuthorizationsAuthorIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
+
+
+class EntityAuthorizationsAuthorizedEntityIdentifierType(StrEnum):
+    Nip = "Nip"
+    PeppolId = "PeppolId"
+
+
 class EntityAuthorizationsAuthorizingEntityIdentifierType(StrEnum):
     Nip = "Nip"
 
@@ -699,9 +721,27 @@ class EntityDetails(BaseModel):
     """
 
 
+class EntityPermissionItemScope(StrEnum):
+    InvoiceWrite = "InvoiceWrite"
+    InvoiceRead = "InvoiceRead"
+
+
 class EntityPermissionType(StrEnum):
     InvoiceWrite = "InvoiceWrite"
     InvoiceRead = "InvoiceRead"
+
+
+class EntityPermissionsContextIdentifierType(StrEnum):
+    Nip = "Nip"
+    InternalId = "InternalId"
+
+
+class EntityPermissionsSubjectIdentifierType(StrEnum):
+    Nip = "Nip"
+
+
+class EntityPermissionsSubordinateEntityIdentifierType(StrEnum):
+    Nip = "Nip"
 
 
 class EntityRoleType(StrEnum):
@@ -711,6 +751,10 @@ class EntityRoleType(StrEnum):
     LocalGovernmentSubUnit = "LocalGovernmentSubUnit"
     VatGroupUnit = "VatGroupUnit"
     VatGroupSubUnit = "VatGroupSubUnit"
+
+
+class EntityRolesParentEntityIdentifierType(StrEnum):
+    Nip = "Nip"
 
 
 class EntitySubjectByFingerprintDetailsType(StrEnum):
@@ -756,8 +800,15 @@ class EuEntityAdministrationPermissionsSubjectIdentifierType(StrEnum):
     Fingerprint = "Fingerprint"
 
 
-class EuEntityDetails(EntityByFingerprintDetails):
-    pass
+class EuEntityDetails(BaseModel):
+    fullName: Annotated[str, Field(max_length=100)]
+    """
+    Pełna nazwa podmiotu.
+    """
+    address: Annotated[str, Field(max_length=512)]
+    """
+    Adres podmiotu.
+    """
 
 
 class EuEntityPermissionSubjectDetailsType(StrEnum):
@@ -773,6 +824,17 @@ class EuEntityPermissionSubjectDetailsType(StrEnum):
     PersonByFingerprintWithIdentifier = "PersonByFingerprintWithIdentifier"
     PersonByFingerprintWithoutIdentifier = "PersonByFingerprintWithoutIdentifier"
     EntityByFingerprint = "EntityByFingerprint"
+
+
+class EuEntityPermissionType(StrEnum):
+    InvoiceWrite = "InvoiceWrite"
+    InvoiceRead = "InvoiceRead"
+
+
+class EuEntityPermissionsAuthorIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
 
 
 class EuEntityPermissionsQueryPermissionType(StrEnum):
@@ -802,10 +864,59 @@ class EuEntityPermissionsQueryRequest(BaseModel):
     """
 
 
+class EuEntityPermissionsSubjectIdentifierType(StrEnum):
+    Fingerprint = "Fingerprint"
+
+
 class ExceptionDetails(BaseModel):
     exceptionCode: int | None = None
     exceptionDescription: str | None = None
     details: list[str] | None = None
+
+
+class ForbiddenProblemDetails(BaseModel):
+    title: str
+    """
+    Forbidden
+    """
+    status: int
+    """
+    403
+    """
+    detail: str
+    """
+    Szczegółowy opis przyczyny odmowy dostępu.
+    """
+    instance: str | None = None
+    """
+    URI identyfikujące konkretne wystąpienie błędu.
+    """
+    reasonCode: str
+    """
+     Kod przyczyny odmowy dostępu.
+    | Code | Opis |
+    |------|-------------|
+    | missing-permissions | Brak wymaganych uprawnień do wykonania operacji w bieżącym kontekście. |
+    | ip-not-allowed | Żądanie pochodzi z adresu IP innego niż wskazany podczas uwierzytelnienia. |
+    | insufficient-resource-access | Brak dostępu do wskazanego zasobu. |
+    | auth-method-not-allowed | Ta operacja nie jest dostępna dla użytej metody uwierzytelnienia. |
+    | security-service-blocked | Żądanie zostało zablokowane przez mechanizmy bezpieczeństwa. |
+    """
+    security: dict[str, Any] | None = None
+    """
+    Dodatkowe dane zależne od `reasonCode`.
+    | Code  | Security |
+    |------| ------------ |
+    | missing-permissions | requiredAnyOfPermissions: string[], presentPermissions: string[] |
+    | ip-not-allowed | clientIp: string |
+    | insufficient-resource-access  ||
+    | auth-method-not-allowed | authenticationMethodCategory: string  |
+    | security-service-blocked | incidentId: string, clientIp: string  |
+    """
+    traceId: str | None = None
+    """
+    Identyfikator śledzenia błędu.
+    """
 
 
 class FormCode(BaseModel):
@@ -845,6 +956,12 @@ class IdDocument(BaseModel):
 class IndirectPermissionType(StrEnum):
     InvoiceRead = "InvoiceRead"
     InvoiceWrite = "InvoiceWrite"
+
+
+class IndirectPermissionsSubjectIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
 
 
 class IndirectPermissionsTargetIdentifierType(StrEnum):
@@ -1034,18 +1151,6 @@ class KsefCertificateType(StrEnum):
     Offline = "Offline"
 
 
-class Nip(RootModel[str]):
-    root: Annotated[
-        str,
-        Field(
-            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
-        ),
-    ]
-    """
-    10 cyfrowy numer NIP.
-    """
-
-
 class NipVatUe(RootModel[str]):
     root: Annotated[
         str,
@@ -1058,12 +1163,34 @@ class NipVatUe(RootModel[str]):
     """
 
 
-class OnlineSessionContextLimitsOverride(BatchSessionContextLimitsOverride):
-    pass
+class OnlineSessionContextLimitsOverride(BaseModel):
+    maxInvoiceSizeInMB: Annotated[int, Field(ge=0, le=5)]
+    """
+    Maksymalny rozmiar faktury w MB.
+    """
+    maxInvoiceWithAttachmentSizeInMB: Annotated[int, Field(ge=0, le=10)]
+    """
+    Maksymalny rozmiar faktury z załącznikiem w MB.
+    """
+    maxInvoices: Annotated[int, Field(ge=0, le=100000)]
+    """
+    Maksymalna ilość faktur które można przesłać w pojedynczej sesji.
+    """
 
 
-class OnlineSessionEffectiveContextLimits(BatchSessionEffectiveContextLimits):
-    pass
+class OnlineSessionEffectiveContextLimits(BaseModel):
+    maxInvoiceSizeInMB: Annotated[int, Field(ge=0)]
+    """
+    Maksymalny rozmiar faktury w MB.
+    """
+    maxInvoiceWithAttachmentSizeInMB: Annotated[int, Field(ge=0)]
+    """
+    Maksymalny rozmiar faktury z załącznikiem w MB.
+    """
+    maxInvoices: Annotated[int, Field(ge=0)]
+    """
+    Maksymalna ilość faktur które można przesłać w pojedynczej sesji.
+    """
 
 
 class OpenOnlineSessionRequest(BaseModel):
@@ -1072,13 +1199,14 @@ class OpenOnlineSessionRequest(BaseModel):
     Schemat faktur wysyłanych w ramach sesji.
 
     Obsługiwane schematy:
-    | SystemCode | SchemaVersion | Value |
-    | --- | --- | --- |
-    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |
-    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |
-    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |
-    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |
-    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |
+    | SystemCode | SchemaVersion | Value | ValidFrom | ValidTo |
+    | --- | --- | --- | --- | --- |
+    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |  | 23.03.2026 |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-1E.xsd) | 1-1E | RR |  |  |
 
     """
     encryption: EncryptionInfo
@@ -1255,11 +1383,27 @@ class PersonPermissionSubjectDetailsType(StrEnum):
     PersonByFingerprintWithoutIdentifier = "PersonByFingerprintWithoutIdentifier"
 
 
+class PersonPermissionType(StrEnum):
+    CredentialsManage = "CredentialsManage"
+    CredentialsRead = "CredentialsRead"
+    InvoiceWrite = "InvoiceWrite"
+    InvoiceRead = "InvoiceRead"
+    Introspection = "Introspection"
+    SubunitManage = "SubunitManage"
+    EnforcementOperations = "EnforcementOperations"
+
+
 class PersonPermissionsAuthorIdentifierType(StrEnum):
     Nip = "Nip"
     Pesel = "Pesel"
     Fingerprint = "Fingerprint"
     System = "System"
+
+
+class PersonPermissionsAuthorizedIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
 
 
 class PersonPermissionsContextIdentifierType(StrEnum):
@@ -1270,6 +1414,18 @@ class PersonPermissionsContextIdentifierType(StrEnum):
 class PersonPermissionsQueryType(StrEnum):
     PermissionsInCurrentContext = "PermissionsInCurrentContext"
     PermissionsGrantedInCurrentContext = "PermissionsGrantedInCurrentContext"
+
+
+class PersonPermissionsSubjectIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
+
+
+class PersonPermissionsTargetIdentifierType(StrEnum):
+    Nip = "Nip"
+    AllPartners = "AllPartners"
+    InternalId = "InternalId"
 
 
 class PersonRemoveRequest(BaseModel):
@@ -1297,6 +1453,21 @@ class PersonSubjectByFingerprintDetailsType(StrEnum):
     PersonByFingerprintWithoutIdentifier = "PersonByFingerprintWithoutIdentifier"
 
 
+class PersonSubjectDetailsType(StrEnum):
+    """
+    | Wartość | Opis |
+    | --- | --- |
+    | PersonByIdentifier | Osoba fizyczna posługująca się Profilem Zaufanym lub certyfikatem zawierającym identyfikator NIP lub PESEL. |
+    | PersonByFingerprintWithIdentifier | Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL, ale mająca NIP lub PESEL. |
+    | PersonByFingerprintWithoutIdentifier | Osoba fizyczna posługująca się certyfikatem niezawierającym identyfikatora NIP ani PESEL i niemająca NIP ani PESEL. |
+
+    """
+
+    PersonByIdentifier = "PersonByIdentifier"
+    PersonByFingerprintWithIdentifier = "PersonByFingerprintWithIdentifier"
+    PersonByFingerprintWithoutIdentifier = "PersonByFingerprintWithoutIdentifier"
+
+
 class PersonalPermissionScope(StrEnum):
     CredentialsManage = "CredentialsManage"
     CredentialsRead = "CredentialsRead"
@@ -1306,6 +1477,34 @@ class PersonalPermissionScope(StrEnum):
     SubunitManage = "SubunitManage"
     EnforcementOperations = "EnforcementOperations"
     VatUeManage = "VatUeManage"
+
+
+class PersonalPermissionType(StrEnum):
+    CredentialsManage = "CredentialsManage"
+    CredentialsRead = "CredentialsRead"
+    InvoiceWrite = "InvoiceWrite"
+    InvoiceRead = "InvoiceRead"
+    Introspection = "Introspection"
+    SubunitManage = "SubunitManage"
+    EnforcementOperations = "EnforcementOperations"
+    VatUeManage = "VatUeManage"
+
+
+class PersonalPermissionsAuthorizedIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
+
+
+class PersonalPermissionsContextIdentifierType(StrEnum):
+    Nip = "Nip"
+    InternalId = "InternalId"
+
+
+class PersonalPermissionsTargetIdentifierType(StrEnum):
+    Nip = "Nip"
+    AllPartners = "AllPartners"
+    InternalId = "InternalId"
 
 
 class PublicKeyCertificateUsage(StrEnum):
@@ -1370,13 +1569,6 @@ class QueryPeppolProvidersResponse(BaseModel):
 class QueryType(StrEnum):
     Granted = "Granted"
     Received = "Received"
-
-
-class ReferenceNumber(RootModel[str]):
-    root: Annotated[str, Field(max_length=36, min_length=36)]
-    """
-    Numer referencyjny.
-    """
 
 
 class RetrieveCertificatesListItem(BaseModel):
@@ -1503,6 +1695,12 @@ class StatusInfo(BaseModel):
     """
 
 
+class SubjectIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
+
+
 class SubjectRemoveRequest(BaseModel):
     subjectNip: Annotated[
         str,
@@ -1526,6 +1724,10 @@ class SubordinateEntityRoleType(StrEnum):
     VatGroupSubUnit = "VatGroupSubUnit"
 
 
+class SubordinateRoleSubordinateEntityIdentifierType(StrEnum):
+    Nip = "Nip"
+
+
 class Subunit(BaseModel):
     subjectNip: Annotated[
         str,
@@ -1543,8 +1745,42 @@ class SubunitPermissionScope(StrEnum):
     CredentialsManage = "CredentialsManage"
 
 
+class SubunitPermissionsAuthorIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
+
+
 class SubunitPermissionsContextIdentifierType(StrEnum):
     InternalId = "InternalId"
+    Nip = "Nip"
+
+
+class SubunitPermissionsSubjectIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
+
+
+class SubunitPermissionsSubunitIdentifierType(StrEnum):
+    InternalId = "InternalId"
+    Nip = "Nip"
+
+
+class TestDataAuthenticationContextIdentifierType(StrEnum):
+    Nip = "Nip"
+    InternalId = "InternalId"
+    NipVatUe = "NipVatUe"
+    PeppolId = "PeppolId"
+
+
+class TestDataAuthorizedIdentifierType(StrEnum):
+    Nip = "Nip"
+    Pesel = "Pesel"
+    Fingerprint = "Fingerprint"
+
+
+class TestDataContextIdentifierType(StrEnum):
     Nip = "Nip"
 
 
@@ -1738,6 +1974,29 @@ class TooManyRequestsResponse(BaseModel):
     """
 
 
+class UnauthorizedProblemDetails(BaseModel):
+    title: str
+    """
+    Unauthorized
+    """
+    status: int
+    """
+    401
+    """
+    detail: str
+    """
+    Szczegółowy opis przyczyny odmowy dostępu.
+    """
+    instance: str | None = None
+    """
+    URI identyfikujące konkretne wystąpienie błędu.
+    """
+    traceId: str | None = None
+    """
+    Identyfikator śledzenia błędu.
+    """
+
+
 class UpoPageResponse(BaseModel):
     referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -1745,8 +2004,8 @@ class UpoPageResponse(BaseModel):
     """
     downloadUrl: AnyUrl
     """
-    Adres do pobrania strony UPO. Link generowany jest przy każdym odpytaniu o status. 
-    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego. 
+    Adres do pobrania strony UPO. Link generowany jest przy każdym odpytaniu o status.
+    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego.
     Link nie podlega limitom API i wygasa po określonym czasie w `DownloadUrlExpirationDate`.
 
     Odpowiedź HTTP zawiera dodatkowe nagłówki:
@@ -1765,8 +2024,16 @@ class UpoResponse(BaseModel):
     """
 
 
-class AttachmentPermissionGrantRequest(PersonRemoveRequest):
-    pass
+class AttachmentPermissionGrantRequest(BaseModel):
+    nip: Annotated[
+        str,
+        Field(
+            max_length=10, min_length=10, pattern="^[1-9]((\\d[1-9])|([1-9]\\d))\\d{7}$"
+        ),
+    ]
+    """
+    10 cyfrowy numer NIP.
+    """
 
 
 class AttachmentPermissionRevokeRequest(BaseModel):
@@ -1797,6 +2064,10 @@ class AuthenticationChallengeResponse(BaseModel):
     timestampMs: int
     """
     Czas wygenerowania challenge-a w milisekundach od 1 stycznia 1970 roku (Unix timestamp).
+    """
+    clientIp: str
+    """
+    Adres IP klienta.
     """
 
 
@@ -2019,7 +2290,7 @@ class CertificateEnrollmentStatusResponse(BaseModel):
     """
     certificateSerialNumber: str | None = None
     """
-    Numer seryjny wygenerowanego certyfikatu (w formacie szesnastkowym). 
+    Numer seryjny wygenerowanego certyfikatu (w formacie szesnastkowym).
     Zwracany w przypadku prawidłowego przeprocesowania wniosku certyfikacyjnego.
     """
 
@@ -2132,7 +2403,7 @@ class EntityAuthorizationsAuthorIdentifier(BaseModel):
     | Fingerprint | Odcisk palca certyfikatu |
     """
 
-    type: CertificateSubjectIdentifierType
+    type: EntityAuthorizationsAuthorIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2151,7 +2422,7 @@ class EntityAuthorizationsAuthorizedEntityIdentifier(BaseModel):
     | PeppolId | Identyfikator dostawcy usług Peppol |
     """
 
-    type: EntityAuthorizationPermissionsSubjectIdentifierType
+    type: EntityAuthorizationsAuthorizedEntityIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2190,6 +2461,36 @@ class EntityPermission(BaseModel):
     """
 
 
+class EntityPermissionsContextIdentifier(BaseModel):
+    """
+    Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
+    """
+
+    type: EntityPermissionsContextIdentifierType
+    """
+    Typ identyfikatora.
+    """
+    value: Annotated[str, Field(max_length=16, min_length=10)]
+    """
+    Wartość identyfikatora.
+    """
+
+
+class EntityPermissionsQueryRequest(BaseModel):
+    contextIdentifier: EntityPermissionsContextIdentifier | None = None
+    """
+    Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
+    """
+
+
 class EntityPermissionsSubjectIdentifier(BaseModel):
     """
     Identyfikator podmiotu.
@@ -2198,7 +2499,7 @@ class EntityPermissionsSubjectIdentifier(BaseModel):
     | Nip | 10 cyfrowy numer NIP |
     """
 
-    type: EntityAuthorizationsAuthorizingEntityIdentifierType
+    type: EntityPermissionsSubjectIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2216,7 +2517,7 @@ class EntityPermissionsSubordinateEntityIdentifier(BaseModel):
     | Nip | 10 cyfrowy numer NIP |
     """
 
-    type: EntityAuthorizationsAuthorizingEntityIdentifierType
+    type: EntityPermissionsSubordinateEntityIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2234,7 +2535,7 @@ class EntityRolesParentEntityIdentifier(BaseModel):
     | Nip | 10 cyfrowy numer NIP |
     """
 
-    type: EntityAuthorizationsAuthorizingEntityIdentifierType
+    type: EntityRolesParentEntityIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2290,7 +2591,7 @@ class EuEntityPermissionsAuthorIdentifier(BaseModel):
     | Fingerprint | Odcisk palca certyfikatu |
     """
 
-    type: CertificateSubjectIdentifierType
+    type: EuEntityPermissionsAuthorIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2308,7 +2609,7 @@ class EuEntityPermissionsSubjectIdentifier(BaseModel):
     | Fingerprint | Odcisk palca certyfikatu |
     """
 
-    type: EuEntityAdministrationPermissionsSubjectIdentifierType
+    type: EuEntityPermissionsSubjectIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2373,7 +2674,7 @@ class IndirectPermissionsSubjectIdentifier(BaseModel):
     | Fingerprint | Odcisk palca certyfikatu |
     """
 
-    type: CertificateSubjectIdentifierType
+    type: IndirectPermissionsSubjectIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2567,8 +2868,8 @@ class InvoiceQueryDateRange(BaseModel):
     """
     Określa, czy system ma ograniczyć filtrowanie (zakres dateRange.to) do wartości `PermanentStorageHwmDate`.
 
-    * Dotyczy wyłącznie zapytań z `dateType = PermanentStorage`,  
-    * Gdy `true`, system ogranicza filtrowanie tak, aby wartość `dateRange.to` nie przekraczała wartości `PermanentStorageHwmDate`,  
+    * Dotyczy wyłącznie zapytań z `dateType = PermanentStorage`,
+    * Gdy `true`, system ogranicza filtrowanie tak, aby wartość `dateRange.to` nie przekraczała wartości `PermanentStorageHwmDate`,
     * Gdy `null` lub `false`, filtrowanie może wykraczać poza `PermanentStorageHwmDate`.
     """
 
@@ -2590,7 +2891,7 @@ class InvoiceQueryFilters(BaseModel):
     """
     Typ i zakres dat, według którego filtrowane są faktury.
     Maksymalny dozwolony okres wynosi 3 miesiące w strefie UTC lub w strefie Europe/Warsaw (WAW).
-                
+
     Format daty:
      * Daty muszą być przekazane w formacie ISO 8601, np. `yyyy-MM-ddTHH:mm:ss`.
      * Dopuszczalne są następujące warianty:
@@ -2702,7 +3003,7 @@ class OpenBatchSessionResponse(BaseModel):
     * dołączyć treść części pliku w korpusie żądania.
 
     `Uwaga: nie należy dodawać do nagłówków token dostępu (accessToken).`
-     
+
     Każdą część przesyła się oddzielnym żądaniem HTTP.Zwracane kody odpowiedzi:
      * <b>201</b> – poprawne przyjęcie pliku,
      * <b>400</b> – błędne dane,
@@ -2820,7 +3121,7 @@ class PersonPermissionsAuthorizedIdentifier(BaseModel):
     | Fingerprint | Odcisk palca certyfikatu |
     """
 
-    type: CertificateSubjectIdentifierType
+    type: PersonPermissionsAuthorizedIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2849,7 +3150,7 @@ class PersonPermissionsContextIdentifier(BaseModel):
     """
 
 
-class PersonPermissionsSubjectIdentifier(IndirectPermissionsSubjectIdentifier):
+class PersonPermissionsSubjectIdentifier(BaseModel):
     """
     Identyfikator osoby fizycznej.
     | Type | Value |
@@ -2857,6 +3158,15 @@ class PersonPermissionsSubjectIdentifier(IndirectPermissionsSubjectIdentifier):
     | Nip | 10 cyfrowy numer NIP |
     | Pesel | 11 cyfrowy numer PESEL |
     | Fingerprint | Odcisk palca certyfikatu |
+    """
+
+    type: PersonPermissionsSubjectIdentifierType
+    """
+    Typ identyfikatora.
+    """
+    value: Annotated[str, Field(max_length=64, min_length=10)]
+    """
+    Wartość identyfikatora.
     """
 
 
@@ -2870,7 +3180,7 @@ class PersonPermissionsTargetIdentifier(BaseModel):
     | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
     """
 
-    type: IndirectPermissionsTargetIdentifierType
+    type: PersonPermissionsTargetIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2888,7 +3198,7 @@ class PersonalPermissionsAuthorizedIdentifier(BaseModel):
     | Nip | 10 cyfrowy numer NIP |
     """
 
-    type: CertificateSubjectIdentifierType
+    type: PersonalPermissionsAuthorizedIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2907,7 +3217,7 @@ class PersonalPermissionsContextIdentifier(BaseModel):
     | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
     """
 
-    type: PersonPermissionsContextIdentifierType
+    type: PersonalPermissionsContextIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2927,7 +3237,7 @@ class PersonalPermissionsTargetIdentifier(BaseModel):
     | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
     """
 
-    type: IndirectPermissionsTargetIdentifierType
+    type: PersonalPermissionsTargetIdentifierType
     """
     Typ identyfikatora.
     """
@@ -2961,8 +3271,51 @@ class PublicKeyCertificate(BaseModel):
     """
 
 
-class QueryTokensResponseItem(TokenStatusResponse):
-    pass
+class QueryTokensResponseItem(BaseModel):
+    referenceNumber: Annotated[str, Field(max_length=36, min_length=36)]
+    """
+    Numer referencyjny tokena KSeF.
+    """
+    authorIdentifier: TokenAuthorIdentifierTypeIdentifier
+    """
+    Identyfikator osoby która wygenerowała token.
+    """
+    contextIdentifier: TokenContextIdentifierTypeIdentifier
+    """
+    Identyfikator kontekstu, w którym został wygenerowany token i do którego daje dostęp.
+    """
+    description: Annotated[str, Field(max_length=256, min_length=5)]
+    """
+    Opis tokena.
+    """
+    requestedPermissions: list[TokenPermissionType]
+    """
+    Uprawnienia przypisane tokenowi.
+    """
+    dateCreated: AwareDatetime
+    """
+    Data i czas utworzenia tokena.
+    """
+    lastUseDate: AwareDatetime | None = None
+    """
+    Data ostatniego użycia tokena.
+    """
+    status: AuthenticationTokenStatus
+    """
+    Status tokena.
+    | Wartość | Opis |
+    | --- | --- |
+    | Pending | Token został utworzony ale jest jeszcze w trakcie aktywacji i nadawania uprawnień. Nie może być jeszcze wykorzystywany do uwierzytelniania. |
+    | Active | Token jest aktywny i może być wykorzystywany do uwierzytelniania. |
+    | Revoking | Token jest w trakcie unieważniania. Nie może już być wykorzystywany do uwierzytelniania. |
+    | Revoked | Token został unieważniony i nie może być wykorzystywany do uwierzytelniania. |
+    | Failed | Nie udało się aktywować tokena. Należy wygenerować nowy token, obecny nie może być wykorzystywany do uwierzytelniania. |
+
+    """
+    statusDetails: list[str] | None = None
+    """
+    Dodatkowe informacje na temat statusu, zwracane w przypadku błędów.
+    """
 
 
 class SendInvoiceRequest(BaseModel):
@@ -3044,8 +3397,8 @@ class SessionInvoiceStatusResponse(BaseModel):
     """
     upoDownloadUrl: AnyUrl | None = None
     """
-    Adres do pobrania UPO. Link generowany jest przy każdym odpytaniu o status. 
-    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego. 
+    Adres do pobrania UPO. Link generowany jest przy każdym odpytaniu o status.
+    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego.
     Link nie podlega limitom API i wygasa po określonym czasie w `UpoDownloadUrlExpirationDate`.
 
     Odpowiedź HTTP zawiera dodatkowe nagłówki:
@@ -3095,7 +3448,7 @@ class SessionStatusResponse(BaseModel):
     status: StatusInfo
     """
     Informacje o aktualnym statusie.
-                
+
     Sesja wsadowa:
     | Code | Description | Details |
     | --- | --- | --- |
@@ -3189,7 +3542,7 @@ class SessionsQueryResponseItem(BaseModel):
 
 
 class SetSubjectLimitsRequest(BaseModel):
-    subjectIdentifierType: CertificateSubjectIdentifierType | None = None
+    subjectIdentifierType: SubjectIdentifierType | None = None
     enrollment: EnrollmentSubjectLimitsOverride | None = None
     certificate: CertificateSubjectLimitsOverride | None = None
 
@@ -3225,9 +3578,7 @@ class SubordinateEntityRolesQueryRequest(BaseModel):
     """
 
 
-class SubordinateRoleSubordinateEntityIdentifier(
-    EntityPermissionsSubordinateEntityIdentifier
-):
+class SubordinateRoleSubordinateEntityIdentifier(BaseModel):
     """
     Identyfikator podmiotu podrzędnego.
     | Type | Value |
@@ -3235,8 +3586,17 @@ class SubordinateRoleSubordinateEntityIdentifier(
     | Nip | 10 cyfrowy numer NIP |
     """
 
+    type: SubordinateRoleSubordinateEntityIdentifierType
+    """
+    Typ identyfikatora.
+    """
+    value: Annotated[str, Field(max_length=10, min_length=10)]
+    """
+    Wartość identyfikatora.
+    """
 
-class SubunitPermissionsAuthorIdentifier(EuEntityPermissionsAuthorIdentifier):
+
+class SubunitPermissionsAuthorIdentifier(BaseModel):
     """
     Identyfikator uprawniającego.
     | Type | Value |
@@ -3244,6 +3604,15 @@ class SubunitPermissionsAuthorIdentifier(EuEntityPermissionsAuthorIdentifier):
     | Nip | 10 cyfrowy numer NIP |
     | Pesel | 11 cyfrowy numer PESEL |
     | Fingerprint | Odcisk palca certyfikatu |
+    """
+
+    type: SubunitPermissionsAuthorIdentifierType
+    """
+    Typ identyfikatora.
+    """
+    value: Annotated[str, Field(max_length=64, min_length=10)]
+    """
+    Wartość identyfikatora.
     """
 
 
@@ -3257,7 +3626,7 @@ class SubunitPermissionsAuthorizedIdentifier(BaseModel):
     | Fingerprint | Odcisk palca certyfikatu |
     """
 
-    type: CertificateSubjectIdentifierType
+    type: SubunitPermissionsSubjectIdentifierType
     """
     Typ identyfikatora.
     """
@@ -3296,7 +3665,7 @@ class SubunitPermissionsSubjectIdentifier(BaseModel):
     | Fingerprint | Odcisk palca certyfikatu |
     """
 
-    type: CertificateSubjectIdentifierType
+    type: SubunitPermissionsSubjectIdentifierType
     """
     Typ identyfikatora.
     """
@@ -3315,7 +3684,7 @@ class SubunitPermissionsSubunitIdentifier(BaseModel):
     | Nip | 10 cyfrowy numer NIP |
     """
 
-    type: SubunitPermissionsContextIdentifierType
+    type: SubunitPermissionsSubunitIdentifierType
     """
     Typ identyfikatora.
     """
@@ -3327,16 +3696,16 @@ class SubunitPermissionsSubunitIdentifier(BaseModel):
 
 class TestDataAuthenticationContextIdentifier(BaseModel):
     value: str
-    type: AuthenticationContextIdentifierType
+    type: TestDataAuthenticationContextIdentifierType
 
 
 class TestDataAuthorizedIdentifier(BaseModel):
-    type: CertificateSubjectIdentifierType
+    type: TestDataAuthorizedIdentifierType
     value: Annotated[str, Field(max_length=64, min_length=10)]
 
 
 class TestDataContextIdentifier(BaseModel):
-    type: EntityAuthorizationsAuthorizingEntityIdentifierType
+    type: TestDataContextIdentifierType
     value: Annotated[str, Field(max_length=10, min_length=10)]
 
 
@@ -3375,8 +3744,8 @@ class BatchFileInfo(BaseModel):
     """
 
 
-class BlockContextAuthenticationRequest(UnblockContextAuthenticationRequest):
-    pass
+class BlockContextAuthenticationRequest(BaseModel):
+    contextIdentifier: TestDataAuthenticationContextIdentifier | None = None
 
 
 class CertificateListItem(BaseModel):
@@ -3534,6 +3903,37 @@ class EntityAuthorizationPermissionsQueryRequest(BaseModel):
     """
 
 
+class EntityPermissionItem(BaseModel):
+    id: Annotated[str, Field(max_length=36, min_length=36)]
+    """
+    Identyfikator uprawnienia.
+    """
+    contextIdentifier: EntityPermissionsContextIdentifier
+    """
+    Identyfikator kontekstu podmiotu, który nadał uprawnienia do obsługi faktur.
+    | Type | Value |
+    | --- | --- |
+    | Nip | 10 cyfrowy numer NIP |
+    | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
+    """
+    permissionScope: EntityPermissionItemScope
+    """
+    Rodzaj uprawnienia.
+    """
+    description: Annotated[str, Field(max_length=256, min_length=5)]
+    """
+    Opis uprawnienia.
+    """
+    startDate: AwareDatetime
+    """
+    Data rozpoczęcia obowiązywania uprawnienia.
+    """
+    canDelegate: bool
+    """
+    Flaga określająca, czy uprawnienie ma być możliwe do dalszego przekazywania.
+    """
+
+
 class EntityPermissionsGrantRequest(BaseModel):
     subjectIdentifier: EntityPermissionsSubjectIdentifier
     """
@@ -3651,10 +4051,10 @@ class InvoicePackage(BaseModel):
     """
     Dotyczy wyłącznie zapytań filtrowanych po typie daty <b>PermanentStorage</b>.
     Jeśli zapytanie dotyczyło najnowszego okresu, wartość ta może być wartością nieznacznie skorygowaną względem górnej granicy podanej w warunkach zapytania.
-    Dla okresów starszych, będzie to zgodne z warunkami zapytania. 
+    Dla okresów starszych, będzie to zgodne z warunkami zapytania.
 
     System gwarantuje, że dane poniżej tej wartości są spójne i kompletne.
-    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur). 
+    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur).
 
     Dla dateType = Issue lub Invoicing – null.
     """
@@ -3666,11 +4066,12 @@ class OpenBatchSessionRequest(BaseModel):
     Schemat faktur wysyłanych w ramach sesji.
 
     Obsługiwane schematy:
-    | SystemCode | SchemaVersion | Value |
-    | --- | --- | --- |
-    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |
-    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |
-    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |
+    | SystemCode | SchemaVersion | Value | ValidFrom | ValidTo |
+    | --- | --- | --- | --- | --- |
+    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |  | 23.03.2026 |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-1E.xsd) | 1-1E | RR |  |  |
 
     """
     batchFile: BatchFileInfo
@@ -3720,7 +4121,7 @@ class PermissionsSubjectPersonByFingerprintDetails(BaseModel):
 
 
 class PermissionsSubjectPersonDetails(BaseModel):
-    subjectDetailsType: PersonPermissionSubjectDetailsType
+    subjectDetailsType: PersonSubjectDetailsType
     """
     Typ danych uprawnionej osoby fizycznej.
     | Wartość | Opis |
@@ -3876,7 +4277,7 @@ class PersonPermissionsGrantRequest(BaseModel):
     | Pesel | 11 cyfrowy numer PESEL |
     | Fingerprint | Odcisk palca certyfikatu |
     """
-    permissions: list[PersonPermissionScope]
+    permissions: list[PersonPermissionType]
     """
     Lista nadawanych uprawnień. Każda wartość może wystąpić tylko raz.
     """
@@ -3927,13 +4328,13 @@ class PersonPermissionsQueryRequest(BaseModel):
     | AllPartners | Identyfikator oznaczający, że uprawnienie nadane w sposób pośredni jest typu generalnego |
     | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
     """
-    permissionTypes: list[PersonPermissionScope] | None = None
+    permissionTypes: list[PersonPermissionType] | None = None
     """
     Lista rodzajów wyszukiwanych uprawnień.
     """
     permissionState: PermissionState | None = None
     """
-    Stan uprawnienia. 
+    Stan uprawnienia.
     | Type | Value |
     | --- | --- |
     | Active | Uprawnienia aktywne |
@@ -4026,13 +4427,13 @@ class PersonalPermissionsQueryRequest(BaseModel):
     | AllPartners | Identyfikator oznaczający, że wyszukiwanie dotyczy uprawnień generalnych nadanych w sposób pośredni |
     | InternalId | Dwuczłonowy identyfikator składający się z numeru NIP i 5 cyfr: `{nip}-{5_cyfr}` |
     """
-    permissionTypes: list[PersonalPermissionScope] | None = None
+    permissionTypes: list[PersonalPermissionType] | None = None
     """
     Lista rodzajów wyszukiwanych uprawnień.
     """
     permissionState: PermissionState | None = None
     """
-    Stan uprawnienia. 
+    Stan uprawnienia.
     | Type | Value |
     | --- | --- |
     | Active | Uprawnienia aktywne |
@@ -4053,6 +4454,17 @@ class QueryCertificatesResponse(BaseModel):
 
 class QueryEntityAuthorizationPermissionsResponse(BaseModel):
     authorizationGrants: list[EntityAuthorizationGrant]
+    """
+    Lista odczytanych uprawnień.
+    """
+    hasMore: bool
+    """
+    Flaga informująca o dostępności kolejnej strony wyników.
+    """
+
+
+class QueryEntityPermissionsResponse(BaseModel):
+    permissions: list[EntityPermissionItem]
     """
     Lista odczytanych uprawnień.
     """
@@ -4323,7 +4735,7 @@ class EuEntityPermissionsGrantRequest(BaseModel):
     | --- | --- |
     | Fingerprint | Odcisk palca certyfikatu |
     """
-    permissions: list[EntityPermissionType]
+    permissions: list[EuEntityPermissionType]
     """
     Lista nadawanych uprawnień. Każda wartość może wystąpić tylko raz.
     """
@@ -4484,13 +4896,14 @@ class InvoiceMetadata(BaseModel):
     Struktura dokumentu faktury.
 
     Obsługiwane schematy:
-    | SystemCode | SchemaVersion | Value |
-    | --- | --- | --- |
-    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |
-    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |
-    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |
-    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |
-    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |
+    | SystemCode | SchemaVersion | Value | ValidFrom | ValidTo |
+    | --- | --- | --- | --- | --- |
+    | [FA (2)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(2)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [FA (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/FA/schemat_FA(3)_v1-0E.xsd) | 1-0E | FA |  |  |
+    | [PEF (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [PEF_KOR (3)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/PEF/Schemat_PEF_KOR(3)_v2-1.xsd) | 2-1 | PEF |  |  |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-0E.xsd) | 1-0E | RR |  | 23.03.2026 |
+    | [FA_RR (1)](https://github.com/CIRFMF/ksef-docs/blob/main/faktury/schemy/RR/schemat_RR(1)_v1-1E.xsd) | 1-1E | RR |  |  |
 
     """
     isSelfInvoicing: bool
@@ -4545,13 +4958,13 @@ class QueryInvoicesMetadataResponse(BaseModel):
     """
     Dotyczy wyłącznie zapytań filtrowanych po typie daty <b>PermanentStorage</b>.
     Jeśli zapytanie dotyczyło najnowszego okresu, wartość ta może być wartością nieznacznie skorygowaną względem górnej granicy podanej w warunkach zapytania.
-    Dla okresów starszych, będzie to zgodne z warunkami zapytania. 
+    Dla okresów starszych, będzie to zgodne z warunkami zapytania.
 
     Wartość jest stała dla wszystkich stron tego samego zapytania
     i nie zależy od paginacji ani sortowania.
 
     System gwarantuje, że dane poniżej tej wartości są spójne i kompletne.
-    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur). 
+    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur).
 
     Dla dateType = Issue lub Invoicing – null.
     """
@@ -4604,7 +5017,7 @@ class EuEntityAdministrationPermissionsGrantRequest(BaseModel):
     """
     euEntityName: Annotated[str, Field(max_length=256, min_length=5)]
     """
-    Nazwa i adres podmiotu unijnego w formacie: 
+    Nazwa i adres podmiotu unijnego w formacie:
     `{euSubjectName}, {euSubjectAddress}`
     """
     subjectDetails: EuEntityPermissionSubjectDetails

@@ -4,7 +4,6 @@ import pytest
 
 from ksef2.domain.models.testdata import (
     AuthContextIdentifier,
-    AuthContextIdentifierType,
 )
 
 
@@ -13,7 +12,7 @@ def test_revoke_attachments(xades_authenticated_context, ksef_credentials):
     """Revoke attachment sending permissions for a subject."""
     client, _ = xades_authenticated_context
 
-    # This should succeed (even if attachments weren't previously enabled)
+    # This should succeed (even if attachments weren'request previously enabled)
     client.testdata.revoke_attachments(nip=ksef_credentials.subject_nip)
 
 
@@ -37,33 +36,33 @@ def test_block_and_unblock_context(xades_authenticated_context, ksef_credentials
     client, _ = xades_authenticated_context
 
     context_id = AuthContextIdentifier(
-        type=AuthContextIdentifierType.NIP,
+        type="nip",
         value=ksef_credentials.subject_nip,
     )
 
     # Block the context
-    client.testdata.block_context(context_identifier=context_id)
+    client.testdata.block_context(context=context_id)
 
     # Unblock the context
-    client.testdata.unblock_context(context_identifier=context_id)
+    client.testdata.unblock_context(context=context_id)
 
 
 @pytest.mark.integration
 def test_block_context_repeated(xades_authenticated_context, ksef_credentials):
-    """Test that blocking an already blocked context doesn't fail."""
+    """Test that blocking an already blocked context doesn'request fail."""
     client, _ = xades_authenticated_context
 
     context_id = AuthContextIdentifier(
-        type=AuthContextIdentifierType.NIP,
+        type="nip",
         value=ksef_credentials.subject_nip,
     )
 
     # Block twice - second block should still succeed
-    client.testdata.block_context(context_identifier=context_id)
-    client.testdata.block_context(context_identifier=context_id)
+    client.testdata.block_context(context=context_id)
+    client.testdata.block_context(context=context_id)
 
     # Unblock to clean up
-    client.testdata.unblock_context(context_identifier=context_id)
+    client.testdata.unblock_context(context=context_id)
 
 
 @pytest.mark.integration
