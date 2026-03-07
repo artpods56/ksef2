@@ -52,10 +52,6 @@ def from_spec(
 
 
 @overload
-def from_spec(response: spec.AuthenticationListItem) -> AuthenticationSession: ...
-
-
-@overload
 def from_spec(
     response: spec.AuthenticationListResponse,
 ) -> AuthenticationSessionsResponse: ...
@@ -67,6 +63,10 @@ def from_spec(response: spec.AuthenticationTokensResponse) -> AuthTokens: ...
 
 @overload
 def from_spec(response: spec.AuthenticationTokenRefreshResponse) -> RefreshedToken: ...
+
+
+@overload
+def from_spec(response: spec.AuthenticationListItem) -> AuthenticationSession: ...
 
 
 def from_spec(response: BaseModel | Enum) -> object:
@@ -153,37 +153,44 @@ def _(response: spec.AuthenticationMethodCategory) -> AuthenticationMethodCatego
             assert_never(unreachable)
 
 
-def _auth_operation_payload(
-    response: spec.AuthenticationOperationStatusResponse | spec.AuthenticationListItem,
-) -> dict[str, object]:
-    return {
-        "start_date": response.startDate,
-        "authentication_method": from_spec(response.authenticationMethod),
-        "authentication_method_category": from_spec(
-            response.authenticationMethodInfo.category
-        ),
-        "authentication_method_code": response.authenticationMethodInfo.code,
-        "authentication_method_display_name": response.authenticationMethodInfo.displayName,
-        "status_code": response.status.code,
-        "status_description": response.status.description,
-        "status_details": response.status.details,
-        "is_token_redeemed": response.isTokenRedeemed,
-        "last_token_refresh_date": response.lastTokenRefreshDate,
-        "refresh_token_valid_until": response.refreshTokenValidUntil,
-    }
-
-
 @_from_spec.register
 def _(response: spec.AuthenticationOperationStatusResponse) -> AuthOperationStatus:
-    return AuthOperationStatus(**_auth_operation_payload(response))
+    return AuthOperationStatus(
+        start_date=response.startDate,
+        authentication_method=from_spec(response.authenticationMethod),
+        authentication_method_category=from_spec(
+            response.authenticationMethodInfo.category
+        ),
+        authentication_method_code=response.authenticationMethodInfo.code,
+        authentication_method_display_name=response.authenticationMethodInfo.displayName,
+        status_code=response.status.code,
+        status_description=response.status.description,
+        status_details=response.status.details,
+        is_token_redeemed=response.isTokenRedeemed,
+        last_token_refresh_date=response.lastTokenRefreshDate,
+        refresh_token_valid_until=response.refreshTokenValidUntil,
+    )
 
 
 @_from_spec.register
 def _(response: spec.AuthenticationListItem) -> AuthenticationSession:
-    payload = _auth_operation_payload(response)
-    payload["reference_number"] = response.referenceNumber
-    payload["is_current"] = response.isCurrent
-    return AuthenticationSession(**payload)
+    return AuthenticationSession(
+        start_date=response.startDate,
+        authentication_method=from_spec(response.authenticationMethod),
+        authentication_method_category=from_spec(
+            response.authenticationMethodInfo.category
+        ),
+        authentication_method_code=response.authenticationMethodInfo.code,
+        authentication_method_display_name=response.authenticationMethodInfo.displayName,
+        status_code=response.status.code,
+        status_description=response.status.description,
+        status_details=response.status.details,
+        is_token_redeemed=response.isTokenRedeemed,
+        last_token_refresh_date=response.lastTokenRefreshDate,
+        refresh_token_valid_until=response.refreshTokenValidUntil,
+        reference_number=response.referenceNumber,
+        is_current=response.isCurrent,
+    )
 
 
 @_from_spec.register
