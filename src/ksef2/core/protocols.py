@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Protocol, Any, runtime_checkable
 
 import httpx
@@ -11,7 +12,7 @@ class Middleware(Protocol):
         path: str,
         *,
         headers: dict[str, str] | None = None,
-        params: httpx.QueryParams | None = None,
+        params: Mapping[str, Any] | None = None,
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
     ) -> httpx.Response: ...
@@ -21,7 +22,7 @@ class Middleware(Protocol):
         path: str,
         *,
         headers: dict[str, str] | None = None,
-        params: httpx.QueryParams | None = None,
+        params: Mapping[str, Any] | None = None,
     ) -> httpx.Response: ...
 
     def post(
@@ -29,7 +30,7 @@ class Middleware(Protocol):
         path: str,
         *,
         headers: dict[str, str] | None = None,
-        params: httpx.QueryParams | None = None,
+        params: Mapping[str, Any] | None = None,
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
     ) -> httpx.Response: ...
@@ -39,5 +40,5 @@ class Middleware(Protocol):
         path: str,
         *,
         headers: dict[str, str] | None = None,
-        params: httpx.QueryParams | None = None,
+        params: Mapping[str, Any] | None = None,
     ) -> httpx.Response: ...

@@ -1,7 +1,8 @@
 """Shared parsing and query-parameter helpers for endpoint wrappers."""
 
 import abc
-from typing import Any, ClassVar, Mapping, NotRequired, TypedDict
+from collections.abc import Mapping
+from typing import Any, ClassVar, NotRequired, TypedDict
 from urllib.parse import urlencode
 
 import httpx

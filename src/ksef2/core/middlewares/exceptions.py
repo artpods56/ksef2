@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import final, Any, override
 
 import httpx
@@ -22,7 +23,7 @@ class KSeFExceptionMiddleware(BaseMiddleware):
             return None
 
     @staticmethod
-    def _parse_retry_after(headers: httpx.Headers) -> int | None:
+    def _parse_retry_after(headers: Mapping[str, str]) -> int | None:
         value = headers.get("Retry-After")
         if value is None:
             return None
@@ -65,7 +66,7 @@ class KSeFExceptionMiddleware(BaseMiddleware):
         path: str,
         *,
         headers: dict[str, str] | None = None,
-        params: httpx.QueryParams | None = None,
+        params: Mapping[str, Any] | None = None,
         json: dict[str, Any] | None = None,
         content: bytes | None = None,
     ) -> httpx.Response:
