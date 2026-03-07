@@ -5,13 +5,10 @@ from collections.abc import Callable
 from typing import final
 
 import httpx
-
-import httpx
 from tenacity import RetryError, retry, retry_if_result, stop_after_delay, wait_fixed
 
 from ksef2.core import exceptions
 from ksef2.core.crypto import encrypt_invoice
-from ksef2.logging import get_logger
 from ksef2.logging import get_logger
 from ksef2.core.protocols import Middleware
 from ksef2.domain.models import invoices
