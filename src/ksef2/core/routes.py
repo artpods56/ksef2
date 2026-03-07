@@ -36,6 +36,8 @@ class PeppolRoutes(StrEnum):
 
 
 class TestDataRoutes(StrEnum):
+    __test__ = False
+
     CREATE_SUBJECT = "/testdata/subject"
     DELETE_SUBJECT = "/testdata/subject/remove"
     CREATE_PERSON = "/testdata/person"
