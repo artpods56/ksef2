@@ -32,8 +32,6 @@ Requires Python 3.12+.
 ## Supported OpenAPI Version
 
 The SDK currently supports KSeF OpenAPI version `2.2.1`.
-The source of truth for this value is
-[`src/ksef2/__openapi_version__.py`](src/ksef2/__openapi_version__.py).
 
 ## Quick Start
 
