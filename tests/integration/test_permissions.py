@@ -21,12 +21,9 @@ from ksef2.clients.online import OnlineSessionClient
 from ksef2.core.tools import generate_nip
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.permissions import (
-    AuthorizationPermissionTypeEnum,
     AuthorizationPermissionsQuery,
     AuthorizationPermissionsQueryResponse,
-    AuthorizationSubjectIdentifierTypeEnum,
     EntityPermission,
-    EntityPermissionTypeEnum,
     EuEntityPermissionsQuery,
     EuEntityPermissionsQueryResponse,
     PersonalPermissionsQuery,
@@ -34,11 +31,8 @@ from ksef2.domain.models.permissions import (
     PersonPermissionDetail,
     PersonPermissionsQuery,
     PersonPermissionsQueryResponse,
-    PersonPermissionsQueryTypeEnum,
-    QueryTypeEnum,
     SubordinateEntityRolesQuery,
     SubordinateEntityRolesQueryResponse,
-    SubunitIdentifierTypeEnum,
     SubunitPermissionsQuery,
     SubunitPermissionsQueryResponse,
 )
@@ -131,7 +125,7 @@ def test_query_authorizations(permissions_context: PermissionContext):
     auth = permissions_context["auth"]
 
     query = AuthorizationPermissionsQuery(
-        query_type=QueryTypeEnum.GRANTED,
+        query_type="granted",
     )
 
     response = auth.permissions.query_authorizations(query=query)
@@ -175,7 +169,7 @@ def test_query_persons(permissions_context: PermissionContext):
     auth = permissions_context["auth"]
 
     query = PersonPermissionsQuery(
-        query_type=PersonPermissionsQueryTypeEnum.IN_CONTEXT,
+        query_type="in_context",
     )
 
     response = auth.permissions.query_persons(query=query)
@@ -238,9 +232,7 @@ def test_grant_entity_permission(permissions_context: PermissionContext):
     response = auth.permissions.grant_entity(
         subject_value=buyer_nip,
         permissions=[
-            EntityPermission(
-                type=EntityPermissionTypeEnum.INVOICE_READ, can_delegate=False
-            ),
+            EntityPermission(type="invoice_read", can_delegate=False),
         ],
         description="Test entity permission grant",
         entity_name="Test Buyer Entity",
@@ -268,9 +260,9 @@ def test_grant_authorization_permission(permissions_context: PermissionContext):
     buyer_nip = generate_nip()
 
     response = auth.permissions.grant_authorization(
-        subject_type=AuthorizationSubjectIdentifierTypeEnum.NIP,
+        subject_type="nip",
         subject_value=buyer_nip,
-        permission=AuthorizationPermissionTypeEnum.SELF_INVOICING,
+        permission="self_invoicing",
         description="Test authorization grant",
         entity_name="Test Authorization Entity",
     )
@@ -309,7 +301,7 @@ def test_grant_subunit_permission(permissions_context: PermissionContext):
     response = auth.permissions.grant_subunit(
         subject_type="nip",
         subject_value=seller_nip,
-        context_type=SubunitIdentifierTypeEnum.NIP,
+        context_type="nip",
         context_value=seller_nip,
         description="Test subunit permission grant",
         first_name="Test",
@@ -334,9 +326,9 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
 
     # First, grant an authorization permission
     grant_response = auth.permissions.grant_authorization(
-        subject_type=AuthorizationSubjectIdentifierTypeEnum.NIP,
+        subject_type="nip",
         subject_value=buyer_nip,
-        permission=AuthorizationPermissionTypeEnum.SELF_INVOICING,
+        permission="self_invoicing",
         description="Test authorization for revoke",
         entity_name="Test Entity for Revoke",
     )
@@ -350,7 +342,7 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
     from ksef2.domain.models.pagination import OffsetPaginationParams
 
     query_response = auth.permissions.query_authorizations(
-        query=AuthorizationPermissionsQuery(query_type=QueryTypeEnum.GRANTED),
+        query=AuthorizationPermissionsQuery(query_type="granted"),
         params=OffsetPaginationParams(page_size=100),
     )
 
@@ -388,9 +380,7 @@ def test_revoke_common_permission(permissions_context: PermissionContext):
     grant_response = auth.permissions.grant_entity(
         subject_value=buyer_nip,
         permissions=[
-            EntityPermission(
-                type=EntityPermissionTypeEnum.INVOICE_READ, can_delegate=False
-            ),
+            EntityPermission(type="invoice_read", can_delegate=False),
         ],
         description="Test entity for revoke",
         entity_name="Test Entity for Revoke",

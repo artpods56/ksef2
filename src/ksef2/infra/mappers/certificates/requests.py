@@ -9,9 +9,9 @@ from ksef2.domain.models.certificates import (
     RevokeCertificateRequest,
     RetrieveCertificatesRequest,
     QueryCertificatesRequest,
-    CertificateType,
+    CertificateTypeValue,
     CertificateTypeEnum,
-    CertificateStatus,
+    CertificateStatusValue,
     CertificateStatusEnum,
     RevocationReasonEnum,
     IdentifierTypeEnum,
@@ -52,12 +52,12 @@ def to_spec(request: QueryCertificatesRequest) -> spec.QueryCertificatesRequest:
 
 
 @overload
-def to_spec(request: CertificateType) -> spec.KsefCertificateType: ...
+def to_spec(request: CertificateTypeValue) -> spec.KsefCertificateType: ...
 
 
 @overload
 def to_spec(
-    request: CertificateStatus,
+    request: CertificateStatusValue,
 ) -> spec.CertificateListItemStatus: ...
 
 

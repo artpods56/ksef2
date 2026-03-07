@@ -6,8 +6,8 @@ from ksef2.domain.models.certificates import (
     CertificateInfo,
     CertificateLimitsResponse,
     CertificatesInfoList,
-    CertificateStatus,
-    CertificateType,
+    CertificateStatusValue,
+    CertificateTypeValue,
     EnrollCertificateRequest,
     IdentifierType,
     QueryCertificatesRequest,
@@ -20,11 +20,11 @@ from ksef2.infra.mappers.helpers import lookup
 from ksef2.infra.schema.api import spec
 from ksef2.infra.mappers import helpers
 
-_CERTIFICATE_TYPE_TO_DOMAIN: dict[spec.KsefCertificateType, CertificateType] = {
+_CERTIFICATE_TYPE_TO_DOMAIN: dict[spec.KsefCertificateType, CertificateTypeValue] = {
     spec.KsefCertificateType.Authentication: "authentication",
     spec.KsefCertificateType.Offline: "offline",
 }
-_CERTIFICATE_TYPE_FROM_DOMAIN: dict[CertificateType, spec.KsefCertificateType] = {
+_CERTIFICATE_TYPE_FROM_DOMAIN: dict[CertificateTypeValue, spec.KsefCertificateType] = {
     v: k for k, v in _CERTIFICATE_TYPE_TO_DOMAIN.items()
 }
 
@@ -40,13 +40,13 @@ _IDENTIFIER_TYPE: dict[spec.CertificateSubjectIdentifierType, IdentifierType] = 
     spec.CertificateSubjectIdentifierType.Pesel: "pesel",
 }
 
-_STATUS_TO_DOMAIN: dict[spec.CertificateListItemStatus, CertificateStatus] = {
+_STATUS_TO_DOMAIN: dict[spec.CertificateListItemStatus, CertificateStatusValue] = {
     spec.CertificateListItemStatus.Active: "active",
     spec.CertificateListItemStatus.Revoked: "revoked",
     spec.CertificateListItemStatus.Expired: "expired",
     spec.CertificateListItemStatus.Blocked: "blocked",
 }
-_STATUS_FROM_DOMAIN: dict[CertificateStatus, spec.CertificateListItemStatus] = {
+_STATUS_FROM_DOMAIN: dict[CertificateStatusValue, spec.CertificateListItemStatus] = {
     v: k for k, v in _STATUS_TO_DOMAIN.items()
 }
 

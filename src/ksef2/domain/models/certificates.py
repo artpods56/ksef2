@@ -34,13 +34,8 @@ class RevocationReasonEnum(StrEnum):
     KEY_COMPROMISE = "key_compromise"
 
 
-# Public runtime aliases kept enum-shaped for compatibility with older examples/tests.
-CertificateType = CertificateTypeEnum
-CertificateStatus = CertificateStatusEnum
-
-
 class SubjectIdentifier(KSeFBaseModel):
-    type: IdentifierTypeEnum
+    type: IdentifierType
     value: str
 
 
@@ -48,7 +43,7 @@ class Certificate(KSeFBaseModel):
     base64_encoded_certificate: str
     name: str
     serial_number: str
-    certificate_type: CertificateType
+    certificate_type: CertificateTypeValue
 
 
 class RetrievedCertificatesList(KSeFBaseModel):
@@ -65,8 +60,8 @@ class CertificateInfo(KSeFBaseModel):
     serial_number: str
     name: str
     common_name: str
-    type: CertificateType
-    status: CertificateStatus
+    type: CertificateTypeValue
+    status: CertificateStatusValue
 
     # issued for
     subject_identifier: SubjectIdentifier
@@ -138,7 +133,7 @@ class CertificateLimitsResponse(KSeFBaseModel):
 
 class EnrollCertificateRequest(KSeFBaseModel):
     certificate_name: str
-    certificate_type: CertificateType
+    certificate_type: CertificateTypeValue
     csr: str
     valid_from: datetime | str | None = None
 
@@ -154,8 +149,8 @@ class RevokeCertificateRequest(KSeFBaseModel):
 class QueryCertificatesRequest(KSeFBaseModel):
     certificate_serial_number: str | None = None
     name: str | None = None
-    certificate_type: CertificateType | None = None
-    status: CertificateStatus | None = None
+    certificate_type: CertificateTypeValue | None = None
+    status: CertificateStatusValue | None = None
     expires_after: datetime | str | None = None
 
 

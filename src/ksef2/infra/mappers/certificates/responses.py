@@ -9,8 +9,8 @@ from ksef2.domain.models.certificates import (
     CertificateInfo,
     CertificateLimitsResponse,
     CertificatesInfoList,
-    CertificateType,
-    CertificateStatus,
+    CertificateTypeValue,
+    CertificateStatusValue,
     SubjectIdentifier,
     RetrievedCertificatesList,
     Certificate,
@@ -59,11 +59,11 @@ def from_spec(
 
 
 @overload
-def from_spec(response: spec.CertificateListItemStatus) -> CertificateStatus: ...
+def from_spec(response: spec.CertificateListItemStatus) -> CertificateStatusValue: ...
 
 
 @overload
-def from_spec(response: spec.KsefCertificateType) -> CertificateType: ...
+def from_spec(response: spec.KsefCertificateType) -> CertificateTypeValue: ...
 
 
 @overload
@@ -209,7 +209,7 @@ def _(
 
 
 @_from_spec.register
-def _(response: spec.CertificateListItemStatus) -> CertificateStatus:
+def _(response: spec.CertificateListItemStatus) -> CertificateStatusValue:
     match response:
         case spec.CertificateListItemStatus.Active:
             return "active"
@@ -224,7 +224,7 @@ def _(response: spec.CertificateListItemStatus) -> CertificateStatus:
 
 
 @_from_spec.register
-def _(response: spec.KsefCertificateType) -> CertificateType:
+def _(response: spec.KsefCertificateType) -> CertificateTypeValue:
     match response:
         case spec.KsefCertificateType.Authentication:
             return "authentication"

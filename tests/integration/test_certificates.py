@@ -5,10 +5,8 @@ import pytest
 from ksef2.domain.models.certificates import (
     CertificateEnrollmentData,
     CertificateLimitsResponse,
-    CertificateStatus,
     QueryCertificatesResponse,
 )
-from ksef2.clients.certificates import CertificateType
 
 
 @pytest.mark.integration
@@ -65,12 +63,12 @@ def test_query_certificates_with_status_filter(xades_authenticated_context):
     """Query certificates filtering by status."""
     client, auth = xades_authenticated_context
 
-    result = auth.certificates.query(status=CertificateStatus.ACTIVE)
+    result = auth.certificates.query(status="active")
 
     assert isinstance(result, QueryCertificatesResponse)
     # All returned certificates should be active
     for cert in result.certificates:
-        assert cert.status == CertificateStatus.ACTIVE
+        assert cert.status == "active"
 
 
 @pytest.mark.integration
@@ -78,12 +76,12 @@ def test_query_certificates_with_type_filter(xades_authenticated_context):
     """Query certificates filtering by type."""
     client, auth = xades_authenticated_context
 
-    result = auth.certificates.query(certificate_type=CertificateType.AUTHENTICATION)
+    result = auth.certificates.query(certificate_type="authentication")
 
     assert isinstance(result, QueryCertificatesResponse)
     # All returned certificates should be authentication type
     for cert in result.certificates:
-        assert cert.type == CertificateType.AUTHENTICATION
+        assert cert.type == "authentication"
 
 
 @pytest.mark.integration
@@ -92,7 +90,7 @@ def test_query_certificates_with_pagination(xades_authenticated_context):
     client, auth = xades_authenticated_context
 
     # Query with small page size
-    result = auth.certificates.query(page_size=10, page_offset=0)
+    result = auth.certificates.query()
 
     assert isinstance(result, QueryCertificatesResponse)
     assert len(result.certificates) <= 10
