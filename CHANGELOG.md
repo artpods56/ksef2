@@ -1,7 +1,11 @@
 ## Unreleased
 
+## v0.9.0 (2026-03-07)
+
 ### Feat
 
+- **logging**: add package structlog helpers
+- add batch upload workflow
 - add client lifecycle and transport config
 - expand client layer with dedicated modules for all API domains
 - reorganize infra mappers into domain-specific modules
@@ -11,8 +15,23 @@
 - refactor the endpoints layer along with comprehensive unit tests, 100% coverage
 - move Peppol from services to clients, improve API, add method with internal pagination
 
+### Fix
+
+- **mappers**: handle unsupported authentication method codes
+- **permissions**: add entity grants query endpoint
+- **logging**: remove duplicate logger imports
+- **examples**: remove invalid demo testdata grants
+- **auth**: register auth response mapper
+
 ### Refactor
 
+- **scripts**: remove obsolete api playground script
+- **types**: tighten public literal type surface
+- **sdk**: split session clients and refresh release docs
+- **cleanup**: remove obsolete docs and legacy request mappers
+- reorganize examples and harden xml and session handling
+- **examples**: standardize example script execution and layout
+- narrow public enum surface
 - refresh generated spec and tooling
 - consolidate services layer, add InvoicesService
 - update scripts and examples for new API

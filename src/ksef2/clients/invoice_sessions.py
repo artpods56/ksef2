@@ -6,6 +6,8 @@ from ksef2.domain.models.pagination import ListSessionsQuery
 from ksef2.domain.models.session import (
     ListSessionsResponse,
     SessionStatus,
+    SessionStatusEnum,
+    normalize_session_status,
     normalize_session_type,
 )
 from ksef2.endpoints.session import SessionEndpoints
@@ -29,7 +31,7 @@ class InvoiceSessionsClient:
         session_type: str,
         continuation_token: str | None = None,
         params: ListSessionsQuery | None = None,
-        statuses: list[SessionStatus] | None = None,
+        statuses: list[SessionStatus | SessionStatusEnum] | None = None,
     ) -> ListSessionsResponse:
         """Fetch one page of invoice session history for the chosen session type.
 
@@ -47,7 +49,13 @@ class InvoiceSessionsClient:
             session_type=normalize_session_type(session_type),
         )
         if statuses is not None:
-            parameters = parameters.model_copy(update={"statuses": list(statuses)})
+            parameters = parameters.model_copy(
+                update={
+                    "statuses": [
+                        normalize_session_status(status) for status in statuses
+                    ]
+                }
+            )
 
         return from_spec(
             self._endpoints.list_sessions(

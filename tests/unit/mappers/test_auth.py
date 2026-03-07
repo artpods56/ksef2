@@ -76,9 +76,7 @@ class TestAuthResponseMapper:
 
         assert isinstance(output, domain_auth.AuthOperationStatus)
         assert output.start_date == mapped_input.startDate
-        assert (
-            output.authentication_method == mapped_input.authenticationMethodInfo.code
-        )
+        assert output.authentication_method == "token"
         assert output.authentication_method_category == from_spec(
             mapped_input.authenticationMethodInfo.category
         )
@@ -104,12 +102,25 @@ class TestAuthResponseMapper:
         assert isinstance(output, domain_auth.AuthenticationSession)
         assert output.reference_number == mapped_input.referenceNumber
         assert output.is_current == mapped_input.isCurrent
-        assert (
-            output.authentication_method == mapped_input.authenticationMethodInfo.code
-        )
+        assert output.authentication_method == "token"
         assert output.authentication_method_category == from_spec(
             mapped_input.authenticationMethodInfo.category
         )
+
+    def test_map_authentication_session_from_transport_code(self) -> None:
+        mapped_input = AuthenticationListItemFactory.build(
+            authenticationMethod=spec.AuthenticationMethod.QualifiedSeal,
+            authenticationMethodInfo=spec.AuthenticationMethodInfo(
+                category=spec.AuthenticationMethodCategory.XadesSignature,
+                code="xades.qualified-seal",
+                displayName="Pieczęć kwalifikowana",
+            ),
+        )
+
+        output = from_spec(mapped_input)
+
+        assert output.authentication_method == "qualified_seal"
+        assert output.authentication_method_code == "xades.qualified-seal"
 
     def test_map_authentication_sessions_response(
         self, auth_list_resp: BaseFactory[spec.AuthenticationListResponse]

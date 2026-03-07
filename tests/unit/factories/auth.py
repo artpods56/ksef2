@@ -16,8 +16,8 @@ class AuthenticationMethodInfoFactory(ModelFactory[spec.AuthenticationMethodInfo
     category: spec.AuthenticationMethodCategory = (
         spec.AuthenticationMethodCategory.Token
     )
-    code: str = "token"
-    displayName: str = "Token"
+    code: str = "token.ksef"
+    displayName: str = "Token KSeF"
 
 
 class TokenInfoFactory(ModelFactory[spec.TokenInfo]):

@@ -4,12 +4,10 @@ Run with:
     uv run pytest tests/integration/test_encryption.py -v -m integration
 """
 
-from __future__ import annotations
-
 import pytest
 
 from ksef2 import Client
-from ksef2.domain.models.encryption import PublicKeyCertificate, CertUsage
+from ksef2.domain.models.encryption import CertUsageEnum, PublicKeyCertificate
 
 
 @pytest.mark.integration
@@ -26,4 +24,4 @@ def test_get_certificates(real_client: Client):
     assert cert.valid_from is not None
     assert cert.valid_to is not None
     assert len(cert.usage) > 0
-    assert all(isinstance(u, CertUsage) for u in cert.usage)
+    assert all(usage in CertUsageEnum._value2member_map_ for usage in cert.usage)

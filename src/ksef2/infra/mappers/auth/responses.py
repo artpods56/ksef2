@@ -8,7 +8,6 @@ from pydantic import BaseModel
 
 from ksef2.domain.models.auth import (
     AuthenticationMethod,
-    AuthenticationMethodEnum,
     AuthenticationMethodCategory,
     AuthenticationSession,
     AuthenticationSessionsResponse,
@@ -94,10 +93,23 @@ def _from_spec(response: BaseModel | Enum) -> object:
 
 
 def _method_from_code(code: str) -> AuthenticationMethod:
-    try:
-        return AuthenticationMethodEnum(code).value
-    except ValueError as e:
-        raise ValueError(f"Unsupported authentication method code: {code!r}") from e
+    match code:
+        case "token.ksef":
+            return "token"
+        case "national-node.trusted-profile":
+            return "trusted_profile"
+        case "other.internal-certificate":
+            return "internal_certificate"
+        case "xades.qualified-signature":
+            return "qualified_signature"
+        case "xades.qualified-seal":
+            return "qualified_seal"
+        case "xades.personal-signature":
+            return "personal_signature"
+        case "xades.peppol-signature":
+            return "peppol_signature"
+        case _:
+            raise ValueError(f"Unsupported authentication method code: {code!r}")
 
 
 @_from_spec.register
