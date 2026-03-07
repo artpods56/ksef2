@@ -244,7 +244,7 @@ just fetch-spec     # Fetch latest OpenAPI spec from KSeF
 
 ## API Coverage
 
-The SDK covers **77 of 77** KSeF API endpoints (100%). See feature docs for details:
+The SDK covers **73 of 73** KSeF API endpoints (100%). See feature docs for details:
 
 - [Authentication](docs/guides/authentication.md) — XAdES, token auth, session management
 - [Encryption](docs/guides/encryption.md) — public KSeF encryption certificates
