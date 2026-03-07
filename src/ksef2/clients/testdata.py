@@ -5,7 +5,11 @@ from typing import Self, final
 import httpx
 
 from ksef2.core import exceptions
+import httpx
+
+from ksef2.core import exceptions
 from ksef2.core.protocols import Middleware
+from ksef2.logging import get_logger
 from ksef2.logging import get_logger
 from ksef2.domain.models.testdata import (
     AuthContextIdentifier,
