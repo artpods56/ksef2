@@ -1,56 +1,43 @@
-"""Send a minimal invoice in the TEST environment.
-
-Prerequisites:
-- none; the script uses a generated TEST certificate identity
-
-What it demonstrates:
-- authenticating in TEST
-- opening an online session
-- sending an invoice with both context-manager and manual session handling
-"""
-
-from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
 from ksef2 import Client, Environment, FormSchema
-from ksef2.core.invoices import InvoiceTemplater
+from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
-from scripts.examples._common import repo_root
+
+VALID_NIP = generate_nip()
+ROOT = next(
+    path
+    for path in Path(__file__).resolve().parents
+    if (path / "pyproject.toml").exists()
+)
+
+INVOICE_TEMPLATE_PATH = (
+    ROOT / "docs" / "assets" / "sample_invoices" / "fa3" / "invoice-template_v3.xml"
+)
 
 
-@dataclass
-class ExampleConfig:
-    environment: Environment = Environment.TEST
-    template_path: Path = (
-        repo_root()
-        / "docs"
-        / "assets"
-        / "sample_invoices"
-        / "fa3"
-        / "invoice-template_v3.xml"
-    )
+def main() -> None:
+    client = Client(Environment.TEST)
 
+    auth = client.authentication.with_test_certificate(nip=VALID_NIP)
 
-def run(config: ExampleConfig) -> None:
-    client = Client(config.environment)
-    valid_nip = generate_nip()
-    template_xml = config.template_path.read_text(encoding="utf-8")
-
-    auth = client.authentication.with_test_certificate(nip=valid_nip)
-    invoice_xml = InvoiceTemplater.create(
+    template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
+    invoice_xml = InvoiceFactory.create(
         template_xml,
         {
-            "#nip#": valid_nip,
+            "#nip#": VALID_NIP,
             "#invoicing_date#": date.today().isoformat(),
-            "#invoice_number#": f"DEMO-{date.today():%Y%m%d}-{valid_nip[-4:]}",
+            "#invoice_number#": f"DEMO-{date.today():%Y%m%d}-{VALID_NIP[-4:]}",
         },
     )
 
+    # Sessions are context managers and will automatically terminate on exit
     with auth.online_session(form_code=FormSchema.FA3) as session:
         result = session.send_invoice(invoice_xml=invoice_xml)
         print(result.reference_number)
 
+    # Sessions also support manual management:
     session = auth.online_session(form_code=FormSchema.FA3)
     try:
         result = session.send_invoice(invoice_xml=invoice_xml)
@@ -59,10 +46,5 @@ def run(config: ExampleConfig) -> None:
         session.close()
 
 
-def main() -> int:
-    run(ExampleConfig())
-    return 0
-
-
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

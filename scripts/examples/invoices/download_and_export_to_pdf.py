@@ -1,44 +1,17 @@
-"""Send a TEST invoice, download it as the buyer, and render the results to PDF.
-
-Prerequisites:
-- none; the script provisions and cleans up its own TEST-environment data
-
-What it demonstrates:
-- sending an invoice between TEST subjects
-- buyer-side export and download
-- rendering exported invoices to PDF
-"""
-
 import time
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from ksef2 import Client, Environment, FormSchema
-from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.packages import PackageReader
+from ksef2.core.invoices import InvoiceFactory
 from ksef2.core.tools import generate_nip
 from ksef2.domain.models import InvoicesFilter
 from ksef2.services.renderers import InvoicePDFExporter
-from scripts.examples._common import repo_root
 
 
-@dataclass
-class ExampleConfig:
-    environment: Environment = Environment.TEST
-    template_path: Path = field(
-        default_factory=lambda: (
-            repo_root()
-            / "docs"
-            / "assets"
-            / "sample_invoices"
-            / "fa3"
-            / "invoice-template-fa-3-with-custom-subject_2.xml"
-        )
-    )
-    downloads_dir: Path = field(
-        default_factory=lambda: repo_root() / "downloads" / "pdf_export"
-    )
+def generate_test_subject() -> str:
+    return generate_nip()
 
 
 def send_invoice(
@@ -48,16 +21,14 @@ def send_invoice(
     buyer_nip: str,
 ) -> None:
     seller_auth = client.authentication.with_test_certificate(nip=seller_nip)
-    template_xml = template_path.read_text(encoding="utf-8")
 
     with seller_auth.online_session(form_code=FormSchema.FA3) as session:
-        # we generate valid invoice from the template because we need the nips to match
-        invoice_xml = InvoiceTemplater.create(
-            template_xml=template_xml,
+        invoice_xml = InvoiceFactory.create(
+            template_xml=template_path.read_text(encoding="utf-8"),
             replacements={
                 "#nip#": seller_nip,
                 "#subject2nip#": buyer_nip,
-                "#invoicing_date#": datetime.now(tz=timezone.utc).date().isoformat(),
+                "#invoicing_date#": date.today().isoformat(),
                 "#invoice_number#": str(int(time.time() * 1000)),
             },
         )
@@ -67,10 +38,11 @@ def send_invoice(
 
 def download_and_export(
     client: Client,
-    downloads_directory: Path,
+    downloads_dir: Path,
     buyer_nip: str,
 ) -> None:
     buyer_auth = client.authentication.with_test_certificate(nip=buyer_nip)
+
     query_filters = InvoicesFilter(
         role="buyer",
         date_type="issue_date",
@@ -85,43 +57,57 @@ def download_and_export(
 
     zip_parts = buyer_auth.invoices.export_and_download(filters=query_filters)
 
-    downloads_directory.mkdir(parents=True, exist_ok=True)
+    downloads_dir.mkdir(parents=True, exist_ok=True)
     exporter = InvoicePDFExporter()
 
     for invoice in PackageReader(zip_parts):
         pdf_bytes = exporter.export_from_string(invoice_xml=invoice.xml)
-        pdf_path = downloads_directory / f"{Path(invoice.name).stem}.pdf"
+        pdf_path = downloads_dir / f"{Path(invoice.name).stem}.pdf"
         _ = pdf_path.write_bytes(pdf_bytes)
         print(f"Saved: {pdf_path}")
 
 
-def run(config: ExampleConfig) -> None:
-    client = Client(environment=config.environment)
-    seller_nip = generate_nip()
-    buyer_nip = generate_nip()
+def main(template_path: Path, downloads_dir: Path) -> None:
+
+    client = Client(environment=Environment.TEST)
+    seller_nip = generate_test_subject()
+    buyer_nip = generate_test_subject()
 
     with client.testdata.temporal() as temp:
         temp.create_subject(
             nip=seller_nip,
             subject_type="enforcement_authority",
-            description="Scenario seller",
+            description="Test seller",
         )
         temp.create_subject(
             nip=buyer_nip,
             subject_type="enforcement_authority",
-            description="Scenario buyer",
+            description="Test buyer",
         )
 
-        send_invoice(client, config.template_path, seller_nip, buyer_nip)
-        download_and_export(client, config.downloads_dir, buyer_nip)
+        send_invoice(client, template_path, seller_nip, buyer_nip)
+        download_and_export(client, downloads_dir, buyer_nip)
 
     print("Done.")
 
 
-def main() -> int:
-    run(ExampleConfig())
-    return 0
-
-
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # this is meant to be run from the root of the project
+    # modify the paths accordingly if you're running it from somewhere else
+
+    ROOT = Path(__file__).parents[3]
+    DOWNLOAD_DIR = ROOT / "downloads" / "pdf_export"
+
+    INVOICE_TEMPLATE_PATH = (
+        ROOT
+        / "docs"
+        / "assets"
+        / "sample_invoices"
+        / "fa3"
+        / "invoice-template-fa-3-with-custom-subject_2.xml"
+    )
+
+    main(
+        template_path=INVOICE_TEMPLATE_PATH,
+        downloads_dir=DOWNLOAD_DIR,
+    )

@@ -1,48 +1,36 @@
-"""List and terminate authentication sessions in the TEST environment.
-
-Prerequisites:
-- none; the script uses a generated TEST certificate identity
-
-What it demonstrates:
-- authenticating in TEST
-- listing auth sessions
-- terminating the current auth session
-"""
-
-from dataclasses import dataclass
-
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 
-
-@dataclass
-class ExampleConfig:
-    environment: Environment = Environment.TEST
+NIP = generate_nip()
 
 
-def run(config: ExampleConfig) -> None:
-    client = Client(environment=config.environment)
-    nip = generate_nip()
+def main() -> None:
+    client = Client(environment=Environment.TEST)
 
-    print("Authenticating...")
-    auth = client.authentication.with_test_certificate(nip=nip)
+    # Authenticate
+    print("Authenticating ...")
+    auth = client.authentication.with_test_certificate(nip=NIP)
 
-    print("Listing active authentication sessions...")
+    # List active sessions
+    print("Listing active authentication sessions ...")
     sessions = auth.sessions.list_page()
     print(f"  Found {len(sessions.items)} session(s)")
     for item in sessions.items:
         print(f"  {item.reference_number} current={item.is_current}")
 
-    print("Terminating current session...")
+    # Paginated listing (if many sessions exist)
+    # for page in auth.sessions.list(page_size=10):
+    #     print(len(page.items))
+
+    # Terminate the current session
+    print("Terminating current session ...")
     auth.sessions.terminate_current()
     print("  Current session terminated.")
+
+    # To terminate a specific session by reference number:
+    # auth.sessions.close(reference_number="some-reference-number")
     print("Session management complete.")
 
 
-def main() -> int:
-    run(ExampleConfig())
-    return 0
-
-
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
