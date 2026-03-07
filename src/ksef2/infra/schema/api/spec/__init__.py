@@ -22,6 +22,7 @@ from ..supp.invoices import (
 )
 from ..supp.auth import InitTokenAuthenticationRequest
 from ..supp.encryption import PublicKeyCertificate
+from ..supp.certificates import EnrollCertificateRequest
 from ..supp.permissions import (
     PersonPermissionsAuthorIdentifier,
     PersonPermissionsAuthorizedIdentifier,
@@ -49,6 +50,7 @@ __all__ = [
     "SendInvoiceRequest",
     "InitTokenAuthenticationRequest",
     "PublicKeyCertificate",
+    "EnrollCertificateRequest",
     "SessionInvoiceStatusResponse",
     "SessionInvoicesResponse",
     "QueryInvoicesMetadataRequest",

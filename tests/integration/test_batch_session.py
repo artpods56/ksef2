@@ -1,10 +1,15 @@
 """Integration tests for batch session endpoints."""
 
+from datetime import datetime, timezone
+from pathlib import Path
+
 import pytest
 
-from ksef2 import Client
-from ksef2.clients.authenticated import AuthenticatedClient
+from ksef2 import Client, Environment
+from ksef2.core.invoices import InvoiceTemplater
+from ksef2.core.tools import generate_nip
 from ksef2.domain.models.batch import (
+    BatchInvoice,
     BatchFileInfo,
     BatchFilePart,
     PartUploadRequest,
@@ -22,53 +27,75 @@ class TestBatchSession:
     - POST /sessions/batch/{referenceNumber}/close (close batch session)
     """
 
-    @pytest.mark.skip(
-        reason="Batch session requires valid batch file - complex setup needed"
-    )
     def test_open_batch_session(
         self,
-        xades_authenticated_context: tuple[Client, AuthenticatedClient],
     ) -> None:
-        """Test opening a batch session.
-
-        Note: This test is skipped by default because it requires:
-        1. A properly prepared and encrypted batch file
-        2. Valid file hashes (SHA-256)
-        3. The file to be uploaded to the returned URLs
-
-        The test demonstrates the API structure but would fail without
-        real batch file preparation.
-        """
-        client, auth = xades_authenticated_context
-
-        # Example batch file info - would fail validation without real data
-        batch_file = BatchFileInfo(
-            file_size=16037,
-            file_hash="WO86CC+1Lef11wEosItld/NPwxGN8tobOMLqk9PQjgs=",
-            parts=[
-                BatchFilePart(
-                    ordinal_number=1,
-                    file_size=16048,
-                    file_hash="23ZyDAN0H/+yhC/En2xbNfF0tajAWSfejDaXD7fc2AE=",
-                )
-            ],
+        """Open, upload, close, and inspect a real batch session."""
+        client = Client(environment=Environment.TEST)
+        seller_nip = generate_nip()
+        template_path = (
+            Path(__file__).parents[2]
+            / "docs"
+            / "assets"
+            / "sample_invoices"
+            / "fa3"
+            / "invoice-template_v3.xml"
         )
+        template_xml = template_path.read_text(encoding="utf-8")
+        now = datetime.now(tz=timezone.utc)
 
-        # This would open a batch session
-        batch_session = auth.batch_session(batch_file=batch_file)
+        with client.testdata.temporal() as temp:
+            temp.create_subject(
+                nip=seller_nip,
+                subject_type="enforcement_authority",
+                description="Integration batch session seller",
+            )
+            auth = client.authentication.with_test_certificate(nip=seller_nip)
+            invoice = BatchInvoice(
+                file_name="invoice-01.xml",
+                content=InvoiceTemplater.create(
+                    template_xml,
+                    {
+                        "#nip#": seller_nip,
+                        "#invoicing_date#": now.date().isoformat(),
+                        "#invoice_number#": f"IT-BATCH-{now:%Y%m%d%H%M%S}",
+                    },
+                ),
+            )
 
-        # Verify response structure
-        assert batch_session.reference_number
-        assert len(batch_session.reference_number) == 36
-        assert batch_session.part_upload_requests
-        assert len(batch_session.part_upload_requests) == 1
+            prepared_batch = auth.batch.prepare_batch(
+                invoices=[invoice],
+                form_code=FormSchema.FA3,
+            )
 
-        # Verify upload request structure
-        upload_req = batch_session.part_upload_requests[0]
-        assert upload_req.ordinal_number == 1
-        assert upload_req.method == "PUT"
-        assert upload_req.url
-        assert upload_req.headers
+            with auth.batch_session(prepared_batch=prepared_batch) as batch_session:
+                assert batch_session.reference_number
+                assert len(batch_session.reference_number) == 36
+                assert batch_session.part_upload_requests
+                assert len(batch_session.part_upload_requests) == 1
+
+                upload_req = batch_session.part_upload_requests[0]
+                assert upload_req.ordinal_number == 1
+                assert upload_req.method == "PUT"
+                assert upload_req.url
+                assert upload_req.headers
+
+                batch_session.upload_parts()
+                state = batch_session.get_state()
+
+            status = auth.batch.wait_for_completion(
+                session=state,
+                timeout=120.0,
+                poll_interval=2.0,
+            )
+            assert status.status.code == 200
+            assert status.invoice_count == 1
+            assert status.successful_invoice_count == 1
+            assert status.failed_invoice_count == 0
+
+            invoices_page = auth.batch.list_invoices(session=state)
+            assert len(invoices_page.invoices) == 1
+            assert invoices_page.invoices[0].reference_number
 
     def test_batch_file_info_model(self) -> None:
         """Test that BatchFileInfo request validates correctly."""

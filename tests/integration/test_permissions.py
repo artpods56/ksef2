@@ -52,6 +52,35 @@ PermissionContext = TypedDict(
 )
 
 
+def _wait_for_permission_operation(
+    auth: AuthenticatedClient,
+    *,
+    reference_number: str,
+    timeout: float = 60.0,
+    poll_interval: float = 2.0,
+) -> None:
+    deadline = time.monotonic() + timeout
+    last_code = None
+
+    while time.monotonic() < deadline:
+        status = auth.permissions.get_operation_status(
+            reference_number=reference_number,
+        )
+        last_code = status.status.code
+        if last_code == 200:
+            return
+        if last_code >= 400:
+            raise AssertionError(
+                f"Permission operation failed: {last_code} {status.status.description}"
+            )
+        time.sleep(poll_interval)
+
+    raise AssertionError(
+        f"Permission operation did not finish within {timeout} seconds; "
+        f"last status={last_code}"
+    )
+
+
 @pytest.fixture(scope="module")
 def permissions_context(
     real_client: Client,
@@ -335,92 +364,89 @@ def test_revoke_authorization_permission(permissions_context: PermissionContext)
 
     assert grant_response.reference_number
 
-    # Wait for the grant to be processed
-    time.sleep(5)
+    _wait_for_permission_operation(
+        auth,
+        reference_number=grant_response.reference_number,
+    )
 
     # Query authorizations to find the one we just created
     from ksef2.domain.models.pagination import OffsetPaginationParams
 
-    query_response = auth.permissions.query_authorizations(
-        query=AuthorizationPermissionsQuery(query_type="granted"),
-        params=OffsetPaginationParams(page_size=100),
+    deadline = time.monotonic() + 60.0
+    permission_id = None
+    while time.monotonic() < deadline and permission_id is None:
+        query_response = auth.permissions.query_authorizations(
+            query=AuthorizationPermissionsQuery(query_type="granted"),
+            params=OffsetPaginationParams(page_size=100),
+        )
+        for grant in query_response.authorization_grants:
+            if grant.description == "Test authorization for revoke":
+                permission_id = grant.id
+                break
+        if permission_id is None:
+            time.sleep(2.0)
+
+    assert permission_id is not None
+
+    revoke_response = auth.permissions.revoke_authorization(
+        permission_id=permission_id,
     )
 
-    # Find our permission by description
-    permission_id = None
-    for grant in query_response.authorization_grants:
-        if grant.description == "Test authorization for revoke":
-            permission_id = grant.id
-            break
-
-    # If we found the permission, revoke it
-    if permission_id:
-        revoke_response = auth.permissions.revoke_authorization(
-            permission_id=permission_id,
-        )
-
-        assert revoke_response is not None
-        assert hasattr(revoke_response, "reference_number")
-        assert revoke_response.reference_number
-    else:
-        # If we didn'request find it, the test still passes as we verified grant worked
-        # The permission might not have been processed yet or might be in a different context
-        pytest.skip(
-            "Permission not found in query results - likely still being processed"
-        )
+    assert revoke_response is not None
+    assert hasattr(revoke_response, "reference_number")
+    assert revoke_response.reference_number
 
 
 @pytest.mark.integration
 def test_revoke_common_permission(permissions_context: PermissionContext):
     """Grant and then revoke a common permission."""
     auth = permissions_context["auth"]
-    buyer_nip = generate_nip()
+    person_nip = generate_nip()
 
-    # First, grant an entity permission
-    grant_response = auth.permissions.grant_entity(
-        subject_value=buyer_nip,
-        permissions=[
-            EntityPermission(type="invoice_read", can_delegate=False),
-        ],
-        description="Test entity for revoke",
-        entity_name="Test Entity for Revoke",
+    grant_response = auth.permissions.grant_person(
+        subject_type="nip",
+        subject_value=person_nip,
+        permissions=["invoice_read"],
+        description="Test common permission for revoke",
+        first_name="Test",
+        last_name="Person",
     )
 
     assert grant_response.reference_number
 
-    time.sleep(5)
-
-    _ = auth.permissions.get_operation_status(
+    _wait_for_permission_operation(
+        auth,
         reference_number=grant_response.reference_number,
     )
 
     # Query personal permissions to find the one we just created
     from ksef2.domain.models.pagination import OffsetPaginationParams
 
-    query_response = auth.permissions.query_personal(
-        query=PersonalPermissionsQuery(),
-        params=OffsetPaginationParams(page_size=100),
+    deadline = time.monotonic() + 60.0
+    permission_id = None
+    while time.monotonic() < deadline and permission_id is None:
+        query_response = auth.permissions.query_persons(
+            query=PersonPermissionsQuery(
+                query_type="in_context",
+                authorized_type="nip",
+                authorized_value=person_nip,
+                permission_types=["invoice_read"],
+            ),
+            params=OffsetPaginationParams(page_size=100),
+        )
+        for perm in query_response.permissions:
+            if perm.description == "Test common permission for revoke":
+                permission_id = perm.id
+                break
+        if permission_id is None:
+            time.sleep(2.0)
+
+    assert permission_id is not None
+
+    revoke_response = auth.permissions.revoke_common(
+        permission_id=permission_id,
     )
 
-    # Find our permission by description
-    permission_id = None
-    for perm in query_response.permissions:
-        if perm.description == "Test entity for revoke":
-            permission_id = perm.id
-            break
-
-    # If we found the permission, revoke it
-    if permission_id:
-        revoke_response = auth.permissions.revoke_common(
-            permission_id=permission_id,
-        )
-
-        assert revoke_response is not None
-        assert hasattr(revoke_response, "reference_number")
-        assert revoke_response.reference_number
-    else:
-        # If we didn'request find it, the test still passes as we verified grant worked
-        # The permission might not have been processed yet or might be in a different context
-        pytest.skip(
-            "Permission not found in query results - likely still being processed"
-        )
+    assert revoke_response is not None
+    assert hasattr(revoke_response, "reference_number")
+    assert revoke_response.reference_number

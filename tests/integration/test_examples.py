@@ -6,25 +6,26 @@ subjects via the testdata API and clean up automatically via temporal().
 
 Skipped examples (require external config not available in CI):
   - auth/auth_xades_demo.py    — needs MCU certificate files
-  - invoices/download_purchase_invoices.py — needs MCU certificate files
-  - auth/auth_token.py         — needs KSEF_TEST_KSEF_TOKEN env var (skipped if absent)
 """
 
 from pathlib import Path
 
 import pytest
 
+from ksef2 import Client
 import scripts.examples.auth.auth_refresh as auth_refresh_example
-import scripts.examples.auth.auth_token as auth_token_example
 import scripts.examples.auth.auth_xades as auth_xades_example
 import scripts.examples.auth.token_management as token_management_example
+import scripts.examples.invoices.send_batch as send_batch_example
 import scripts.examples.invoices.send_invoice as send_invoice_example
 import scripts.examples.invoices.send_query_export_download as send_example
+import scripts.examples.invoices.submit_batch as submit_batch_example
 import scripts.examples.limits.limits_modify as limits_modify_example
 import scripts.examples.limits.limits_query as limits_query_example
 import scripts.examples.permissions.grant_permissions as grant_permissions_example
 import scripts.examples.permissions.query_permissions as query_permissions_example
 import scripts.examples.quickstart as quickstart_example
+import scripts.examples.scenarios.session_workflow as session_workflow_example
 import scripts.examples.session.session_management as session_management_example
 import scripts.examples.session.session_resume as session_resume_example
 import scripts.examples.testdata.attachments as attachments_example
@@ -50,19 +51,6 @@ def test_example_auth_refresh() -> None:
     Covers: XAdES auth → list sessions → refresh access token.
     """
     auth_refresh_example.main()
-
-
-@pytest.mark.integration
-@pytest.mark.skip(
-    reason=(
-        "Token auth requires a short KSeF token (<190 bytes for RSA-OAEP/2048). "
-        "JWTs from the TEST environment exceed this limit. "
-        "See auth/auth_token.py for manual usage with a short token."
-    )
-)
-def test_example_auth_token() -> None:
-    """Token-based authentication using a pre-generated KSeF token."""
-    auth_token_example.main()
 
 
 @pytest.mark.integration
@@ -98,9 +86,6 @@ def test_example_session_resume() -> None:
 
 
 @pytest.mark.integration
-@pytest.mark.skip(
-    reason="Session workflow example has been removed from scripts/examples."
-)
 def test_example_session_workflow() -> None:
     """Full online session workflow including invoice operations.
 
@@ -108,9 +93,7 @@ def test_example_session_workflow() -> None:
     send invoice → list failed invoices → get UPO → download invoice →
     list sessions.
     """
-    import scripts.examples.session.workflow as workflow_example
-
-    workflow_example.main()
+    session_workflow_example.main()
 
 
 # ── invoices ──────────────────────────────────────────────────────────────────
@@ -147,18 +130,15 @@ def test_example_send_query_export_download() -> None:
 
 
 @pytest.mark.integration
-@pytest.mark.skip(
-    reason="Purchase invoice download example requires MCU certificate files."
-)
-def test_example_download_purchase_invoices() -> None:
-    """Purchase invoice download across multiple buyer entities.
+def test_example_send_batch() -> None:
+    """Prepare, upload, and process a batch session end to end."""
+    send_batch_example.main()
 
-    Covers: create seller + N buyers → send invoices as Subject2 →
-    authenticate as each buyer → export Subject2 invoices → fetch packages.
-    """
-    import scripts.examples.invoices.download_purchase_invoices as download_example
 
-    download_example.main()
+@pytest.mark.integration
+def test_example_submit_batch() -> None:
+    """Prepare and submit a batch in one high-level call."""
+    submit_batch_example.main()
 
 
 @pytest.mark.integration
@@ -258,15 +238,15 @@ def test_example_query_permissions() -> None:
 
 
 @pytest.mark.integration
-def test_example_testdata_setup_automatic() -> None:
+def test_example_testdata_setup_automatic(real_client: Client) -> None:
     """Testdata setup with automatic cleanup via temporal() context manager."""
-    setup_test_data_example.with_automatic_cleanup()
+    setup_test_data_example.with_automatic_cleanup(real_client)
 
 
 @pytest.mark.integration
-def test_example_testdata_setup_manual() -> None:
+def test_example_testdata_setup_manual(real_client: Client) -> None:
     """Testdata setup with manual create/revoke/delete lifecycle."""
-    setup_test_data_example.manual_cleanup()
+    setup_test_data_example.manual_cleanup(real_client)
 
 
 @pytest.mark.integration

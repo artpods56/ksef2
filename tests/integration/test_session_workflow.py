@@ -17,7 +17,7 @@ import pytest
 
 from ksef2 import Client, FormSchema, Environment
 from ksef2.clients.online import OnlineSessionClient
-from ksef2.core.invoices import InvoiceFactory
+from ksef2.core.invoices import InvoiceTemplater
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.core.xades import generate_test_certificate
 from ksef2.domain.models.session import OnlineSessionState, SessionStatusResponse
@@ -25,6 +25,7 @@ from ksef2.domain.models.testdata import (
     Identifier,
     Permission,
 )
+from ksef2.endpoints.session import SessionEndpoints
 
 INVOICE_TEMPLATE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -91,7 +92,7 @@ def workflow_context():
 
         with auth.online_session(form_code=FormSchema.FA3) as session:
             template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
-            invoice_xml = InvoiceFactory.create(
+            invoice_xml = InvoiceTemplater.create(
                 template_xml,
                 {
                     "#nip#": seller_nip,
@@ -234,33 +235,79 @@ def test_resume_session_from_state(workflow_context):
 
 
 @pytest.mark.integration
-@pytest.mark.skip(
-    reason="Session UPO requires completed session with UPO reference number"
-)
-def test_get_session_upo_by_reference(workflow_context):
-    """Test getting collective UPO for a session by UPO reference number.
+def test_get_session_upo_by_reference():
+    """A closed online session exposes a collective UPO by reference number."""
+    client = Client(environment=Environment.TEST)
+    seller_nip = generate_nip()
+    buyer_nip = generate_nip()
+    person_nip = generate_nip()
+    person_pesel = generate_pesel()
 
-    Note: This test is skipped because:
-    1. The session UPO is only available after the session is closed
-    2. We need a valid upoReferenceNumber from the session status
-    3. The workflow_context keeps the session open for other tests
+    with client.testdata.temporal() as temp:
+        temp.create_subject(
+            nip=seller_nip,
+            subject_type="enforcement_authority",
+            description="Session UPO test seller",
+        )
+        temp.create_subject(
+            nip=buyer_nip,
+            subject_type="enforcement_authority",
+            description="Session UPO test buyer",
+        )
+        temp.create_person(
+            nip=person_nip,
+            pesel=person_pesel,
+            description="Session UPO test person",
+        )
+        temp.grant_permissions(
+            permissions=[
+                Permission(type="invoice_write", description="Send invoices"),
+                Permission(type="introspection", description="Inspect sessions"),
+            ],
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=seller_nip),
+        )
 
-    The endpoint (GET /sessions/{referenceNumber}/upo/{upoReferenceNumber})
-    returns the collective UPO XML for the entire session, which is different
-    from the per-invoice UPO endpoints.
-    """
-    _ = workflow_context  # noqa: F841 - context used in real implementation
+        cert, private_key = generate_test_certificate(seller_nip)
+        auth = client.authentication.with_xades(
+            nip=seller_nip,
+            cert=cert,
+            private_key=private_key,
+        )
 
-    # In a real scenario, you would:
-    # 1. Close the session
-    # 2. Get the session status which includes upoReferenceNumber
-    # 3. Call GetSessionUpoEndpoint with both reference numbers
+        template_xml = INVOICE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    # This is the endpoint structure (not actually callable in this test):
-    # endpoint = GetSessionUpoEndpoint(client._transport)
-    # upo_xml = endpoint.send(
-    #     access_token=workflow_context["access_token"],
-    #     reference_number=session.reference_number,
-    #     upo_reference_number="<upo-ref-from-session-status>",
-    # )
-    pass
+        with auth.online_session(form_code=FormSchema.FA3) as session:
+            invoice_xml = InvoiceTemplater.create(
+                template_xml,
+                {
+                    "#nip#": seller_nip,
+                    "#subject2nip#": buyer_nip,
+                    "#invoicing_date#": "2026-02-16",
+                    "#invoice_number#": f"UPO-{int(time.time())}",
+                },
+            )
+            _ = session.send_invoice(invoice_xml=invoice_xml)
+            state = session.get_state()
+
+        resumed = auth.resume_online_session(state=state)
+
+        deadline = time.monotonic() + 90.0
+        status = resumed.get_status()
+        while (
+            status.upo is None or not status.upo.pages
+        ) and time.monotonic() < deadline:
+            time.sleep(2.0)
+            status = resumed.get_status()
+
+        assert status.upo is not None
+        assert status.upo.pages
+
+        upo_reference_number = status.upo.pages[0].reference_number
+        upo_xml = SessionEndpoints(auth._authed_transport).get_session_upo(
+            state.reference_number,
+            upo_reference_number,
+        )
+
+        assert isinstance(upo_xml, bytes)
+        assert len(upo_xml) > 0
