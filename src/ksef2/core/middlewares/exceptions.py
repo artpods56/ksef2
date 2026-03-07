@@ -1,7 +1,7 @@
 from typing import final, Any, override
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from ksef2.core import middlewares, protocols
 from ksef2.infra.mappers.exceptions import ExceptionsMapper
@@ -17,7 +17,7 @@ class KSeFExceptionMiddleware(middlewares.BaseMiddleware):
     def _try_parse[T: BaseModel](content: str, model: type[T]) -> T | None:
         try:
             return model.model_validate_json(content)
-        except Exception:
+        except (ValidationError, ValueError):
             return None
 
     @staticmethod

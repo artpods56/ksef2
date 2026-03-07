@@ -1,52 +1,52 @@
 """Enable and revoke attachment permissions on TEST.
 
-Demonstrates how to enable and revoke attachment sending permissions for a subject.
+Prerequisites:
+- none; the script provisions and cleans up its own TEST-environment data
 
-Usage:
-    uv run python scripts/examples/testdata/attachments.py
+What it demonstrates:
+- enabling attachment permissions
+- revoking them immediately and with an end date
 """
 
+from dataclasses import dataclass
 from datetime import date, timedelta
 
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 
-ORG_NIP = generate_nip()
+
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
 
 
-def main() -> None:
-    client = Client(environment=Environment.TEST)
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    organization_nip = generate_nip()
 
     with client.testdata.temporal() as temp:
-        # Create a test subject
-        print(f"Creating test subject with NIP: {ORG_NIP}")
+        print(f"Creating test subject with NIP: {organization_nip}")
         temp.create_subject(
-            nip=ORG_NIP,
+            nip=organization_nip,
             subject_type="enforcement_authority",
             description="Attachments test",
         )
 
-        # Enable attachments for the subject
-        print(f"Enabling attachments for NIP: {ORG_NIP}")
-        client.testdata.enable_attachments(nip=ORG_NIP)
+        print(f"Enabling attachments for NIP: {organization_nip}")
+        client.testdata.enable_attachments(nip=organization_nip)
         print("  Attachments enabled")
 
-        # At this point, the subject can send invoices with attachments
-
-        # Revoke attachments (immediate)
-        print(f"Revoking attachments for NIP: {ORG_NIP}")
-        client.testdata.revoke_attachments(nip=ORG_NIP)
+        print(f"Revoking attachments for NIP: {organization_nip}")
+        client.testdata.revoke_attachments(nip=organization_nip)
         print("  Attachments revoked immediately")
 
-        # Re-enable for the next example
-        print("Re-enabling attachments ...")
-        client.testdata.enable_attachments(nip=ORG_NIP)
+        print("Re-enabling attachments...")
+        client.testdata.enable_attachments(nip=organization_nip)
 
-        # Revoke attachments with expected end date
         future_date = date.today() + timedelta(days=30)
         print(f"Revoking attachments with end date: {future_date}")
         client.testdata.revoke_attachments(
-            nip=ORG_NIP,
+            nip=organization_nip,
             expected_end_date=future_date,
         )
         print(f"  Attachments will be revoked on {future_date}")
@@ -54,5 +54,10 @@ def main() -> None:
     print("Test data cleaned up.")
 
 
+def main() -> int:
+    run(ExampleConfig())
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

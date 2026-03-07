@@ -18,6 +18,8 @@ from signxml.algorithms import (
 )
 from signxml.xades.xades import XAdESSigner
 
+from ksef2.core.xml import parse_xml_bytes
+
 # OID 2.5.4.97 = organizationIdentifier (used in company-seal certificates)
 _OID_ORGANIZATION_IDENTIFIER = ObjectIdentifier("2.5.4.97")
 # OID 2.5.4.5 = serialNumber (used for PESEL in personal certificates)
@@ -33,7 +35,8 @@ def load_certificate_from_pem(source: bytes | str | Path) -> Certificate:
         source: PEM-encoded bytes, or a path (``str`` / ``Path``) to a ``.pem`` / ``.crt`` file.
 
     Returns:
-        A :class:`~cryptography.x509.Certificate` ready to pass to :meth:`~ksef2.services.auth.AuthService.authenticate_xades`.
+        A :class:`~cryptography.x509.Certificate` ready to pass to
+        :meth:`~ksef2.clients.auth.AuthClient.with_xades`.
 
     Example — certificate obtained from MCU (DEMO / PRODUCTION)::
 
@@ -43,7 +46,7 @@ def load_certificate_from_pem(source: bytes | str | Path) -> Certificate:
         cert = load_certificate_from_pem("cert.pem")
         key  = load_private_key_from_pem("key.pem")
 
-        auth = Client(Environment.DEMO).auth.authenticate_xades(
+        auth = Client(Environment.DEMO).authentication.with_xades(
             nip="1234567890", cert=cert, private_key=key
         )
     """
@@ -84,7 +87,8 @@ def load_certificate_and_key_from_p12(
         password: Decryption password for the archive, or ``None`` if unencrypted.
 
     Returns:
-        A ``(cert, private_key)`` tuple ready to pass to :meth:`~ksef2.services.auth.AuthService.authenticate_xades`.
+        A ``(cert, private_key)`` tuple ready to pass to
+        :meth:`~ksef2.clients.auth.AuthClient.with_xades`.
 
     Note:
         If you have separate ``.pem`` and ``.key`` files downloaded directly from MCU, prefer
@@ -203,7 +207,7 @@ def sign_xades(
         signature_algorithm=SignatureMethod.RSA_SHA256,
         digest_algorithm=DigestAlgorithm.SHA256,
     )
-    root = etree.fromstring(xml_bytes)  # noqa: S320
+    root = parse_xml_bytes(xml_bytes)
 
     cert_pem = cert.public_bytes(serialization.Encoding.PEM)
     key_pem = private_key.private_bytes(

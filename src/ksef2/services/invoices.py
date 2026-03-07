@@ -10,6 +10,7 @@ from ksef2.core.crypto import decrypt_aes_cbc
 from ksef2.core.middlewares.auth import BearerTokenMiddleware
 from ksef2.core.protocols import Middleware
 from ksef2.core.stores import CertificateStore
+from ksef2.logging import get_logger
 from ksef2.domain.models.invoices import (
     ExportHandle,
     InvoiceExportStatusResponse,
@@ -18,8 +19,6 @@ from ksef2.domain.models.invoices import (
     QueryInvoicesMetadataResponse,
 )
 from ksef2.domain.models.pagination import InvoiceMetadataParams
-
-from structlog import get_logger
 
 logger = get_logger(__name__)
 
@@ -97,7 +96,11 @@ class InvoicesService:
         saved_files: list[Path] = []
 
         for part in package.parts:
-            logger.info(f"Downloading part: {part.part_name}")
+            logger.info(
+                "Downloading export package part",
+                part_name=part.part_name,
+                package_part_url=str(part.url),
+            )
 
             resp = self._download_transport.get(str(part.url))
             _ = resp.raise_for_status()
@@ -110,7 +113,11 @@ class InvoicesService:
             with open(output_file, "wb") as f:
                 _ = f.write(zip_data)
 
-            logger.info(f"Saved decrypted package to: {output_file}")
+            logger.info(
+                "Saved decrypted export package part",
+                output_file=str(output_file),
+                part_name=part.part_name,
+            )
             saved_files.append(output_file)
 
         return saved_files
@@ -124,7 +131,11 @@ class InvoicesService:
         """Download and decrypt all parts of an export package in memory."""
         result: list[bytes] = []
         for part in package.parts:
-            logger.info(f"Downloading part: {part.part_name}")
+            logger.info(
+                "Downloading export package part",
+                part_name=part.part_name,
+                package_part_url=str(part.url),
+            )
             resp = self._download_transport.get(str(part.url))
             _ = resp.raise_for_status()
             result.append(

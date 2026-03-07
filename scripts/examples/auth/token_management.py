@@ -1,27 +1,41 @@
+"""Generate, inspect, and revoke a KSeF token in TEST.
+
+Prerequisites:
+- none; the script provisions and cleans up its own TEST-environment data
+
+What it demonstrates:
+- creating a temporary test subject
+- generating a KSeF token
+- checking token status and revoking it
+"""
+
+from dataclasses import dataclass
+
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip
 
-NIP = generate_nip()
+
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
 
 
-def main() -> None:
-    client = Client(environment=Environment.TEST)
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    nip = generate_nip()
 
-    # Set up: create subject with CREDENTIALS_MANAGE permission
-    print("Setting up test data ...")
+    print("Setting up test data...")
     with client.testdata.temporal() as td:
         td.create_subject(
-            nip=NIP,
+            nip=nip,
             subject_type="enforcement_authority",
             description="Token management test",
         )
 
-        # Authenticate
-        print("Authenticating ...")
-        auth = client.authentication.with_test_certificate(nip=NIP)
+        print("Authenticating...")
+        auth = client.authentication.with_test_certificate(nip=nip)
 
-        # Generate a new KSeF token
-        print("Generating KSeF token ...")
+        print("Generating KSeF token...")
         result = auth.tokens.generate(
             permissions=[
                 "invoice_read",
@@ -32,28 +46,24 @@ def main() -> None:
         print(f"  Token:     {result.token[:40]}...")
         print(f"  Reference: {result.reference_number}")
 
-        # Check token status
-        print("Checking token status ...")
-        status = auth.tokens.status(
-            reference_number=result.reference_number,
-        )
+        print("Checking token status...")
+        status = auth.tokens.status(reference_number=result.reference_number)
         print(f"  Status: {status.status}")
 
-        # Revoke the token
-        print("Revoking token ...")
-        auth.tokens.revoke(
-            reference_number=result.reference_number,
-        )
+        print("Revoking token...")
+        auth.tokens.revoke(reference_number=result.reference_number)
 
-        # Verify the token has entered revocation flow
-        print("Verifying revocation ...")
-        status = auth.tokens.status(
-            reference_number=result.reference_number,
-        )
+        print("Verifying revocation...")
+        status = auth.tokens.status(reference_number=result.reference_number)
         print(f"  Status: {status.status}")
 
     print("Done, test data cleaned up.")
 
 
+def main() -> int:
+    run(ExampleConfig())
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

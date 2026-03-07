@@ -1,9 +1,12 @@
-import logging
 from datetime import date, datetime
 from types import TracebackType
 from typing import Self, final
 
+import httpx
+
+from ksef2.core import exceptions
 from ksef2.core.protocols import Middleware
+from ksef2.logging import get_logger
 from ksef2.domain.models.testdata import (
     AuthContextIdentifier,
     BlockContextRequest,
@@ -24,11 +27,13 @@ from ksef2.domain.models.testdata import (
 from ksef2.endpoints.testdata import TestDataEndpoints
 from ksef2.infra.mappers.testdata import to_spec
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @final
 class TestDataClient:
+    """Helper for TEST-only endpoints that seed and mutate sandbox data."""
+
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = TestDataEndpoints(transport)
 
@@ -41,6 +46,7 @@ class TestDataClient:
         subunits: list[SubUnit] | None = None,
         created_date: datetime | None = None,
     ) -> None:
+        """Create a test subject with optional subunits."""
         request = CreateSubjectRequest(
             subject_nip=nip,
             subject_type=subject_type,
@@ -51,6 +57,7 @@ class TestDataClient:
         self._endpoints.create_subject(to_spec(request))
 
     def delete_subject(self, *, nip: str) -> None:
+        """Delete a test subject by NIP."""
         self._endpoints.delete_subject(to_spec(DeleteSubjectRequest(subject_nip=nip)))
 
     def create_person(
@@ -63,6 +70,7 @@ class TestDataClient:
         is_deceased: bool = False,
         created_date: datetime | None = None,
     ) -> None:
+        """Create a test person in the chosen subject."""
         request = CreatePersonRequest(
             nip=nip,
             pesel=pesel,
@@ -74,6 +82,7 @@ class TestDataClient:
         self._endpoints.create_person(to_spec(request))
 
     def delete_person(self, *, nip: str) -> None:
+        """Delete a test person by subject NIP."""
         self._endpoints.delete_person(to_spec(DeletePersonRequest(nip=nip)))
 
     def grant_permissions(
@@ -83,6 +92,7 @@ class TestDataClient:
         grant_to: Identifier,
         in_context_of: Identifier,
     ) -> None:
+        """Grant test permissions in a chosen context."""
         request = GrantPermissionsRequest(
             permissions=permissions,
             grant_to=grant_to,
@@ -93,6 +103,7 @@ class TestDataClient:
     def revoke_permissions(
         self, *, revoke_from: Identifier, in_context_of: Identifier
     ) -> None:
+        """Revoke test permissions in a chosen context."""
         request = RevokePermissionsRequest(
             revoke_from=revoke_from,
             in_context_of=in_context_of,
@@ -100,11 +111,13 @@ class TestDataClient:
         self._endpoints.revoke_permissions(to_spec(request))
 
     def enable_attachments(self, *, nip: str) -> None:
+        """Enable invoice attachments for a test subject."""
         self._endpoints.enable_attachments(to_spec(EnableAttachmentsRequest(nip=nip)))
 
     def revoke_attachments(
         self, *, nip: str, expected_end_date: date | None = None
     ) -> None:
+        """Revoke attachment permissions, optionally effective on a given date."""
         request = RevokeAttachmentsRequest(
             nip=nip,
             expected_end_date=expected_end_date,
@@ -112,17 +125,22 @@ class TestDataClient:
         self._endpoints.revoke_attachments(to_spec(request))
 
     def block_context(self, *, context: AuthContextIdentifier) -> None:
+        """Block authentication for a specific test context."""
         self._endpoints.block_context(to_spec(BlockContextRequest(context=context)))
 
     def unblock_context(self, *, context: AuthContextIdentifier) -> None:
+        """Unblock authentication for a specific test context."""
         self._endpoints.unblock_context(to_spec(UnblockContextRequest(context=context)))
 
     def temporal(self) -> "TemporalTestData":
+        """Return a context manager that automatically cleans up created test data."""
         return TemporalTestData(self)
 
 
 @final
 class TemporalTestData:
+    """Context manager that records testdata mutations and reverts them on exit."""
+
     def __init__(self, client: TestDataClient) -> None:
         self._client = client
         self._subjects: list[str] = []
@@ -132,20 +150,27 @@ class TemporalTestData:
         self._blocked_contexts: list[AuthContextIdentifier] = []
 
     def __enter__(self) -> Self:
+        """Return the helper for use in a ``with`` block."""
         return self
 
     def _cleanup_blocked_context(self, context: AuthContextIdentifier) -> None:
         try:
             self._client.unblock_context(context=context)
-        except Exception:
-            logger.warning("Failed to unblock context %request", context, exc_info=True)
+        except (exceptions.KSeFException, httpx.HTTPError):
+            logger.warning(
+                "Failed to unblock context",
+                context=context,
+                exc_info=True,
+            )
 
     def _cleanup_attachment(self, nip: str) -> None:
         try:
             self._client.revoke_attachments(nip=nip)
-        except Exception:
+        except (exceptions.KSeFException, httpx.HTTPError):
             logger.warning(
-                "Failed to revoke attachments for %request", nip, exc_info=True
+                "Failed to revoke attachments",
+                nip=nip,
+                exc_info=True,
             )
 
     def _cleanup_permission(
@@ -156,25 +181,33 @@ class TemporalTestData:
                 revoke_from=grant_to,
                 in_context_of=in_context_of,
             )
-        except Exception:
+        except (exceptions.KSeFException, httpx.HTTPError):
             logger.warning(
-                "Failed to revoke permissions for %request → %request",
-                in_context_of,
-                grant_to,
+                "Failed to revoke permissions",
+                in_context_of=in_context_of,
+                grant_to=grant_to,
                 exc_info=True,
             )
 
     def _cleanup_person(self, nip: str) -> None:
         try:
             self._client.delete_person(nip=nip)
-        except Exception:
-            logger.warning("Failed to delete person %request", nip, exc_info=True)
+        except (exceptions.KSeFException, httpx.HTTPError):
+            logger.warning(
+                "Failed to delete person",
+                nip=nip,
+                exc_info=True,
+            )
 
     def _cleanup_subject(self, nip: str) -> None:
         try:
             self._client.delete_subject(nip=nip)
-        except Exception:
-            logger.warning("Failed to delete subject %request", nip, exc_info=True)
+        except (exceptions.KSeFException, httpx.HTTPError):
+            logger.warning(
+                "Failed to delete subject",
+                nip=nip,
+                exc_info=True,
+            )
 
     def __exit__(
         self,
@@ -182,6 +215,7 @@ class TemporalTestData:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        """Best-effort cleanup of tracked changes in reverse creation order."""
         for context in reversed(self._blocked_contexts):
             self._cleanup_blocked_context(context)
         for nip in reversed(self._attachments):

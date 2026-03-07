@@ -5,10 +5,11 @@ from polyfactory import BaseFactory
 
 from ksef2.clients.online import OnlineSessionClient
 from ksef2.core.exceptions import (
+    KSeFClientClosedError,
     KSeFInvoiceProcessingTimeoutError,
     KSeFSessionError,
 )
-from ksef2.core.routes import InvoiceRoutes
+from ksef2.core.routes import InvoiceRoutes, SessionRoutes
 from ksef2.domain.models.session import OnlineSessionState
 from ksef2.infra.schema.api import spec
 from tests.unit.fakes.transport import FakeTransport
@@ -22,6 +23,27 @@ def _build_client(
 
 
 class TestOnlineSessionClient:
+    def test_close_is_idempotent_and_blocks_further_calls(
+        self,
+        fake_transport: FakeTransport,
+        domain_online_session_state: BaseFactory[OnlineSessionState],
+    ) -> None:
+        state = domain_online_session_state.build()
+        client = OnlineSessionClient(fake_transport, state)
+        fake_transport.enqueue({})
+
+        client.close()
+        client.close()
+
+        assert len(fake_transport.calls) == 1
+        assert fake_transport.calls[0].method == "POST"
+        assert fake_transport.calls[0].path == SessionRoutes.TERMINATE_ONLINE.format(
+            referenceNumber=state.reference_number
+        )
+
+        with pytest.raises(KSeFClientClosedError, match="Session client is closed"):
+            _ = client.get_status()
+
     def test_wait_for_invoice_ready_returns_processed_status(
         self,
         fake_transport: FakeTransport,

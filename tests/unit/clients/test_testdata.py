@@ -155,12 +155,8 @@ class TestTemporalTestData:
         in_context_of = domain_td_identifier.build(value="2234567890")
         context = domain_td_auth_context_identifier.build(value="ctx-1")
         permission = domain_td_permission.build()
-        fake_transport.enqueue({})
-        fake_transport.enqueue({})
-        fake_transport.enqueue({})
-        fake_transport.enqueue({})
-        fake_transport.enqueue({})
-        fake_transport.enqueue({})
+        for _ in range(10):
+            fake_transport.enqueue({})
 
         with testdata_client.temporal() as temp:
             temp.create_subject(

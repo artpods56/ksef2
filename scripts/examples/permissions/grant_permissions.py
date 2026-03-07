@@ -1,24 +1,40 @@
+"""Grant person and entity permissions in the TEST environment.
+
+Prerequisites:
+- none; the script provisions and cleans up its own TEST-environment data
+
+What it demonstrates:
+- creating temporary subject and person data
+- granting permissions to a person and an entity
+"""
+
+from dataclasses import dataclass
+
 from ksef2 import Client, Environment
 from ksef2.core.tools import generate_nip, generate_pesel
 from ksef2.domain.models import EntityPermission, Identifier, Permission
 
-ORG_NIP = generate_nip()
-PERSON_NIP = generate_nip()
-PERSON_PESEL = generate_pesel()
 
-client = Client(environment=Environment.TEST)
+@dataclass
+class ExampleConfig:
+    environment: Environment = Environment.TEST
 
 
-def main() -> None:
+def run(config: ExampleConfig) -> None:
+    client = Client(environment=config.environment)
+    organization_nip = generate_nip()
+    person_nip = generate_nip()
+    person_pesel = generate_pesel()
+
     with client.testdata.temporal() as temp:
         temp.create_subject(
-            nip=ORG_NIP,
+            nip=organization_nip,
             subject_type="enforcement_authority",
             description="SDK test seller",
         )
         temp.create_person(
-            nip=PERSON_NIP,
-            pesel=PERSON_PESEL,
+            nip=person_nip,
+            pesel=person_pesel,
             description="Example person",
         )
 
@@ -29,17 +45,16 @@ def main() -> None:
                     description="Manage credentials",
                 ),
             ],
-            grant_to=Identifier(type="nip", value=PERSON_NIP),
-            in_context_of=Identifier(type="nip", value=ORG_NIP),
+            grant_to=Identifier(type="nip", value=person_nip),
+            in_context_of=Identifier(type="nip", value=organization_nip),
         )
 
-        # Authenticate - no session needed for permission operations
-        auth = client.authentication.with_test_certificate(nip=ORG_NIP)
+        auth = client.authentication.with_test_certificate(nip=organization_nip)
 
         print("Granting person permissions...")
         result = auth.permissions.grant_person(
             subject_type="pesel",
-            subject_value=PERSON_PESEL,
+            subject_value=person_pesel,
             permissions=["invoice_read", "invoice_write"],
             description="Test person permissions",
             first_name="John",
@@ -49,7 +64,7 @@ def main() -> None:
 
         print("Granting entity permissions...")
         result = auth.permissions.grant_entity(
-            subject_value=ORG_NIP,
+            subject_value=organization_nip,
             permissions=[
                 EntityPermission(
                     type="invoice_read",
@@ -62,5 +77,10 @@ def main() -> None:
         print(f"Entity permissions granted: {result.reference_number}")
 
 
+def main() -> int:
+    run(ExampleConfig())
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -4,6 +4,7 @@ from typing import final, Any
 from lxml import etree
 
 from ksef2.core.exceptions import KSeFInvoiceRenderingError
+from ksef2.core.xml import parse_xml_bytes, parse_xml_file
 from ksef2.infra.schema.fa3 import STYLESHEET_PATH as _DEFAULT_STYLESHEET_PATH
 
 from lxml.etree import _ElementTree as ElementTree, _Element as Element
@@ -37,7 +38,7 @@ class InvoiceXSLTRenderer:
             return
 
         try:
-            xslt_doc = etree.parse(str(self._stylesheet_path))
+            xslt_doc = parse_xml_file(self._stylesheet_path)
         except (OSError, etree.XMLSyntaxError) as e:
             raise KSeFInvoiceRenderingError(
                 f"Failed to parse XSLT stylesheet: {self._stylesheet_path}"
@@ -72,7 +73,7 @@ class InvoiceXSLTRenderer:
                 pretty_print=True,
                 encoding="unicode",
             )
-        except Exception as e:
+        except (TypeError, ValueError, etree.SerialisationError) as e:
             raise KSeFInvoiceRenderingError(
                 "Failed to serialize transformation result to HTML."
             ) from e
@@ -84,7 +85,7 @@ class InvoiceXSLTRenderer:
             raise FileNotFoundError(f"Invoice XML file not found: {invoice_xml_path}")
 
         try:
-            xml_doc = etree.parse(str(invoice_xml_path))
+            xml_doc = parse_xml_file(invoice_xml_path)
         except (OSError, etree.XMLSyntaxError) as e:
             raise KSeFInvoiceRenderingError(
                 f"Failed to parse invoice XML file: {invoice_xml_path}"
@@ -97,7 +98,7 @@ class InvoiceXSLTRenderer:
             if isinstance(invoice_xml, str):
                 invoice_xml = invoice_xml.encode("utf-8")
 
-            xml_doc = etree.fromstring(invoice_xml)
+            xml_doc = parse_xml_bytes(invoice_xml)
         except etree.XMLSyntaxError as e:
             raise KSeFInvoiceRenderingError(
                 "Failed to parse invoice XML string."
