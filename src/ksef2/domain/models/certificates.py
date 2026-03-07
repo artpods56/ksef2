@@ -1,3 +1,5 @@
+"""Domain models for KSeF certificate management."""
+
 from datetime import datetime
 from enum import StrEnum
 from typing import Literal
@@ -35,6 +37,8 @@ class RevocationReasonEnum(StrEnum):
 
 
 class SubjectIdentifier(KSeFBaseModel):
+    """Identifier of the subject the certificate was issued for."""
+
     type: IdentifierType
     value: str
 
@@ -47,6 +51,8 @@ class Certificate(KSeFBaseModel):
 
 
 class RetrievedCertificatesList(KSeFBaseModel):
+    """Certificates returned by the retrieval endpoint."""
+
     certificates: list[Certificate]
 
 
@@ -56,6 +62,8 @@ class CertificateQuota(KSeFBaseModel):
 
 
 class CertificateInfo(KSeFBaseModel):
+    """Metadata for one certificate visible in certificate queries."""
+
     # certificate
     serial_number: str
     name: str
@@ -74,11 +82,15 @@ class CertificateInfo(KSeFBaseModel):
 
 
 class CertificatesInfoList(KSeFBaseModel):
+    """One page of certificate query results."""
+
     certificates: list[CertificateInfo]
     has_more: bool
 
 
 class CertificateEnrollmentData(KSeFBaseModel):
+    """Subject data that should be embedded in a certificate enrollment CSR."""
+
     common_name: str
     name: str | None = None
     surname: str | None = None
@@ -99,6 +111,8 @@ class CertificateEnrollmentResponse(KSeFBaseModel):
 
 
 class CertificateEnrollmentStatusResponse(KSeFBaseModel):
+    """Current status of a certificate enrollment request."""
+
     request_date: datetime
     status_code: int
     status_description: str
@@ -107,6 +121,8 @@ class CertificateEnrollmentStatusResponse(KSeFBaseModel):
 
 
 class CertificateLimitsResponse(KSeFBaseModel):
+    """Effective enrollment and certificate quotas for the current subject."""
+
     can_request: bool
     enrollment_limit: int
     enrollment_remaining: int
@@ -132,6 +148,8 @@ class CertificateLimitsResponse(KSeFBaseModel):
 
 
 class EnrollCertificateRequest(KSeFBaseModel):
+    """Payload used to request a new certificate enrollment."""
+
     certificate_name: str
     certificate_type: CertificateTypeValue
     csr: str
@@ -139,14 +157,20 @@ class EnrollCertificateRequest(KSeFBaseModel):
 
 
 class RetrieveCertificatesRequest(KSeFBaseModel):
+    """Payload used to download issued certificates by serial number."""
+
     certificate_serial_numbers: list[str]
 
 
 class RevokeCertificateRequest(KSeFBaseModel):
+    """Payload used to revoke a certificate when a reason is provided."""
+
     revocation_reason: RevocationReason | None = None
 
 
 class QueryCertificatesRequest(KSeFBaseModel):
+    """Optional filters for certificate search."""
+
     certificate_serial_number: str | None = None
     name: str | None = None
     certificate_type: CertificateTypeValue | None = None

@@ -8,6 +8,8 @@ from ksef2.infra.mappers.encryption import from_spec, to_spec
 
 @final
 class EncryptionClient:
+    """Access to public encryption certificates published by KSeF."""
+
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = EncryptionEndpoints(transport)
 
@@ -16,6 +18,7 @@ class EncryptionClient:
         *,
         usage: list[CertUsage] | None = None,
     ) -> list[PublicKeyCertificate]:
+        """Return public certificates, optionally filtered by supported usage."""
         certificates = [
             from_spec(cert) for cert in self._endpoints.fetch_public_certificates()
         ]

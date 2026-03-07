@@ -26,6 +26,8 @@ XadesAuthParams = TypedDict(
 
 @final
 class AuthEndpoints(BaseEndpoints):
+    """Raw authentication endpoints backed by generated schema models."""
+
     _AUTH_SESSIONS_PARAMS = TypeAdapter(AuthSessionsQueryParams)
 
     def list_sessions(
@@ -33,6 +35,7 @@ class AuthEndpoints(BaseEndpoints):
         continuation_token: str | None = None,
         **params: Unpack[AuthSessionsQueryParams],
     ) -> spec.AuthenticationListResponse:
+        """Fetch one page of authentication sessions."""
         req_headers = (
             {"x-continuation-token": continuation_token} if continuation_token else None
         )
@@ -53,6 +56,7 @@ class AuthEndpoints(BaseEndpoints):
         signed_xml: bytes,
         verify_chain: bool = False,
     ) -> spec.AuthenticationInitResponse:
+        """Start authentication from an XAdES-signed XML payload."""
         return self._parse(
             self._transport.request(
                 "POST",
@@ -68,6 +72,7 @@ class AuthEndpoints(BaseEndpoints):
         )
 
     def challenge(self) -> spec.AuthenticationChallengeResponse:
+        """Create an authentication challenge."""
         return self._parse(
             self._transport.post(
                 path=routes.AuthRoutes.CHALLENGE,
@@ -78,6 +83,7 @@ class AuthEndpoints(BaseEndpoints):
     def token_auth(
         self, body: InitTokenAuthenticationRequest
     ) -> spec.AuthenticationInitResponse:
+        """Start token-based authentication."""
         return self._parse(
             self._transport.post(
                 path=routes.AuthRoutes.TOKEN_AUTH,
@@ -91,6 +97,7 @@ class AuthEndpoints(BaseEndpoints):
         bearer_token: str,
         reference_number: str,
     ) -> spec.AuthenticationOperationStatusResponse:
+        """Fetch the status of an in-progress authentication operation."""
         return self._parse(
             self._transport.get(
                 path=routes.AuthRoutes.AUTH_STATUS.format(
@@ -102,6 +109,7 @@ class AuthEndpoints(BaseEndpoints):
         )
 
     def redeem_token(self, bearer_token: str) -> spec.AuthenticationTokensResponse:
+        """Redeem a temporary authentication token for access and refresh tokens."""
         return self._parse(
             self._transport.post(
                 path=routes.AuthRoutes.REDEEM_TOKEN,
@@ -113,6 +121,7 @@ class AuthEndpoints(BaseEndpoints):
     def refresh_token(
         self, bearer_token: str
     ) -> spec.AuthenticationTokenRefreshResponse:
+        """Refresh an access token using a refresh token bearer header."""
         return self._parse(
             self._transport.post(
                 path=routes.AuthRoutes.REFRESH_TOKEN,
@@ -122,11 +131,13 @@ class AuthEndpoints(BaseEndpoints):
         )
 
     def terminate_current_session(self) -> None:
+        """Terminate the current authentication session."""
         _ = self._transport.delete(
             path=routes.AuthRoutes.TERMINATE_CURRENT_SESSION,
         )
 
     def terminate_auth_session(self, reference_number: str) -> None:
+        """Terminate an authentication session by reference number."""
         _ = self._transport.delete(
             path=routes.AuthRoutes.TERMINATE_AUTH_SESSION.format(
                 referenceNumber=reference_number

@@ -1,3 +1,5 @@
+"""Domain models for KSeF authentication tokens."""
+
 from datetime import datetime
 from enum import StrEnum
 from typing import Literal
@@ -55,11 +57,15 @@ class TokenContextIdentifierTypeEnum(StrEnum):
 
 
 class TokenAuthorIdentifier(KSeFBaseModel):
+    """Identifies the subject that created the token."""
+
     type: TokenAuthorIdentifierTypeEnum
     value: str
 
 
 class TokenContextIdentifier(KSeFBaseModel):
+    """Identifies the taxpayer or organizational context bound to a token."""
+
     type: TokenContextIdentifierTypeEnum
     value: str
 
@@ -75,6 +81,8 @@ class TokenStatusResponse(KSeFBaseModel):
 
 
 class TokenInfo(KSeFBaseModel):
+    """Metadata returned when querying tokens."""
+
     reference_number: str
     author_identifier: TokenAuthorIdentifier
     context_identifier: TokenContextIdentifier
@@ -87,16 +95,22 @@ class TokenInfo(KSeFBaseModel):
 
 
 class QueryTokensResponse(KSeFBaseModel):
+    """A single page of token search results."""
+
     continuation_token: str | None
     tokens: list[TokenInfo]
 
 
 class GenerateTokenRequest(KSeFBaseModel):
+    """Payload used to request a new KSeF token."""
+
     permissions: list[TokenPermission]
     description: str
 
 
 class QueryTokensRequest(KSeFBaseModel):
+    """Optional filters for listing tokens."""
+
     status: list[TokenStatus] | None = None
     description: str | None = None
     author_identifier: TokenAuthorIdentifier | None = None

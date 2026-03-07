@@ -23,9 +23,19 @@ _LIST_TOKENS_PARAMS = TypeAdapter(ListTokensQueryParams)
 
 @final
 class TokenEndpoints(BaseEndpoints):
+    """Raw token endpoints backed by generated schema models."""
+
     def generate_token(
         self, body: spec.GenerateTokenRequest
     ) -> spec.GenerateTokenResponse:
+        """Create a token using schema-native request and response models.
+
+        Args:
+            body: Request payload expected by the generated API schema.
+
+        Returns:
+            The token creation response returned by KSeF.
+        """
         return self._parse(
             self._transport.post(
                 path=routes.TokenRoutes.GENERATE_TOKEN,
@@ -39,6 +49,16 @@ class TokenEndpoints(BaseEndpoints):
         continuation_token: str | None = None,
         **params: Unpack[ListTokensQueryParams],
     ) -> spec.QueryTokensResponse:
+        """Fetch one page of tokens.
+
+        Args:
+            continuation_token: Pagination token sent in the
+                ``x-continuation-token`` header to request the next page.
+            **params: Optional query parameters supported by ``GET /tokens``.
+
+        Returns:
+            One page of token results from the API.
+        """
         headers = (
             {"x-continuation-token": continuation_token} if continuation_token else None
         )
@@ -53,6 +73,7 @@ class TokenEndpoints(BaseEndpoints):
         )
 
     def token_status(self, reference_number: str) -> spec.TokenStatusResponse:
+        """Fetch the current activation status for a token reference."""
         return self._parse(
             self._transport.get(
                 path=routes.TokenRoutes.TOKEN_STATUS.format(
@@ -63,7 +84,8 @@ class TokenEndpoints(BaseEndpoints):
         )
 
     def revoke_token(self, reference_number: str) -> None:
-        self._transport.delete(
+        """Revoke a token by its reference number."""
+        _ = self._transport.delete(
             path=routes.TokenRoutes.REVOKE_TOKEN.format(
                 referenceNumber=reference_number
             ),

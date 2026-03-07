@@ -1,3 +1,5 @@
+"""Mappings from subunit permission query responses to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -97,6 +99,7 @@ def subunit_from_spec(
 
 
 def subunit_from_spec(response: BaseModel | Enum) -> object:
+    """Convert subunit permission query responses into domain models."""
     return _from_spec(response)
 
 

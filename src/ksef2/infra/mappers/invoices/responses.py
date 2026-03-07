@@ -1,3 +1,5 @@
+"""Mappings from generated invoice schema models to domain models."""
+
 from functools import singledispatch
 from typing import assert_never, overload
 
@@ -146,6 +148,7 @@ def from_spec(response: spec.InvoicePackage) -> invoices.InvoicePackage: ...
 
 
 def from_spec(response: BaseModel) -> object:
+    """Convert a generated invoice schema model into its domain counterpart."""
     return _from_spec(response)
 
 

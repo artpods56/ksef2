@@ -27,13 +27,17 @@ from ksef2.infra.mappers.certificates import from_spec, to_spec
 
 @final
 class CertificatesClient:
+    """High-level API for certificate enrollment, retrieval, and search."""
+
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = CertificatesEndpoints(transport)
 
     def get_limits(self) -> CertificateLimitsResponse:
+        """Return the effective certificate enrollment and issuance quotas."""
         return from_spec(self._endpoints.get_limits())
 
     def get_enrollment_data(self) -> CertificateEnrollmentData:
+        """Return subject data needed to prepare a CSR for enrollment."""
         return from_spec(self._endpoints.get_enrollment_data())
 
     def enroll(
@@ -44,6 +48,7 @@ class CertificatesClient:
         csr: str,
         valid_from: datetime | str | None = None,
     ) -> CertificateEnrollmentResponse:
+        """Request issuance of a certificate from a CSR."""
         request = EnrollCertificateRequest(
             certificate_name=certificate_name,
             certificate_type=certificate_type,
@@ -58,6 +63,7 @@ class CertificatesClient:
         *,
         reference_number: str,
     ) -> CertificateEnrollmentStatusResponse:
+        """Fetch the current status of a certificate enrollment request."""
         return from_spec(
             self._endpoints.get_enrollment_status(
                 reference_number=reference_number,
@@ -69,6 +75,7 @@ class CertificatesClient:
         *,
         certificate_serial_numbers: list[str],
     ) -> RetrievedCertificatesList:
+        """Download issued certificates by serial number."""
         request = RetrieveCertificatesRequest(
             certificate_serial_numbers=certificate_serial_numbers,
         )
@@ -81,6 +88,7 @@ class CertificatesClient:
         certificate_serial_number: str,
         reason: RevocationReason | None = None,
     ) -> None:
+        """Revoke a certificate, optionally providing a revocation reason."""
 
         request = RevokeCertificateRequest(revocation_reason=reason)
         body = to_spec(request)
@@ -99,6 +107,7 @@ class CertificatesClient:
         expires_after: datetime | str | None = None,
         params: OffsetPaginationParams | None = None,
     ) -> CertificatesInfoList:
+        """Fetch one page of certificate search results."""
         parameters = params or OffsetPaginationParams()
 
         request = QueryCertificatesRequest(
@@ -122,6 +131,7 @@ class CertificatesClient:
         expires_after: datetime | str | None = None,
         params: OffsetPaginationParams | None = None,
     ) -> Iterator[CertificateInfo]:
+        """Iterate over all certificates matching the provided filters."""
         current_params = params or OffsetPaginationParams()
 
         while True:

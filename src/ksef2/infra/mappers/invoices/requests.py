@@ -1,3 +1,5 @@
+"""Mappings from invoice domain models to generated API schema models."""
+
 import base64
 from functools import singledispatch
 from typing import overload
@@ -166,6 +168,7 @@ def to_spec(request: invoices.SendInvoicePayload) -> spec.SendInvoiceRequest: ..
 def to_spec(
     request: BaseModel,
 ) -> object:
+    """Convert an invoice domain model into the schema payload expected by KSeF."""
     return _to_spec(request)
 
 

@@ -1,3 +1,5 @@
+"""Mappings from generated encryption schema models to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -17,6 +19,7 @@ def from_spec(response: spec.PublicKeyCertificate) -> PublicKeyCertificate: ...
 
 
 def from_spec(response: BaseModel | Enum) -> object:
+    """Convert a generated encryption schema object into its domain counterpart."""
     return _from_spec(response)
 
 

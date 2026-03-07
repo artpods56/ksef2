@@ -1,3 +1,5 @@
+"""Mappings from generated certificate schema models to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -85,6 +87,17 @@ def from_spec(
 
 
 def from_spec(response: BaseModel | Enum) -> object:
+    """Convert a generated certificate schema object into its domain counterpart.
+
+    Args:
+        response: Generated API model or enum value to map.
+
+    Returns:
+        The matching domain model or literal value.
+
+    Raises:
+        NotImplementedError: If no mapper exists for the provided type.
+    """
     return _from_spec(response)
 
 
@@ -93,11 +106,6 @@ def from_spec(response: BaseModel | Enum) -> object:
 
 @singledispatch
 def _from_spec(response: BaseModel | Enum) -> object:
-    """Map an API spec response to a domain model.
-
-    Dispatches on the type of `response`. If no mapper is registered,
-    raises NotImplementedError with information about the missing mapper.
-    """
     raise NotImplementedError(
         f"No mapper registered for {type(response).__name__}. "
         f"Register one with @from_spec.register"

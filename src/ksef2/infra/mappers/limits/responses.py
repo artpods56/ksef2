@@ -1,3 +1,5 @@
+"""Mappings from generated limit schema models to domain models."""
+
 from functools import singledispatch
 from typing import overload
 
@@ -28,6 +30,7 @@ def from_spec(response: spec.EffectiveApiRateLimits) -> ApiRateLimits: ...
 
 
 def from_spec(response: BaseModel) -> object:
+    """Convert an effective limit response into its domain counterpart."""
     return _from_spec(response)
 
 

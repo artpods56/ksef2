@@ -1,3 +1,5 @@
+"""Mappings from permission query models to generated API schema payloads."""
+
 from __future__ import annotations
 
 from enum import Enum
@@ -315,6 +317,7 @@ def to_spec(
 
 
 def to_spec(request: BaseModel | Enum) -> object:
+    """Convert a permission query model into the schema payload expected by KSeF."""
     return _to_spec(request)
 
 

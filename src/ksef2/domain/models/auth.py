@@ -1,3 +1,5 @@
+"""Domain models for authentication flows and auth sessions."""
+
 from datetime import datetime
 from enum import StrEnum
 from typing import Literal
@@ -49,6 +51,8 @@ class AuthenticationMethodCategoryEnum(StrEnum):
 
 
 class InitTokenAuthenticationRequest(KSeFBaseModel):
+    """Payload used to authenticate with a previously generated KSeF token."""
+
     challenge: str
     context_type: ContextIdentifierType
     context_value: str
@@ -56,22 +60,30 @@ class InitTokenAuthenticationRequest(KSeFBaseModel):
 
 
 class ChallengeResponse(KSeFBaseModel):
+    """Challenge material returned before token or XAdES authentication starts."""
+
     challenge: str
     timestamp: datetime
     timestamp_ms: int
 
 
 class TokenCredentials(KSeFBaseModel):
+    """A bearer token together with its expiration time."""
+
     token: str
     valid_until: datetime
 
 
 class AuthInitResponse(KSeFBaseModel):
+    """Initial authentication response containing the short-lived auth token."""
+
     reference_number: str
     authentication_token: TokenCredentials
 
 
 class AuthOperationStatus(KSeFBaseModel):
+    """Status of an in-progress authentication operation."""
+
     start_date: datetime
     authentication_method: AuthenticationMethod
     authentication_method_category: AuthenticationMethodCategory
@@ -86,6 +98,8 @@ class AuthOperationStatus(KSeFBaseModel):
 
 
 class AuthenticationSession(KSeFBaseModel):
+    """Metadata describing an authentication session visible in session listings."""
+
     reference_number: str
     start_date: datetime
     authentication_method: AuthenticationMethod
@@ -102,14 +116,20 @@ class AuthenticationSession(KSeFBaseModel):
 
 
 class AuthenticationSessionsResponse(KSeFBaseModel):
+    """A single page of authentication sessions."""
+
     continuation_token: str | None = None
     items: list[AuthenticationSession]
 
 
 class AuthTokens(KSeFBaseModel):
+    """Access and refresh tokens returned after successful authentication."""
+
     access_token: TokenCredentials
     refresh_token: TokenCredentials
 
 
 class RefreshedToken(KSeFBaseModel):
+    """Access token returned by the refresh endpoint."""
+
     access_token: TokenCredentials

@@ -34,6 +34,8 @@ from ksef2.infra.mappers.auth import from_spec, to_spec
 
 @final
 class AuthClient:
+    """Entry point for creating authenticated SDK clients."""
+
     def __init__(
         self,
         transport: Middleware,
@@ -55,6 +57,23 @@ class AuthClient:
         poll_interval: float = 1.0,
         max_poll_attempts: int = 60,
     ) -> AuthenticatedClient:
+        """Authenticate with a KSeF token and return an authenticated client.
+
+        Args:
+            ksef_token: Token generated in KSeF for the target context.
+            nip: Context identifier value used for authentication.
+            context_type: Type of identifier represented by ``nip``.
+            poll_interval: Delay in seconds between authentication status checks.
+            max_poll_attempts: Maximum number of polling attempts before timing out.
+
+        Returns:
+            An authenticated client with redeemed access and refresh tokens.
+
+        Raises:
+            NoCertificateAvailableError: If no valid token-encryption certificate is
+                available.
+            KSeFAuthError: If authentication fails or polling times out.
+        """
         self._ensure_certificates()
 
         challenge = from_spec(self._auth_ep.challenge())
@@ -97,6 +116,19 @@ class AuthClient:
         poll_interval: float = 1.0,
         max_poll_attempts: int = 60,
     ) -> AuthenticatedClient:
+        """Authenticate with an XAdES-signed challenge response.
+
+        Args:
+            nip: Taxpayer identifier embedded in the authentication request.
+            cert: Signing certificate accepted by the target environment.
+            private_key: Private key used to sign the XAdES payload.
+            verify_chain: Whether KSeF should verify the certificate chain.
+            poll_interval: Delay in seconds between authentication status checks.
+            max_poll_attempts: Maximum number of polling attempts before timing out.
+
+        Returns:
+            An authenticated client with redeemed access and refresh tokens.
+        """
         from ksef2.core.xades import build_auth_token_request_xml, sign_xades
 
         challenge = from_spec(self._auth_ep.challenge())
@@ -126,6 +158,7 @@ class AuthClient:
         poll_interval: float = 1.0,
         max_poll_attempts: int = 60,
     ) -> AuthenticatedClient:
+        """Authenticate in the TEST environment using an SDK-generated certificate."""
         if self._environment is not Environment.TEST:
             raise exceptions.KSeFUnsupportedEnvironmentError(
                 "with_test_certificate() is only available for Environment.TEST"
@@ -142,11 +175,13 @@ class AuthClient:
         )
 
     def refresh(self, *, refresh_token: str) -> RefreshedToken:
+        """Exchange a refresh token for a new access token."""
         return from_spec(self._auth_ep.refresh_token(bearer_token=refresh_token))
 
     def _build_authenticated_client(
         self, *, auth_tokens: AuthTokens
     ) -> AuthenticatedClient:
+        """Wrap redeemed tokens in an authenticated SDK client."""
         return AuthenticatedClient(
             transport=self._transport,
             auth_tokens=auth_tokens,
@@ -154,6 +189,7 @@ class AuthClient:
         )
 
     def _ensure_certificates(self) -> None:
+        """Populate the certificate store when token authentication needs it."""
         if not self._certificate_store.all():
             self._certificate_store.load(self._certificates.get_certificates())
 
@@ -165,6 +201,7 @@ class AuthClient:
         poll_interval: float,
         max_attempts: int,
     ) -> None:
+        """Poll authentication status until the operation succeeds or fails."""
 
         retry_predicate: Callable[[Response], bool] = lambda resp: (
             resp.status_code < 200
@@ -199,4 +236,5 @@ class AuthClient:
             ) from exc
 
     def _redeem(self, auth_token: str) -> AuthTokens:
+        """Redeem the temporary authentication token for access and refresh tokens."""
         return from_spec(self._auth_ep.redeem_token(bearer_token=auth_token))

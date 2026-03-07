@@ -9,6 +9,8 @@ from ksef2.infra.mappers.auth import from_spec
 
 @final
 class SessionManagementClient:
+    """High-level access to authentication session listings and termination."""
+
     def __init__(self, transport: Middleware) -> None:
         self._auth_ep = AuthEndpoints(transport)
 
@@ -18,6 +20,7 @@ class SessionManagementClient:
         page_size: int | None = None,
         continuation_token: str | None = None,
     ) -> AuthenticationSessionsResponse:
+        """Fetch one page of authentication sessions."""
         return from_spec(
             self._auth_ep.list_sessions(
                 continuation_token=continuation_token,
@@ -30,6 +33,7 @@ class SessionManagementClient:
         *,
         page_size: int | None = None,
     ) -> Iterator[AuthenticationSessionsResponse]:
+        """Iterate through all authentication session pages."""
         response = self.list_page(page_size=page_size)
         yield response
 
@@ -38,9 +42,11 @@ class SessionManagementClient:
             yield response
 
     def terminate_current(self) -> None:
+        """Terminate the authentication session backing the current bearer token."""
         self._auth_ep.terminate_current_session()
 
     def close(self, *, reference_number: str) -> None:
+        """Terminate an authentication session by reference number."""
         self._auth_ep.terminate_auth_session(
             reference_number=reference_number,
         )

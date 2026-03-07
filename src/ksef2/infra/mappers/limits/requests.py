@@ -1,3 +1,5 @@
+"""Mappings from limit domain models to generated API schema models."""
+
 from functools import singledispatch
 from typing import overload
 
@@ -25,6 +27,7 @@ def to_spec(request: ApiRateLimits) -> spec.SetRateLimitsRequest: ...
 
 
 def to_spec(request: BaseModel) -> object:
+    """Convert a limit override model into the schema payload expected by KSeF."""
     return _to_spec(request)
 
 

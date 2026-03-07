@@ -17,6 +17,8 @@ from ksef2.infra.mappers.invoices import from_spec, to_spec
 
 @final
 class InvoicesClient:
+    """Low-level invoice API used by higher-level invoice services."""
+
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = InvoicesEndpoints(transport)
 
@@ -26,6 +28,7 @@ class InvoicesClient:
         filters: InvoicesFilter,
         params: InvoiceMetadataParams | None = None,
     ) -> QueryInvoicesMetadataResponse:
+        """Fetch one page of invoice metadata matching the provided filters."""
         request = to_spec(filters)
         parameters = params or InvoiceMetadataParams()
         spec_resp = self._endpoints.query_metadata(
@@ -35,6 +38,7 @@ class InvoicesClient:
         return from_spec(spec_resp)
 
     def download_invoice(self, *, ksef_number: str) -> bytes:
+        """Download raw invoice bytes by KSeF number."""
         return self._endpoints.download(ksef_number=ksef_number)
 
     def schedule_export(
@@ -43,6 +47,7 @@ class InvoicesClient:
         filters: InvoicesFilter,
         encryption_certificate: str,
     ) -> ExportHandle:
+        """Schedule an export and return the handle needed to decrypt it later."""
         aes_key, iv = generate_session_key()
         encrypted_key = encrypt_symmetric_key(
             key=aes_key,
@@ -68,6 +73,7 @@ class InvoicesClient:
         *,
         reference_number: str,
     ) -> InvoiceExportStatusResponse:
+        """Fetch export status and package metadata by export reference number."""
         spec_resp = self._endpoints.get_export_status(
             reference_number=reference_number,
         )

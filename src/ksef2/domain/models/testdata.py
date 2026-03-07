@@ -1,3 +1,5 @@
+"""Domain models for the TEST-only data seeding endpoints."""
+
 from datetime import date
 from enum import StrEnum
 from typing import Literal
@@ -62,21 +64,29 @@ class SubUnit(KSeFBaseModel):
 
 
 class Identifier(KSeFBaseModel):
+    """Generic subject identifier used in testdata operations."""
+
     type: IdentifierType
     value: str
 
 
 class AuthContextIdentifier(KSeFBaseModel):
+    """Authentication context identifier used for blocking and unblocking access."""
+
     type: AuthContextIdentifierType
     value: str
 
 
 class Permission(KSeFBaseModel):
+    """Permission granted through the testdata helper endpoints."""
+
     type: PermissionType
     description: str
 
 
 class CreateSubjectRequest(KSeFBaseModel):
+    """Payload used to create a test subject."""
+
     subject_nip: str
     subject_type: SubjectType
     description: str
@@ -89,6 +99,8 @@ class DeleteSubjectRequest(KSeFBaseModel):
 
 
 class CreatePersonRequest(KSeFBaseModel):
+    """Payload used to create a test person within a subject."""
+
     nip: str
     pesel: str
     description: str
@@ -102,6 +114,8 @@ class DeletePersonRequest(KSeFBaseModel):
 
 
 class GrantPermissionsRequest(KSeFBaseModel):
+    """Payload used to grant test permissions in a chosen context."""
+
     permissions: list[Permission]
     grant_to: Identifier
     in_context_of: Identifier
@@ -117,6 +131,8 @@ class EnableAttachmentsRequest(KSeFBaseModel):
 
 
 class RevokeAttachmentsRequest(KSeFBaseModel):
+    """Payload used to schedule or perform attachment revocation."""
+
     nip: str
     expected_end_date: date | None = None
 

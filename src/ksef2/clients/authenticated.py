@@ -34,6 +34,8 @@ from ksef2.services.invoices import InvoicesService
 
 @final
 class AuthenticatedClient:
+    """Authenticated entry point for KSeF operations that require bearer tokens."""
+
     def __init__(
         self,
         transport: Middleware,
@@ -59,6 +61,7 @@ class AuthenticatedClient:
         return self._auth_tokens.access_token.token
 
     def _ensure_encryption_certificates_loaded(self) -> None:
+        """Load public encryption certificates on first use."""
         if self._certificate_store.all():
             return
 
@@ -74,6 +77,7 @@ class AuthenticatedClient:
         return self._auth_tokens.refresh_token.token
 
     def get_encryption_key(self) -> tuple[bytes, bytes, bytes]:
+        """Generate a session AES key, IV, and encrypted symmetric key payload."""
         self._ensure_encryption_certificates_loaded()
 
         cert = self._certificate_store.get_valid("symmetric_key_encryption")
@@ -84,6 +88,7 @@ class AuthenticatedClient:
         return aes_key, iv, encrypted_key
 
     def online_session(self, *, form_code: FormSchema) -> OnlineSessionClient:
+        """Open a new online invoice session and return a bound session client."""
         aes_key, iv, encrypted_key = self.get_encryption_key()
 
         request = OpenOnlineSessionRequest(
@@ -112,6 +117,7 @@ class AuthenticatedClient:
         form_code: FormSchema = FormSchema.FA3,
         offline_mode: bool = False,
     ) -> BatchSessionClient:
+        """Open a new batch session and return a bound batch client."""
         aes_key, iv, encrypted_key = self.get_encryption_key()
 
         request = OpenBatchSessionRequest(
@@ -136,9 +142,11 @@ class AuthenticatedClient:
         return BatchSessionClient(transport=self._authed_transport, state=state)
 
     def resume_online_session(self, state: OnlineSessionState) -> OnlineSessionClient:
+        """Rebind an existing serialized online session state to this client."""
         return OnlineSessionClient(transport=self._authed_transport, state=state)
 
     def resume_batch_session(self, state: "BatchSessionState") -> BatchSessionClient:
+        """Rebind an existing serialized batch session state to this client."""
         return BatchSessionClient(transport=self._authed_transport, state=state)
 
     @cached_property
@@ -167,6 +175,7 @@ class AuthenticatedClient:
 
     @cached_property
     def invoices(self) -> InvoicesService:
+        """Return the invoices service with encryption support configured."""
         return InvoicesService(
             self._authed_transport,
             self._certificate_store,

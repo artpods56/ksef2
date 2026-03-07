@@ -1,3 +1,5 @@
+"""Mappings from permission grant models to generated API schema payloads."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -213,6 +215,7 @@ def to_spec(
 
 
 def to_spec(request: BaseModel | Enum) -> object:
+    """Convert a permission grant model into the schema payload expected by KSeF."""
     return _to_spec(request)
 
 

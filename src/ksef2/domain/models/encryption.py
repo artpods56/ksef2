@@ -1,3 +1,5 @@
+"""Domain models for public encryption certificates exposed by KSeF."""
+
 from datetime import datetime
 from enum import StrEnum
 from typing import Literal
@@ -16,6 +18,8 @@ CertUsage = CertUsageEnum
 
 
 class PublicKeyCertificate(KSeFBaseModel):
+    """Public certificate that can encrypt tokens or session keys for KSeF."""
+
     certificate: str
     valid_from: datetime
     valid_to: datetime

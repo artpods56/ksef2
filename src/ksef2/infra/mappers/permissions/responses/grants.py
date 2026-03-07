@@ -35,6 +35,7 @@ def from_spec(
 
 
 def from_spec(response: BaseModel | Enum) -> object:
+    """Convert grant-related permission responses into domain models."""
     return _from_spec(response)
 
 

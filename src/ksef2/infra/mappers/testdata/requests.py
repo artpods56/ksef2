@@ -1,3 +1,5 @@
+"""Mappings from testdata domain models to generated API payloads."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -99,6 +101,17 @@ def to_spec(request: PermissionType) -> str: ...
 
 
 def to_spec(request: BaseModel | Enum | str) -> object:
+    """Convert a testdata domain object or literal into its schema counterpart.
+
+    Args:
+        request: Domain model, enum, or supported string literal to map.
+
+    Returns:
+        The matching generated API payload object or enum value.
+
+    Raises:
+        NotImplementedError: If no mapper exists for the provided value.
+    """
     if isinstance(request, Enum):
         return _to_spec(request)
     if isinstance(request, str):

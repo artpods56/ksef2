@@ -8,35 +8,47 @@ from ksef2.infra.mappers.limits import from_spec, to_spec
 
 @final
 class LimitsClient:
+    """Read and override KSeF context, subject, and API rate limits."""
+
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = LimitEndpoints(transport)
 
     def get_context_limits(self) -> ContextLimits:
+        """Return the effective limits for online and batch sessions."""
         return from_spec(self._endpoints.get_context_limits())
 
     def get_subject_limits(self) -> SubjectLimits:
+        """Return the effective limits for certificate enrollments and issuance."""
         return from_spec(self._endpoints.get_subject_limits())
 
     def get_api_rate_limits(self) -> ApiRateLimits:
+        """Return the effective per-endpoint API rate limits."""
         return from_spec(self._endpoints.get_api_rate_limits())
 
     def set_session_limits(self, *, limits: ContextLimits) -> None:
+        """Override session limits for the current subject."""
         self._endpoints.set_session_limits(body=to_spec(limits))
 
     def reset_session_limits(self) -> None:
+        """Reset session limits to their default values."""
         self._endpoints.reset_session_limits()
 
     def set_subject_limits(self, *, limits: SubjectLimits) -> None:
+        """Override subject-level certificate and enrollment limits."""
         self._endpoints.set_subject_limits(body=to_spec(limits))
 
     def reset_subject_limits(self) -> None:
+        """Reset subject-level limits to their default values."""
         self._endpoints.reset_subject_limits()
 
     def set_api_rate_limits(self, *, limits: ApiRateLimits) -> None:
+        """Override API rate limits for the current subject."""
         self._endpoints.set_api_rate_limits(body=to_spec(limits))
 
     def reset_api_rate_limits(self) -> None:
+        """Reset API rate limits to their default values."""
         self._endpoints.reset_api_rate_limits()
 
     def set_production_rate_limits(self) -> None:
+        """Copy production rate-limit defaults into the current environment."""
         self._endpoints.set_production_rate_limits()

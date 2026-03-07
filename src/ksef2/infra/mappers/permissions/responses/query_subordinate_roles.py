@@ -1,3 +1,5 @@
+"""Mappings from subordinate-entity role query responses to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -58,6 +60,7 @@ def subordinate_roles_from_spec(
 
 
 def subordinate_roles_from_spec(response: BaseModel | Enum) -> object:
+    """Convert subordinate-role query responses into domain models."""
     return _from_spec(response)
 
 

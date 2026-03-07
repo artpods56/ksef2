@@ -1,3 +1,5 @@
+"""Public root client for authenticated and unauthenticated SDK entry points."""
+
 from functools import cached_property
 from types import TracebackType
 from typing import final, Self
@@ -20,6 +22,8 @@ from ksef2.core.http import HttpTransport
 
 @final
 class Client:
+    """Root KSeF SDK client responsible for transport and lifecycle management."""
+
     def __init__(
         self,
         environment: Environment = Environment.PRODUCTION,
@@ -52,6 +56,7 @@ class Client:
         environment: Environment,
         config: TransportConfig,
     ) -> httpx.Client:
+        """Create the underlying ``httpx.Client`` from transport configuration."""
         timeout_cfg: TimeoutConfig = config.timeouts
         pool_cfg: ConnectionPoolConfig = config.pool
         tls_cfg: TlsConfig = config.tls
@@ -82,11 +87,13 @@ class Client:
         )
 
     def _ensure_open(self) -> None:
+        """Reject operations once the client lifecycle has been closed."""
         if self._lifecycle_state.closed:
             raise exceptions.KSeFClientClosedError("Client is closed.")
 
     @cached_property
     def authentication(self) -> AuthClient:
+        """Return the authentication entry point."""
         self._ensure_open()
         return AuthClient(
             transport=self._transport,
@@ -96,11 +103,13 @@ class Client:
 
     @cached_property
     def encryption(self) -> encryption.EncryptionClient:
+        """Return the public encryption-certificate client."""
         self._ensure_open()
         return encryption.EncryptionClient(self._transport)
 
     @cached_property
     def testdata(self) -> TestDataClient:
+        """Return the TEST-only data seeding client."""
         self._ensure_open()
         if self._environment is not Environment.TEST:
             raise exceptions.KSeFUnsupportedEnvironmentError(
@@ -110,10 +119,12 @@ class Client:
 
     @cached_property
     def peppol(self) -> peppol.PeppolClient:
+        """Return the public Peppol provider client."""
         self._ensure_open()
         return peppol.PeppolClient(self._transport)
 
     def close(self) -> None:
+        """Close owned resources and invalidate cached child clients."""
         if self._lifecycle_state.closed:
             return
 
@@ -126,6 +137,7 @@ class Client:
             self._http_client.close()
 
     def __enter__(self) -> Self:
+        """Return the client for context-manager usage."""
         self._ensure_open()
         return self
 
@@ -135,4 +147,5 @@ class Client:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        """Close the client on context-manager exit."""
         self.close()

@@ -1,3 +1,5 @@
+"""Mappings from encryption domain values to generated API schema values."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -21,6 +23,7 @@ def to_spec(request: CertUsage) -> spec.PublicKeyCertificateUsage: ...
 
 
 def to_spec(request: BaseModel | Enum | str) -> object:
+    """Convert an encryption usage value into its schema counterpart."""
     if isinstance(request, str):
         enum_cls = get_matching_enum(request, VALID_ENCRYPTION_ENUMS)
         if enum_cls is None:

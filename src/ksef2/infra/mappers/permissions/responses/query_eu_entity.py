@@ -1,3 +1,5 @@
+"""Mappings from EU-entity permission query responses to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -64,6 +66,7 @@ def eu_entity_from_spec(
 
 
 def eu_entity_from_spec(response: BaseModel | Enum) -> object:
+    """Convert EU-entity permission query responses into domain models."""
     return _from_spec(response)
 
 

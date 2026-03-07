@@ -60,6 +60,8 @@ from ksef2.infra.mappers.permissions import (
 
 @final
 class PermissionsClient:
+    """High-level API for permission grants, revocations, and permission queries."""
+
     def __init__(self, transport: Middleware) -> None:
         self._grant_eps = PermissionsGrantEndpoints(transport)
         self._revoke_eps = RevokePermissionsEndpoints(transport)
@@ -76,6 +78,7 @@ class PermissionsClient:
         first_name: str,
         last_name: str,
     ) -> GrantPermissionsResponse:
+        """Grant person-scoped permissions to a subject identifier."""
         body = grant_to_spec(
             GrantPersonPermissionsRequest(
                 subject_type=subject_type,
@@ -96,6 +99,7 @@ class PermissionsClient:
         description: str,
         entity_name: str,
     ) -> GrantPermissionsResponse:
+        """Grant entity permissions to a NIP-identified entity."""
         body = grant_to_spec(
             GrantEntityPermissionsRequest(
                 subject_value=subject_value,
@@ -115,6 +119,7 @@ class PermissionsClient:
         description: str,
         entity_name: str,
     ) -> GrantPermissionsResponse:
+        """Grant an authorization permission such as self-invoicing."""
         body = grant_to_spec(
             GrantAuthorizationPermissionsRequest(
                 subject_type=subject_type,
@@ -138,6 +143,7 @@ class PermissionsClient:
         target_type: IndirectTargetIdentifierType | None = None,
         target_value: str | None = None,
     ) -> GrantPermissionsResponse:
+        """Grant indirect permissions, optionally limited to a target entity."""
         body = grant_to_spec(
             GrantIndirectPermissionsRequest(
                 subject_type=subject_type,
@@ -164,6 +170,7 @@ class PermissionsClient:
         last_name: str,
         subunit_name: str | None = None,
     ) -> GrantPermissionsResponse:
+        """Grant permissions within a subunit context."""
         body = grant_to_spec(
             GrantSubunitPermissionsRequest(
                 subject_type=subject_type,
@@ -185,6 +192,7 @@ class PermissionsClient:
         permissions: list[EuEntityPermissionType],
         description: str,
     ) -> GrantPermissionsResponse:
+        """Grant permissions to an EU entity identified by fingerprint data."""
         body = grant_to_spec(
             GrantEuEntityPermissionsRequest(
                 subject_value=subject_value,
@@ -203,6 +211,7 @@ class PermissionsClient:
         description: str,
         eu_entity_name: str,
     ) -> GrantPermissionsResponse:
+        """Grant administration rights for an EU entity in a VAT UE context."""
         body = grant_to_spec(
             GrantEuEntityAdministrationRequest(
                 subject_value=subject_value,
@@ -221,6 +230,7 @@ class PermissionsClient:
         *,
         permission_id: str,
     ) -> GrantPermissionsResponse:
+        """Revoke an authorization permission by permission id."""
         return grant_from_spec(
             self._revoke_eps.revoke_authorization(
                 permission_id=permission_id,
@@ -232,6 +242,7 @@ class PermissionsClient:
         *,
         permission_id: str,
     ) -> GrantPermissionsResponse:
+        """Revoke a non-authorization permission by permission id."""
         return grant_from_spec(
             self._revoke_eps.revoke_person(
                 permission_id=permission_id,
@@ -239,6 +250,7 @@ class PermissionsClient:
         )
 
     def get_attachment_permission_status(self) -> AttachmentPermissionStatus:
+        """Return whether attachments are currently allowed for the subject."""
         return grant_from_spec(self._query_eps.query_attachments_status())
 
     def get_operation_status(
@@ -246,6 +258,7 @@ class PermissionsClient:
         *,
         reference_number: str,
     ) -> PermissionOperationStatusResponse:
+        """Fetch the status of an asynchronous permission operation."""
         return grant_from_spec(
             self._get_eps.query_operation_status(
                 reference_number=reference_number,
@@ -257,6 +270,7 @@ class PermissionsClient:
         *,
         params: OffsetPaginationParams | None = None,
     ) -> EntityRolesResponse:
+        """Fetch one page of roles assigned to the authenticated entity."""
         spec_resp = self._get_eps.query_entity_roles(
             **params.to_query_params()
             if params
@@ -270,6 +284,7 @@ class PermissionsClient:
         query: AuthorizationPermissionsQuery,
         params: OffsetPaginationParams | None = None,
     ) -> AuthorizationPermissionsQueryResponse:
+        """Fetch one page of authorization grants matching the provided filters."""
         spec_resp = self._query_eps.query_authorizations_grants(
             request=query_to_spec(query),
             **params.to_query_params()
@@ -284,6 +299,7 @@ class PermissionsClient:
         query: EuEntityPermissionsQuery,
         params: OffsetPaginationParams | None = None,
     ) -> EuEntityPermissionsQueryResponse:
+        """Fetch one page of EU-entity permissions matching the provided filters."""
         spec_resp = self._query_eps.query_eu_entities_grants(
             request=query_to_spec(query),
             **params.to_query_params()
@@ -298,6 +314,7 @@ class PermissionsClient:
         query: PersonalPermissionsQuery,
         params: OffsetPaginationParams | None = None,
     ) -> PersonalPermissionsQueryResponse:
+        """Fetch one page of permissions held by the authenticated subject."""
         spec_resp = self._query_eps.query_personal_grants(
             request=query_to_spec(query),
             **params.to_query_params()
@@ -312,6 +329,7 @@ class PermissionsClient:
         query: PersonPermissionsQuery,
         params: OffsetPaginationParams | None = None,
     ) -> PersonPermissionsQueryResponse:
+        """Fetch one page of person permission grants matching the provided filters."""
         spec_resp = self._query_eps.query_persons_grants(
             request=query_to_spec(query),
             **params.to_query_params()
@@ -326,6 +344,7 @@ class PermissionsClient:
         query: SubordinateEntityRolesQuery,
         params: OffsetPaginationParams | None = None,
     ) -> SubordinateEntityRolesQueryResponse:
+        """Fetch one page of subordinate entity roles."""
         spec_resp = self._query_eps.query_subordinate_entities_roles(
             request=query_to_spec(query),
             **params.to_query_params()
@@ -340,6 +359,7 @@ class PermissionsClient:
         query: SubunitPermissionsQuery,
         params: OffsetPaginationParams | None = None,
     ) -> SubunitPermissionsQueryResponse:
+        """Fetch one page of subunit permission grants."""
         spec_resp = self._query_eps.query_subunits_grants(
             request=query_to_spec(query),
             **params.to_query_params()

@@ -28,6 +28,8 @@ SessionInvoiceListQueryParams = TypedDict(
 
 @final
 class InvoicesEndpoints(BaseEndpoints):
+    """Raw invoice endpoints backed by generated schema models."""
+
     _METADATA_PARAMS = TypeAdapter(InvoiceMetadataQueryParams)
 
     def query_metadata(
@@ -35,6 +37,7 @@ class InvoicesEndpoints(BaseEndpoints):
         body: spec.InvoiceQueryFilters,
         **params: Unpack[InvoiceMetadataQueryParams],
     ) -> spec.QueryInvoicesMetadataResponse:
+        """Fetch one page of invoice metadata."""
         return self._parse(
             self._transport.post(
                 path=routes.InvoiceRoutes.QUERY_METADATA,
@@ -52,6 +55,7 @@ class InvoicesEndpoints(BaseEndpoints):
         continuation_token: str | None = None,
         **params: Unpack[SessionInvoiceListQueryParams],
     ) -> spec.SessionInvoicesResponse:
+        """Fetch one page of invoices submitted in a session."""
         headers = (
             {"x-continuation-token": continuation_token} if continuation_token else None
         )
@@ -73,6 +77,7 @@ class InvoicesEndpoints(BaseEndpoints):
         continuation_token: str | None = None,
         **params: Unpack[SessionInvoiceListQueryParams],
     ) -> spec.SessionInvoicesResponse:
+        """Fetch one page of failed invoices from a session."""
         headers = (
             {"x-continuation-token": continuation_token} if continuation_token else None
         )
@@ -89,6 +94,7 @@ class InvoicesEndpoints(BaseEndpoints):
         )
 
     def export(self, body: InvoiceExportRequest) -> spec.ExportInvoicesResponse:
+        """Start an invoice export operation."""
         return self._parse(
             self._transport.post(
                 path=routes.InvoiceRoutes.EXPORT,
@@ -100,6 +106,7 @@ class InvoicesEndpoints(BaseEndpoints):
     def get_export_status(
         self, reference_number: str
     ) -> spec.InvoiceExportStatusResponse:
+        """Fetch status for a scheduled invoice export."""
         return self._parse(
             self._transport.get(
                 path=routes.InvoiceRoutes.EXPORT_STATUS.format(
@@ -110,6 +117,7 @@ class InvoicesEndpoints(BaseEndpoints):
         )
 
     def download(self, ksef_number: str) -> bytes:
+        """Download raw invoice bytes by KSeF number."""
         return self._transport.get(
             path=routes.InvoiceRoutes.DOWNLOAD.format(ksefNumber=ksef_number),
         ).content
@@ -119,6 +127,7 @@ class InvoicesEndpoints(BaseEndpoints):
         reference_number: str,
         body: SendInvoiceRequest,
     ) -> spec.SendInvoiceResponse:
+        """Send one encrypted invoice into an open session."""
         return self._parse(
             self._transport.post(
                 path=routes.InvoiceRoutes.SEND.format(referenceNumber=reference_number),
@@ -128,6 +137,7 @@ class InvoicesEndpoints(BaseEndpoints):
         )
 
     def get_session_status(self, reference_number: str) -> spec.SessionStatusResponse:
+        """Fetch status for an online or batch session."""
         return self._parse(
             self._transport.get(
                 path=routes.InvoiceRoutes.SESSION_STATUS.format(
@@ -142,6 +152,7 @@ class InvoicesEndpoints(BaseEndpoints):
         reference_number: str,
         invoice_reference_number: str,
     ) -> spec.SessionInvoiceStatusResponse:
+        """Fetch status for a single invoice inside a session."""
         return self._parse(
             self._transport.get(
                 path=routes.InvoiceRoutes.SESSION_INVOICE_STATUS.format(
@@ -157,6 +168,7 @@ class InvoicesEndpoints(BaseEndpoints):
         reference_number: str,
         ksef_number: str,
     ) -> bytes:
+        """Download a UPO document by KSeF number."""
         return self._transport.get(
             path=routes.InvoiceRoutes.INVOICE_UPO_BY_KSEF.format(
                 referenceNumber=reference_number,
@@ -169,6 +181,7 @@ class InvoicesEndpoints(BaseEndpoints):
         reference_number: str,
         invoice_reference_number: str,
     ) -> bytes:
+        """Download a UPO document by session invoice reference number."""
         return self._transport.get(
             path=routes.InvoiceRoutes.INVOICE_UPO_BY_REFERENCE.format(
                 referenceNumber=reference_number,

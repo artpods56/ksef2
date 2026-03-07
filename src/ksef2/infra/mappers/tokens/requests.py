@@ -1,3 +1,5 @@
+"""Mappings from domain token models to generated API schema models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -38,6 +40,17 @@ def to_spec(request: TokenStatus) -> spec.AuthenticationTokenStatus: ...
 
 
 def to_spec(request: BaseModel | Enum | str) -> object:
+    """Convert a domain token object or literal into its schema counterpart.
+
+    Args:
+        request: Domain model, enum, or supported string literal to map.
+
+    Returns:
+        The matching generated API schema object or enum value.
+
+    Raises:
+        NotImplementedError: If no mapper exists for the provided value.
+    """
     if isinstance(request, str):
         enum_cls = get_matching_enum(request, VALID_TOKEN_ENUMS)
         if enum_cls is None:

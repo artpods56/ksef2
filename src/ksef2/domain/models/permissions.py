@@ -1,3 +1,5 @@
+"""Domain models for permission grants, queries, and operation status."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -191,15 +193,21 @@ class ScopeLiteralEnum(StrEnum):
 
 
 class EntityPermission(KSeFBaseModel):
+    """Entity permission scope together with delegation capability."""
+
     type: EntityPermissionType
     can_delegate: bool = False
 
 
 class GrantPermissionsResponse(KSeFBaseModel):
+    """Reference returned after starting a permission grant or revoke operation."""
+
     reference_number: str
 
 
 class GrantPersonPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions directly to a person."""
+
     subject_type: CertificateSubjectIdentifierType
     subject_value: str
     permissions: list[PersonPermissionScope]
@@ -209,6 +217,8 @@ class GrantPersonPermissionsRequest(KSeFBaseModel):
 
 
 class GrantEntityPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions to an entity."""
+
     subject_value: str
     permissions: list[EntityPermission]
     description: str
@@ -216,6 +226,8 @@ class GrantEntityPermissionsRequest(KSeFBaseModel):
 
 
 class GrantAuthorizationPermissionsRequest(KSeFBaseModel):
+    """Payload for granting invoice authorization rights to an entity."""
+
     subject_type: AuthorizationSubjectIdentifierType
     subject_value: str
     permission: AuthorizationPermissionType
@@ -224,6 +236,8 @@ class GrantAuthorizationPermissionsRequest(KSeFBaseModel):
 
 
 class GrantIndirectPermissionsRequest(KSeFBaseModel):
+    """Payload for granting indirect permissions, optionally scoped to a target."""
+
     subject_type: CertificateSubjectIdentifierType
     subject_value: str
     permissions: list[IndirectPermissionType]
@@ -235,6 +249,8 @@ class GrantIndirectPermissionsRequest(KSeFBaseModel):
 
 
 class GrantSubunitPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions in a subunit context."""
+
     subject_type: CertificateSubjectIdentifierType
     subject_value: str
     context_type: SubunitIdentifierType
@@ -246,12 +262,16 @@ class GrantSubunitPermissionsRequest(KSeFBaseModel):
 
 
 class GrantEuEntityPermissionsRequest(KSeFBaseModel):
+    """Payload for granting permissions to an EU entity."""
+
     subject_value: str
     permissions: list[EuEntityPermissionType]
     description: str
 
 
 class GrantEuEntityAdministrationRequest(KSeFBaseModel):
+    """Payload for granting EU-entity administration rights in a VAT UE context."""
+
     subject_value: str
     context_type: EuEntityAdminContextIdentifierType
     context_value: str
@@ -265,15 +285,21 @@ class GrantEuEntityAdministrationRequest(KSeFBaseModel):
 
 
 class OperationStatus(KSeFBaseModel):
+    """Operation status code and description returned by asynchronous permission APIs."""
+
     code: OperationStatusCode
     description: str
 
 
 class PermissionOperationStatusResponse(KSeFBaseModel):
+    """Status wrapper for a permission grant or revoke operation."""
+
     status: OperationStatus
 
 
 class AttachmentPermissionStatus(KSeFBaseModel):
+    """Current attachment availability for the authenticated subject."""
+
     is_attachment_allowed: bool
     revoked_date: datetime | None = None
 
@@ -284,6 +310,8 @@ class AttachmentPermissionStatus(KSeFBaseModel):
 
 
 class EntityRole(KSeFBaseModel):
+    """Role assigned to the authenticated entity, optionally within a parent entity."""
+
     role: EntityRoleType
     description: str
     start_date: datetime
@@ -292,6 +320,8 @@ class EntityRole(KSeFBaseModel):
 
 
 class EntityRolesResponse(KSeFBaseModel):
+    """One page of entity roles."""
+
     roles: list[EntityRole]
     has_more: bool
 
@@ -302,6 +332,8 @@ class EntityRolesResponse(KSeFBaseModel):
 
 
 class PersonPermissionsQuery(KSeFBaseModel):
+    """Filters for querying person-related permission grants."""
+
     query_type: PersonPermissionsQueryType
     permission_types: list[PersonPermissionScope] | None = None
     permission_state: PermissionState | None = None
@@ -316,6 +348,8 @@ class PersonPermissionsQuery(KSeFBaseModel):
 
 
 class PersonPermissionDetail(KSeFBaseModel):
+    """Permission record returned from person permission queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
     author_type: PersonAuthorIdentifierType | None = None
     author_value: str | None = None
@@ -337,6 +371,8 @@ class PersonPermissionDetail(KSeFBaseModel):
 
 
 class PersonPermissionsQueryResponse(KSeFBaseModel):
+    """One page of person permission query results."""
+
     permissions: list[PersonPermissionDetail]
     has_more: bool
 
@@ -347,6 +383,8 @@ class PersonPermissionsQueryResponse(KSeFBaseModel):
 
 
 class AuthorizationPermissionsQuery(KSeFBaseModel):
+    """Filters for querying authorization grants between entities."""
+
     query_type: QueryType
     permission_types: list[AuthorizationPermissionType] | None = None
     authorizing_type: EntityIdentifierType | None = None
@@ -356,6 +394,8 @@ class AuthorizationPermissionsQuery(KSeFBaseModel):
 
 
 class AuthorizationGrantDetail(KSeFBaseModel):
+    """Authorization grant returned from authorization queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
     author_type: CertificateSubjectIdentifierType | None = None
     author_value: str | None = None
@@ -370,6 +410,8 @@ class AuthorizationGrantDetail(KSeFBaseModel):
 
 
 class AuthorizationPermissionsQueryResponse(KSeFBaseModel):
+    """One page of authorization grant query results."""
+
     authorization_grants: list[AuthorizationGrantDetail]
     has_more: bool
 
@@ -380,6 +422,8 @@ class AuthorizationPermissionsQueryResponse(KSeFBaseModel):
 
 
 class PersonalPermissionsQuery(KSeFBaseModel):
+    """Filters for querying permissions held by the authenticated subject."""
+
     permission_types: list[PersonPermissionScope] | None = None
     permission_state: PermissionState | None = None
     context_type: PersonContextIdentifierType | None = None
@@ -389,6 +433,8 @@ class PersonalPermissionsQuery(KSeFBaseModel):
 
 
 class PersonalPermissionDetail(KSeFBaseModel):
+    """Permission record returned from personal permission queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
     context_type: PersonContextIdentifierType | None = None
     context_value: str | None = None
@@ -408,6 +454,8 @@ class PersonalPermissionDetail(KSeFBaseModel):
 
 
 class PersonalPermissionsQueryResponse(KSeFBaseModel):
+    """One page of personal permission query results."""
+
     permissions: list[PersonalPermissionDetail]
     has_more: bool
 
@@ -418,12 +466,16 @@ class PersonalPermissionsQueryResponse(KSeFBaseModel):
 
 
 class EuEntityPermissionsQuery(KSeFBaseModel):
+    """Filters for querying EU-entity permissions."""
+
     vat_ue_identifier: str | None = None
     authorized_fingerprint_identifier: str | None = None
     permission_types: list[EuEntityQueryPermissionType] | None = None
 
 
 class EuEntityPermission(KSeFBaseModel):
+    """Permission record returned from EU-entity permission queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
     author_type: CertificateSubjectIdentifierType
     author_value: str
@@ -440,6 +492,8 @@ class EuEntityPermission(KSeFBaseModel):
 
 
 class EuEntityPermissionsQueryResponse(KSeFBaseModel):
+    """One page of EU-entity permission query results."""
+
     permissions: list[EuEntityPermission]
     has_more: bool
 
@@ -450,10 +504,14 @@ class EuEntityPermissionsQueryResponse(KSeFBaseModel):
 
 
 class SubordinateEntityRolesQuery(KSeFBaseModel):
+    """Filters for querying subordinate entity roles."""
+
     subordinate_nip: str | None = None
 
 
 class SubordinateEntityRoleDetail(KSeFBaseModel):
+    """Role record returned from subordinate-entity role queries."""
+
     subordinate_entity_type: EntityIdentifierType
     subordinate_entity_value: str
     role: SubordinateEntityRoleType
@@ -462,6 +520,8 @@ class SubordinateEntityRoleDetail(KSeFBaseModel):
 
 
 class SubordinateEntityRolesQueryResponse(KSeFBaseModel):
+    """One page of subordinate entity role query results."""
+
     roles: list[SubordinateEntityRoleDetail]
     has_more: bool
 
@@ -472,10 +532,14 @@ class SubordinateEntityRolesQueryResponse(KSeFBaseModel):
 
 
 class SubunitPermissionsQuery(KSeFBaseModel):
+    """Filters for querying permissions assigned to subunits."""
+
     subunit_nip: str | None = None
 
 
 class SubunitPermission(KSeFBaseModel):
+    """Permission record returned from subunit permission queries."""
+
     id: Annotated[str, Field(max_length=36, min_length=36)]
     authorized_type: CertificateSubjectIdentifierType
     authorized_value: str
@@ -494,6 +558,8 @@ class SubunitPermission(KSeFBaseModel):
 
 
 class SubunitPermissionsQueryResponse(KSeFBaseModel):
+    """One page of subunit permission query results."""
+
     permissions: list[SubunitPermission]
     has_more: bool
 

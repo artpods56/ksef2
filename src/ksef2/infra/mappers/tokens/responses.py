@@ -1,3 +1,5 @@
+"""Mappings from generated token schema models to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -68,6 +70,17 @@ def from_spec(
 
 
 def from_spec(response: BaseModel | Enum) -> object:
+    """Convert a generated token schema object into its domain counterpart.
+
+    Args:
+        response: Generated API model or enum value to map.
+
+    Returns:
+        The matching domain model or literal value.
+
+    Raises:
+        NotImplementedError: If no mapper exists for the provided type.
+    """
     return _from_spec(response)
 
 

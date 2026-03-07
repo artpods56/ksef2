@@ -1,3 +1,5 @@
+"""Mappings from entity and authorization query responses to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -109,6 +111,7 @@ def entity_from_spec(
 
 
 def entity_from_spec(response: BaseModel | Enum) -> object:
+    """Convert entity-role and authorization query responses into domain models."""
     return _from_spec(response)
 
 

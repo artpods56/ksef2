@@ -10,11 +10,14 @@ from ksef2.infra.mappers.sessions import from_spec
 
 @final
 class InvoiceSessionLogClient:
+    """Read historical online or batch session logs with pagination support."""
+
     def __init__(self, transport: Middleware) -> None:
         self._endpoints = SessionEndpoints(transport)
 
     @staticmethod
     def _coerce_session_type(session_type: str) -> SessionTypeEnum:
+        """Normalize user-friendly session type strings into enum values."""
         try:
             return SessionTypeEnum[session_type.upper()]
         except KeyError as exc:
@@ -31,6 +34,7 @@ class InvoiceSessionLogClient:
         params: ListSessionsQuery | None = None,
         statuses: list[str] | None = None,
     ) -> ListSessionsResponse:
+        """Fetch one page of session log results for the chosen session type."""
         parameters = params or ListSessionsQuery(
             session_type=self._coerce_session_type(session_type),
         )
@@ -50,6 +54,7 @@ class InvoiceSessionLogClient:
         session_type: str,
         params: ListSessionsQuery | None = None,
     ) -> Iterator[ListSessionsResponse]:
+        """Iterate through all session log pages for the chosen session type."""
         parameters = params or ListSessionsQuery(
             session_type=self._coerce_session_type(session_type),
         )

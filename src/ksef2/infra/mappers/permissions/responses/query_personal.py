@@ -1,3 +1,5 @@
+"""Mappings from personal permission query responses to domain models."""
+
 from enum import Enum
 from functools import singledispatch
 from typing import assert_never, overload
@@ -137,6 +139,7 @@ def personal_from_spec(
 
 
 def personal_from_spec(response: BaseModel | Enum) -> object:
+    """Convert personal permission query responses into domain models."""
     return _from_spec(response)
 
 
