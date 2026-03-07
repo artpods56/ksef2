@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from ksef2.domain.models.auth import (
     AuthenticationMethod,
+    AuthenticationMethodEnum,
     AuthenticationMethodCategory,
     AuthenticationSession,
     AuthenticationSessionsResponse,
@@ -92,6 +93,13 @@ def _from_spec(response: BaseModel | Enum) -> object:
     )
 
 
+def _method_from_code(code: str) -> AuthenticationMethod:
+    try:
+        return AuthenticationMethodEnum(code).value
+    except ValueError as e:
+        raise ValueError(f"Unsupported authentication method code: {code!r}") from e
+
+
 @_from_spec.register
 def _(response: spec.AuthenticationChallengeResponse) -> ChallengeResponse:
     return ChallengeResponse(
@@ -157,7 +165,7 @@ def _(response: spec.AuthenticationMethodCategory) -> AuthenticationMethodCatego
 def _(response: spec.AuthenticationOperationStatusResponse) -> AuthOperationStatus:
     return AuthOperationStatus(
         start_date=response.startDate,
-        authentication_method=from_spec(response.authenticationMethod),
+        authentication_method=_method_from_code(response.authenticationMethodInfo.code),
         authentication_method_category=from_spec(
             response.authenticationMethodInfo.category
         ),
@@ -176,7 +184,7 @@ def _(response: spec.AuthenticationOperationStatusResponse) -> AuthOperationStat
 def _(response: spec.AuthenticationListItem) -> AuthenticationSession:
     return AuthenticationSession(
         start_date=response.startDate,
-        authentication_method=from_spec(response.authenticationMethod),
+        authentication_method=_method_from_code(response.authenticationMethodInfo.code),
         authentication_method_category=from_spec(
             response.authenticationMethodInfo.category
         ),
