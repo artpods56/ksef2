@@ -98,6 +98,10 @@ GENERATED_PAIRS: tuple[GeneratedPair, ...] = (
     GeneratedPair(
         Path("src/ksef2/core/async_protocols.py"), Path("src/ksef2/core/protocols.py")
     ),
+    GeneratedPair(
+        Path("src/ksef2/core/async_external_transfer.py"),
+        Path("src/ksef2/core/external_transfer.py"),
+    ),
     # clients/
     GeneratedPair(
         Path("src/ksef2/clients/async_auth.py"), Path("src/ksef2/clients/auth.py")
@@ -600,11 +604,16 @@ def _run_ruff_fix(paths: Iterable[Path], cwd: Path = REPO_ROOT) -> None:
         return
 
     config = str(cwd / "pyproject.toml")
+    ruff = Path(sys.executable).with_name("ruff")
+    if not ruff.is_file():
+        ruff_from_path = shutil.which("ruff")
+        if ruff_from_path is None:
+            raise RuntimeError("ruff is required to format generated sync modules")
+        ruff = Path(ruff_from_path)
+
     _run(
         [
-            "uv",
-            "run",
-            "ruff",
+            str(ruff),
             "check",
             "--config",
             config,
@@ -615,7 +624,7 @@ def _run_ruff_fix(paths: Iterable[Path], cwd: Path = REPO_ROOT) -> None:
         ],
         cwd=cwd,
     )
-    _run(["uv", "run", "ruff", "format", "--config", config, *path_args], cwd=cwd)
+    _run([str(ruff), "format", "--config", config, *path_args], cwd=cwd)
 
 
 def _run(command: list[str], cwd: Path) -> None:

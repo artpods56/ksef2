@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ksef2"
-version = "0.19.0"
+version = "1.0.0"
 description = "Python SDK and Tools for Poland's KSeF (Krajowy System e-Faktur) API"
 readme = "README.md"
 authors = [{ name = "Artur Podsiadły" }]
@@ -56,13 +56,20 @@ codegen = [
 testpaths = ["tests"]
 addopts = "-m 'not integration'"
 asyncio_mode = "auto"
+filterwarnings = [
+    "error::DeprecationWarning",
+    "error::PendingDeprecationWarning",
+]
 markers = [
     "integration: tests that hit the real KSeF TEST environment",
 ]
 
+[tool.basedpyright]
+baselineFile = ".basedpyright/baseline.json"
+
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.19.0"
+version = "1.0.0"
 tag_format = "v$version"
 update_changelog_on_bump = true
 version_files = [

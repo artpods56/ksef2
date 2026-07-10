@@ -6,8 +6,9 @@ description: SDK exception hierarchy, attributes, KSeF exception codes, and poll
 import { LinkCard } from '@astrojs/starlight/components';
 
 ksef2 raises SDK exceptions for failures it can classify. Transport failures
-raised before KSeF returns a parsed response remain `httpx.HTTPError`
-exceptions.
+raised before KSeF returns a parsed API response remain `httpx.HTTPError`
+exceptions. Presigned external-storage transfers use the dedicated exceptions
+described below instead of KSeF API/authentication classification.
 
 ## Base classes
 
@@ -17,6 +18,8 @@ exceptions.
 | `KSeFApiError` | `KSeFException` | `API_ERROR` | `status_code`, `exception_code`, `response` |
 | `KSeFAuthError` | `KSeFApiError` | `AUTH_ERROR` | `status_code`, `exception_code`, `response` |
 | `KSeFRateLimitError` | `KSeFApiError` | `RATE_LIMIT_ERROR` | `retry_after`, `status_code`, `response` |
+| `KSeFExternalTransferError` | `KSeFException` | `EXTERNAL_TRANSFER_ERROR` | `operation`, `host`, `reference_number`, `part_ordinal`, `status_code`, `outcome_ambiguous` |
+| `KSeFBatchUploadError` | `KSeFExternalTransferError` | `BATCH_UPLOAD_ERROR` | External-transfer attributes plus `recovery_state()` |
 
 Catch narrower subclasses before `KSeFException` when the workflow has a
 specific recovery action.
@@ -45,8 +48,41 @@ except httpx.HTTPError as exc:
 | `KSeFInvoiceRenderingError` | `INVOICE_RENDERING_ERROR` | Optional XSLT/PDF rendering failures. |
 | `KSeFEncryptionError` | `ENCRYPTION_ERROR` | Token, symmetric-key, invoice encryption, or decryption failure. |
 | `KSeFSessionError` | `SESSION_ERROR` | Session-state violation, such as using a closed session. |
+| `KSeFAuthTokenRedemptionError` | `AUTH_TOKEN_REDEMPTION_ERROR` | A one-shot authentication redemption lost its response and may have succeeded. |
+| `KSeFExternalTransferError` | `EXTERNAL_TRANSFER_ERROR` | A presigned external-storage upload or download was rejected or lost its response. |
+| `KSeFBatchUploadError` | `BATCH_UPLOAD_ERROR` | A batch-part upload failed while protected recovery state remains available. |
 | `NoCertificateAvailableError` | `NO_CERTIFICATE_AVAILABLE` | No valid certificate exists for signing or encryption usage. |
 | `KSeFMetadataPaginationError` | `METADATA_PAGINATION_ERROR` | Metadata pagination cannot continue safely. |
+
+`KSeFAuthTokenRedemptionError.outcome_ambiguous` is always `True`. Do not retry
+the redemption: KSeF may already have consumed the temporary authentication
+token even though the response did not reach the caller.
+
+## External transfer attributes and batch recovery
+
+Presigned storage responses are not KSeF API responses. A storage `403`, for
+example, raises `KSeFExternalTransferError`, not `KSeFAuthError`. Its message and
+`context` contain only the sanitized host, operation, workflow reference, part
+ordinal, status code, and ambiguity flag; the signed URL is not included.
+
+| Attribute | Type | Meaning |
+| --- | --- | --- |
+| `operation` | `Literal["upload", "download"]` | External transfer that failed. |
+| `host` | `str` | Storage hostname without path, query, or signature. |
+| `reference_number` | `str` | Export or batch workflow reference. |
+| `part_ordinal` | `int` | One-based package part ordinal. |
+| `status_code` | `int | None` | Storage response status, or `None` when no response arrived. |
+| `outcome_ambiguous` | `bool` | `True` when an upload may have reached storage despite a lost response. |
+
+`KSeFBatchUploadError.recovery_state()` deliberately reveals the sensitive
+`BatchSessionResumeState` required for recovery. It is excluded from the error
+message and `context` because it contains encryption material and presigned
+URLs. Store it only in protected credential storage, and do not blindly retry
+an upload when `outcome_ambiguous` is `True`.
+
+The original `httpx` failure remains available through `__cause__`. Avoid
+logging the cause indiscriminately because raw HTTP diagnostics can include the
+signed URL.
 
 ## API error attributes
 

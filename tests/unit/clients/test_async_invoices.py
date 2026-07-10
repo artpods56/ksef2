@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 from polyfactory import BaseFactory
@@ -177,7 +177,11 @@ class TestAsyncInvoicesClient:
         pages = asyncio.run(
             _collect_metadata_pages(
                 invoices_client,
-                filters=inv_export_filters.build(date_type="permanent_storage"),
+                filters=inv_export_filters.build(
+                    date_type="permanent_storage",
+                    date_from=boundary - timedelta(days=1),
+                    date_to=boundary + timedelta(days=1),
+                ),
                 params=InvoiceMetadataParams(
                     page_size=250,
                     page_offset=39,

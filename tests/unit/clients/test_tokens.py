@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from polyfactory import BaseFactory
 
@@ -24,11 +25,7 @@ class TestTokensClient:
         token_generate_resp: BaseFactory[spec.GenerateTokenResponse],
     ):
         gen_resp = token_generate_resp.build()
-        status_resp = TokenStatusResponseFactory.build(
-            status=spec.AuthenticationTokenStatus.Active
-        )
         fake_transport.enqueue(gen_resp.model_dump(mode="json"))
-        fake_transport.enqueue(status_resp.model_dump(mode="json"))
 
         result = tokens_client.generate(
             permissions=["invoice_read"],
@@ -38,87 +35,49 @@ class TestTokensClient:
         assert isinstance(result, tokens.GenerateTokenResponse)
         assert result.reference_number == gen_resp.referenceNumber
         assert result.token == gen_resp.token
-        assert len(fake_transport.calls) == 2
+        assert len(fake_transport.calls) == 1
         call = fake_transport.calls[0]
         assert call.method == "POST"
         assert str(call.path) == TokenRoutes.GENERATE_TOKEN
 
-    def test_generate_polls_until_active(
+    def test_wait_for_activation_polls_until_active(
         self,
         tokens_client: TokensClient,
         fake_transport: FakeTransport,
-        token_generate_resp: BaseFactory[spec.GenerateTokenResponse],
     ):
-        gen_resp = token_generate_resp.build()
         pending_resp = TokenStatusResponseFactory.build(
             status=spec.AuthenticationTokenStatus.Pending
         )
         active_resp = TokenStatusResponseFactory.build(
             status=spec.AuthenticationTokenStatus.Active
         )
-        fake_transport.enqueue(gen_resp.model_dump(mode="json"))
         fake_transport.enqueue(pending_resp.model_dump(mode="json"))
         fake_transport.enqueue(active_resp.model_dump(mode="json"))
 
-        result = tokens_client.generate(
-            permissions=["invoice_read"],
-            description="Test token",
+        result = tokens_client.wait_for_activation(
+            reference_number=active_resp.referenceNumber,
             poll_interval=0.0,
         )
 
-        assert isinstance(result, tokens.GenerateTokenResponse)
-        assert len(fake_transport.calls) == 3
+        assert result.status == "active"
+        assert len(fake_transport.calls) == 2
 
-    def test_generate_raises_on_failed_status(
+    def test_wait_for_activation_raises_on_failed_status(
         self,
         tokens_client: TokensClient,
         fake_transport: FakeTransport,
-        token_generate_resp: BaseFactory[spec.GenerateTokenResponse],
     ):
-        gen_resp = token_generate_resp.build()
         failed_resp = TokenStatusResponseFactory.build(
             status=spec.AuthenticationTokenStatus.Failed
         )
-        fake_transport.enqueue(gen_resp.model_dump(mode="json"))
         fake_transport.enqueue(failed_resp.model_dump(mode="json"))
 
         with pytest.raises(exceptions.KSeFApiError, match="Token activation failed"):
-            _ = tokens_client.generate(
-                permissions=["invoice_read"],
-                description="Test token",
+            _ = tokens_client.wait_for_activation(
+                reference_number=failed_resp.referenceNumber,
             )
 
-    def test_generate_raises_on_timeout(
-        self,
-        tokens_client: TokensClient,
-        fake_transport: FakeTransport,
-        token_generate_resp: BaseFactory[spec.GenerateTokenResponse],
-    ):
-        gen_resp = token_generate_resp.build()
-        pending_resp = TokenStatusResponseFactory.build(
-            status=spec.AuthenticationTokenStatus.Pending
-        )
-        fake_transport.enqueue(gen_resp.model_dump(mode="json"))
-        for _ in range(3):
-            fake_transport.enqueue(pending_resp.model_dump(mode="json"))
-
-        with pytest.raises(
-            exceptions.KSeFTokenStatusTimeoutError,
-            match="not active",
-        ) as exc_info:
-            _ = tokens_client.generate(
-                permissions=["invoice_read"],
-                description="Test token",
-                timeout=0.0,
-                poll_interval=0.0,
-            )
-
-        assert exc_info.value.reference_number == gen_resp.referenceNumber
-        assert exc_info.value.timeout == 0.0
-        assert not hasattr(exc_info.value, "attempts")
-        assert not hasattr(exc_info.value, "status_code")
-
-    def test_generate_zero_timeout_polls_status_once(
+    def test_activation_timeout_does_not_discard_generated_token(
         self,
         tokens_client: TokensClient,
         fake_transport: FakeTransport,
@@ -131,13 +90,17 @@ class TestTokensClient:
         fake_transport.enqueue(gen_resp.model_dump(mode="json"))
         fake_transport.enqueue(pending_resp.model_dump(mode="json"))
 
+        generated = tokens_client.generate(
+            permissions=["invoice_read"],
+            description="Test token",
+        )
+
         with pytest.raises(
             exceptions.KSeFTokenStatusTimeoutError,
             match="not active",
         ) as exc_info:
-            _ = tokens_client.generate(
-                permissions=["invoice_read"],
-                description="Test token",
+            _ = tokens_client.wait_for_activation(
+                reference_number=generated.reference_number,
                 timeout=0.0,
                 poll_interval=0.0,
             )
@@ -146,9 +109,32 @@ class TestTokensClient:
         assert exc_info.value.timeout == 0.0
         assert not hasattr(exc_info.value, "attempts")
         assert not hasattr(exc_info.value, "status_code")
-
+        assert generated.token == gen_resp.token
         assert len(fake_transport.calls) == 2
-        assert fake_transport.calls[0].method == "POST"
+        assert fake_transport.calls[1].method == "GET"
+
+    def test_activation_transport_error_does_not_discard_generated_token(
+        self,
+        tokens_client: TokensClient,
+        fake_transport: FakeTransport,
+        token_generate_resp: BaseFactory[spec.GenerateTokenResponse],
+    ):
+        gen_resp = token_generate_resp.build()
+        fake_transport.enqueue(gen_resp.model_dump(mode="json"))
+        fake_transport.enqueue_error(httpx.ReadError("status response lost"))
+
+        generated = tokens_client.generate(
+            permissions=["invoice_read"],
+            description="Test token",
+        )
+
+        with pytest.raises(httpx.ReadError, match="status response lost"):
+            _ = tokens_client.wait_for_activation(
+                reference_number=generated.reference_number,
+            )
+
+        assert generated.token == gen_resp.token
+        assert len(fake_transport.calls) == 2
         assert fake_transport.calls[1].method == "GET"
 
     def test_list_page(

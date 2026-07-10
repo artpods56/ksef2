@@ -18,26 +18,40 @@ używać tokena.
 token = auth.tokens.generate(
     permissions=["invoice_read"],
     description="nightly invoice export",
-    timeout=60.0,
-    poll_interval=1.0,
 )
 
-# GenerateTokenResponse
-# {
-#   "reference_number": "20260625-TOKEN-...",
-#   "token": "eyJ..."
-# }
+token_reference = token.reference_number
+token_secret = token.token
 ```
 
-`generate()` wysyła żądanie tokena i czeka, aż KSeF zgłosi token jako aktywny.
+`generate()` wraca, gdy tylko KSeF udostępni jednorazową wartość credentiala.
 Zwrócone pole `token` jest sekretem, którego automatyzacja użyje później do
 uwierzytelniania tokenem.
+
+Domyślny `repr` i ogólne zrzuty Pydantic pomijają sekret. Odczytuj `.token`
+tylko na granicy chronionego magazynu albo użyj `to_sensitive_dict()`, gdy
+potrzebujesz jawnej mapy zawierającej sekret.
 
 <Aside type="caution" title="Wartość tokena jest pokazana raz">
   Zapisz zwróconą wartość tokena od razu w magazynie sekretów. Późniejsze
   wywołania statusu i listowania identyfikują token po `reference_number`, ale
   nie odzyskują sekretnej wartości tokena.
 </Aside>
+
+Po zapisaniu credentiala poczekaj jawnie, gdy następna operacja wymaga już
+aktywnego tokena:
+
+```python
+status = auth.tokens.wait_for_activation(
+    reference_number=token.reference_number,
+    timeout=60.0,
+    poll_interval=1.0,
+)
+```
+
+Timeout albo błąd transportu z `wait_for_activation()` nie odrzuca zapisanego
+wcześniej credentiala. Wznów sprawdzanie później z tym samym
+`reference_number`.
 
 ## Listuj tokeny
 
@@ -113,9 +127,11 @@ auth.tokens.revoke(reference_number="20260625-TOKEN-...")
 
 3. Zapisz wartość tokena w magazynie sekretów, a numer referencyjny w metadanych.
 
-4. Listuj albo sprawdzaj referencje tokenów podczas audytów.
+4. Poczekaj na aktywację, gdy token musi być od razu gotowy do użycia.
 
-5. Cofaj tokeny nieużywane, wygasłe albo naruszone.
+5. Listuj albo sprawdzaj referencje tokenów podczas audytów.
+
+6. Cofaj tokeny nieużywane, wygasłe albo naruszone.
 
 </Steps>
 

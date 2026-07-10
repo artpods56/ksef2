@@ -28,6 +28,11 @@ filters = InvoicesFilter.for_seller(
 )
 ```
 
+`InvoicesFilter` normalizuje każdą przyjętą datę do UTC przed porównaniem i
+mapowaniem requestu. Wartości z jawnym offsetem zachowują swój moment. Wartości
+bez strefy są interpretowane jako czas lokalny Europe/Warsaw; niejednoznaczne
+albo nieistniejące godziny zmiany czasu muszą zawierać jawny offset.
+
 <Aside type="tip" title="Do synchronizacji użyj dat trwałego zapisu">
   `issue_date` jest zwykle właściwe dla okresów księgowych. Dla automatycznej
   synchronizacji przyrostowej użyj `date_type="permanent_storage"` oraz

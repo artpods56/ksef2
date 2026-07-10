@@ -4,6 +4,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Literal
 
+from pydantic import Field
+
 from ksef2.domain.models.base import KSeFBaseModel
 
 type TokenPermission = Literal[
@@ -82,7 +84,11 @@ class GenerateTokenResponse(KSeFBaseModel):
     """Token value returned after a successful generate operation."""
 
     reference_number: str
-    token: str
+    token: str = Field(exclude=True, repr=False)
+
+    def to_sensitive_dict(self) -> dict[str, str]:
+        """Export the one-time token for deliberately protected persistence."""
+        return {"reference_number": self.reference_number, "token": self.token}
 
 
 class TokenStatusResponse(KSeFBaseModel):

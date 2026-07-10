@@ -62,8 +62,10 @@ class AsyncAuthenticatedClient:
         auth_tokens: AuthTokens,
         certificate_store: CertificateStoreProtocol,
         environment: Environment = Environment.PRODUCTION,
+        transfer_transport: AsyncMiddleware | None = None,
     ) -> None:
         self._transport = transport
+        self._transfer_transport = transfer_transport or transport
         self._auth_tokens = auth_tokens
         self._certificate_store = certificate_store
         self._environment = environment
@@ -281,7 +283,7 @@ class AsyncAuthenticatedClient:
         return AsyncBatchSessionClient(
             transport=self._authed_transport,
             state=state,
-            upload_transport=self._transport,
+            upload_transport=self._transfer_transport,
             prepared_batch=prepared_batch,
             access_token=self.access_token,
         )
@@ -340,7 +342,7 @@ class AsyncAuthenticatedClient:
         return AsyncBatchSessionClient(
             transport=self._authed_transport,
             state=state,
-            upload_transport=self._transport,
+            upload_transport=self._transfer_transport,
             access_token=self.access_token,
         )
 
@@ -349,7 +351,7 @@ class AsyncAuthenticatedClient:
         """Return the invoices service with encryption support configured."""
         return AsyncInvoicesService(
             self._authed_transport,
-            self._transport,
+            self._transfer_transport,
             self._certificate_store,
             client=AsyncInvoicesClient(self._authed_transport),
             ensure_encryption_certificates_loaded=(
@@ -366,7 +368,7 @@ class AsyncAuthenticatedClient:
         """
         return AsyncBatchService(
             authed_transport=self._authed_transport,
-            upload_transport=self._transport,
+            upload_transport=self._transfer_transport,
             get_encryption_key=self._get_encryption_material,
             open_batch_session=self.open_batch_session,
         )

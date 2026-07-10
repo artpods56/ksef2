@@ -76,8 +76,9 @@ from pathlib import Path
 
 export = auth.invoices.schedule_export(filters=filters)
 
-# ExportHandle(reference_number="...", aes_key=<bytes>, iv=<bytes>)
-# Keep this object private. It contains decryption material.
+# ExportHandle(reference_number="...")
+# Keep this object private. Its hidden aes_key and iv fields contain
+# decryption material.
 
 package = auth.invoices.wait_for_export_package(
     reference_number=export.reference_number,

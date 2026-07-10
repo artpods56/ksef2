@@ -6,6 +6,7 @@ from typing import final
 
 from ksef2.core import exceptions
 from ksef2.core.async_protocols import AsyncMiddleware
+from ksef2.core.async_external_transfer import AsyncExternalTransferClient
 from ksef2.domain.models import BatchSessionResumeState
 from ksef2.domain.models.batch import PartUploadRequest, PreparedBatch
 from ksef2.domain.models.session import (
@@ -15,9 +16,6 @@ from ksef2.domain.models.session import (
 from ksef2.endpoints.async_invoices import AsyncInvoicesEndpoints
 from ksef2.endpoints.async_session import AsyncSessionEndpoints
 from ksef2.infra.mappers.sessions import from_spec as session_from_spec
-from ksef2.logging import get_logger
-
-logger = get_logger(__name__)
 
 
 @final
@@ -46,7 +44,9 @@ class AsyncBatchSessionClient:
         access_token: str | None = None,
     ) -> None:
         self._transport = transport
-        self._upload_transport = upload_transport or transport
+        self._external_transfers = AsyncExternalTransferClient(
+            upload_transport or transport
+        )
         self._state = state
         self._prepared_batch = prepared_batch
         self._access_token = access_token
@@ -163,7 +163,9 @@ class AsyncBatchSessionClient:
         Raises:
             KSeFClientClosedError: If the upload window has already been closed.
             KSeFValidationError: If the session has no prepared batch payload attached.
-            httpx.HTTPError: If uploading a part to its presigned URL fails.
+            KSeFBatchUploadError: If external storage rejects an upload or its
+                outcome cannot be determined. Call ``recovery_state()`` on the error
+                to deliberately recover the sensitive batch state.
         """
         self._ensure_open()
 
@@ -190,19 +192,27 @@ class AsyncBatchSessionClient:
         for ordinal_number in sorted(upload_requests):
             upload_request = upload_requests[ordinal_number]
             part = parts[ordinal_number]
-            _ = await self._upload_transport.request(
-                upload_request.method,
-                upload_request.url,
-                headers={
-                    "Content-Type": "application/octet-stream",
-                    **{
-                        key: value
-                        for key, value in upload_request.headers.items()
-                        if value is not None
+            try:
+                await self._external_transfers.upload_part(
+                    method=upload_request.method,
+                    url=upload_request.url,
+                    headers={
+                        "Content-Type": "application/octet-stream",
+                        **{
+                            key: value
+                            for key, value in upload_request.headers.items()
+                            if value is not None
+                        },
                     },
-                },
-                content=part.content,
-            )
+                    content=part.content,
+                    reference_number=self._state.reference_number,
+                    part_ordinal=ordinal_number,
+                )
+            except exceptions.KSeFExternalTransferError as exc:
+                raise exceptions.KSeFBatchUploadError(
+                    transfer_error=exc,
+                    recovery_state=self._state,
+                ) from exc
 
     async def aclose(self) -> None:
         """Close the batch session and start processing.
@@ -228,13 +238,5 @@ class AsyncBatchSessionClient:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        try:
+        if exc_type is None:
             await self.aclose()
-        except exceptions.KSeFException:
-            if exc_type is None:
-                raise
-            logger.warning(
-                "Failed to close batch session",
-                reference_number=self._state.reference_number,
-                exc_info=True,
-            )

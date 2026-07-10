@@ -13,7 +13,7 @@ They are the paths intended to remain stable through the 1.x line.
 | Import path | Use it for |
 | --- | --- |
 | `ksef2` | Root clients, environment and transport config, `FormSchema`, `__version__`, and public exceptions. |
-| `ksef2.clients` | Concrete sync and async client classes when you need them for type annotations. |
+| `ksef2.clients` | Concrete sync/async clients and the stable `InvoicesService` / `BatchService` workflow types (plus async twins) for type annotations. |
 | `ksef2.models` | SDK request, response, filter, pagination, token, permission, session, and batch models. |
 | `ksef2.fa3` | FA(3) invoice builder, draft snapshots, and public FA(3) domain models used by builder workflows. |
 | `ksef2.xades` | Certificate loading, TEST certificate generation, local XAdES signing helpers, and `LocalSigner`. |
@@ -67,8 +67,8 @@ Avoid these paths in application code:
 - `ksef2.infra.*`: generated schemas and mapper internals;
 - `ksef2.endpoints.*`: endpoint transport implementation;
 - `ksef2.core.*`: internal protocol, transport, middleware, and helper modules;
-- `ksef2.services.*`: client-composed workflow service implementation; use
-  client branches or `ksef2.renderers`;
+- `ksef2.services.*`: client-composed workflow implementation; import the four
+  documented workflow service types from `ksef2.clients`, or use client branches;
 - `scripts/*`: repository tooling, not package API.
 
 Some internal paths may still be importable for SDK implementation or tests, but

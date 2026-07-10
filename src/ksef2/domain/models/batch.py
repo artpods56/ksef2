@@ -1,6 +1,7 @@
 """Domain models for batch session operations."""
 
 import base64
+import binascii
 import warnings
 from typing import TYPE_CHECKING, Literal, Self, override
 
@@ -22,6 +23,20 @@ MAX_AES_CBC_PADDING_BYTES = 16
 MAX_BATCH_ENCRYPTED_PART_SIZE_BYTES = (
     MAX_BATCH_PART_PRE_ENCRYPTION_SIZE_BYTES + MAX_AES_CBC_PADDING_BYTES
 )
+
+
+def _validate_encoded_batch_material(
+    value: str, *, field_name: str, expected_length: int | None = None
+) -> str:
+    try:
+        decoded = base64.b64decode(value, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ValueError(f"{field_name} must be valid Base64") from exc
+    if expected_length is not None and len(decoded) != expected_length:
+        raise ValueError(f"{field_name} must decode to {expected_length} bytes")
+    if not decoded:
+        raise ValueError(f"{field_name} must not be empty")
+    return value
 
 
 class BatchInvoice(KSeFBaseModel):
@@ -79,10 +94,29 @@ class BatchFileInfo(KSeFBaseModel):
 class BatchEncryptionData(KSeFBaseModel):
     """Encryption material used for the prepared batch payload."""
 
-    aes_key: str
-    iv: str
-    encrypted_key: str
+    aes_key: str = Field(exclude=True, repr=False)
+    iv: str = Field(exclude=True, repr=False)
+    encrypted_key: str = Field(exclude=True, repr=False)
     public_key_id: str | None = None
+
+    @field_validator("aes_key")
+    @classmethod
+    def _validate_aes_key(cls, value: str) -> str:
+        return _validate_encoded_batch_material(
+            value, field_name="aes_key", expected_length=32
+        )
+
+    @field_validator("iv")
+    @classmethod
+    def _validate_iv(cls, value: str) -> str:
+        return _validate_encoded_batch_material(
+            value, field_name="iv", expected_length=16
+        )
+
+    @field_validator("encrypted_key")
+    @classmethod
+    def _validate_encrypted_key(cls, value: str) -> str:
+        return _validate_encoded_batch_material(value, field_name="encrypted_key")
 
     @classmethod
     def from_bytes(
@@ -103,15 +137,24 @@ class BatchEncryptionData(KSeFBaseModel):
 
     def get_aes_key_bytes(self) -> bytes:
         """Return the decoded AES key."""
-        return base64.b64decode(self.aes_key)
+        return base64.b64decode(self.aes_key, validate=True)
 
     def get_iv_bytes(self) -> bytes:
         """Return the decoded initialization vector."""
-        return base64.b64decode(self.iv)
+        return base64.b64decode(self.iv, validate=True)
 
     def get_encrypted_key_bytes(self) -> bytes:
         """Return the decoded encrypted symmetric key."""
-        return base64.b64decode(self.encrypted_key)
+        return base64.b64decode(self.encrypted_key, validate=True)
+
+    def to_sensitive_dict(self) -> dict[str, str | None]:
+        """Export encryption material for deliberately protected persistence."""
+        return {
+            "aes_key": self.aes_key,
+            "iv": self.iv,
+            "encrypted_key": self.encrypted_key,
+            "public_key_id": self.public_key_id,
+        }
 
 
 class BatchPreparedPart(KSeFBaseModel):
@@ -154,11 +197,19 @@ class PartUploadRequest(KSeFBaseModel):
     method: str
     """HTTP method to use for uploading (typically PUT)."""
 
-    url: str
+    url: str = Field(exclude=True, repr=False)
     """URL to upload the file part to."""
 
     headers: dict[str, str | None]
     """Headers to include in the upload request."""
+
+    def to_sensitive_dict(
+        self, *, mode: Literal["json", "python"] | str = "json"
+    ) -> dict[str, object]:
+        """Export upload instructions with the presigned capability URL."""
+        data: dict[str, object] = self.model_dump(mode=mode)
+        data["url"] = self.url
+        return data
 
 
 class OpenBatchSessionResponse(KSeFBaseModel):
@@ -200,7 +251,8 @@ class BatchSessionResumeState(BaseSessionResumeState):
         """
         data = super().to_dict(mode=mode)
         data["part_upload_requests"] = [
-            request.model_dump(mode=mode) for request in self.part_upload_requests
+            request.to_sensitive_dict(mode=mode)
+            for request in self.part_upload_requests
         ]
         return data
 

@@ -21,9 +21,9 @@ context. This makes later audits and failure recovery much easier.
 ## Tokens
 
 `auth.tokens` creates, lists, checks, and revokes KSeF tokens. Token generation
-returns the token payload and a reference number. The SDK waits for token
-activation before returning from `generate()`, but production systems should
-still store the reference number and handle timeout or activation failure.
+returns the one-time token payload and a reference number immediately. Persist
+the credential before explicitly calling `wait_for_activation()`. This keeps a
+polling timeout or transport failure from discarding the only copy of the token.
 
 A generated token has a fixed permission set. If the permissions should change,
 generate a new token and revoke the old one after migration. Token generation is

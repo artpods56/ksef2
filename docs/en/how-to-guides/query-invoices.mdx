@@ -28,6 +28,11 @@ filters = InvoicesFilter.for_seller(
 )
 ```
 
+`InvoicesFilter` normalizes every accepted datetime to UTC before comparison and
+request mapping. Values with an explicit offset preserve their instant. Naive
+values are interpreted as Europe/Warsaw local time; ambiguous or nonexistent
+daylight-saving times must include an explicit offset.
+
 <Aside type="tip" title="Use permanent storage dates for sync">
   `issue_date` is usually the right choice for accounting periods. For
   unattended incremental sync, use `date_type="permanent_storage"` and

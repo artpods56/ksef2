@@ -1,3 +1,37 @@
+## v1.0.0 (2026-07-11)
+
+### Feat
+
+- establish documented `ksef2`, `ksef2.clients`, `ksef2.models`, `ksef2.fa3`,
+  `ksef2.raw`, `ksef2.xades`, and `ksef2.profiles` compatibility surfaces
+- add complete sync and async high-level workflows for authentication, sessions,
+  invoices, tokens, permissions, certificates, limits, PEPPOL, and TEST data
+- add the public FA(3) invoice builder, versioned draft state, and XSD conformance
+- return one-time generated tokens before explicit activation polling
+- version authentication and session resume-state documents
+- store new SDK and CLI profiles under `~/.config/ksef`, while continuing to
+  read existing `~/.config/ksef2-cli` profiles as a fallback
+
+### Fix
+
+- prevent automatic retries from consuming one-shot authentication redemption
+- isolate presigned storage transfers from KSeF authentication and error middleware
+- preserve protected batch recovery state when uploads fail
+- redact bearer tokens, encryption material, and signed URLs from default output
+- normalize invoice filter datetimes and reject ambiguous or reversed ranges
+- reject invalid FA(3) invoice numbers before XML serialization
+
+### Build
+
+- verify release tags against source and wheel metadata before PyPI upload
+- run live integration tests against the exact tagged release commit
+- gate local FA(3), generated-artifact, coverage, and deprecation contracts
+
+### Docs
+
+- publish the 1.0 public API contract, migration guide, and bilingual workflow
+  documentation
+
 ## v0.19.0 (2026-06-23)
 
 ### Feat

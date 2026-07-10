@@ -392,6 +392,10 @@ The builder can produce three forms:
 - `build()` returns `KsefInvoice`.
 - `to_spec()` returns the generated FA(3) `Faktura` schema model.
 - `to_xml()` returns an XML string.
+- `to_xml()` validates the result against the packaged FA(3) XSD by default and
+  raises `ValueError` if serialization produced a non-conforming document.
+- Use `to_xml(validate=False)` only for deliberate diagnostic or intermediate
+  serialization that will not be submitted to KSeF.
 
 ```python
 from pathlib import Path

@@ -1,15 +1,15 @@
 ---
-title: Referencja cyklu życia klienta
-description: Argumenty konstruktorów, własność gałęzi, zamykanie zasobów i błędy lifecycle w klientach ksef2.
+title: Tworzenie i zamykanie klientów
+description: Argumenty konstruktorów, własność modułów, zamykanie zasobów i błędy cyklu życia w klientach ksef2.
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-Ta strona opisuje kontrakt referencyjny klientów głównych i klientów
-uwierzytelnionych. Użyj poradnika praktycznego, gdy potrzebujesz kompletnej
-sekwencji setupu.
+Ta strona opisuje kontrakt referencyjny klientów bazowych i uwierzytelnionych.
+Skorzystaj z poradnika praktycznego, gdy potrzebujesz pełnej sekwencji
+konfiguracji.
 
-## Konstruktory klientów głównych
+## Konstruktory klienta bazowego
 
 ```python
 Client(
@@ -29,14 +29,14 @@ AsyncClient(
 
 | Argument | Typ sync | Typ async | Domyślnie | Znaczenie |
 | --- | --- | --- | --- | --- |
-| `environment` | `Environment` | `Environment` | `Environment.PRODUCTION` | Środowisko KSeF i base URL klienta głównego. |
+| `environment` | `Environment` | `Environment` | `Environment.PRODUCTION` | Środowisko KSeF i bazowy URL klienta. |
 | `transport_config` | `TransportConfig | None` | `TransportConfig | None` | Timeouty HTTP, pool, TLS, proxy, HTTP/2 i retry dla klienta HTTP tworzonego przez SDK. |
 | `http_client` | `httpx.Client | None` | `httpx.AsyncClient | None` | Klient HTTP przekazany przez aplikację. Gdy jest podany, aplikacja posiada jego ustawienia HTTP i końcowe zamknięcie. |
 
 Gdy `http_client` nie jest podany, SDK tworzy klienta `httpx` z
-`transport_config` i zamyka go razem z klientem głównym.
+`transport_config` i zamyka go razem z klientem bazowym.
 
-## Elementy klienta głównego
+## Elementy klienta bazowego
 
 | Element | Dostępny na | Zwraca | Uwagi |
 | --- | --- | --- | --- |
@@ -44,13 +44,13 @@ Gdy `http_client` nie jest podany, SDK tworzy klienta `httpx` z
 | `encryption` | `Client`, `AsyncClient` | `EncryptionClient` / `AsyncEncryptionClient` | Publiczny odczyt certyfikatów szyfrowania KSeF. |
 | `peppol` | `Client`, `AsyncClient` | `PeppolClient` / `AsyncPeppolClient` | Publiczny lookup dostawców PEPPOL. |
 | `testdata` | `Client`, `AsyncClient` | `TestDataClient` / `AsyncTestDataClient` | Gałąź fixture'ów tylko dla TEST. Rzuca błąd poza `Environment.TEST`. |
-| `raw` | `Client`, `AsyncClient` | `RawClient` / `AsyncRawClient` | Low-level nieuwierzytelnione grupy endpointów. |
+| `raw` | `Client`, `AsyncClient` | `RawClient` / `AsyncRawClient` | Niskopoziomowe, nieuwierzytelnione grupy endpointów. |
 | `authenticated(auth_tokens)` | `Client`, `AsyncClient` | `AuthenticatedClient` / `AsyncAuthenticatedClient` | Deprecated compatibility wrapper. Użyj `authentication.resume(AuthenticationResumeState.from_tokens(auth_tokens))`. |
-| `close()` | `Client` | `None` | Idempotentnie zamyka klienta HTTP sync należącego do SDK i unieważnia gałęzie w cache. |
-| `aclose()` | `AsyncClient` | `None` | Idempotentnie zamyka zasoby async i unieważnia gałęzie w cache. |
+| `close()` | `Client` | `None` | Idempotentnie zamyka klienta HTTP sync należącego do SDK i unieważnia moduły w cache. |
+| `aclose()` | `AsyncClient` | `None` | Idempotentnie zamyka zasoby async i unieważnia moduły w cache. |
 
-Właściwości gałęzi są cache'owane, dopóki klient główny jest otwarty. Po
-zamknięciu klienta dostęp do gałęzi i operacje chronione lifecycle middleware
+Właściwości modułów są cache'owane, dopóki klient bazowy jest otwarty. Po
+zamknięciu klienta dostęp do modułów i operacje chronione middleware cyklu życia
 rzucają `KSeFClientClosedError`.
 
 ## Context managery
@@ -60,7 +60,7 @@ rzucają `KSeFClientClosedError`.
 | `Client` | `with Client(...) as client:` | `client.close()` przy wyjściu. |
 | `AsyncClient` | `async with AsyncClient(...) as client:` | `await client.aclose()` przy wyjściu. |
 
-Context manager zamyka tylko klienta głównego. Sesje online i batch są osobnymi
+Context manager zamyka tylko klienta bazowego. Sesje online i batch są osobnymi
 granicami cyklu życia i powinny być zamykane przez własne context managery albo
 metody serwisów.
 
@@ -88,7 +88,7 @@ kontekstem KSeF i jedną parą tokenów.
 | `sessions` | `SessionManagementClient` | Lista i zamykanie sesji uwierzytelnienia. |
 | `invoice_sessions` | `InvoiceSessionsClient` | Historia sesji online i batch faktur. |
 | `permissions` | `PermissionsClient` | Nadawanie, query, cofanie i status operacji uprawnień. |
-| `raw` | `RawAuthenticatedClient` | Low-level uwierzytelnione grupy endpointów. |
+| `raw` | `RawAuthenticatedClient` | Niskopoziomowe, uwierzytelnione grupy endpointów. |
 
 `AuthenticationResumeState` jest właścicielem bearer access i refresh tokenów.
 `OnlineSessionResumeState` i `BatchSessionResumeState` nie zawierają danych
@@ -127,7 +127,7 @@ obiektu. Middleware retry SDK nadal używa `transport_config.retry`.
 <LinkCard
   title="Metody uwierzytelniania"
   href="../concepts/authentication-methods.mdx"
-  description="Zrozum jak klient główny staje się klientem uwierzytelnionym."
+  description="Jak klient bazowy przechodzi w klienta uwierzytelnionego."
 />
 <LinkCard
   title="Referencja operacji"
@@ -135,7 +135,7 @@ obiektu. Middleware retry SDK nadal używa `transport_config.retry`.
   description="Sprawdź transport, retry, timeouty i wznawialność."
 />
 <LinkCard
-  title="Low-level API"
+  title="API niskiego poziomu"
   href="low-level/overview.mdx"
   description="Użyj schema-native wrapperów endpointów, gdy klient workflow nie wystarcza."
 />

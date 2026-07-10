@@ -6,6 +6,7 @@
 from pathlib import Path
 from typing import final
 
+import httpx
 from cryptography.x509 import Certificate
 
 from ksef2.clients.authenticated import AuthenticatedClient
@@ -70,8 +71,10 @@ class AuthClient:
         transport: Middleware,
         certificate_store: CertificateStoreProtocol,
         environment: Environment = Environment.PRODUCTION,
+        transfer_transport: Middleware | None = None,
     ) -> None:
         self._transport = transport
+        self._transfer_transport = transfer_transport or transport
         self._certificate_store = certificate_store
         self._environment = environment
         self._certificates = EncryptionClient(transport)
@@ -318,7 +321,11 @@ class AuthClient:
 
     def _redeem(self, auth_token: str) -> AuthTokens:
         """Redeem the temporary authentication token for access and refresh tokens."""
-        return from_spec(self._auth_ep.redeem_token(bearer_token=auth_token))
+        try:
+            response = self._auth_ep.redeem_token(bearer_token=auth_token)
+        except httpx.TransportError as exc:
+            raise exceptions.KSeFAuthTokenRedemptionError() from exc
+        return from_spec(response)
 
     def _build_authenticated_client(
         self,
@@ -331,6 +338,7 @@ class AuthClient:
             auth_tokens=auth_tokens,
             certificate_store=self._certificate_store,
             environment=self._environment,
+            transfer_transport=self._transfer_transport,
         )
 
     def _ensure_certificates(self) -> None:

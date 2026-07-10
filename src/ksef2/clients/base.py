@@ -9,7 +9,8 @@ import httpx
 
 from ksef2.clients.auth import AuthClient
 from ksef2.clients.authenticated import AuthenticatedClient
-from ksef2.clients import encryption, peppol
+from ksef2.clients.encryption import EncryptionClient
+from ksef2.clients.peppol import PeppolClient
 from ksef2.clients.testdata import TestDataClient
 from ksef2.config import Environment, TransportConfig
 from ksef2.core import exceptions, middlewares, stores
@@ -48,12 +49,14 @@ class Client:
         )
         self._owns_http_client = http_client is None
         self._lifecycle_state = middlewares.ClientLifecycleState()
+        lifecycle_transport = middlewares.ClientLifecycleMiddleware(
+            HttpTransport(client=self._http_client, headers={}),
+            self._lifecycle_state,
+        )
+        self._transfer_transport = lifecycle_transport
         self._transport = middlewares.KSeFExceptionMiddleware(
             middlewares.RetryMiddleware(
-                middlewares.ClientLifecycleMiddleware(
-                    HttpTransport(client=self._http_client, headers={}),
-                    self._lifecycle_state,
-                ),
+                lifecycle_transport,
                 self._transport_config.retry,
             )
         )
@@ -91,17 +94,18 @@ class Client:
             transport=self._transport,
             certificate_store=self._certificate_store,
             environment=self._environment,
+            transfer_transport=self._transfer_transport,
         )
 
     @cached_property
-    def encryption(self) -> encryption.EncryptionClient:
+    def encryption(self) -> EncryptionClient:
         """Return the public encryption-certificate client.
 
         Raises:
             KSeFClientClosedError: If the root client has been closed.
         """
         self._ensure_open()
-        return encryption.EncryptionClient(self._transport)
+        return EncryptionClient(self._transport)
 
     @cached_property
     def testdata(self) -> TestDataClient:
@@ -119,14 +123,14 @@ class Client:
         return TestDataClient(self._transport)
 
     @cached_property
-    def peppol(self) -> peppol.PeppolClient:
+    def peppol(self) -> PeppolClient:
         """Return the public Peppol provider client.
 
         Raises:
             KSeFClientClosedError: If the root client has been closed.
         """
         self._ensure_open()
-        return peppol.PeppolClient(self._transport)
+        return PeppolClient(self._transport)
 
     @cached_property
     def raw(self) -> RawClient:

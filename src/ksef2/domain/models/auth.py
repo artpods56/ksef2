@@ -6,9 +6,9 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Literal, Self
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr, field_validator
 
-from ksef2.domain.models.base import KSeFBaseModel
+from ksef2.domain.models.base import KSeFBaseModel, KSeFPersistedModel
 
 type ContextIdentifierType = Literal["nip", "internal_id", "nip_vat_ue", "peppol_id"]
 
@@ -85,7 +85,7 @@ class ChallengeResponse(KSeFBaseModel):
 class TokenCredentials(KSeFBaseModel):
     """A bearer token together with its expiration time."""
 
-    token: str
+    token: str = Field(exclude=True, repr=False)
     valid_until: datetime
 
 
@@ -144,7 +144,7 @@ class AuthTokens(KSeFBaseModel):
     refresh_token: TokenCredentials
 
 
-class AuthenticationResumeState(KSeFBaseModel):
+class AuthenticationResumeState(KSeFPersistedModel):
     """Serializable authentication state used to rehydrate an authenticated client.
 
     Use ``to_json()`` when intentionally exporting resumable JSON containing
@@ -152,10 +152,22 @@ class AuthenticationResumeState(KSeFBaseModel):
     redacted.
     """
 
+    format_version: Literal[1] = 1
     access_token: SecretStr
     access_token_valid_until: datetime
     refresh_token: SecretStr
     refresh_token_valid_until: datetime
+
+    @field_validator("access_token", "refresh_token", mode="before")
+    @classmethod
+    def _reject_missing_or_redacted_tokens(cls, value: object) -> object:
+        token = value.get_secret_value() if isinstance(value, SecretStr) else value
+        if token in ("", "**********"):
+            raise ValueError(
+                "Resume state must contain the original bearer token; "
+                "use to_json() for explicit sensitive export."
+            )
+        return value
 
     @classmethod
     def from_tokens(cls, auth_tokens: AuthTokens) -> Self:

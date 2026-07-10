@@ -143,7 +143,8 @@ ksef2 --profile prod-token invoices list \
 ```
 
 These commands add a profile to the local `ksef2-cli` configuration at
-`~/.config/ksef2-cli/config.toml`:
+`~/.config/ksef2/config.toml`. Existing legacy
+`~/.config/ksef2-cli/config.toml` files are still read when present.
 
 ```toml
 # ksef2-cli local profiles

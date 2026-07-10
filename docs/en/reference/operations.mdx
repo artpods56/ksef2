@@ -101,7 +101,7 @@ Retryable `POST` groups:
 
 | Area | Operations |
 | --- | --- |
-| Authentication | challenge, redeem token, refresh token |
+| Authentication | challenge, refresh token |
 | Invoices | metadata query |
 | Certificates | query, retrieve |
 | Permissions | personal, authorization, EU entity, person, subordinate entity, and subunit queries |
@@ -110,6 +110,11 @@ Invoice submission, permission grants, certificate enrollment, token
 generation, online-session opening, and batch-session opening are not retried by
 the SDK retry middleware. Persist returned references and resume by status
 instead of recreating those operations blindly.
+
+Authentication token redemption is also never retried because KSeF returns its
+access/refresh pair only once. A lost redemption response raises
+`KSeFAuthTokenRedemptionError` with `outcome_ambiguous=True`; do not repeat the
+redemption automatically.
 
 ## Workflow polling timeouts
 

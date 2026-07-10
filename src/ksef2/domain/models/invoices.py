@@ -1,11 +1,13 @@
 """Domain models for invoice metadata, sending, downloading, and export."""
 
-from dataclasses import dataclass, field
-from datetime import date, datetime
+from dataclasses import field
+from datetime import date, datetime, timezone
 from enum import StrEnum
 from typing import Literal, Self
+from zoneinfo import ZoneInfo
 
-from pydantic import TypeAdapter, field_validator, model_validator
+from pydantic import ConfigDict, Field as PydanticField
+from pydantic import field_validator, model_validator
 
 from ksef2.domain.models.base import KSeFBaseModel
 from ksef2.domain.models.compression import (
@@ -92,7 +94,7 @@ _INVOICING_MODE_TO_SPEC: dict[InvoicingMode, InvoicingModeSpecValue] = {
 _INVOICING_MODE_FROM_SPEC: dict[InvoicingModeSpecValue, InvoicingMode] = {
     value: key for key, value in _INVOICING_MODE_TO_SPEC.items()
 }
-_DATETIME_ADAPTER = TypeAdapter(datetime)
+_WARSAW_TIMEZONE = ZoneInfo("Europe/Warsaw")
 
 
 def normalize_sort_order(value: SortOrder | SortOrderEnum | str) -> SortOrder:
@@ -294,12 +296,20 @@ class PackagePart(KSeFBaseModel):
     ordinal_number: int
     part_name: str
     method: str
-    url: str
+    url: str = PydanticField(exclude=True, repr=False)
     part_size: int
     part_hash: str
     encrypted_part_size: int
     encrypted_part_hash: str
     expiration_date: datetime
+
+    def to_sensitive_dict(
+        self, *, mode: Literal["json", "python"] | str = "json"
+    ) -> dict[str, object]:
+        """Export package metadata with its presigned capability URL."""
+        data: dict[str, object] = self.model_dump(mode=mode)
+        data["url"] = self.url
+        return data
 
 
 class InvoicePackage(KSeFBaseModel):
@@ -324,38 +334,42 @@ class InvoiceExportStatusResponse(KSeFBaseModel):
     package: InvoicePackage | None = None
 
 
-@dataclass(frozen=True)
-class ExportHandle:
+class ExportHandle(KSeFBaseModel):
     """Holds export reference + crypto keys needed to later fetch/decrypt the package."""
 
+    model_config = ConfigDict(extra="ignore", frozen=True)
+
     reference_number: str
-    aes_key: bytes
-    iv: bytes
+    aes_key: bytes = PydanticField(exclude=True, repr=False)
+    iv: bytes = PydanticField(exclude=True, repr=False)
+
+    def to_sensitive_dict(self) -> dict[str, str | bytes]:
+        """Export the key material only for deliberate protected handling."""
+        return {
+            "reference_number": self.reference_number,
+            "aes_key": self.aes_key,
+            "iv": self.iv,
+        }
 
 
 ### Public API ###
 
 
-def _parse_filter_datetime(value: datetime | str) -> datetime | None:
-    if isinstance(value, datetime):
-        return value
-
-    try:
-        return _DATETIME_ADAPTER.validate_python(value)
-    except ValueError:
-        return None
-
-
 class InvoicesFilter(KSeFBaseModel):
-    """Filters accepted by invoice metadata query and export operations."""
+    """Filters accepted by invoice metadata query and export operations.
+
+    Datetimes are stored as UTC-aware values. Inputs with an explicit offset keep
+    their instant. Naive inputs are interpreted as Europe/Warsaw local time;
+    ambiguous or nonexistent daylight-saving times require an explicit offset.
+    """
 
     # role
     role: Literal["buyer", "seller", "third_subject", "authorized_subject"]
 
     # dates
     date_type: Literal["issue_date", "invoicing_date", "permanent_storage"]
-    date_from: datetime | str
-    date_to: datetime | str = field(default_factory=datetime.now)
+    date_from: datetime
+    date_to: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     restrict_to_permanent_storage_hwm_date: bool | None = None
 
     # currency and amounts
@@ -388,6 +402,32 @@ class InvoicesFilter(KSeFBaseModel):
             return normalize_invoicing_mode(value)
         return value
 
+    @field_validator("date_from", "date_to", mode="after")
+    @classmethod
+    def _normalize_datetime(cls, value: datetime) -> datetime:
+        if value.tzinfo is not None and value.utcoffset() is not None:
+            return value.astimezone(timezone.utc)
+
+        normalized_candidates: list[datetime] = []
+        for fold in (0, 1):
+            local_candidate = value.replace(tzinfo=_WARSAW_TIMEZONE, fold=fold)
+            normalized = local_candidate.astimezone(timezone.utc)
+            round_trip = normalized.astimezone(_WARSAW_TIMEZONE).replace(tzinfo=None)
+            if round_trip == value and normalized not in normalized_candidates:
+                normalized_candidates.append(normalized)
+
+        if not normalized_candidates:
+            raise ValueError(
+                f"{value.isoformat()} does not exist in Europe/Warsaw local time; "
+                "provide an explicit UTC offset."
+            )
+        if len(normalized_candidates) > 1:
+            raise ValueError(
+                f"{value.isoformat()} is ambiguous in Europe/Warsaw local time; "
+                "provide an explicit UTC offset."
+            )
+        return normalized_candidates[0]
+
     @classmethod
     def for_buyer(
         cls,
@@ -415,30 +455,34 @@ class InvoicesFilter(KSeFBaseModel):
         is_self_invoicing: bool | None = None,
     ) -> Self:
         """Build a filter for invoices where the authenticated subject is buyer."""
-        effective_date_to = date_to if date_to is not None else datetime.now()
-        return cls(
-            role="buyer",
-            date_type=date_type,
-            date_from=date_from,
-            date_to=effective_date_to,
-            restrict_to_permanent_storage_hwm_date=(
-                restrict_to_permanent_storage_hwm_date
-            ),
-            currency_codes=currency_codes,
-            amount_type=amount_type,
-            amount_min=amount_min,
-            amount_max=amount_max,
-            seller_nip=seller_nip,
-            buyer_nip=buyer_nip,
-            buyer_vat_ue=buyer_vat_ue,
-            buyer_other_id=buyer_other_id,
-            invoice_number=invoice_number,
-            ksef_number=ksef_number,
-            invoice_schema=invoice_schema,
-            invoice_types=invoice_types,
-            has_attachment=has_attachment,
-            invoicing_mode=invoicing_mode,
-            is_self_invoicing=is_self_invoicing,
+        effective_date_to = (
+            date_to if date_to is not None else datetime.now(timezone.utc)
+        )
+        return cls.model_validate(
+            {
+                "role": "buyer",
+                "date_type": date_type,
+                "date_from": date_from,
+                "date_to": effective_date_to,
+                "restrict_to_permanent_storage_hwm_date": (
+                    restrict_to_permanent_storage_hwm_date
+                ),
+                "currency_codes": currency_codes,
+                "amount_type": amount_type,
+                "amount_min": amount_min,
+                "amount_max": amount_max,
+                "seller_nip": seller_nip,
+                "buyer_nip": buyer_nip,
+                "buyer_vat_ue": buyer_vat_ue,
+                "buyer_other_id": buyer_other_id,
+                "invoice_number": invoice_number,
+                "ksef_number": ksef_number,
+                "invoice_schema": invoice_schema,
+                "invoice_types": invoice_types,
+                "has_attachment": has_attachment,
+                "invoicing_mode": invoicing_mode,
+                "is_self_invoicing": is_self_invoicing,
+            }
         )
 
     @classmethod
@@ -468,30 +512,34 @@ class InvoicesFilter(KSeFBaseModel):
         is_self_invoicing: bool | None = None,
     ) -> Self:
         """Build a filter for invoices where the authenticated subject is seller."""
-        effective_date_to = date_to if date_to is not None else datetime.now()
-        return cls(
-            role="seller",
-            date_type=date_type,
-            date_from=date_from,
-            date_to=effective_date_to,
-            restrict_to_permanent_storage_hwm_date=(
-                restrict_to_permanent_storage_hwm_date
-            ),
-            currency_codes=currency_codes,
-            amount_type=amount_type,
-            amount_min=amount_min,
-            amount_max=amount_max,
-            seller_nip=seller_nip,
-            buyer_nip=buyer_nip,
-            buyer_vat_ue=buyer_vat_ue,
-            buyer_other_id=buyer_other_id,
-            invoice_number=invoice_number,
-            ksef_number=ksef_number,
-            invoice_schema=invoice_schema,
-            invoice_types=invoice_types,
-            has_attachment=has_attachment,
-            invoicing_mode=invoicing_mode,
-            is_self_invoicing=is_self_invoicing,
+        effective_date_to = (
+            date_to if date_to is not None else datetime.now(timezone.utc)
+        )
+        return cls.model_validate(
+            {
+                "role": "seller",
+                "date_type": date_type,
+                "date_from": date_from,
+                "date_to": effective_date_to,
+                "restrict_to_permanent_storage_hwm_date": (
+                    restrict_to_permanent_storage_hwm_date
+                ),
+                "currency_codes": currency_codes,
+                "amount_type": amount_type,
+                "amount_min": amount_min,
+                "amount_max": amount_max,
+                "seller_nip": seller_nip,
+                "buyer_nip": buyer_nip,
+                "buyer_vat_ue": buyer_vat_ue,
+                "buyer_other_id": buyer_other_id,
+                "invoice_number": invoice_number,
+                "ksef_number": ksef_number,
+                "invoice_schema": invoice_schema,
+                "invoice_types": invoice_types,
+                "has_attachment": has_attachment,
+                "invoicing_mode": invoicing_mode,
+                "is_self_invoicing": is_self_invoicing,
+            }
         )
 
     @model_validator(mode="after")
@@ -519,17 +567,7 @@ class InvoicesFilter(KSeFBaseModel):
             joined = ", ".join(buyer_identifiers)
             raise ValueError(f"Only one buyer identifier can be specified: {joined}.")
 
-        date_from = _parse_filter_datetime(self.date_from)
-        date_to = _parse_filter_datetime(self.date_to)
-        if date_from is None or date_to is None:
-            return self
-
-        try:
-            date_from_is_after_date_to = date_from > date_to
-        except TypeError:
-            date_from_is_after_date_to = False
-
-        if date_from_is_after_date_to:
+        if self.date_from > self.date_to:
             raise ValueError("date_from must be less than or equal to date_to.")
 
         return self

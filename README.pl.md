@@ -146,7 +146,8 @@ ksef2 --profile prod-token invoices list \
 ```
 
 Te komendy dodają profil do lokalnej konfiguracji `ksef2-cli` w
-`~/.config/ksef2-cli/config.toml`:
+`~/.config/ksef2/config.toml`. Istniejące starsze pliki
+`~/.config/ksef2-cli/config.toml` nadal są odczytywane, jeśli istnieją.
 
 ```toml
 # ksef2-cli local profiles

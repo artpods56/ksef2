@@ -10,6 +10,7 @@ from typing import final
 from ksef2.clients.invoices import InvoicesClient
 from ksef2.core import exceptions
 from ksef2.core.crypto import decrypt_aes_cbc
+from ksef2.core.external_transfer import ExternalTransferClient
 from ksef2.core.polling import poll_until
 from ksef2.core.protocols import Middleware
 from ksef2.core.stores import CertificateStoreProtocol
@@ -54,7 +55,7 @@ class InvoicesService:
         ensure_encryption_certificates_loaded: Callable[[], None] | None = None,
     ) -> None:
         self._transport = transport
-        self._download_transport = download_transport
+        self._external_transfers = ExternalTransferClient(download_transport)
         self._certificate_store = certificate_store
         self._client = client or InvoicesClient(transport)
         self._ensure_encryption_certificates_loaded = (
@@ -192,7 +193,8 @@ class InvoicesService:
             KSeFEncryptionError: If a downloaded package part cannot be decrypted.
             ValueError: If a package part name is unsafe for local filesystem output.
             OSError: If the target directory or output file cannot be written.
-            httpx.HTTPStatusError: If a package part download returns an error status.
+            KSeFExternalTransferError: If external storage rejects a part download or
+                its outcome cannot be determined.
         """
         target_path = Path(target_directory)
         target_path.mkdir(parents=True, exist_ok=True)
@@ -203,13 +205,17 @@ class InvoicesService:
             logger.info(
                 "Downloading export package part",
                 part_name=part.part_name,
-                package_part_url=str(part.url),
+                part_ordinal=part.ordinal_number,
+                reference_number=export.reference_number,
             )
-            resp = self._download_transport.get(str(part.url))
-            _ = resp.raise_for_status()
+            encrypted_part = self._external_transfers.download_part(
+                url=str(part.url),
+                reference_number=export.reference_number,
+                part_ordinal=part.ordinal_number,
+            )
 
             zip_data = decrypt_aes_cbc(
-                resp.content,
+                encrypted_part,
                 key=export.aes_key,
                 iv=export.iv,
             )
@@ -237,20 +243,25 @@ class InvoicesService:
 
         Raises:
             KSeFEncryptionError: If a downloaded package part cannot be decrypted.
-            httpx.HTTPStatusError: If a package part download returns an error status.
+            KSeFExternalTransferError: If external storage rejects a part download or
+                its outcome cannot be determined.
         """
         result: list[bytes] = []
         for part in package.parts:
             logger.info(
                 "Downloading export package part",
                 part_name=part.part_name,
-                package_part_url=str(part.url),
+                part_ordinal=part.ordinal_number,
+                reference_number=export.reference_number,
             )
-            resp = self._download_transport.get(str(part.url))
-            _ = resp.raise_for_status()
+            encrypted_part = self._external_transfers.download_part(
+                url=str(part.url),
+                reference_number=export.reference_number,
+                part_ordinal=part.ordinal_number,
+            )
             result.append(
                 decrypt_aes_cbc(
-                    resp.content,
+                    encrypted_part,
                     key=export.aes_key,
                     iv=export.iv,
                 )
@@ -322,7 +333,8 @@ class InvoicesService:
                 available.
             KSeFEncryptionError: If export key encryption or package decryption fails.
             KSeFExportTimeoutError: If polling exceeds ``timeout``.
-            httpx.HTTPStatusError: If a package part download returns an error status.
+            KSeFExternalTransferError: If external storage rejects a part download or
+                its outcome cannot be determined.
         """
         handle = self.schedule_export(
             filters=filters,

@@ -3,8 +3,11 @@
 from collections.abc import Sequence
 from datetime import datetime
 from decimal import Decimal
+from functools import lru_cache
+from pathlib import Path
 from typing import Annotated, Self, override
 
+from lxml import etree
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
@@ -37,6 +40,20 @@ from ksef2.services.builders.fa3.body.settlement import SettlementBodyBuilder
 from ksef2.services.builders.fa3.body.simplified import SimplifiedBodyBuilder
 from ksef2.services.builders.fa3.body.standard import StandardBodyBuilder
 from ksef2.services.builders.fa3.metadata import builder_param
+
+
+@lru_cache(maxsize=1)
+def _load_fa3_schema() -> etree.XMLSchema:
+    schema_path = (
+        Path(__file__).parents[3]
+        / "infra"
+        / "schema"
+        / "fa3"
+        / "definitions"
+        / "schemat.xsd"
+    )
+    parser = etree.XMLParser(no_network=True, resolve_entities=False)
+    return etree.XMLSchema(etree.parse(str(schema_path), parser))
 
 
 class StandardInvoiceBuilder(
@@ -792,22 +809,32 @@ class StandardInvoiceBuilder(
         pretty_print: bool = True,
         xml_declaration: bool = True,
         encoding: str = "UTF-8",
+        validate: bool = True,
     ) -> str:
-        """Serialize the built invoice to XML bytes.
+        """Serialize the built invoice and validate it against the FA(3) XSD.
 
         Raises:
             ValueError: If the current builder state cannot build a complete invoice.
+                Also raised when the serialized document violates the packaged XSD.
         """
         serializer = XmlSerializer(
             config=SerializerConfig(
-                pretty_print=pretty_print,
+                indent="  " if pretty_print else None,
                 xml_declaration=xml_declaration,
                 encoding=encoding,
             )
         )
-        return serializer.render(  # pyright: ignore[reportUnknownMemberType]
+        xml = serializer.render(  # pyright: ignore[reportUnknownMemberType]
             self.to_spec(), ns_map={None: __NAMESPACE__}
         )
+        if validate:
+            parser = etree.XMLParser(no_network=True, resolve_entities=False)
+            try:
+                document = etree.fromstring(xml.encode(encoding), parser)
+                _load_fa3_schema().assertValid(document)
+            except (etree.DocumentInvalid, etree.XMLSyntaxError) as exc:
+                raise ValueError(f"FA(3) XML schema validation failed: {exc}") from exc
+        return xml
 
     @staticmethod
     def _build_entity(

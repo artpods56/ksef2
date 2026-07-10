@@ -116,8 +116,11 @@ The SDK selects a profile in the same order as `ksef2-cli`:
 By default, the profile file is:
 
 ```text
-~/.config/ksef2-cli/config.toml
+~/.config/ksef2/config.toml
 ```
+
+Existing `~/.config/ksef2-cli/config.toml` files are still read as a legacy
+fallback.
 
 Set `KSEF2_CONFIG` or pass `config_path` when the profile file lives somewhere
 else:

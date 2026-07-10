@@ -24,7 +24,11 @@ from ksef2.infra.mappers.invoices.fa3.spec.invoice import (
 )
 from ksef2.infra.schema.fa3.models.schemat import Faktura
 from ksef2.services.builders.fa3.root import StandardInvoiceBuilder
-from tests.integration.builders.helpers import load_sample, sample_path
+from tests.integration.builders.helpers import (
+    load_sample,
+    sample_path,
+    serialize_and_validate,
+)
 
 VAT_SAMPLES = [
     "FA_3_Przykład_21.xml",
@@ -46,7 +50,7 @@ def _assert_vat_sample(sample_name: str, builder: StandardInvoiceBuilder) -> Non
     actual_spec = builder.to_spec()
     actual_invoice = invoice_from_spec(actual_spec)
     xml_invoice = invoice_from_spec(
-        parser.from_bytes(builder.to_xml().encode("utf-8"), Faktura)
+        parser.from_bytes(serialize_and_validate(builder), Faktura)
     )
 
     assert actual_spec.fa.p_2 == expected_spec.fa.p_2
@@ -131,7 +135,7 @@ def test_new_fa3_vat_builder_sample_ksef_01_matches_loaded_sample() -> None:
     actual_spec = builder.to_spec()
     actual_invoice = invoice_from_spec(actual_spec)
     xml_invoice = invoice_from_spec(
-        parser.from_bytes(builder.to_xml().encode("utf-8"), Faktura)
+        parser.from_bytes(serialize_and_validate(builder), Faktura)
     )
 
     assert actual_spec.fa.p_2 == expected_spec.fa.p_2

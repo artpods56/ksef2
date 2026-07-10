@@ -1,26 +1,26 @@
 ---
-title: Klienci i cykl życia
-description: Zrozum klientów głównych, klientów uwierzytelnionych, uchwyty sesji i własność zasobów w ksef2.
+title: Model klientów
+description: Klient bazowy, klient uwierzytelniony, uchwyty sesji i zasada własności zasobów w ksef2.
 ---
 
 import { Aside, LinkCard } from '@astrojs/starlight/components';
 
-SDK ma niewielką hierarchię obiektów. Każdy obiekt oznacza inną granicę cyklu
-życia, a nie tylko inną przestrzeń nazw.
+SDK ma niewielką hierarchię obiektów. Każdy obiekt oznacza inną granicę
+zarządzania zasobami, a nie tylko inną przestrzeń nazw.
 
 ```text
 Client albo AsyncClient
-  -> publiczne gałęzie klienta głównego
+  -> publiczne moduły klienta bazowego
   -> authentication
     -> AuthenticatedClient dla jednego kontekstu KSeF
       -> sesje, faktury, tokeny, uprawnienia, certyfikaty, limity
         -> sesja online, sesja batch, uchwyt eksportu
 ```
 
-Klient główny wybiera środowisko KSeF i posiada zasoby transportu. Klient
+Klient bazowy wybiera środowisko KSeF i trzyma zasoby transportu. Klient
 uwierzytelniony niesie dostęp do jednego kontekstu. Klienci sesji i uchwyty
-eksportu są węższymi obiektami przepływu i nie powinny być używane jako ogólne
-punkty wejścia SDK.
+eksportu to węższe obiekty jednego przepływu — nie używaj ich jako ogólnego
+wejścia do SDK.
 
 ## Model obiektów
 
@@ -32,35 +32,34 @@ punkty wejścia SDK.
 | Klient albo stan sesji batch | Jeden przepływ uploadu batch oraz materiał szyfrowania paczki. | Użyj do uploadu, zamknięcia, pollingu statusu i pobrania UPO. |
 | Uchwyt eksportu | Numer referencyjny eksportu oraz lokalny materiał AES potrzebny do odszyfrowania części paczki. | Trzymaj tylko do czasu pobrania i zapisania paczki eksportu. |
 
-Główna zasada cyklu życia jest prosta: używaj ponownie klientów głównych i
-uwierzytelnionych, gdy środowisko i kontekst się zgadzają; sesje i eksporty
-traktuj jako uchwyty jednego przepływu.
+Główna zasada jest prosta: ponownie używaj klientów bazowych i uwierzytelnionych,
+gdy środowisko i kontekst się zgadzają; sesje i eksporty traktuj jako uchwyty
+jednego przepływu.
 
-## Klienci główni
+## Klient bazowy
 
-Klient główny jest granicą zasobów HTTP zarządzanych przez SDK. Udostępnia
-publiczne gałęzie, które nie wymagają uwierzytelnienia, na przykład odczyt
-certyfikatów szyfrowania i dostawców PEPPOL. Udostępnia też `authentication`,
-czyli wejście do uwierzytelnionego kontekstu KSeF.
+Klient bazowy jest granicą zasobów HTTP zarządzanych przez SDK. Udostępnia
+publiczne moduły bez uwierzytelnienia — na przykład odczyt certyfikatów
+szyfrowania i dostawców PEPPOL. Udostępnia też `authentication`, czyli wejście
+do uwierzytelnionego kontekstu KSeF.
 
-Twórz klienta głównego dla jednego środowiska: TEST, DEMO albo PRODUCTION. Nie
-przełączaj jednego klienta między środowiskami. Jeżeli aplikacja rozmawia z
-więcej niż jednym środowiskiem, każde środowisko powinno mieć osobnego klienta
-głównego i osobny cykl życia.
+Twórz klienta bazowego dla jednego środowiska: TEST, DEMO albo PRODUCTION. Nie
+przełączaj jednego klienta między środowiskami. Jeżeli aplikacja łączy się z
+więcej niż jednym środowiskiem, każde powinno mieć osobnego klienta bazowego.
 
-Zamknięcie klienta głównego zwalnia zasoby HTTP, gdy należą one do SDK. Jeżeli
-przekazujesz do SDK własnego klienta `httpx`, aplikacja, która go utworzyła,
-wciąż odpowiada za jego zamknięcie.
+Zamknięcie klienta bazowego zwalnia zasoby HTTP, gdy należą one do SDK. Jeżeli
+przekazujesz własnego klienta `httpx`, aplikacja nadal odpowiada za jego
+zamknięcie.
 
 ## Klienci uwierzytelnieni
 
-Uwierzytelnienie zmienia klienta głównego w klienta uwierzytelnionego dla
-jednego kontekstu KSeF. Ten kontekst to zwykle NIP podatnika plus credential,
-który potwierdza prawo do działania w tym kontekście.
+Uwierzytelnienie tworzy klienta uwierzytelnionego dla jednego kontekstu KSeF.
+Kontekst to zwykle NIP podatnika plus credential potwierdzający prawo działania
+w tym kontekście.
 
-Klient uwierzytelniony jest punktem wejścia do gałęzi chronionych:
+Klient uwierzytelniony udostępnia moduły chronione:
 
-| Gałąź | Rodzaj przepływu |
+| Moduł | Rodzaj przepływu |
 | --- | --- |
 | `online_session` | Interaktywna wysyłka faktur. |
 | `batch` | Przygotowanie, upload, status i UPO paczki batch. |
@@ -96,7 +95,7 @@ wysłaniu zaszyfrowanych części paczki i zamknięciu sesji batch.
 
 ## Sync i async
 
-`Client` i `AsyncClient` udostępniają ten sam model gałęzi. Klient async zmienia
+`Client` i `AsyncClient` udostępniają ten sam model modułów. Klient async zmienia
 styl wywołań: operacje sieciowe używają `await`, a granice cyklu życia używają
 async context managerów. Nie zmienia to modelu workflow KSeF.
 

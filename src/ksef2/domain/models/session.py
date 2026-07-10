@@ -1,6 +1,7 @@
 """Domain models for online, batch, and authentication sessions."""
 
 import base64
+import binascii
 import json
 import warnings
 from collections.abc import Mapping
@@ -11,12 +12,33 @@ from typing import TYPE_CHECKING, Literal, Self, cast
 from pydantic import (
     AwareDatetime,
     AnyUrl,
+    Field,
     SecretStr,
     field_validator,
     model_validator,
 )
 
-from ksef2.domain.models.base import KSeFBaseModel
+from ksef2.domain.models.base import KSeFBaseModel, KSeFPersistedModel
+
+
+def _validate_encoded_session_secret(
+    value: object, *, field_name: str, expected_length: int
+) -> object:
+    encoded = value.get_secret_value() if isinstance(value, SecretStr) else value
+    if not isinstance(encoded, str):
+        return value
+    if encoded == "**********":
+        raise ValueError(
+            "Resume state contains redacted encryption material; "
+            "use to_json() for explicit sensitive export."
+        )
+    try:
+        decoded = base64.b64decode(encoded, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ValueError(f"{field_name} must be valid Base64") from exc
+    if len(decoded) != expected_length:
+        raise ValueError(f"{field_name} must decode to {expected_length} bytes")
+    return value
 
 
 class FormSchema(Enum):
@@ -37,9 +59,9 @@ class FormSchema(Enum):
 class SessionEncryptionMaterial(KSeFBaseModel):
     """Raw and encrypted symmetric session key material."""
 
-    aes_key: bytes
-    iv: bytes
-    encrypted_key: bytes
+    aes_key: bytes = Field(exclude=True, repr=False)
+    iv: bytes = Field(exclude=True, repr=False)
+    encrypted_key: bytes = Field(exclude=True, repr=False)
     public_key_id: str | None = None
 
 
@@ -185,8 +207,18 @@ class UpoPage(KSeFBaseModel):
     """Download information for one UPO page."""
 
     reference_number: str
-    download_url: AnyUrl
+    download_url: AnyUrl = Field(exclude=True, repr=False)
     download_url_expiration_date: AwareDatetime
+
+    def to_sensitive_dict(
+        self, *, mode: Literal["json", "python"] | str = "json"
+    ) -> dict[str, object]:
+        """Export UPO metadata with its capability-bearing download URL."""
+        data: dict[str, object] = self.model_dump(mode=mode)
+        data["download_url"] = (
+            str(self.download_url) if mode == "json" else self.download_url
+        )
+        return data
 
 
 class Upo(KSeFBaseModel):
@@ -220,10 +252,21 @@ class SessionInvoiceStatusResponse(KSeFBaseModel):
     acquisition_date: AwareDatetime | None = None
     invoicing_date: AwareDatetime
     permanent_storage_date: AwareDatetime | None = None
-    upo_download_url: AnyUrl | None = None
+    upo_download_url: AnyUrl | None = Field(default=None, exclude=True, repr=False)
     upo_download_url_expiration_date: AwareDatetime | None = None
     invoicing_mode: str | None = None
     status: InvoiceStatusInfo
+
+    def to_sensitive_dict(
+        self, *, mode: Literal["json", "python"] | str = "json"
+    ) -> dict[str, object]:
+        """Export invoice status with its capability-bearing UPO URL."""
+        data: dict[str, object] = self.model_dump(mode=mode)
+        if self.upo_download_url is not None:
+            data["upo_download_url"] = (
+                str(self.upo_download_url) if mode == "json" else self.upo_download_url
+            )
+        return data
 
 
 class SessionInvoicesResponse(KSeFBaseModel):
@@ -262,13 +305,15 @@ def _warn_deprecated(old_name: str, new_name: str) -> None:
     )
 
 
-class BaseSessionResumeState(KSeFBaseModel):
+class BaseSessionResumeState(KSeFPersistedModel):
     """Base class for session resume state with common fields.
 
     This class contains fields shared between online and batch sessions.
     It provides serialization/deserialization support and helper methods
     for accessing the encryption keys.
     """
+
+    format_version: Literal[1] = 1
 
     reference_number: str
     """Reference number of the session."""
@@ -281,6 +326,20 @@ class BaseSessionResumeState(KSeFBaseModel):
 
     form_code: FormSchema
     """Invoice schema used for this session."""
+
+    @field_validator("aes_key", mode="before")
+    @classmethod
+    def _validate_encoded_aes_key(cls, value: object) -> object:
+        return _validate_encoded_session_secret(
+            value, field_name="aes_key", expected_length=32
+        )
+
+    @field_validator("iv", mode="before")
+    @classmethod
+    def _validate_encoded_iv(cls, value: object) -> object:
+        return _validate_encoded_session_secret(
+            value, field_name="iv", expected_length=16
+        )
 
     @model_validator(mode="before")
     @classmethod
@@ -321,11 +380,11 @@ class BaseSessionResumeState(KSeFBaseModel):
 
     def get_aes_key_bytes(self) -> bytes:
         """Get the AES key as raw bytes."""
-        return base64.b64decode(self.aes_key.get_secret_value())
+        return base64.b64decode(self.aes_key.get_secret_value(), validate=True)
 
     def get_iv_bytes(self) -> bytes:
         """Get the initialization vector as raw bytes."""
-        return base64.b64decode(self.iv.get_secret_value())
+        return base64.b64decode(self.iv.get_secret_value(), validate=True)
 
     def to_dict(
         self,

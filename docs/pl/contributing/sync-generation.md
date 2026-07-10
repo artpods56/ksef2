@@ -1,11 +1,11 @@
 ---
-title: Generowanie kodu sync
-description: Utrzymuj wygenerowane klienty sync na podstawie modułów async.
+title: Synchronizacja kodu sync/async
+description: Utrzymuj wygenerowane moduły sync na podstawie źródeł async.
 ---
 
 Moduły async są źródłem prawdy dla większości implementacji endpointów,
 klientów, middleware i serwisów. Moduły sync wymienione w `scripts/gen_sync.py`
-są generowane z tych źródeł async.
+powstają automatycznie z tych źródeł async.
 
 Wygenerowane pliki zaczynają się od:
 
@@ -67,7 +67,7 @@ albo strukturalnie inna:
 - `src/ksef2/core/polling.py` zawiera wspólne helpery pollingu sync i async.
 - `src/ksef2/core/response_errors.py` zawiera wspólne mapowanie błędów odpowiedzi.
 - `src/ksef2/clients/base.py` i `src/ksef2/clients/async_base.py` różnią się
-  własnością klienta głównego i cyklem życia.
+  własnością klienta bazowego i zarządzaniem zasobami.
 - `src/ksef2/core/http.py` i `src/ksef2/core/async_http.py` różnią się
   własnością transportu i zamykaniem.
 
@@ -99,4 +99,4 @@ Dla generacji sync oznacza to, że:
 ## Referencja
 
 - [Konfiguracja klienta](../how-to-guides/client-setup.mdx)
-- [Low-level API](../reference/low-level/overview.mdx)
+- [API niskiego poziomu](../reference/low-level/overview.mdx)

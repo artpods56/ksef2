@@ -8,7 +8,6 @@ from ksef2.domain.models.invoices import (
 )
 from ksef2.infra.schema.api import spec
 from polyfactory.factories.pydantic_factory import ModelFactory
-from polyfactory.factories import DataclassFactory
 from polyfactory.pytest_plugin import register_fixture
 
 _NOW = datetime.now(timezone.utc)
@@ -102,4 +101,4 @@ class PackagePartFactory(ModelFactory[PackagePart]): ...
 class InvoicePackageFactory(ModelFactory[InvoicePackage]): ...
 
 
-class ExportHandleFactory(DataclassFactory[ExportHandle]): ...
+class ExportHandleFactory(ModelFactory[ExportHandle]): ...

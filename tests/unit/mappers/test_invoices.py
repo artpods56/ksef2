@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from polyfactory import BaseFactory
 
 from ksef2.domain.models import invoices as domain_invoices
@@ -28,6 +30,17 @@ class TestInvoicesRequestMapper:
 
         assert isinstance(output, spec.InvoiceQueryFilters)
         assert output.amount is None
+
+    def test_to_spec_receives_normalized_filter_datetimes(self) -> None:
+        request = domain_invoices.InvoicesFilter.for_seller(
+            date_from="2026-01-01T00:00:00",
+            date_to="2026-01-02T00:00:00",
+        )
+
+        output = to_spec(request)
+
+        assert output.dateRange.from_ == datetime(2025, 12, 31, 23, tzinfo=timezone.utc)
+        assert output.dateRange.to == datetime(2026, 1, 1, 23, tzinfo=timezone.utc)
 
     def test_to_spec_maps_amount_filter_when_range_is_present(self) -> None:
         request = domain_invoices.InvoicesFilter.for_seller(

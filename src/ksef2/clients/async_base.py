@@ -60,12 +60,14 @@ class AsyncClient:
             headers={},
             _owns_client=self._owns_http_client,
         )
+        lifecycle_transport = AsyncClientLifecycleMiddleware(
+            self._http_transport,
+            self._lifecycle_state,
+        )
+        self._transfer_transport = lifecycle_transport
         self._transport = AsyncKSeFExceptionMiddleware(
             AsyncRetryMiddleware(
-                AsyncClientLifecycleMiddleware(
-                    self._http_transport,
-                    self._lifecycle_state,
-                ),
+                lifecycle_transport,
                 self._transport_config.retry,
             )
         )
@@ -101,6 +103,7 @@ class AsyncClient:
             transport=self._transport,
             certificate_store=self._certificate_store,
             environment=self._environment,
+            transfer_transport=self._transfer_transport,
         )
 
     @cached_property

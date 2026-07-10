@@ -25,7 +25,7 @@
           {
             "label": "Overview",
             "translations": {
-              "pl": "Przegląd"
+              "pl": "Wprowadzenie"
             },
             "path": "getting-started/overview.mdx"
           },
@@ -49,7 +49,7 @@
           {
             "label": "SDK Overview",
             "translations": {
-              "pl": "Przegląd SDK"
+              "pl": "Jak działa SDK"
             },
             "path": "concepts/overview.mdx"
           },
@@ -69,7 +69,7 @@
               {
                 "label": "Clients and lifecycle",
                 "translations": {
-                  "pl": "Klienci i cykl życia"
+                  "pl": "Klient "
                 },
                 "path": "concepts/clients-and-lifecycle.mdx"
               },
@@ -134,14 +134,14 @@
               {
                 "label": "Invoice lifecycle",
                 "translations": {
-                  "pl": "Cykl życia faktury"
+                  "pl": "Faktura w KSeF"
                 },
                 "path": "concepts/invoice-lifecycle.mdx"
               },
               {
                 "label": "Querying and exports",
                 "translations": {
-                  "pl": "Zapytania i eksporty"
+                  "pl": "Wyszukiwanie i eksport paczek"
                 },
                 "path": "concepts/querying-and-exports.mdx"
               },
@@ -170,7 +170,7 @@
               {
                 "label": "Limits, polling, and retries",
                 "translations": {
-                  "pl": "Limity, polling i ponowienia"
+                  "pl": "Limity i ponawianie żądań"
                 },
                 "path": "concepts/limits.mdx"
               },
@@ -196,7 +196,7 @@
           {
             "label": "Overview",
             "translations": {
-              "pl": "Przegląd"
+              "pl": "Spis poradników"
             },
             "path": "how-to-guides/overview.mdx"
           },
@@ -216,7 +216,7 @@
               {
                 "label": "Set up clients",
                 "translations": {
-                  "pl": "Skonfiguruj klienta"
+                  "pl": "Konfiguracja klienta"
                 },
                 "path": "how-to-guides/client-setup.mdx"
               },
@@ -246,7 +246,7 @@
           {
             "label": "Invoice work",
             "translations": {
-              "pl": "Praca z fakturami"
+              "pl": "Faktury"
             },
             "items": [
               {
@@ -352,7 +352,7 @@
               {
                 "label": "Use XAdES helpers",
                 "translations": {
-                  "pl": "Użyj pomocników XAdES"
+                  "pl": "Podpisy XAdES"
                 },
                 "path": "how-to-guides/use-xades-helpers.mdx"
               }
@@ -371,21 +371,21 @@
           {
             "label": "1.0.0 release notes",
             "translations": {
-              "pl": "Release notes 1.0.0"
+              "pl": "Notatki wydania 1.0.0"
             },
             "path": "reference/release-notes-1-0-0.mdx"
           },
           {
             "label": "Public API contract",
             "translations": {
-              "pl": "Kontrakt publicznego API"
+              "pl": "Interfejs publiczny"
             },
             "path": "reference/public-api.mdx"
           },
           {
             "label": "Client lifecycle",
             "translations": {
-              "pl": "Cykl życia klienta"
+              "pl": "Tworzenie i zamykanie klientów"
             },
             "path": "reference/client-lifecycle.mdx"
           },
@@ -406,13 +406,13 @@
           {
             "label": "Low-level API",
             "translations": {
-              "pl": "Low-level API"
+              "pl": "API niskiego poziomu"
             },
             "items": [
               {
                 "label": "Overview",
                 "translations": {
-                  "pl": "Przegląd"
+                  "pl": "Wprowadzenie"
                 },
                 "path": "reference/low-level/overview.mdx"
               },
@@ -452,7 +452,7 @@
           {
             "label": "Sync code generation",
             "translations": {
-              "pl": "Generowanie kodu sync"
+              "pl": "Synchronizacja kodu sync/async"
             },
             "path": "contributing/sync-generation.md"
           }

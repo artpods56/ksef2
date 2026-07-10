@@ -113,8 +113,16 @@ def test_default_profile_config_path_uses_cli_locations(tmp_path) -> None:
     env_path = tmp_path / "from-env.toml"
     assert default_profile_config_path({CONFIG_ENV_VAR: str(env_path)}) == env_path
 
-    assert default_profile_config_path({"XDG_CONFIG_HOME": str(tmp_path / "xdg")}) == (
-        tmp_path / "xdg" / "ksef2-cli" / "config.toml"
+    xdg_home = tmp_path / "xdg"
+    assert default_profile_config_path({"XDG_CONFIG_HOME": str(xdg_home)}) == (
+        xdg_home / "ksef2" / "config.toml"
+    )
+
+    legacy_path = xdg_home / "ksef2-cli" / "config.toml"
+    legacy_path.parent.mkdir(parents=True)
+    legacy_path.write_text("", encoding="utf-8")
+    assert default_profile_config_path({"XDG_CONFIG_HOME": str(xdg_home)}) == (
+        legacy_path
     )
 
 

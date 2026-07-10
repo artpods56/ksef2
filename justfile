@@ -19,6 +19,10 @@ test-runtime-checks:
     KSEF2_RUNTIME_CHECKS=1 uv run --extra runtime-checks python -m pytest tests/unit/ -q
 
 
+test-fa3-contracts:
+    uv run python -m pytest tests/integration/builders/fa3/ -m integration -q
+
+
 test-coverage:
     uv run python -m pytest --cov=ksef2 --cov-config=.coveragerc.toml --cov-report=xml tests/unit/ -v
     uv run python scripts/test_coverage_badge.py
@@ -28,10 +32,12 @@ release-check:
     just lint
     just format-check
     just check-ksef-api-version
+    just check-generated-artifacts
     just check-gen-sync
     just typecheck
-    just test
+    just test-coverage
     just test-runtime-checks
+    just test-fa3-contracts
     uv build
 
 
@@ -40,10 +46,10 @@ coverage:
 
 
 lint:
-    uv run ruff check src/ tests/ scripts/gen_sync.py
+    uv run ruff check src/ tests/ scripts/gen_sync.py scripts/sync_generated_artifacts.py scripts/test_coverage_badge.py scripts/verify_release.py
 
 format-check:
-    uv run ruff format --check src/ tests/ scripts/gen_sync.py
+    uv run ruff format --check src/ tests/ scripts/gen_sync.py scripts/sync_generated_artifacts.py scripts/test_coverage_badge.py scripts/verify_release.py
 
 gen-sync:
     uv run --group codegen python scripts/gen_sync.py
@@ -52,8 +58,9 @@ check-gen-sync:
     uv run --group codegen python scripts/gen_sync.py --check
 
 typecheck:
-    GITHUB_ACTIONS= uv run --extra runtime-checks basedpyright --level error
-    GITHUB_ACTIONS= uv run --extra runtime-checks --group codegen basedpyright scripts/gen_sync.py
+    GITHUB_ACTIONS= uv run --extra runtime-checks basedpyright src --level warning --warnings
+    GITHUB_ACTIONS= uv run --extra runtime-checks basedpyright tests --level error
+    GITHUB_ACTIONS= uv run --extra runtime-checks --group codegen basedpyright scripts/gen_sync.py scripts/sync_generated_artifacts.py scripts/test_coverage_badge.py scripts/verify_release.py --level warning --warnings
 
 
 sync-ksef-api-version:
@@ -69,30 +76,16 @@ fetch-spec:
 
 
 regenerate-models:
-    uv run --group codegen datamodel-codegen \
-      --input openapi.json \
-      --input-file-type openapi \
-      --output models.py \
-      --output-model-type pydantic_v2.BaseModel \
-      --use-annotated \
-      --field-constraints \
-      --use-standard-collections \
-      --use-union-operator \
-      --strict-nullable \
-      --collapse-root-models \
-      --use-schema-description \
-      --use-field-description \
-      --disable-timestamp \
-      --target-python-version 3.12 \
-      --output src/ksef2/infra/schema/api/spec/models.py
-    uv run ruff format src/ksef2/infra/schema/api/spec/models.py
+    uv run --group codegen python scripts/sync_generated_artifacts.py --only openapi
 
 
 regenerate-fa3-models:
-    xsdata generate schemas/FA3/schemat.xsd \
-      --output dataclasses \
-      --unnest-classes \
-      --relative-imports \
-      --package ksef2.infra.schema.fa3.models \
-      --structure-style filenames \
-      --docstring-style Google
+    uv run --group codegen python scripts/sync_generated_artifacts.py --only fa3
+
+
+regenerate-artifacts:
+    uv run --group codegen python scripts/sync_generated_artifacts.py
+
+
+check-generated-artifacts:
+    uv run --group codegen python scripts/sync_generated_artifacts.py --check

@@ -9,6 +9,7 @@ from ksef2.clients._async_session import _AwaitableSession
 from ksef2.clients.async_batch import AsyncBatchSessionClient
 from ksef2.core import exceptions
 from ksef2.core.async_protocols import AsyncMiddleware
+from ksef2.core.async_external_transfer import AsyncExternalTransferClient
 from ksef2.core.polling import async_poll_until
 from ksef2.domain.models.batch import (
     BatchFileInfo,
@@ -73,7 +74,7 @@ class AsyncBatchService:
     ) -> None:
         self._invoice_eps = AsyncInvoicesEndpoints(authed_transport)
         self._session_eps = AsyncSessionEndpoints(authed_transport)
-        self._upload_transport = upload_transport
+        self._external_transfers = AsyncExternalTransferClient(upload_transport)
         self._get_encryption_key = get_encryption_key
         self._open_batch_session = open_batch_session
 
@@ -201,7 +202,9 @@ class AsyncBatchService:
             KSeFClientClosedError: If the session client is closed.
             KSeFValidationError: If prepared part ordinals do not match session upload
                 instructions.
-            httpx.HTTPError: If uploading a part to its presigned URL fails.
+            KSeFBatchUploadError: If external storage rejects an upload or its
+                outcome cannot be determined. Call ``recovery_state()`` on the error
+                to deliberately recover the sensitive batch state.
         """
         upload_requests = {
             request.ordinal_number: request for request in session.part_upload_requests
@@ -218,19 +221,27 @@ class AsyncBatchService:
         for ordinal_number in sorted(upload_requests):
             upload_request = upload_requests[ordinal_number]
             part = parts[ordinal_number]
-            _ = await self._upload_transport.request(
-                upload_request.method,
-                upload_request.url,
-                headers={
-                    "Content-Type": "application/octet-stream",
-                    **{
-                        key: value
-                        for key, value in upload_request.headers.items()
-                        if value is not None
+            try:
+                await self._external_transfers.upload_part(
+                    method=upload_request.method,
+                    url=upload_request.url,
+                    headers={
+                        "Content-Type": "application/octet-stream",
+                        **{
+                            key: value
+                            for key, value in upload_request.headers.items()
+                            if value is not None
+                        },
                     },
-                },
-                content=part.content,
-            )
+                    content=part.content,
+                    reference_number=session.reference_number,
+                    part_ordinal=ordinal_number,
+                )
+            except exceptions.KSeFExternalTransferError as exc:
+                raise exceptions.KSeFBatchUploadError(
+                    transfer_error=exc,
+                    recovery_state=session.resume_state(),
+                ) from exc
 
     async def submit_prepared_batch(
         self,
@@ -248,7 +259,9 @@ class AsyncBatchService:
         Raises:
             KSeFClientClosedError: If the session client closes before upload.
             KSeFValidationError: If the prepared batch cannot be opened or uploaded.
-            httpx.HTTPError: If uploading a part to its presigned URL fails.
+            KSeFBatchUploadError: If external storage rejects an upload or its
+                outcome cannot be determined. Call ``recovery_state()`` on the error
+                to deliberately recover the sensitive batch state.
         """
         async with self.open_session(prepared_batch=prepared_batch) as session:
             state = session.resume_state()
@@ -280,7 +293,9 @@ class AsyncBatchService:
             KSeFEncryptionError: If key or part encryption fails.
             KSeFValidationError: If preparation, session opening, or upload validation
                 fails.
-            httpx.HTTPError: If uploading a part to its presigned URL fails.
+            KSeFBatchUploadError: If external storage rejects an upload or its
+                outcome cannot be determined. Call ``recovery_state()`` on the error
+                to deliberately recover the sensitive batch state.
         """
         prepared_batch = await self.prepare_batch(
             invoices=invoices,

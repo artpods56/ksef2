@@ -1,0 +1,6 @@
+# The official FA(3) schema files retain their upstream CRLF endings. Treat the
+# terminal carriage return as intentional whitespace when checking a diff.
+schemas/FA3/*.xsd whitespace=cr-at-eol
+schemas/FA3/*.xml whitespace=cr-at-eol
+src/ksef2/infra/schema/fa3/definitions/*.xsd whitespace=cr-at-eol
+src/ksef2/infra/schema/fa3/definitions/*.xml whitespace=cr-at-eol

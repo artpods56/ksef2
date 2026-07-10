@@ -101,7 +101,7 @@ Ponawialne grupy `POST`:
 
 | Obszar | Operacje |
 | --- | --- |
-| Uwierzytelnianie | challenge, redeem token, refresh token |
+| Uwierzytelnianie | challenge, refresh token |
 | Faktury | query metadanych |
 | Certyfikaty | query, retrieve |
 | Uprawnienia | query personal, authorization, EU entity, person, subordinate entity i subunit |
@@ -110,6 +110,11 @@ Wysyłka faktury, nadawanie uprawnień, enrollment certyfikatu, generowanie
 tokenu, otwieranie sesji online i otwieranie sesji batch nie są ponawiane przez
 middleware retry SDK. Zapisz zwrócone referencje i wznawiaj przez status zamiast
 tworzyć te operacje ponownie w ciemno.
+
+Redeem tokenu uwierzytelnienia także nigdy nie jest ponawiany, ponieważ KSeF
+zwraca parę access/refresh tylko raz. Utrata odpowiedzi redeem rzuca
+`KSeFAuthTokenRedemptionError` z `outcome_ambiguous=True`; nie powtarzaj tej
+operacji automatycznie.
 
 ## Timeouty pollingu workflow
 

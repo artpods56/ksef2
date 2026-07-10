@@ -8,7 +8,11 @@ from ksef2.infra.mappers.invoices.fa3.spec.invoice import (
     from_spec as invoice_from_spec,
 )
 from ksef2.infra.schema.fa3.models.schemat import Faktura
-from tests.integration.builders.helpers import load_sample, sample_path
+from tests.integration.builders.helpers import (
+    load_sample,
+    sample_path,
+    serialize_and_validate,
+)
 from ksef2.services.builders.fa3.root import StandardInvoiceBuilder
 
 
@@ -19,7 +23,7 @@ def _assert_sample(builder: StandardInvoiceBuilder, sample_name: str) -> None:
     actual_invoice = invoice_from_spec(actual)
     expected_invoice = invoice_from_spec(expected)
     xml_invoice = invoice_from_spec(
-        parser.from_bytes(builder.to_xml().encode("utf-8"), Faktura)
+        parser.from_bytes(serialize_and_validate(builder), Faktura)
     )
 
     assert actual.fa.p_2 == expected.fa.p_2

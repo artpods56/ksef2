@@ -21,7 +21,7 @@ class RecordedCall:
 @dataclass()
 class FakeTransport(protocols.Middleware):
     calls: list[RecordedCall] = field(default_factory=list)
-    responses: list[httpx.Response] = field(default_factory=list)
+    responses: list[httpx.Response | httpx.TransportError] = field(default_factory=list)
 
     def request(
         self,
@@ -94,6 +94,9 @@ class FakeTransport(protocols.Middleware):
             )
         self.responses.append(resp)
 
+    def enqueue_error(self, error: httpx.TransportError) -> None:
+        self.responses.append(error)
+
     def clear(self) -> None:
         self.calls.clear()
         self.responses.clear()
@@ -101,14 +104,17 @@ class FakeTransport(protocols.Middleware):
     def _next_response(self) -> httpx.Response:
         if not self.responses:
             raise RuntimeError("FakeTransport: no more queued responses")
-        return self.responses.pop(0)
+        response = self.responses.pop(0)
+        if isinstance(response, httpx.TransportError):
+            raise response
+        return response
 
 
 @final
 @dataclass()
 class AsyncFakeTransport(AsyncMiddleware):
     calls: list[RecordedCall] = field(default_factory=list)
-    responses: list[httpx.Response] = field(default_factory=list)
+    responses: list[httpx.Response | httpx.TransportError] = field(default_factory=list)
 
     async def request(
         self,
@@ -181,6 +187,9 @@ class AsyncFakeTransport(AsyncMiddleware):
             )
         self.responses.append(resp)
 
+    def enqueue_error(self, error: httpx.TransportError) -> None:
+        self.responses.append(error)
+
     def clear(self) -> None:
         self.calls.clear()
         self.responses.clear()
@@ -188,4 +197,7 @@ class AsyncFakeTransport(AsyncMiddleware):
     def _next_response(self) -> httpx.Response:
         if not self.responses:
             raise RuntimeError("AsyncFakeTransport: no more queued responses")
-        return self.responses.pop(0)
+        response = self.responses.pop(0)
+        if isinstance(response, httpx.TransportError):
+            raise response
+        return response

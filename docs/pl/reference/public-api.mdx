@@ -1,6 +1,6 @@
 ---
-title: Kontrakt publicznego API
-description: Stabilne ścieżki importu i granice internal dla ksef2 1.0.
+title: Interfejs publiczny
+description: Stabilne ścieżki importu i granice modułów wewnętrznych w ksef2 1.0.
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
@@ -13,13 +13,13 @@ stabilne w linii 1.x.
 | Ścieżka importu | Do czego służy |
 | --- | --- |
 | `ksef2` | Klienci root, konfiguracja środowiska i transportu, `FormSchema`, `__version__` oraz publiczne wyjątki. |
-| `ksef2.clients` | Konkretne klasy klientów sync i async, gdy potrzebujesz ich w adnotacjach typów. |
+| `ksef2.clients` | Konkretne klasy klientów sync/async oraz stabilne typy workflow `InvoicesService` / `BatchService` (i ich odpowiedniki async) do adnotacji typów. |
 | `ksef2.models` | Modele żądań, odpowiedzi, filtrów, paginacji, tokenów, uprawnień, sesji i batchy. |
 | `ksef2.fa3` | Publiczny builder faktur FA(3), drafty buildera oraz typy modelu faktury używane przez aplikacje. |
 | `ksef2.xades` | Ładowanie certyfikatów, generowanie certyfikatów TEST, lokalne podpisy XAdES i `LocalSigner`. |
 | `ksef2.profiles` | Helpery konfiguracji profili zgodnych z `ksef2-cli`. |
 | `ksef2.renderers` | Opcjonalne lokalne helpery renderowania faktur XSLT/PDF. |
-| `ksef2.raw` | Low-level klienty endpointów, schema-native modele `spec` i `supp` oraz helpery kryptograficzne. |
+| `ksef2.raw` | Klienty endpointów niskiego poziomu, modele `spec` i `supp` oraz narzędzia kryptograficzne. |
 | `ksef2.raw.mappers` | Publiczne mappery między modelami raw i modelami SDK. |
 
 Preferuj najwyższy poziom importu pasujący do workflow:
@@ -45,10 +45,10 @@ Pakiet root `ksef2` jest publiczną fasadą dla typowego kodu aplikacyjnego:
 
 Dla tych nazw używaj importów z root zamiast sięgać do modułów implementacyjnych.
 
-## Stabilność low-level API
+## Stabilność API niskiego poziomu
 
-`ksef2.raw` jest publiczne, ale celowo niższopoziomowe. Ścieżka importu jest
-stabilna, natomiast kształt schema-native modeli podąża za sprawdzoną wersją
+`ksef2.raw` jest publiczne, ale celowo niskopoziomowe. Ścieżka importu jest
+stabilna, natomiast kształt modeli zgodnych ze schematem podąża za wersją
 OpenAPI KSeF.
 
 ```python
@@ -67,8 +67,8 @@ Unikaj tych ścieżek w kodzie aplikacyjnym:
 - `ksef2.infra.*`: wygenerowane schemy i wewnętrzne mappery;
 - `ksef2.endpoints.*`: implementacja endpointów i transportu;
 - `ksef2.core.*`: wewnętrzne moduły protokołu, transportu, middleware i helperów;
-- `ksef2.services.*`: implementacja usług komponowanych przez klienta; używaj
-  gałęzi klienta albo `ksef2.renderers`;
+- `ksef2.services.*`: implementacja workflow komponowana przez klienta; cztery
+  udokumentowane typy usług importuj z `ksef2.clients` albo używaj modułów klienta;
 - `scripts/*`: narzędzia repozytorium, nie API pakietu.
 
 Część ścieżek internal może być importowalna dla implementacji SDK albo testów,
@@ -88,7 +88,7 @@ zachować udokumentowane importy i zachowanie poza poprawkami błędów.
   description="Przejrzyj klientów głównych, klientów uwierzytelnionych i własność cyklu życia."
 />
 <LinkCard
-  title="Low-level API"
+  title="API niskiego poziomu"
   href="low-level/overview.mdx"
   description="Użyj schema-native wrapperów endpointów przez wspieraną powierzchnię raw."
 />

@@ -1,6 +1,6 @@
 ---
-title: Limity, polling i ponowienia
-description: Zrozum limity kontekstu KSeF, limity podmiotu, rate limity API, deadline pollingu i granice retry.
+title: Limity i ponawianie żądań
+description: Limity kontekstu KSeF, limity podmiotu, rate limity API, terminy pollingu i granice ponawiania.
 ---
 
 import { Aside, LinkCard } from '@astrojs/starlight/components';
@@ -62,7 +62,7 @@ operacji.
 
 ## Granice retry
 
-Transport klienta głównego może ponawiać błędy transportu i odpowiedzi KSeF
+Transport klienta bazowego może ponawiać błędy transportu i odpowiedzi KSeF
 nadające się do retry. To nie znaczy, że każdą operację można bezpiecznie
 powtarzać w ciemno. Wysyłka faktury, nadanie uprawnień, rejestracja certyfikatu,
 generowanie tokenu i otwarcie sesji powinny być ponawiane na granicy aplikacji,

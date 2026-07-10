@@ -179,7 +179,8 @@ Profile selection order is the same in the CLI and SDK:
 3. `active_profile` in the local config file.
 
 Use `KSEF2_CONFIG` or `config_path="..."` when the profile file is not at the
-default `~/.config/ksef2-cli/config.toml` location.
+default `~/.config/ksef2/config.toml` location. Existing
+`~/.config/ksef2-cli/config.toml` files are still read as a legacy fallback.
 
 Use an existing profile from SDK code:
 

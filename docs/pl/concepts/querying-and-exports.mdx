@@ -1,15 +1,15 @@
 ---
-title: Zapytania i eksporty
-description: Zrozum metadane faktur, bezpośrednie pobieranie, uchwyty eksportu, paczki i synchronizację przyrostową.
+title: Wyszukiwanie i eksport paczek
+description: Metadane faktur, pobieranie pojedynczych dokumentów, eksporty paczek i synchronizacja przyrostowa.
 ---
 
 import { Aside, LinkCard } from '@astrojs/starlight/components';
 
-Pobieranie faktur ma trzy różne zadania:
+Pobieranie faktur w KSeF to trzy różne zadania:
 
-- zapytania o metadane odpowiadają "jakie faktury istnieją dla tego podmiotu i filtra?";
-- bezpośrednie pobieranie odpowiada "daj mi przetworzony XML dla tego numeru KSeF";
-- eksporty odpowiadają "przygotuj paczkę do pobrania dla większego zestawu faktur".
+- metadane odpowiadają na pytanie „jakie faktury pasują do filtra?”;
+- pobieranie pojedyncze zwraca przetworzony XML dla podanego numeru KSeF;
+- eksport przygotowuje paczkę do pobrania dla większego zestawu faktur.
 
 KSeF najlepiej traktować jako system wymiany i źródło oficjalnych zapisów
 faktur, a nie jako bazę danych pod każdym ekranem aplikacji. W większości

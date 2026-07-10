@@ -36,14 +36,31 @@ class AsyncTokensClient:
     def __init__(self, transport: AsyncMiddleware) -> None:
         self._endpoints = AsyncTokenEndpoints(transport)
 
-    async def _poll_until_active(
+    async def wait_for_activation(
         self,
         *,
         reference_number: str,
-        timeout: float,
-        poll_interval: float,
+        timeout: float = 60.0,
+        poll_interval: float = 1.0,
     ) -> TokenStatusResponse:
-        """Poll token status until it becomes active or reaches a terminal state."""
+        """Wait until a generated token becomes active or reaches a terminal state.
+
+        Call this explicitly after persisting the one-time credential returned by
+        :meth:`generate`. A polling failure does not contain or recover that secret.
+
+        Args:
+            reference_number: Reference returned by :meth:`generate`.
+            timeout: Maximum number of seconds to wait for activation.
+            poll_interval: Delay in seconds between status checks.
+
+        Returns:
+            The first status response that reports the token as active.
+
+        Raises:
+            KSeFApiError: If activation ends in a terminal failure state.
+            KSeFTokenStatusTimeoutError: If polling exceeds ``timeout``.
+            httpx.HTTPError: If a status request fails at the transport boundary.
+        """
         reference_number_local = reference_number
 
         async def _poll() -> TokenStatusResponse:
@@ -72,23 +89,16 @@ class AsyncTokensClient:
         *,
         permissions: list[TokenPermission],
         description: str,
-        timeout: float = 60.0,
-        poll_interval: float = 1.0,
     ) -> GenerateTokenResponse:
-        """Create a token and wait until KSeF marks it as active.
+        """Create a token and immediately return its one-time credential.
 
         Args:
             permissions: Permissions to include in the generated token.
             description: Human-readable label shown in KSeF token listings.
-            timeout: Maximum number of seconds to wait for activation.
-            poll_interval: Delay in seconds between status checks.
 
         Returns:
-            The token payload returned immediately after creation.
-
-        Raises:
-            KSeFApiError: If activation ends in a terminal failure state.
-            KSeFTokenStatusTimeoutError: If polling exceeds ``timeout``.
+            The token payload returned once by KSeF. Persist its secret before
+            calling :meth:`wait_for_activation`.
         """
         request = GenerateTokenRequest(
             permissions=permissions,
@@ -96,14 +106,7 @@ class AsyncTokensClient:
         )
         body = to_spec(request)
         spec_resp = await self._endpoints.generate_token(body=body)
-        result = from_spec(spec_resp)
-
-        _ = await self._poll_until_active(
-            reference_number=result.reference_number,
-            timeout=timeout,
-            poll_interval=poll_interval,
-        )
-        return result
+        return from_spec(spec_resp)
 
     async def list_page(
         self,

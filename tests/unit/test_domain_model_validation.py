@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -142,11 +142,71 @@ def test_invoices_filter_rejects_reversed_datetime_values() -> None:
         )
 
 
-def test_invoices_filter_preserves_valid_date_string_fields() -> None:
+def test_invoices_filter_normalizes_naive_warsaw_dates_to_utc() -> None:
     filters = _invoice_filter(
         date_from="2026-01-01T00:00:00",
         date_to="2026-01-02T00:00:00",
     )
 
-    assert filters.date_from == "2026-01-01T00:00:00"
-    assert filters.date_to == "2026-01-02T00:00:00"
+    assert filters.date_from == datetime(2025, 12, 31, 23, tzinfo=timezone.utc)
+    assert filters.date_to == datetime(2026, 1, 1, 23, tzinfo=timezone.utc)
+
+
+def test_invoices_filter_normalizes_explicit_offsets_to_utc() -> None:
+    filters = _invoice_filter(
+        date_from="2026-01-01T01:00:00+01:00",
+        date_to="2026-01-01T03:00:00+02:00",
+    )
+
+    assert filters.date_from == datetime(2026, 1, 1, tzinfo=timezone.utc)
+    assert filters.date_to == datetime(2026, 1, 1, 1, tzinfo=timezone.utc)
+
+
+def test_invoices_filter_accepts_equal_instants_with_different_offsets() -> None:
+    filters = _invoice_filter(
+        date_from="2026-01-01T00:00:00+00:00",
+        date_to="2026-01-01T01:00:00+01:00",
+    )
+
+    assert filters.date_from == filters.date_to
+
+
+def test_invoices_filter_rejects_reversed_mixed_timezone_range() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="date_from must be less than or equal to date_to",
+    ):
+        _invoice_filter(
+            date_from="2026-01-02T00:00:00+00:00",
+            date_to="2026-01-01T00:00:00",
+        )
+
+
+def test_invoices_filter_rejects_invalid_datetime_string() -> None:
+    with pytest.raises(ValidationError, match="Input should be a valid datetime"):
+        _invoice_filter(date_from="not-a-datetime")
+
+
+@pytest.mark.parametrize(
+    ("value", "message"),
+    [
+        ("2026-03-29T02:30:00", "does not exist in Europe/Warsaw"),
+        ("2026-10-25T02:30:00", "is ambiguous in Europe/Warsaw"),
+    ],
+)
+def test_invoices_filter_requires_offset_for_dst_transition_times(
+    value: str,
+    message: str,
+) -> None:
+    with pytest.raises(ValidationError, match=message):
+        _invoice_filter(date_from=value)
+
+
+def test_invoices_filter_accepts_explicit_offset_during_dst_overlap() -> None:
+    filters = _invoice_filter(
+        date_from="2026-10-25T02:30:00+02:00",
+        date_to="2026-10-25T02:30:00+01:00",
+    )
+
+    assert filters.date_from == datetime(2026, 10, 25, 0, 30, tzinfo=timezone.utc)
+    assert filters.date_to == datetime(2026, 10, 25, 1, 30, tzinfo=timezone.utc)

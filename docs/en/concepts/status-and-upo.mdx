@@ -130,7 +130,7 @@ Choose polling settings based on the workflow:
 | Online invoice acceptance | `session.wait_for_invoice_ready()` or `send_invoice_and_wait()` |
 | Batch processing | `auth.batch.wait_for_completion()` |
 | Export package readiness | `auth.invoices.wait_for_export_package()` |
-| Token generation or inspection | `auth.tokens.generate()` or `auth.tokens.status()` |
+| Token activation or inspection | `auth.tokens.wait_for_activation()` or `auth.tokens.status()` |
 
 ## What to persist
 

@@ -77,7 +77,58 @@ Używaj `auth.invoices`, `auth.tokens`, `auth.permissions`, `auth.certificates` 
 `client.peppol` oraz dostępnego tylko w TEST `client.testdata` do pracy
 publicznej albo przygotowawczej na kliencie root.
 
-## 4. Zaktualizuj obsługę błędów
+## 4. Przenieś konfigurację profili
+
+Nowe profile SDK i CLI są zapisywane w `~/.config/ksef/config.toml`. Istniejące
+pliki `~/.config/ksef2-cli/config.toml` pozostają odczytywane jako zgodność
+wsteczna, więc przed aktualizacją nie trzeba ich ręcznie przenosić. Nowe zapisy
+trafiają do nowej lokalizacji; ustaw `KSEF2_CONFIG`, gdy aplikacja musi zachować
+jawną ścieżkę profilu.
+
+## 5. Przenieś utrwalony stan wznowienia i draftów
+
+Przykłady sprzed 1.0 czasem serializowały wynik `get_state()` ogólnymi metodami
+Pydantic. W 1.0 stan uwierzytelnienia i sesji są rozdzielone, a ich jawne metody
+eksportu celowo zawierają dane uwierzytelniające:
+
+```python
+from ksef2.models import AuthenticationResumeState, OnlineSessionResumeState
+
+authentication_json = auth.resume_state().to_json()
+session_json = session.resume_state().to_json()
+
+authentication_state = AuthenticationResumeState.from_json(authentication_json)
+session_state = OnlineSessionResumeState.from_json(session_json)
+```
+
+Obie wartości JSON traktuj jak sekrety. Nie loguj ich ani nie zapisuj w zwykłych
+danych aplikacji. Ogólny wynik `model_dump_json()` pozostaje zredagowany i nie
+może służyć do wznowienia klienta ani sesji.
+
+Utrwalone dokumenty uwierzytelnienia, sesji i `KsefInvoiceDraft` zawierają teraz
+`format_version: 1`. Dokumenty sprzed 1.0 bez wersji są odczytywane jako wersja
+1, natomiast nieznane przyszłe wersje i niezadeklarowane pola najwyższego
+poziomu kończą się błędem walidacji zamiast cichego pominięcia.
+
+Generowanie tokenu zwraca również jednorazowe dane uwierzytelniające przed
+rozpoczęciem pollingu aktywacji. Zastąp wywołania sprzed 1.0, które przekazywały
+argumenty pollingu do `generate()`, dwoma jawnymi operacjami:
+
+```python
+generated = auth.tokens.generate(
+    permissions=["invoice_read"],
+    description="Odczyt faktur",
+)
+status = auth.tokens.wait_for_activation(
+    reference_number=generated.reference_number,
+    timeout=60.0,
+)
+```
+
+Zapisz `generated.token` przed oczekiwaniem. Timeout pollingu nie unieważnia
+wygenerowanego tokenu.
+
+## 6. Zaktualizuj obsługę błędów
 
 Łap błędy sklasyfikowane przez SDK publicznymi klasami wyjątków, a błędy
 transportu trzymaj osobno:
@@ -104,7 +155,7 @@ Wyjątki timeoutów pollingu oznaczają wygaśnięcie lokalnego deadline'u. Same
 sobie nie dowodzą, że zdalna operacja KSeF nie powiodła się. Zapisuj referencje
 przed czekaniem, żeby inny proces mógł wznowić polling.
 
-## 5. Sprawdź integracje low-level
+## 7. Sprawdź integracje low-level
 
 Trzymaj kod low-level w obsługiwanej powierzchni raw:
 
@@ -117,7 +168,7 @@ from ksef2.raw.mappers import auth as auth_mapper
 sprawdzoną wersją OpenAPI KSeF. Gdy Ministerstwo Finansów zmieni schemę,
 kształty modeli raw mogą zmienić się w minor release SDK.
 
-## 6. Zaktualizuj użycie buildera FA(3)
+## 8. Zaktualizuj użycie buildera FA(3)
 
 Nowy kod budowania faktur opieraj o publiczną fasadę FA(3):
 
@@ -130,7 +181,7 @@ Gdy użytkownicy mogą przerwać edycję faktury, zapisuj wygenerowany XML albo 
 biznesowe weryfikuj z oficjalnymi regułami FA(3) i wymaganiami księgowymi
 własnej organizacji.
 
-## 7. Zamień stare linki dokumentacji
+## 9. Zamień stare linki dokumentacji
 
 Publiczna dokumentacja nie używa już starych tras `intro`, `workflows` ani
 `api-signatures`.

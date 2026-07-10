@@ -390,6 +390,10 @@ Builder może zwrócić trzy postacie faktury:
 - `build()` zwraca `KsefInvoice`.
 - `to_spec()` zwraca wygenerowany model schemy FA(3) `Faktura`.
 - `to_xml()` zwraca XML jako string.
+- `to_xml()` domyślnie waliduje wynik względem dołączonego XSD FA(3) i zgłasza
+  `ValueError`, jeśli serializacja utworzyła dokument niezgodny ze schematem.
+- Używaj `to_xml(validate=False)` wyłącznie do świadomej serializacji
+  diagnostycznej lub pośredniej, która nie zostanie wysłana do KSeF.
 
 ```python
 from pathlib import Path

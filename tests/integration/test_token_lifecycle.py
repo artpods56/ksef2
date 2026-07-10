@@ -76,6 +76,9 @@ def token_context():
             permissions=["invoice_read"],
             description="Integration test token",
         )
+        _ = auth.tokens.wait_for_activation(
+            reference_number=generated.reference_number,
+        )
 
         yield client, auth, generated
 

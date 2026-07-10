@@ -21,9 +21,9 @@ kontekst. Ułatwia to późniejszy audyt i odtwarzanie po błędach.
 ## Tokeny
 
 `auth.tokens` tworzy, listuje, sprawdza i cofa tokeny KSeF. Generowanie tokenu
-zwraca payload tokenu i numer referencyjny. SDK czeka na aktywację tokenu przed
-powrotem z `generate()`, ale system produkcyjny nadal powinien zapisać numer
-referencyjny i obsłużyć timeout albo błąd aktywacji.
+od razu zwraca jednorazowy payload tokenu i numer referencyjny. Zapisz credential
+przed jawnym wywołaniem `wait_for_activation()`. Dzięki temu timeout albo błąd
+transportu podczas pollingu nie odrzuci jedynej kopii tokenu.
 
 Wygenerowany token ma stały zestaw uprawnień. Jeśli uprawnienia mają się
 zmienić, wygeneruj nowy token i cofnij stary po migracji. Generowanie tokenu

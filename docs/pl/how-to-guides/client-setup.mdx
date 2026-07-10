@@ -1,13 +1,13 @@
 ---
-title: Skonfiguruj klienta
-description: Utwórz klienta sync albo async, skonfiguruj transport i wybierz uwierzytelnione gałęzie.
+title: Konfiguracja klienta
+description: Utwórz klienta sync albo async, skonfiguruj transport i wybierz moduły po uwierzytelnieniu.
 ---
 
 import { Aside, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
-Klient główny `Client` przechowuje konfigurację transportu HTTP i udostępnia
-publiczne, nieuwierzytelnione gałęzie. Uwierzytelnij się raz dla kontekstu KSeF,
-a potem przekaż uwierzytelnionego klienta do kodu przepływu.
+Klient bazowy `Client` przechowuje konfigurację transportu HTTP i udostępnia
+publiczne moduły bez uwierzytelnienia. Uwierzytelnij się raz dla kontekstu KSeF,
+a potem przekaż klienta uwierzytelnionego do kodu przepływu.
 
 ## Wybierz sync albo async
 
@@ -37,10 +37,10 @@ async with AsyncClient(Environment.TEST) as client:
 Poza lokalnymi przepływami TEST używaj `Environment.DEMO` albo
 `Environment.PRODUCTION`.
 
-## Zarządzaj cyklem życia
+## Zarządzanie zasobami
 
-Klient główny przechowuje zasoby HTTP zarządzane przez SDK. W skryptach i
-zadaniach preferuj context manager:
+Klient bazowy przechowuje zasoby HTTP zarządzane przez SDK. W skryptach i
+zadaniach preferuj menedżer kontekstu:
 
 ```python
 from ksef2 import Client, Environment
@@ -86,7 +86,7 @@ with auth.online_session(form_code=FormSchema.FA3) as session:
 ```
 
 Gdy dane uwierzytelniające są zapisane w profilu kompatybilnym z CLI, utwórz
-klienta głównego dla środowiska profilu i uwierzytelnij się przez
+klienta bazowego dla środowiska profilu i uwierzytelnij się przez
 `with_profile()`:
 
 ```python
@@ -96,16 +96,16 @@ client = Client(Environment.PRODUCTION)
 auth = client.authentication.with_profile("prod-token")
 ```
 
-## Publiczne gałęzie klienta głównego
+## Publiczne moduły klienta bazowego
 
-Klient główny przydaje się przed uwierzytelnieniem:
+Klient bazowy przydaje się przed uwierzytelnieniem:
 
 ```python
 certificates = client.encryption.get_certificates()
 providers = client.peppol.query()
 ```
 
-Gałąź tylko dla TEST także jest na kliencie głównym:
+Moduł tylko dla TEST także jest na kliencie bazowym:
 
 ```python
 client.testdata.create_subject(
@@ -117,7 +117,7 @@ client.testdata.create_subject(
 
 ## Gałęzie uwierzytelnione
 
-Po uwierzytelnieniu użyj gałęzi pasującej do zadania:
+Po uwierzytelnieniu użyj modułu pasującego do zadania:
 
 ```python
 invoices = auth.invoices
@@ -130,9 +130,9 @@ sessions = auth.sessions
 invoice_sessions = auth.invoice_sessions
 ```
 
-<Aside type="note" title="Oddziel klienta głównego od uwierzytelnionego">
-  Klient główny wybiera środowisko i transport. Klient uwierzytelniony trzyma
-  tokeny bearer i gałęzie zależne od kontekstu. Przekazywanie
+<Aside type="note" title="Oddziel klienta bazowego od uwierzytelnionego">
+  Klient bazowy wybiera środowisko i transport. Klient uwierzytelniony trzyma
+  tokeny bearer i moduły zależne od kontekstu. Przekazywanie
   uwierzytelnionego klienta do kodu przepływów trzyma stan auth poza kodem
   konfiguracji.
 </Aside>
@@ -143,9 +143,9 @@ invoice_sessions = auth.invoice_sessions
 
 1. Odczytaj środowisko i ustawienia transportu na granicy aplikacji.
 
-2. Utwórz jednego klienta głównego dla wybranego środowiska KSeF.
+2. Utwórz jednego klienta bazowego dla wybranego środowiska KSeF.
 
-3. Używaj gałęzi głównych tylko do publicznych odczytów albo przygotowania
+3. Używaj modułów bazowych tylko do publicznych odczytów albo przygotowania
    danych TEST.
 
 4. Uwierzytelnij się raz dla kontekstu, który wykonuje operację.
@@ -180,7 +180,7 @@ invoice_sessions = auth.invoice_sessions
 <LinkCard
   title="Dostawcy PEPPOL"
   href="query-peppol-providers.mdx"
-  description="Odczytuj publiczne dane dostawców PEPPOL z klienta głównego."
+  description="Odczytuj publiczne dane dostawców PEPPOL z klienta bazowego."
 />
 <LinkCard
   title="Dane TEST"
@@ -190,5 +190,5 @@ invoice_sessions = auth.invoice_sessions
 <LinkCard
   title="Cykl życia klienta"
   href="../reference/client-lifecycle.mdx"
-  description="Przejrzyj cykl życia klienta głównego, klientów uwierzytelnionych i zamykanie zasobów."
+  description="Tworzenie, zamykanie i własność zasobów klientów bazowych i uwierzytelnionych."
 />

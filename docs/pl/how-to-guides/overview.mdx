@@ -1,21 +1,21 @@
 ---
-title: Przegląd poradników praktycznych
-description: Wybierz właściwy poradnik zadaniowy dla publicznej powierzchni SDK.
+title: Spis poradników
+description: Wybierz poradnik do konkretnego zadania na publicznej powierzchni SDK.
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
 
-Ta sekcja jest dla sytuacji, w których znasz już podstawowy kształt SDK i
-chcesz wykonać konkretne zadanie w KSeF. Quickstart pokazuje jedną ścieżkę od
-początku do końca; te poradniki rozbijają typowe decyzje produkcyjne.
+Ta sekcja jest dla sytuacji, w których znasz już ogólny kształt SDK i chcesz
+wykonać konkretne zadanie w KSeF. Szybki start pokazuje jedną ścieżkę od początku
+do końca; poniższe poradniki rozbijają typowe decyzje produkcyjne.
 
 ## Konfiguracja
 
 <CardGrid>
   <LinkCard
-    title="Skonfiguruj klientów"
+    title="Konfiguracja klienta"
     href="client-setup.mdx"
-    description="Wybierz sync albo async, publiczne gałęzie klienta głównego i uwierzytelnione gałęzie przepływów."
+    description="Sync albo async, publiczne moduły klienta bazowego i moduły po uwierzytelnieniu."
   />
   <LinkCard
     title="Uwierzytelnij się"
@@ -29,7 +29,7 @@ początku do końca; te poradniki rozbijają typowe decyzje produkcyjne.
   />
 </CardGrid>
 
-## Praca z fakturami
+## Faktury
 
 <CardGrid>
   <LinkCard
@@ -95,7 +95,7 @@ początku do końca; te poradniki rozbijają typowe decyzje produkcyjne.
   <LinkCard
     title="Wyszukaj dostawców PEPPOL"
     href="query-peppol-providers.mdx"
-    description="Wyszukuj publiczne dane dostawców PEPPOL z klienta głównego."
+    description="Wyszukuj publiczne dane dostawców PEPPOL z klienta bazowego."
   />
   <LinkCard
     title="Użyj danych TEST"
@@ -108,15 +108,15 @@ początku do końca; te poradniki rozbijają typowe decyzje produkcyjne.
     description="Ładuj materiał certyfikatu, generuj certyfikaty TEST i podpisuj XML."
   />
   <LinkCard
-    title="Low-level API"
+    title="API niskiego poziomu"
     href="../reference/low-level/overview.mdx"
     description="Zejdź do schema-native wrapperów endpointów dla własnego podpisu, custody szyfrowania albo debugowania payloadów."
   />
 </CardGrid>
 
 <Aside type="tip" title="Sync i async mają ten sam przepływ">
-  Klient async ma te same gałęzie i nazwy metod. Użyj `AsyncClient`, wywołania
-  sieciowe poprzedź `await`, a cykl życia klienta i sesji obsłuż przez
+  Klient async ma te same moduły i nazwy metod. Użyj `AsyncClient`, wywołania
+  sieciowe poprzedź `await`, a zasoby klienta i sesji zamykaj przez
   `async with`.
 </Aside>
 
@@ -132,12 +132,12 @@ początku do końca; te poradniki rozbijają typowe decyzje produkcyjne.
 2. Uwierzytelnij się dla wybranego kontekstu.
 
    Uwierzytelniony klient udostępnia `online_session`, `batch`, `invoices`,
-   `tokens`, `permissions`, `certificates` i inne gałęzie przepływów.
+   `tokens`, `permissions`, `certificates` i inne moduły przepływów.
 
 3. Uruchom gałąź przepływu, która odpowiada za zadanie.
 
-   Użyj publicznych gałęzi klienta głównego do certyfikatów szyfrowania, lookupu
-   PEPPOL i danych TEST. Użyj gałęzi uwierzytelnionych do faktur, sesji,
+   Użyj publicznych modułów klienta bazowego do certyfikatów szyfrowania, lookupu
+   PEPPOL i danych TEST. Użyj modułów uwierzytelnionych do faktur, sesji,
    tokenów, uprawnień, certyfikatów i limitów.
 
 4. Poczekaj na przetwarzanie w KSeF albo status operacji.
@@ -157,14 +157,14 @@ początku do końca; te poradniki rozbijają typowe decyzje produkcyjne.
 ## Referencja
 
 <LinkCard
-  title="Quickstart"
+  title="Szybki start"
   href="../getting-started/quickstart.mdx"
   description="Uruchom pierwszy przepływ generowania, wysyłki, potwierdzenia i pobrania."
 />
 <LinkCard
   title="Operacje"
   href="../reference/operations.mdx"
-  description="Mapuj zadania na gałęzie SDK, helpery pollingu i granice retry."
+  description="Mapuj zadania na moduły SDK, pomocniki pollingu i granice ponawiania."
 />
 <LinkCard
   title="Kontrakt publicznego API"

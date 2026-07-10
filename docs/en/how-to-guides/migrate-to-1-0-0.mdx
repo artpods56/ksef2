@@ -74,7 +74,57 @@ Use `auth.invoices`, `auth.tokens`, `auth.permissions`, `auth.certificates`, and
 `auth.limits` for authenticated work. Use `client.encryption`, `client.peppol`,
 and TEST-only `client.testdata` for public or setup work on the root client.
 
-## 4. Update error handling
+## 4. Migrate profile configuration
+
+New SDK and CLI profiles are stored in `~/.config/ksef/config.toml`. Existing
+`~/.config/ksef2-cli/config.toml` files remain readable as a fallback, so no
+manual move is required before upgrading. New writes use the new location; set
+`KSEF2_CONFIG` when an application must keep an explicit profile path.
+
+## 5. Migrate persisted resume and draft state
+
+Pre-1.0 examples sometimes serialized the result of `get_state()` with generic
+Pydantic methods. In 1.0, authentication and session state are separate and
+their explicit export methods intentionally include credentials:
+
+```python
+from ksef2.models import AuthenticationResumeState, OnlineSessionResumeState
+
+authentication_json = auth.resume_state().to_json()
+session_json = session.resume_state().to_json()
+
+authentication_state = AuthenticationResumeState.from_json(authentication_json)
+session_state = OnlineSessionResumeState.from_json(session_json)
+```
+
+Treat both JSON values as secrets. Do not log them or store them in ordinary
+application data. Generic `model_dump_json()` output stays redacted and cannot
+be used to resume a client or session.
+
+Persisted authentication, session, and `KsefInvoiceDraft` documents now contain
+`format_version: 1`. Unversioned pre-1.0 documents are read as version 1, while
+unknown future versions and undeclared top-level fields fail validation rather
+than being silently discarded.
+
+Token generation also returns the one-time credential before any activation
+polling. Replace pre-1.0 calls that passed polling arguments to `generate()`
+with two explicit operations:
+
+```python
+generated = auth.tokens.generate(
+    permissions=["invoice_read"],
+    description="Invoice reader",
+)
+status = auth.tokens.wait_for_activation(
+    reference_number=generated.reference_number,
+    timeout=60.0,
+)
+```
+
+Persist `generated.token` before waiting. A polling timeout does not invalidate
+the generated credential.
+
+## 6. Update error handling
 
 Catch SDK-classified errors by public exception class and keep transport errors
 separate:
@@ -101,7 +151,7 @@ Polling timeout exceptions mean the local deadline expired. They do not prove
 that the remote KSeF operation failed. Persist references before waiting so
 another process can resume polling.
 
-## 5. Recheck low-level integrations
+## 7. Recheck low-level integrations
 
 Keep low-level code inside the supported raw surface:
 
@@ -114,7 +164,7 @@ The `ksef2.raw` import path is stable, but model fields follow the checked KSeF
 OpenAPI version. When the Ministry of Finance changes the schema, raw model
 shapes can change in a minor SDK release.
 
-## 6. Update FA(3) builder usage
+## 8. Update FA(3) builder usage
 
 Use the public FA(3) facade for new invoice-building code:
 
@@ -126,7 +176,7 @@ Persist generated XML or `KsefInvoiceDraft` state when users can pause editing.
 Do not persist private builder attributes. Validate business assumptions against
 the official FA(3) rules and your own accounting requirements.
 
-## 7. Replace old documentation links
+## 9. Replace old documentation links
 
 The public docs no longer use the old `intro`, `workflows`, or
 `api-signatures` routes.

@@ -48,7 +48,7 @@ environment_name = os.environ.get("KSEF2_ENV", "test").upper()
 environment = Environment[environment_name]
 ```
 
-Poniższe przykłady metod zakładają, że `client` jest otwartym klientem głównym
+Poniższe przykłady metod zakładają, że `client` jest otwartym klientem bazowym
 dla wybranego środowiska. W skryptach preferuj context manager, na przykład
 `with Client(Environment.TEST) as client:`.
 
@@ -176,7 +176,8 @@ Kolejność wyboru profilu jest taka sama w CLI i SDK:
 3. `active_profile` w lokalnym pliku konfiguracji.
 
 Użyj `KSEF2_CONFIG` albo `config_path="..."`, gdy plik profili nie znajduje się
-w domyślnej lokalizacji `~/.config/ksef2-cli/config.toml`.
+w domyślnej lokalizacji `~/.config/ksef2/config.toml`. Istniejące pliki
+`~/.config/ksef2-cli/config.toml` nadal są odczytywane jako zgodność wsteczna.
 
 Użyj istniejącego profilu w kodzie SDK:
 
@@ -190,7 +191,7 @@ with Client(Environment.PRODUCTION) as client:
     # auth = client.authentication.with_profile("prod-token")
 ```
 
-Środowisko klienta głównego musi zgadzać się ze środowiskiem wybranego profilu.
+Środowisko klienta bazowego musi zgadzać się ze środowiskiem wybranego profilu.
 
 Utwórz albo zaktualizuj ten sam plik profili z kodu SDK:
 
@@ -245,14 +246,14 @@ async with AsyncClient(Environment.PRODUCTION) as client:
    Dla w pełni własnych konfiguracji użyj konfiguracji aplikacji. Jeśli to samo
    środowisko obsługujesz też z terminala, skorzystaj z profili `ksef2-cli`.
 
-3. Utwórz klienta głównego dla środowiska.
+3. Utwórz klienta bazowego dla środowiska.
 
    Użyj `Client(Environment.TEST)`, `Client(Environment.DEMO)` albo
    `Client(Environment.PRODUCTION)`.
 
 4. Uwierzytelnij się raz i przekaż klienta do przepływów.
 
-   Klient uwierzytelniony przechowuje tokeny dostępu i udostępnia gałęzie
+   Klient uwierzytelniony przechowuje tokeny dostępu i udostępnia moduły
    przepływów.
 
 </Steps>
