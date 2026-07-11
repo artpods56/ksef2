@@ -1,12 +1,14 @@
 import asyncio
+from unittest.mock import patch
 
+import httpx
 import pytest
 from polyfactory import BaseFactory
 
 from ksef2.clients.async_authenticated import AsyncAuthenticatedClient
 from ksef2.clients.async_batch import AsyncBatchSessionClient
 from ksef2.core.crypto import sha256_b64
-from ksef2.core.exceptions import KSeFClientClosedError
+from ksef2.core.exceptions import KSeFBatchUploadError, KSeFClientClosedError
 from ksef2.core.routes import InvoiceRoutes, SessionRoutes
 from ksef2.core.stores import CertificateStore
 from ksef2.domain.models.auth import AuthTokens
@@ -15,7 +17,8 @@ from ksef2.domain.models.batch import (
     BatchFileInfo,
     BatchFilePart,
     BatchPreparedPart,
-    BatchSessionState,
+    BatchSessionResumeState,
+    PartUploadRequest,
     PreparedBatch,
 )
 from ksef2.domain.models.session import FormSchema
@@ -70,7 +73,7 @@ class TestAsyncBatchSessionClient:
     def test_aclose_is_idempotent_and_keeps_reference_accessible(
         self,
         async_fake_transport: AsyncFakeTransport,
-        domain_batch_session_state: BaseFactory[BatchSessionState],
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
     ) -> None:
         state = domain_batch_session_state.build()
         client = AsyncBatchSessionClient(async_fake_transport, state)
@@ -86,7 +89,9 @@ class TestAsyncBatchSessionClient:
         )
 
         assert client.reference_number == state.reference_number
-        assert client.get_state() == state
+        assert client.resume_state() == state
+        with pytest.deprecated_call(match="get_state"):
+            assert client.get_state() == state
 
         with pytest.raises(KSeFClientClosedError, match="Session client is closed"):
             _ = client.part_upload_requests
@@ -94,7 +99,7 @@ class TestAsyncBatchSessionClient:
     def test_upload_parts_uses_attached_prepared_batch(
         self,
         async_fake_transport: AsyncFakeTransport,
-        domain_batch_session_state: BaseFactory[BatchSessionState],
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
     ) -> None:
         state = domain_batch_session_state.build()
         prepared_batch = PreparedBatch(
@@ -143,7 +148,7 @@ class TestAsyncBatchSessionClient:
     def test_async_context_manager_closes_batch_session_on_exit(
         self,
         async_fake_transport: AsyncFakeTransport,
-        domain_batch_session_state: BaseFactory[BatchSessionState],
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
     ) -> None:
         state = domain_batch_session_state.build()
         async_fake_transport.enqueue(json_body={})
@@ -159,10 +164,96 @@ class TestAsyncBatchSessionClient:
             referenceNumber=state.reference_number
         )
 
+    def test_context_manager_does_not_close_after_ambiguous_upload_failure(
+        self,
+        async_fake_transport: AsyncFakeTransport,
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
+    ) -> None:
+        signed_url = "https://storage.example/upload/part-1?sig=secret"
+        state = domain_batch_session_state.build(
+            reference_number="batch-ref",
+            part_upload_requests=[
+                PartUploadRequest(
+                    ordinal_number=1,
+                    method="PUT",
+                    url=signed_url,
+                    headers={"x-ms-blob-type": "BlockBlob"},
+                )
+            ],
+        )
+        client = AsyncBatchSessionClient(
+            async_fake_transport,
+            state,
+            upload_transport=async_fake_transport,
+            prepared_batch=_build_prepared_batch(),
+        )
+        lost_response = httpx.ReadTimeout(
+            "response lost",
+            request=httpx.Request("PUT", signed_url),
+        )
+
+        async def _run() -> None:
+            async with client:
+                await client.upload_parts()
+
+        with patch.object(
+            async_fake_transport,
+            "request",
+            side_effect=lost_response,
+        ) as request:
+            with pytest.raises(KSeFBatchUploadError) as exc_info:
+                asyncio.run(_run())
+
+        error = exc_info.value
+        assert error.outcome_ambiguous is True
+        assert error.recovery_state() is state
+        assert "sig=secret" not in str(error)
+        assert "sig=secret" not in repr(error.context)
+        assert client.part_upload_requests == state.part_upload_requests
+        request.assert_awaited_once()
+
+    def test_context_manager_does_not_close_after_cancellation(
+        self,
+        async_fake_transport: AsyncFakeTransport,
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
+    ) -> None:
+        state = domain_batch_session_state.build()
+        client = AsyncBatchSessionClient(async_fake_transport, state)
+
+        async def _run() -> None:
+            async with client:
+                raise asyncio.CancelledError
+
+        with pytest.raises(asyncio.CancelledError):
+            asyncio.run(_run())
+
+        assert client.resume_state() is state
+        assert client.part_upload_requests == state.part_upload_requests
+        assert async_fake_transport.calls == []
+
+    def test_context_manager_propagates_close_failure_and_keeps_state_resumable(
+        self,
+        async_fake_transport: AsyncFakeTransport,
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
+    ) -> None:
+        state = domain_batch_session_state.build()
+        client = AsyncBatchSessionClient(async_fake_transport, state)
+
+        async def _run() -> None:
+            async with client:
+                pass
+
+        with pytest.raises(RuntimeError, match="no more queued responses"):
+            asyncio.run(_run())
+
+        assert client.resume_state() is state
+        assert client.part_upload_requests == state.part_upload_requests
+        assert len(async_fake_transport.calls) == 1
+
     def test_get_status_reads_session_status(
         self,
         async_fake_transport: AsyncFakeTransport,
-        domain_batch_session_state: BaseFactory[BatchSessionState],
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
         inv_session_status_resp: BaseFactory[spec.SessionStatusResponse],
     ) -> None:
         state = domain_batch_session_state.build()
@@ -186,7 +277,7 @@ class TestAsyncBatchSessionClient:
     def test_get_upo_downloads_collective_session_upo(
         self,
         async_fake_transport: AsyncFakeTransport,
-        domain_batch_session_state: BaseFactory[BatchSessionState],
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
     ) -> None:
         state = domain_batch_session_state.build()
         client = AsyncBatchSessionClient(async_fake_transport, state)
@@ -257,16 +348,14 @@ class TestAsyncAuthenticatedBatchSession:
             referenceNumber=reference_number
         )
 
-    def test_batch_session_context_manager_closes_after_exception(
+    def test_batch_session_context_manager_does_not_close_after_exception(
         self,
         async_fake_transport: AsyncFakeTransport,
         domain_auth_tokens: BaseFactory[AuthTokens],
         session_open_batch_resp: BaseFactory[spec.OpenBatchSessionResponse],
     ) -> None:
         open_response = session_open_batch_resp.build()
-        reference_number = open_response.referenceNumber
         async_fake_transport.enqueue(open_response.model_dump(mode="json"))
-        async_fake_transport.enqueue({})
         client = _build_authenticated_client(
             async_fake_transport,
             domain_auth_tokens.build(),
@@ -279,6 +368,28 @@ class TestAsyncAuthenticatedBatchSession:
         with pytest.raises(ValueError, match="block failed"):
             asyncio.run(_run())
 
-        assert async_fake_transport.calls[1].path == SessionRoutes.CLOSE_BATCH.format(
-            referenceNumber=reference_number
+        assert len(async_fake_transport.calls) == 1
+        assert async_fake_transport.calls[0].path == SessionRoutes.OPEN_BATCH
+
+    def test_resume_batch_session_context_manager_closes_session(
+        self,
+        async_fake_transport: AsyncFakeTransport,
+        domain_auth_tokens: BaseFactory[AuthTokens],
+        domain_batch_session_state: BaseFactory[BatchSessionResumeState],
+    ) -> None:
+        client = _build_authenticated_client(
+            async_fake_transport,
+            domain_auth_tokens.build(),
+        )
+        state = domain_batch_session_state.build()
+        async_fake_transport.enqueue({})
+
+        async def _run() -> None:
+            async with client.resume_batch_session(state=state) as session:
+                assert session.resume_state() == state
+
+        asyncio.run(_run())
+
+        assert async_fake_transport.calls[0].path == SessionRoutes.CLOSE_BATCH.format(
+            referenceNumber=state.reference_number
         )

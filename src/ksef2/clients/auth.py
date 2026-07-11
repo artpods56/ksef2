@@ -6,6 +6,7 @@
 from pathlib import Path
 from typing import final
 
+import httpx
 from cryptography.x509 import Certificate
 
 from ksef2.clients.authenticated import AuthenticatedClient
@@ -23,8 +24,9 @@ from ksef2.core import exceptions
 from ksef2.core.crypto import encrypt_token
 from ksef2.core.polling import poll_until
 from ksef2.core.protocols import Middleware
-from ksef2.core.stores import CertificateStore
+from ksef2.core.stores import CertificateStoreProtocol
 from ksef2.domain.models.auth import (
+    AuthenticationResumeState,
     AuthOperationStatus,
     AuthTokens,
     ContextIdentifierType,
@@ -67,14 +69,20 @@ class AuthClient:
     def __init__(
         self,
         transport: Middleware,
-        certificate_store: CertificateStore,
+        certificate_store: CertificateStoreProtocol,
         environment: Environment = Environment.PRODUCTION,
+        transfer_transport: Middleware | None = None,
     ) -> None:
         self._transport = transport
+        self._transfer_transport = transfer_transport or transport
         self._certificate_store = certificate_store
         self._environment = environment
         self._certificates = EncryptionClient(transport)
         self._auth_ep = AuthEndpoints(transport)
+
+    def resume(self, state: AuthenticationResumeState) -> AuthenticatedClient:
+        """Rehydrate an authenticated client from saved authentication state."""
+        return self._build_authenticated_client(auth_tokens=state.to_tokens())
 
     def with_token(
         self,
@@ -313,7 +321,11 @@ class AuthClient:
 
     def _redeem(self, auth_token: str) -> AuthTokens:
         """Redeem the temporary authentication token for access and refresh tokens."""
-        return from_spec(self._auth_ep.redeem_token(bearer_token=auth_token))
+        try:
+            response = self._auth_ep.redeem_token(bearer_token=auth_token)
+        except httpx.TransportError as exc:
+            raise exceptions.KSeFAuthTokenRedemptionError() from exc
+        return from_spec(response)
 
     def _build_authenticated_client(
         self,
@@ -326,11 +338,12 @@ class AuthClient:
             auth_tokens=auth_tokens,
             certificate_store=self._certificate_store,
             environment=self._environment,
+            transfer_transport=self._transfer_transport,
         )
 
     def _ensure_certificates(self) -> None:
         """Populate the certificate store when token authentication needs it."""
-        if not self._certificate_store.all():
+        if self._certificate_store.needs_refresh("ksef_token_encryption"):
             self._certificate_store.load(self._certificates.get_certificates())
 
     def _poll_until_authenticated(

@@ -39,7 +39,7 @@ def _ready_export_package() -> spec.InvoicePackage:
                     "ordinalNumber": 1,
                     "partName": "part-1.zip.enc",
                     "method": "GET",
-                    "url": "https://example.com/export/part-1",
+                    "url": "https://example.com/export/part-1?sig=secret",
                     "partSize": 64,
                     "partHash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
                     "encryptedPartSize": 128,
@@ -62,7 +62,7 @@ def _invoice_package_with_part_name(part_name: str) -> invoices.InvoicePackage:
                     "ordinal_number": 1,
                     "part_name": part_name,
                     "method": "GET",
-                    "url": "https://example.com/export/part-1",
+                    "url": "https://example.com/export/part-1?sig=secret",
                     "part_size": 64,
                     "part_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
                     "encrypted_part_size": 128,
@@ -176,8 +176,12 @@ class TestAsyncInvoicesService:
             )
         )
 
-        with patch(
-            "ksef2.services.async_invoices.decrypt_aes_cbc", return_value=b"decrypted"
+        with (
+            patch(
+                "ksef2.services.async_invoices.decrypt_aes_cbc",
+                return_value=b"decrypted",
+            ),
+            patch("ksef2.services.async_invoices.logger.info") as log_info,
         ):
             saved_files = asyncio.run(
                 service.fetch_package(
@@ -190,6 +194,7 @@ class TestAsyncInvoicesService:
         assert saved_files == [tmp_path / expected_name]
         assert saved_files[0].read_bytes() == b"decrypted"
         assert not (tmp_path.parent / expected_name).exists()
+        assert "sig=secret" not in repr(log_info.call_args_list)
 
     @pytest.mark.parametrize(
         "part_name", [".", "..", ".aes", ".hidden.zip.aes", "bad\x00.zip.aes"]

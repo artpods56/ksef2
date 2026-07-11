@@ -9,3 +9,7 @@ omit = [
     "src/ksef2/infra/schema/*",
     "*/src/ksef2/infra/schema/*",
 ]
+# The initial 1.0 floor leaves one point of platform headroom below the
+# measured ~80% baseline. Raising it is intentional; regressions below it fail.
+fail_under = 79
+precision = 2

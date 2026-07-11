@@ -1,11 +1,13 @@
 """Domain models for invoice metadata, sending, downloading, and export."""
 
-from dataclasses import dataclass, field
-from datetime import date, datetime
+from dataclasses import field
+from datetime import date, datetime, timezone
 from enum import StrEnum
-from typing import Literal
+from typing import Literal, Self
+from zoneinfo import ZoneInfo
 
-from pydantic import field_validator
+from pydantic import ConfigDict, Field as PydanticField
+from pydantic import field_validator, model_validator
 
 from ksef2.domain.models.base import KSeFBaseModel
 from ksef2.domain.models.compression import (
@@ -92,6 +94,7 @@ _INVOICING_MODE_TO_SPEC: dict[InvoicingMode, InvoicingModeSpecValue] = {
 _INVOICING_MODE_FROM_SPEC: dict[InvoicingModeSpecValue, InvoicingMode] = {
     value: key for key, value in _INVOICING_MODE_TO_SPEC.items()
 }
+_WARSAW_TIMEZONE = ZoneInfo("Europe/Warsaw")
 
 
 def normalize_sort_order(value: SortOrder | SortOrderEnum | str) -> SortOrder:
@@ -293,12 +296,20 @@ class PackagePart(KSeFBaseModel):
     ordinal_number: int
     part_name: str
     method: str
-    url: str
+    url: str = PydanticField(exclude=True, repr=False)
     part_size: int
     part_hash: str
     encrypted_part_size: int
     encrypted_part_hash: str
     expiration_date: datetime
+
+    def to_sensitive_dict(
+        self, *, mode: Literal["json", "python"] | str = "json"
+    ) -> dict[str, object]:
+        """Export package metadata with its presigned capability URL."""
+        data: dict[str, object] = self.model_dump(mode=mode)
+        data["url"] = self.url
+        return data
 
 
 class InvoicePackage(KSeFBaseModel):
@@ -323,41 +334,47 @@ class InvoiceExportStatusResponse(KSeFBaseModel):
     package: InvoicePackage | None = None
 
 
-@dataclass(frozen=True)
-class ExportHandle:
+class ExportHandle(KSeFBaseModel):
     """Holds export reference + crypto keys needed to later fetch/decrypt the package."""
 
+    model_config = ConfigDict(extra="ignore", frozen=True)
+
     reference_number: str
-    aes_key: bytes
-    iv: bytes
+    aes_key: bytes = PydanticField(exclude=True, repr=False)
+    iv: bytes = PydanticField(exclude=True, repr=False)
+
+    def to_sensitive_dict(self) -> dict[str, str | bytes]:
+        """Export the key material only for deliberate protected handling."""
+        return {
+            "reference_number": self.reference_number,
+            "aes_key": self.aes_key,
+            "iv": self.iv,
+        }
 
 
 ### Public API ###
 
 
-class AmountMixin(KSeFBaseModel):
-    """Reusable amount-range filter fields."""
-
-    amount_type: Literal["brutto", "netto", "vat"]
-    amount_min: float | None = None
-    amount_max: float | None = None
-
-
 class InvoicesFilter(KSeFBaseModel):
-    """Filters accepted by invoice metadata query and export operations."""
+    """Filters accepted by invoice metadata query and export operations.
+
+    Datetimes are stored as UTC-aware values. Inputs with an explicit offset keep
+    their instant. Naive inputs are interpreted as Europe/Warsaw local time;
+    ambiguous or nonexistent daylight-saving times require an explicit offset.
+    """
 
     # role
     role: Literal["buyer", "seller", "third_subject", "authorized_subject"]
 
     # dates
     date_type: Literal["issue_date", "invoicing_date", "permanent_storage"]
-    date_from: datetime | str
-    date_to: datetime | str = field(default_factory=datetime.now)
+    date_from: datetime
+    date_to: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     restrict_to_permanent_storage_hwm_date: bool | None = None
 
     # currency and amounts
     currency_codes: list[CurrencyCodes] | None = None
-    amount_type: Literal["brutto", "netto", "vat"]
+    amount_type: Literal["brutto", "netto", "vat"] | None = None
     amount_min: float | None = None
     amount_max: float | None = None
 
@@ -384,6 +401,176 @@ class InvoicesFilter(KSeFBaseModel):
         if isinstance(value, str):
             return normalize_invoicing_mode(value)
         return value
+
+    @field_validator("date_from", "date_to", mode="after")
+    @classmethod
+    def _normalize_datetime(cls, value: datetime) -> datetime:
+        if value.tzinfo is not None and value.utcoffset() is not None:
+            return value.astimezone(timezone.utc)
+
+        normalized_candidates: list[datetime] = []
+        for fold in (0, 1):
+            local_candidate = value.replace(tzinfo=_WARSAW_TIMEZONE, fold=fold)
+            normalized = local_candidate.astimezone(timezone.utc)
+            round_trip = normalized.astimezone(_WARSAW_TIMEZONE).replace(tzinfo=None)
+            if round_trip == value and normalized not in normalized_candidates:
+                normalized_candidates.append(normalized)
+
+        if not normalized_candidates:
+            raise ValueError(
+                f"{value.isoformat()} does not exist in Europe/Warsaw local time; "
+                "provide an explicit UTC offset."
+            )
+        if len(normalized_candidates) > 1:
+            raise ValueError(
+                f"{value.isoformat()} is ambiguous in Europe/Warsaw local time; "
+                "provide an explicit UTC offset."
+            )
+        return normalized_candidates[0]
+
+    @classmethod
+    def for_buyer(
+        cls,
+        *,
+        date_from: datetime | str,
+        date_to: datetime | str | None = None,
+        date_type: Literal[
+            "issue_date", "invoicing_date", "permanent_storage"
+        ] = "issue_date",
+        restrict_to_permanent_storage_hwm_date: bool | None = None,
+        currency_codes: list[CurrencyCodes] | None = None,
+        amount_type: Literal["brutto", "netto", "vat"] | None = None,
+        amount_min: float | None = None,
+        amount_max: float | None = None,
+        seller_nip: str | None = None,
+        buyer_nip: str | None = None,
+        buyer_vat_ue: str | None = None,
+        buyer_other_id: str | None = None,
+        invoice_number: str | None = None,
+        ksef_number: str | None = None,
+        invoice_schema: FormSchema | None = None,
+        invoice_types: list[KsefInvoiceTypes] | None = None,
+        has_attachment: bool | None = None,
+        invoicing_mode: InvoicingMode | None = None,
+        is_self_invoicing: bool | None = None,
+    ) -> Self:
+        """Build a filter for invoices where the authenticated subject is buyer."""
+        effective_date_to = (
+            date_to if date_to is not None else datetime.now(timezone.utc)
+        )
+        return cls.model_validate(
+            {
+                "role": "buyer",
+                "date_type": date_type,
+                "date_from": date_from,
+                "date_to": effective_date_to,
+                "restrict_to_permanent_storage_hwm_date": (
+                    restrict_to_permanent_storage_hwm_date
+                ),
+                "currency_codes": currency_codes,
+                "amount_type": amount_type,
+                "amount_min": amount_min,
+                "amount_max": amount_max,
+                "seller_nip": seller_nip,
+                "buyer_nip": buyer_nip,
+                "buyer_vat_ue": buyer_vat_ue,
+                "buyer_other_id": buyer_other_id,
+                "invoice_number": invoice_number,
+                "ksef_number": ksef_number,
+                "invoice_schema": invoice_schema,
+                "invoice_types": invoice_types,
+                "has_attachment": has_attachment,
+                "invoicing_mode": invoicing_mode,
+                "is_self_invoicing": is_self_invoicing,
+            }
+        )
+
+    @classmethod
+    def for_seller(
+        cls,
+        *,
+        date_from: datetime | str,
+        date_to: datetime | str | None = None,
+        date_type: Literal[
+            "issue_date", "invoicing_date", "permanent_storage"
+        ] = "issue_date",
+        restrict_to_permanent_storage_hwm_date: bool | None = None,
+        currency_codes: list[CurrencyCodes] | None = None,
+        amount_type: Literal["brutto", "netto", "vat"] | None = None,
+        amount_min: float | None = None,
+        amount_max: float | None = None,
+        seller_nip: str | None = None,
+        buyer_nip: str | None = None,
+        buyer_vat_ue: str | None = None,
+        buyer_other_id: str | None = None,
+        invoice_number: str | None = None,
+        ksef_number: str | None = None,
+        invoice_schema: FormSchema | None = None,
+        invoice_types: list[KsefInvoiceTypes] | None = None,
+        has_attachment: bool | None = None,
+        invoicing_mode: InvoicingMode | None = None,
+        is_self_invoicing: bool | None = None,
+    ) -> Self:
+        """Build a filter for invoices where the authenticated subject is seller."""
+        effective_date_to = (
+            date_to if date_to is not None else datetime.now(timezone.utc)
+        )
+        return cls.model_validate(
+            {
+                "role": "seller",
+                "date_type": date_type,
+                "date_from": date_from,
+                "date_to": effective_date_to,
+                "restrict_to_permanent_storage_hwm_date": (
+                    restrict_to_permanent_storage_hwm_date
+                ),
+                "currency_codes": currency_codes,
+                "amount_type": amount_type,
+                "amount_min": amount_min,
+                "amount_max": amount_max,
+                "seller_nip": seller_nip,
+                "buyer_nip": buyer_nip,
+                "buyer_vat_ue": buyer_vat_ue,
+                "buyer_other_id": buyer_other_id,
+                "invoice_number": invoice_number,
+                "ksef_number": ksef_number,
+                "invoice_schema": invoice_schema,
+                "invoice_types": invoice_types,
+                "has_attachment": has_attachment,
+                "invoicing_mode": invoicing_mode,
+                "is_self_invoicing": is_self_invoicing,
+            }
+        )
+
+    @model_validator(mode="after")
+    def _validate_filter_shape(self) -> Self:
+        if (
+            self.amount_min is not None or self.amount_max is not None
+        ) and self.amount_type is None:
+            raise ValueError(
+                "amount_type must be specified when amount_min or amount_max is used."
+            )
+
+        if (
+            self.amount_min is not None
+            and self.amount_max is not None
+            and self.amount_min > self.amount_max
+        ):
+            raise ValueError("amount_min must be less than or equal to amount_max.")
+
+        buyer_identifiers = [
+            field_name
+            for field_name in ("buyer_nip", "buyer_vat_ue", "buyer_other_id")
+            if getattr(self, field_name)
+        ]
+        if len(buyer_identifiers) > 1:
+            joined = ", ".join(buyer_identifiers)
+            raise ValueError(f"Only one buyer identifier can be specified: {joined}.")
+
+        if self.date_from > self.date_to:
+            raise ValueError("date_from must be less than or equal to date_to.")
+
+        return self
 
 
 class ExportInvoicesPayload(KSeFBaseModel):

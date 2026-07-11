@@ -103,6 +103,9 @@ class KsefInvoiceBody(KSeFBaseModel):
     invoice_number: str = Field(
         description="p_2: Sequential invoice number identifying the invoice.",
         default_factory=get_placeholder_invoice_number,
+        min_length=1,
+        max_length=256,
+        pattern=r"\S",
     )
 
     warehouse_documents: list[str] = Field(

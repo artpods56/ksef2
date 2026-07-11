@@ -1154,7 +1154,7 @@ class TosobaFizycznaPelnaAdresZamieszkania(Tadres):
 
 @dataclass(kw_only=True)
 class TosobaFizycznaAdresZamieszkania(Tadres):
-    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]Meta:
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         global_type = False
 
     rodzaj_adresu: str = field(

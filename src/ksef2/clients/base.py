@@ -1,5 +1,6 @@
 """Public root client for authenticated and unauthenticated SDK entry points."""
 
+import warnings
 from functools import cached_property
 from types import TracebackType
 from typing import final, Self
@@ -8,13 +9,14 @@ import httpx
 
 from ksef2.clients.auth import AuthClient
 from ksef2.clients.authenticated import AuthenticatedClient
-from ksef2.clients import encryption, peppol
+from ksef2.clients.encryption import EncryptionClient
+from ksef2.clients.peppol import PeppolClient
 from ksef2.clients.testdata import TestDataClient
 from ksef2.config import Environment, TransportConfig
 from ksef2.core import exceptions, middlewares, stores
 from ksef2.core.http_config import build_http_client_kwargs
 from ksef2.core.http import HttpTransport
-from ksef2.domain.models.auth import AuthTokens
+from ksef2.domain.models.auth import AuthenticationResumeState, AuthTokens
 from ksef2.raw.facade import RawClient
 
 
@@ -37,6 +39,7 @@ class Client:
         *,
         transport_config: TransportConfig | None = None,
         http_client: httpx.Client | None = None,
+        certificate_store: stores.CertificateStoreProtocol | None = None,
     ) -> None:
         self._environment = environment
         self._transport_config = transport_config or TransportConfig()
@@ -46,16 +49,22 @@ class Client:
         )
         self._owns_http_client = http_client is None
         self._lifecycle_state = middlewares.ClientLifecycleState()
+        lifecycle_transport = middlewares.ClientLifecycleMiddleware(
+            HttpTransport(client=self._http_client, headers={}),
+            self._lifecycle_state,
+        )
+        self._transfer_transport = lifecycle_transport
         self._transport = middlewares.KSeFExceptionMiddleware(
             middlewares.RetryMiddleware(
-                middlewares.ClientLifecycleMiddleware(
-                    HttpTransport(client=self._http_client, headers={}),
-                    self._lifecycle_state,
-                ),
+                lifecycle_transport,
                 self._transport_config.retry,
             )
         )
-        self._certificate_store = stores.CertificateStore()
+        self._certificate_store = (
+            certificate_store
+            if certificate_store is not None
+            else stores.CertificateStore()
+        )
 
     @staticmethod
     def _build_http_client(
@@ -85,17 +94,18 @@ class Client:
             transport=self._transport,
             certificate_store=self._certificate_store,
             environment=self._environment,
+            transfer_transport=self._transfer_transport,
         )
 
     @cached_property
-    def encryption(self) -> encryption.EncryptionClient:
+    def encryption(self) -> EncryptionClient:
         """Return the public encryption-certificate client.
 
         Raises:
             KSeFClientClosedError: If the root client has been closed.
         """
         self._ensure_open()
-        return encryption.EncryptionClient(self._transport)
+        return EncryptionClient(self._transport)
 
     @cached_property
     def testdata(self) -> TestDataClient:
@@ -113,14 +123,14 @@ class Client:
         return TestDataClient(self._transport)
 
     @cached_property
-    def peppol(self) -> peppol.PeppolClient:
+    def peppol(self) -> PeppolClient:
         """Return the public Peppol provider client.
 
         Raises:
             KSeFClientClosedError: If the root client has been closed.
         """
         self._ensure_open()
-        return peppol.PeppolClient(self._transport)
+        return PeppolClient(self._transport)
 
     @cached_property
     def raw(self) -> RawClient:
@@ -129,13 +139,18 @@ class Client:
         return RawClient(self._transport, self._environment)
 
     def authenticated(self, auth_tokens: AuthTokens) -> AuthenticatedClient:
-        """Bind caller-supplied auth tokens to an authenticated SDK client."""
+        """Deprecated compatibility wrapper for ``authentication.resume()``."""
         self._ensure_open()
-        return AuthenticatedClient(
-            transport=self._transport,
-            auth_tokens=auth_tokens,
-            certificate_store=self._certificate_store,
-            environment=self._environment,
+        warnings.warn(
+            "Client.authenticated(auth_tokens) is deprecated and will be removed "
+            "in a future release; use "
+            "client.authentication.resume(AuthenticationResumeState.from_tokens(auth_tokens)) "
+            "instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.authentication.resume(
+            AuthenticationResumeState.from_tokens(auth_tokens)
         )
 
     def close(self) -> None:

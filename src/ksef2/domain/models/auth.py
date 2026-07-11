@@ -1,10 +1,14 @@
 """Domain models for authentication flows and auth sessions."""
 
+import json
+from collections.abc import Mapping
 from datetime import datetime
 from enum import StrEnum
-from typing import Literal
+from typing import Literal, Self
 
-from ksef2.domain.models.base import KSeFBaseModel
+from pydantic import Field, SecretStr, field_validator
+
+from ksef2.domain.models.base import KSeFBaseModel, KSeFPersistedModel
 
 type ContextIdentifierType = Literal["nip", "internal_id", "nip_vat_ue", "peppol_id"]
 
@@ -81,7 +85,7 @@ class ChallengeResponse(KSeFBaseModel):
 class TokenCredentials(KSeFBaseModel):
     """A bearer token together with its expiration time."""
 
-    token: str
+    token: str = Field(exclude=True, repr=False)
     valid_until: datetime
 
 
@@ -138,6 +142,83 @@ class AuthTokens(KSeFBaseModel):
 
     access_token: TokenCredentials
     refresh_token: TokenCredentials
+
+
+class AuthenticationResumeState(KSeFPersistedModel):
+    """Serializable authentication state used to rehydrate an authenticated client.
+
+    Use ``to_json()`` when intentionally exporting resumable JSON containing
+    bearer credentials. Normal Pydantic dumps and repr output keep token values
+    redacted.
+    """
+
+    format_version: Literal[1] = 1
+    access_token: SecretStr
+    access_token_valid_until: datetime
+    refresh_token: SecretStr
+    refresh_token_valid_until: datetime
+
+    @field_validator("access_token", "refresh_token", mode="before")
+    @classmethod
+    def _reject_missing_or_redacted_tokens(cls, value: object) -> object:
+        token = value.get_secret_value() if isinstance(value, SecretStr) else value
+        if token in ("", "**********"):
+            raise ValueError(
+                "Resume state must contain the original bearer token; "
+                "use to_json() for explicit sensitive export."
+            )
+        return value
+
+    @classmethod
+    def from_tokens(cls, auth_tokens: AuthTokens) -> Self:
+        """Create resume state from authenticated token credentials."""
+        return cls(
+            access_token=SecretStr(auth_tokens.access_token.token),
+            access_token_valid_until=auth_tokens.access_token.valid_until,
+            refresh_token=SecretStr(auth_tokens.refresh_token.token),
+            refresh_token_valid_until=auth_tokens.refresh_token.valid_until,
+        )
+
+    def to_tokens(self) -> AuthTokens:
+        """Return the token model needed to bind authenticated SDK clients."""
+        return AuthTokens(
+            access_token=TokenCredentials(
+                token=self.access_token.get_secret_value(),
+                valid_until=self.access_token_valid_until,
+            ),
+            refresh_token=TokenCredentials(
+                token=self.refresh_token.get_secret_value(),
+                valid_until=self.refresh_token_valid_until,
+            ),
+        )
+
+    def to_dict(
+        self,
+        *,
+        mode: Literal["json", "python"] | str = "json",
+    ) -> dict[str, object]:
+        """Export authentication state with bearer credentials included."""
+        data: dict[str, object] = self.model_dump(mode=mode)
+        data["access_token"] = self.access_token.get_secret_value()
+        data["refresh_token"] = self.refresh_token.get_secret_value()
+        return data
+
+    def to_json(self, *, indent: int | None = None) -> str:
+        """Export authentication state as JSON with bearer credentials included."""
+        data = self.to_dict(mode="json")
+        if indent is None:
+            return json.dumps(data, separators=(",", ":"))
+        return json.dumps(data, indent=indent)
+
+    @classmethod
+    def from_dict(cls, state: Mapping[str, object]) -> Self:
+        """Restore authentication state from a dictionary exported by ``to_dict()``."""
+        return cls.model_validate(state)
+
+    @classmethod
+    def from_json(cls, state: str | bytes | bytearray) -> Self:
+        """Restore authentication state from JSON exported by ``to_json()``."""
+        return cls.model_validate_json(state)
 
 
 class RefreshedToken(KSeFBaseModel):

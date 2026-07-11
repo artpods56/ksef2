@@ -30,6 +30,7 @@ node_modules/
 
 # downloads directory
 /downloads
+/scripts/downloads/
 
 # outputs directory
 /output

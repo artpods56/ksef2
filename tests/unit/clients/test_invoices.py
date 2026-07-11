@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch, MagicMock
 
 from polyfactory import BaseFactory
@@ -151,7 +151,11 @@ class TestInvoicesClient:
         )
         fake_transport.enqueue(first.model_dump(mode="json"))
         fake_transport.enqueue(second.model_dump(mode="json"))
-        filters = inv_export_filters.build(date_type="permanent_storage")
+        filters = inv_export_filters.build(
+            date_type="permanent_storage",
+            date_from=boundary - timedelta(days=1),
+            date_to=boundary + timedelta(days=1),
+        )
 
         pages = list(
             invoices_client.query_metadata_pages(

@@ -159,6 +159,30 @@ def test_invoice_body_defaults_currency_to_pln() -> None:
     assert body.currency == "PLN"
 
 
+@pytest.mark.parametrize("invoice_number", ["", "   ", "X" * 257])
+def test_invoice_body_rejects_invoice_number_outside_xsd_constraints(
+    invoice_number: str,
+) -> None:
+    with pytest.raises(ValidationError, match="invoice_number"):
+        KsefInvoiceBody(
+            issue_date=date(2026, 3, 29),
+            issue_place=None,
+            invoice_number=invoice_number,
+            rows=[make_invoice_line()],
+        )
+
+
+def test_invoice_body_accepts_xsd_maximum_invoice_number_length() -> None:
+    body = KsefInvoiceBody(
+        issue_date=date(2026, 3, 29),
+        issue_place=None,
+        invoice_number="X" * 256,
+        rows=[make_invoice_line()],
+    )
+
+    assert len(body.invoice_number) == 256
+
+
 def test_invoice_system_context_accepts_valid_values() -> None:
     context = InvoiceHeader(
         generation_timestamp=datetime(2026, 2, 1, 12, 30, 45),

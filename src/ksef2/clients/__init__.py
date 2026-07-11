@@ -17,26 +17,37 @@ from ksef2.clients.async_session_management import AsyncSessionManagementClient
 from ksef2.clients.async_testdata import AsyncTemporalTestData
 from ksef2.clients.async_testdata import AsyncTestDataClient
 from ksef2.clients.async_tokens import AsyncTokensClient
-from ksef2.clients.tokens import TokensClient
 from ksef2.clients.authenticated import AuthenticatedClient
+from ksef2.clients.base import Client
+from ksef2.clients.batch import BatchSessionClient
 from ksef2.clients.certificates import CertificatesClient
+from ksef2.clients.encryption import EncryptionClient
 from ksef2.clients.invoice_sessions import InvoiceSessionsClient
 from ksef2.clients.invoices import InvoicesClient
 from ksef2.clients.limits import LimitsClient
-from ksef2.clients.session_management import SessionManagementClient
+from ksef2.clients.online import OnlineSessionClient
+from ksef2.clients.peppol import PeppolClient
 from ksef2.clients.permissions import PermissionsClient
-from ksef2.clients.testdata import TestDataClient
+from ksef2.clients.session_management import SessionManagementClient
+from ksef2.clients.testdata import TemporalTestData, TestDataClient
+from ksef2.clients.tokens import TokensClient
+from ksef2.services.async_batch import AsyncBatchService
+from ksef2.services.async_invoices import AsyncInvoicesService
+from ksef2.services.batch import BatchService
+from ksef2.services.invoices import InvoicesService
 
 
 __all__ = [
     "AuthClient",
     "AsyncAuthClient",
     "AsyncAuthenticatedClient",
+    "AsyncBatchService",
     "AsyncBatchSessionClient",
     "AsyncClient",
     "AsyncCertificatesClient",
     "AsyncEncryptionClient",
     "AsyncInvoiceSessionsClient",
+    "AsyncInvoicesService",
     "AsyncInvoicesClient",
     "AsyncLimitsClient",
     "AsyncOnlineSessionClient",
@@ -48,11 +59,19 @@ __all__ = [
     "AsyncTokensClient",
     "TokensClient",
     "AuthenticatedClient",
+    "BatchService",
+    "BatchSessionClient",
     "CertificatesClient",
+    "Client",
+    "EncryptionClient",
     "InvoiceSessionsClient",
+    "InvoicesService",
     "InvoicesClient",
     "LimitsClient",
-    "SessionManagementClient",
+    "OnlineSessionClient",
+    "PeppolClient",
     "PermissionsClient",
+    "SessionManagementClient",
+    "TemporalTestData",
     "TestDataClient",
 ]

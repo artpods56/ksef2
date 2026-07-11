@@ -8,9 +8,10 @@ from typing import final
 from ksef2.clients.async_invoices import AsyncInvoicesClient
 from ksef2.core import exceptions
 from ksef2.core.async_protocols import AsyncMiddleware
+from ksef2.core.async_external_transfer import AsyncExternalTransferClient
 from ksef2.core.crypto import decrypt_aes_cbc
 from ksef2.core.polling import async_poll_until
-from ksef2.core.stores import CertificateStore
+from ksef2.core.stores import CertificateStoreProtocol
 from ksef2.domain.models.compression import CompressionType
 from ksef2.domain.models.invoices import (
     ExportHandle,
@@ -46,14 +47,14 @@ class AsyncInvoicesService:
         self,
         transport: AsyncMiddleware,
         download_transport: AsyncMiddleware,
-        certificate_store: CertificateStore,
+        certificate_store: CertificateStoreProtocol,
         *,
         client: AsyncInvoicesClient | None = None,
         ensure_encryption_certificates_loaded: Callable[[], Awaitable[None]]
         | None = None,
     ) -> None:
         self._transport = transport
-        self._download_transport = download_transport
+        self._external_transfers = AsyncExternalTransferClient(download_transport)
         self._certificate_store = certificate_store
         self._client = client or AsyncInvoicesClient(transport)
         self._ensure_encryption_certificates_loaded = (
@@ -191,7 +192,8 @@ class AsyncInvoicesService:
             KSeFEncryptionError: If a downloaded package part cannot be decrypted.
             ValueError: If a package part name is unsafe for local filesystem output.
             OSError: If the target directory or output file cannot be written.
-            httpx.HTTPStatusError: If a package part download returns an error status.
+            KSeFExternalTransferError: If external storage rejects a part download or
+                its outcome cannot be determined.
         """
         target_path = Path(target_directory)
         await asyncio.to_thread(target_path.mkdir, parents=True, exist_ok=True)
@@ -202,14 +204,18 @@ class AsyncInvoicesService:
             logger.info(
                 "Downloading export package part",
                 part_name=part.part_name,
-                package_part_url=str(part.url),
+                part_ordinal=part.ordinal_number,
+                reference_number=export.reference_number,
             )
-            resp = await self._download_transport.get(str(part.url))
-            _ = resp.raise_for_status()
+            encrypted_part = await self._external_transfers.download_part(
+                url=str(part.url),
+                reference_number=export.reference_number,
+                part_ordinal=part.ordinal_number,
+            )
 
             zip_data = await asyncio.to_thread(
                 decrypt_aes_cbc,
-                resp.content,
+                encrypted_part,
                 key=export.aes_key,
                 iv=export.iv,
             )
@@ -237,21 +243,26 @@ class AsyncInvoicesService:
 
         Raises:
             KSeFEncryptionError: If a downloaded package part cannot be decrypted.
-            httpx.HTTPStatusError: If a package part download returns an error status.
+            KSeFExternalTransferError: If external storage rejects a part download or
+                its outcome cannot be determined.
         """
         result: list[bytes] = []
         for part in package.parts:
             logger.info(
                 "Downloading export package part",
                 part_name=part.part_name,
-                package_part_url=str(part.url),
+                part_ordinal=part.ordinal_number,
+                reference_number=export.reference_number,
             )
-            resp = await self._download_transport.get(str(part.url))
-            _ = resp.raise_for_status()
+            encrypted_part = await self._external_transfers.download_part(
+                url=str(part.url),
+                reference_number=export.reference_number,
+                part_ordinal=part.ordinal_number,
+            )
             result.append(
                 await asyncio.to_thread(
                     decrypt_aes_cbc,
-                    resp.content,
+                    encrypted_part,
                     key=export.aes_key,
                     iv=export.iv,
                 )
@@ -323,7 +334,8 @@ class AsyncInvoicesService:
                 available.
             KSeFEncryptionError: If export key encryption or package decryption fails.
             KSeFExportTimeoutError: If polling exceeds ``timeout``.
-            httpx.HTTPStatusError: If a package part download returns an error status.
+            KSeFExternalTransferError: If external storage rejects a part download or
+                its outcome cannot be determined.
         """
         handle = await self.schedule_export(
             filters=filters,

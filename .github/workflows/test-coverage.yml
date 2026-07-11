@@ -9,7 +9,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: just sync
 
-      - name: Run unit tests with coverage
+      - name: Run unit tests and verify the coverage floor and badge
         run: just test-coverage
 
       - name: Upload coverage XML
@@ -32,10 +32,3 @@ jobs:
         with:
           name: coverage-xml
           path: coverage.xml
-
-      - name: Commit test-coverage.json if changed
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update test-coverage.json"
-          file_pattern: test-coverage.json

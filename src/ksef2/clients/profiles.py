@@ -26,6 +26,8 @@ CONFIG_ENV_VAR = "KSEF2_CONFIG"
 PROFILE_ENV_VAR = "KSEF2_PROFILE"
 CONFIG_FILE_MODE = 0o600
 PROFILE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+CONFIG_DIR_NAME = "ksef2"
+LEGACY_CONFIG_DIR_NAME = "ksef2-cli"
 
 _ENVIRONMENT_TO_PROFILE = {
     Environment.PRODUCTION: "production",
@@ -237,7 +239,12 @@ def default_profile_config_path(environ: Mapping[str, str] | None = None) -> Pat
     if override:
         return Path(override).expanduser()
     config_home = Path(env.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    return config_home.expanduser() / "ksef2-cli" / "config.toml"
+    config_dir = config_home.expanduser()
+    config_path = config_dir / CONFIG_DIR_NAME / "config.toml"
+    legacy_config_path = config_dir / LEGACY_CONFIG_DIR_NAME / "config.toml"
+    if not config_path.exists() and legacy_config_path.exists():
+        return legacy_config_path
+    return config_path
 
 
 def load_profile_config(path: str | Path | None = None) -> CliProfileConfig:

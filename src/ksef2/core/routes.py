@@ -141,7 +141,6 @@ ALL_ROUTES = [
 RETRYABLE_POST_PATHS = frozenset(
     {
         AuthRoutes.CHALLENGE,
-        AuthRoutes.REDEEM_TOKEN,
         AuthRoutes.REFRESH_TOKEN,
         InvoiceRoutes.QUERY_METADATA,
         CertificateRoutes.QUERY,

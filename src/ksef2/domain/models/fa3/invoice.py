@@ -2,17 +2,63 @@
 
 from collections.abc import Sequence
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
-from ksef2.domain.models.base import KSeFBaseModel
+from ksef2.domain.models.base import KSeFBaseModel, KSeFPersistedModel
 from ksef2.domain.models.fa3.attachment import Attachment
 from ksef2.domain.models.fa3.body import KsefInvoiceBody
 from ksef2.domain.models.fa3.footer import InvoiceFooter
 from ksef2.domain.models.fa3.header import InvoiceHeader
 from ksef2.domain.models.fa3.party import InvoiceEntity
 from ksef2.domain.models.fa3.third_party import InvoiceThirdParty
+
+
+class KsefInvoiceDraft(KSeFPersistedModel):
+    """Serializable editable snapshot of FA(3) builder state."""
+
+    format_version: Literal[1] = 1
+
+    header: Annotated[
+        InvoiceHeader | None, Field(description="Draft header state.")
+    ] = None
+    seller: Annotated[
+        InvoiceEntity | None, Field(description="Draft seller state.")
+    ] = None
+    buyer: Annotated[InvoiceEntity | None, Field(description="Draft buyer state.")] = (
+        None
+    )
+    third_parties: Annotated[
+        list[InvoiceThirdParty], Field(description="Draft third-party state.")
+    ] = Field(default_factory=list)
+    body: Annotated[
+        KsefInvoiceBody | None, Field(description="Draft invoice body state.")
+    ] = None
+    footer: Annotated[
+        InvoiceFooter | None, Field(description="Draft footer state.")
+    ] = None
+    attachment: Annotated[
+        Attachment | None, Field(description="Draft attachment state.")
+    ] = None
+
+    @classmethod
+    def from_invoice(cls, invoice: "KsefInvoice") -> "KsefInvoiceDraft":
+        """Create an editable draft snapshot from a complete invoice."""
+        return cls(
+            header=invoice.header.model_copy(deep=True),
+            seller=invoice.seller.model_copy(deep=True),
+            buyer=invoice.buyer.model_copy(deep=True),
+            third_parties=[
+                third_party.model_copy(deep=True)
+                for third_party in invoice.third_parties
+            ],
+            body=invoice.body.model_copy(deep=True),
+            footer=invoice.footer.model_copy(deep=True) if invoice.footer else None,
+            attachment=(
+                invoice.attachment.model_copy(deep=True) if invoice.attachment else None
+            ),
+        )
 
 
 class KsefInvoice(KSeFBaseModel):

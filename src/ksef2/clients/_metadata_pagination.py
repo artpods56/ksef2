@@ -91,12 +91,15 @@ def _narrow_filters_to_boundary(
     params: InvoiceMetadataParams,
     boundary: MetadataBoundary,
 ) -> InvoicesFilter:
+    filter_data = filters.model_dump()
     if params.sort_order == "asc":
-        return filters.model_copy(update={"date_from": boundary})
-    if params.sort_order == "desc":
-        return filters.model_copy(update={"date_to": boundary})
+        filter_data["date_from"] = boundary
+    elif params.sort_order == "desc":
+        filter_data["date_to"] = boundary
+    else:
+        raise KSeFMetadataPaginationError(
+            "Unsupported metadata sort order",
+            sort_order=params.sort_order,
+        )
 
-    raise KSeFMetadataPaginationError(
-        "Unsupported metadata sort order",
-        sort_order=params.sort_order,
-    )
+    return InvoicesFilter.model_validate(filter_data)

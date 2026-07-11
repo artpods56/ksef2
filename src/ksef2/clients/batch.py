@@ -3,12 +3,14 @@
 
 """Batch session client for managing batch upload sessions."""
 
+import warnings
 from types import TracebackType
 from typing import final
 
 from ksef2.core import exceptions
+from ksef2.core.external_transfer import ExternalTransferClient
 from ksef2.core.protocols import Middleware
-from ksef2.domain.models import BatchSessionState
+from ksef2.domain.models import BatchSessionResumeState
 from ksef2.domain.models.batch import PartUploadRequest, PreparedBatch
 from ksef2.domain.models.session import (
     SessionInvoicesResponse,
@@ -17,9 +19,6 @@ from ksef2.domain.models.session import (
 from ksef2.endpoints.invoices import InvoicesEndpoints
 from ksef2.endpoints.session import SessionEndpoints
 from ksef2.infra.mappers.sessions import from_spec as session_from_spec
-from ksef2.logging import get_logger
-
-logger = get_logger(__name__)
 
 
 @final
@@ -41,15 +40,17 @@ class BatchSessionClient:
     def __init__(
         self,
         transport: Middleware,
-        state: BatchSessionState,
+        state: BatchSessionResumeState,
         *,
         upload_transport: Middleware | None = None,
         prepared_batch: PreparedBatch | None = None,
+        access_token: str | None = None,
     ) -> None:
         self._transport = transport
-        self._upload_transport = upload_transport or transport
+        self._external_transfers = ExternalTransferClient(upload_transport or transport)
         self._state = state
         self._prepared_batch = prepared_batch
+        self._access_token = access_token
         self._invoice_eps = InvoicesEndpoints(transport)
         self._session_eps = SessionEndpoints(transport)
         self._closed = False
@@ -65,9 +66,20 @@ class BatchSessionClient:
 
     @property
     def access_token(self) -> str:
-        """Get the access token for this session."""
+        """Deprecated compatibility accessor for the current bearer token."""
         self._ensure_open()
-        return self._state.access_token
+        warnings.warn(
+            "BatchSessionClient.access_token is deprecated and will be removed "
+            "in a future release; persist AuthenticationResumeState separately.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        if self._access_token is None:
+            raise exceptions.KSeFValidationError(
+                "Batch session state does not contain bearer authentication. "
+                "Use the parent authenticated client's access_token or resume_state()."
+            )
+        return self._access_token
 
     @property
     def aes_key(self) -> bytes:
@@ -87,16 +99,19 @@ class BatchSessionClient:
         self._ensure_open()
         return self._state.part_upload_requests
 
-    def get_state(self) -> BatchSessionState:
-        """Get the serializable state of this batch session.
-
-        The returned state can be serialized to JSON and used later
-        to resume the session or access upload URLs.
-
-        Returns:
-            BatchSessionState containing all session information.
-        """
+    def resume_state(self) -> BatchSessionResumeState:
+        """Return the sensitive session state needed to resume later."""
         return self._state
+
+    def get_state(self) -> BatchSessionResumeState:
+        """Deprecated compatibility wrapper for ``resume_state()``."""
+        warnings.warn(
+            "get_state() is deprecated and will be removed in a future release; "
+            "use resume_state() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.resume_state()
 
     def get_status(self) -> SessionStatusResponse:
         """Fetch the current processing state of the batch session."""
@@ -149,7 +164,9 @@ class BatchSessionClient:
         Raises:
             KSeFClientClosedError: If the upload window has already been closed.
             KSeFValidationError: If the session has no prepared batch payload attached.
-            httpx.HTTPError: If uploading a part to its presigned URL fails.
+            KSeFBatchUploadError: If external storage rejects an upload or its
+                outcome cannot be determined. Call ``recovery_state()`` on the error
+                to deliberately recover the sensitive batch state.
         """
         self._ensure_open()
 
@@ -176,19 +193,27 @@ class BatchSessionClient:
         for ordinal_number in sorted(upload_requests):
             upload_request = upload_requests[ordinal_number]
             part = parts[ordinal_number]
-            _ = self._upload_transport.request(
-                upload_request.method,
-                upload_request.url,
-                headers={
-                    "Content-Type": "application/octet-stream",
-                    **{
-                        key: value
-                        for key, value in upload_request.headers.items()
-                        if value is not None
+            try:
+                self._external_transfers.upload_part(
+                    method=upload_request.method,
+                    url=upload_request.url,
+                    headers={
+                        "Content-Type": "application/octet-stream",
+                        **{
+                            key: value
+                            for key, value in upload_request.headers.items()
+                            if value is not None
+                        },
                     },
-                },
-                content=part.content,
-            )
+                    content=part.content,
+                    reference_number=self._state.reference_number,
+                    part_ordinal=ordinal_number,
+                )
+            except exceptions.KSeFExternalTransferError as exc:
+                raise exceptions.KSeFBatchUploadError(
+                    transfer_error=exc,
+                    recovery_state=self._state,
+                ) from exc
 
     def close(self) -> None:
         """Close the batch session and start processing.
@@ -214,13 +239,5 @@ class BatchSessionClient:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        try:
+        if exc_type is None:
             self.close()
-        except exceptions.KSeFException:
-            if exc_type is None:
-                raise
-            logger.warning(
-                "Failed to close batch session",
-                reference_number=self._state.reference_number,
-                exc_info=True,
-            )

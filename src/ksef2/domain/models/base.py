@@ -86,6 +86,18 @@ class KSeFBaseModel(BaseModel):
         return data
 
 
+class KSeFPersistedModel(KSeFBaseModel):
+    """Base for versioned state whose stored shape must fail closed."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _warn_extra_fields(cls, data: Any) -> Any:
+        """Let Pydantic reject unknown persisted fields without ignore warnings."""
+        return data
+
+
 class KSeFBaseParams[ParamsT](KSeFBaseModel):
     """Base model for query-parameter objects serialized with camelCase aliases."""
 

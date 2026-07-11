@@ -46,8 +46,10 @@ def run(config: ExampleConfig) -> None:
         print(f"  Token:     {result.token[:40]}...")
         print(f"  Reference: {result.reference_number}")
 
-        print("Checking token status...")
-        status = auth.tokens.status(reference_number=result.reference_number)
+        print("Waiting for token activation...")
+        status = auth.tokens.wait_for_activation(
+            reference_number=result.reference_number
+        )
         print(f"  Status: {status.status}")
 
         print("Revoking token...")

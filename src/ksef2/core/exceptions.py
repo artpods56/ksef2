@@ -1,6 +1,6 @@
 """Public exception hierarchy raised by the KSeF SDK."""
 
-from typing import Any
+from typing import Any, Literal
 from pydantic import BaseModel
 from enum import IntEnum
 
@@ -116,6 +116,75 @@ class KSeFRateLimitError(KSeFApiError):
         super().__init__(429, ExceptionCode.UNKNOWN_ERROR, message, response)
 
 
+class KSeFExternalTransferError(KSeFException):
+    """Raised when a presigned external-storage transfer fails."""
+
+    code: str = "EXTERNAL_TRANSFER_ERROR"
+
+    def __init__(
+        self,
+        *,
+        operation: Literal["upload", "download"],
+        host: str,
+        reference_number: str,
+        part_ordinal: int,
+        status_code: int | None = None,
+        outcome_ambiguous: bool = False,
+    ) -> None:
+        self.operation: Literal["upload", "download"] = operation
+        self.host = host
+        self.reference_number = reference_number
+        self.part_ordinal = part_ordinal
+        self.status_code = status_code
+        self.outcome_ambiguous = outcome_ambiguous
+
+        status = (
+            f"status {status_code}"
+            if status_code is not None
+            else "no response received"
+        )
+        super().__init__(
+            f"External storage {operation} failed for host {host} "
+            f"({status}, reference {reference_number}, part {part_ordinal}).",
+            operation=operation,
+            host=host,
+            reference_number=reference_number,
+            part_ordinal=part_ordinal,
+            status_code=status_code,
+            outcome_ambiguous=outcome_ambiguous,
+        )
+
+
+class KSeFBatchUploadError[RecoveryStateT](KSeFExternalTransferError):
+    """External batch upload failure with explicitly accessible recovery state."""
+
+    code: str = "BATCH_UPLOAD_ERROR"
+
+    def __init__(
+        self,
+        *,
+        transfer_error: KSeFExternalTransferError,
+        recovery_state: RecoveryStateT,
+    ) -> None:
+        self._recovery_state = recovery_state
+        super().__init__(
+            operation=transfer_error.operation,
+            host=transfer_error.host,
+            reference_number=transfer_error.reference_number,
+            part_ordinal=transfer_error.part_ordinal,
+            status_code=transfer_error.status_code,
+            outcome_ambiguous=transfer_error.outcome_ambiguous,
+        )
+
+    def recovery_state(self) -> RecoveryStateT:
+        """Return sensitive state for deliberate recovery of the failed batch.
+
+        The state contains encryption material and presigned upload URLs. Protect it
+        as credential material and do not include it in logs or generic error dumps.
+        """
+        return self._recovery_state
+
+
 class KSeFEncryptionError(KSeFException):
     """Raised when encryption or decryption operations fail."""
 
@@ -187,6 +256,20 @@ class KSeFAuthPollingTimeoutError(KSeFException):
             f"Authentication {reference_number} not ready after {timeout}s",
             reference_number=reference_number,
             timeout=timeout,
+        )
+
+
+class KSeFAuthTokenRedemptionError(KSeFException):
+    """Raised when a one-shot authentication token redemption loses its response."""
+
+    code: str = "AUTH_TOKEN_REDEMPTION_ERROR"
+
+    def __init__(self) -> None:
+        self.outcome_ambiguous = True
+        super().__init__(
+            "Authentication token redemption may have succeeded, but its response "
+            "was lost. Do not retry the one-shot redemption automatically.",
+            outcome_ambiguous=True,
         )
 
 

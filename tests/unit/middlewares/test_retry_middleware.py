@@ -2,9 +2,11 @@ from collections.abc import Mapping
 from unittest.mock import patch
 
 import httpx
+import pytest
 
 from ksef2.config import RetryConfig
 from ksef2.core.middlewares.retry import RetryMiddleware
+from ksef2.core.routes import AuthRoutes
 from tests.unit.fakes.transport import FakeTransport
 
 
@@ -65,6 +67,38 @@ class TestRetryMiddleware:
         response = middleware.post("/sessions/ref-123/invoices", json={"foo": "bar"})
 
         assert response.status_code == 503
+        assert len(transport.calls) == 1
+        sleep_mock.assert_not_called()
+
+    @patch("ksef2.core.middlewares.retry.time.sleep")
+    def test_one_shot_redemption_response_is_not_retried(
+        self,
+        sleep_mock,
+    ) -> None:
+        transport = FakeTransport()
+        transport.enqueue(status_code=503, json_body={"message": "busy"})
+        transport.enqueue(status_code=200, json_body={"unexpected": "retry"})
+        middleware = RetryMiddleware(transport, RetryConfig(max_attempts=3))
+
+        response = middleware.post(AuthRoutes.REDEEM_TOKEN)
+
+        assert response.status_code == 503
+        assert len(transport.calls) == 1
+        sleep_mock.assert_not_called()
+
+    @patch("ksef2.core.middlewares.retry.time.sleep")
+    def test_one_shot_redemption_transport_error_is_not_retried(
+        self,
+        sleep_mock,
+    ) -> None:
+        transport = FakeTransport()
+        transport.enqueue_error(httpx.ReadError("redemption response lost"))
+        transport.enqueue(status_code=200, json_body={"unexpected": "retry"})
+        middleware = RetryMiddleware(transport, RetryConfig(max_attempts=3))
+
+        with pytest.raises(httpx.ReadError, match="redemption response lost"):
+            _ = middleware.post(AuthRoutes.REDEEM_TOKEN)
+
         assert len(transport.calls) == 1
         sleep_mock.assert_not_called()
 

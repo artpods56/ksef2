@@ -10,6 +10,7 @@ Covers validation contract assertions:
 
 from unittest.mock import AsyncMock
 
+import httpx
 import pytest
 
 from ksef2.core.middlewares.async_auth import AsyncBearerTokenMiddleware
@@ -20,6 +21,7 @@ from ksef2.core.middlewares.async_lifecycle import (
     AsyncClientLifecycleState,
 )
 from ksef2.config import RetryConfig
+from ksef2.core.routes import AuthRoutes
 from ksef2.core.exceptions import (
     KSeFApiError,
     KSeFAuthError,
@@ -215,6 +217,40 @@ class TestAsyncRetryMiddleware:
         )
 
         assert response.status_code == 503
+        assert len(fake.calls) == 1
+        mock_sleep.assert_not_awaited()
+
+    async def test_one_shot_redemption_response_is_not_retried(self) -> None:
+        fake = AsyncFakeTransport()
+        fake.enqueue(json_body={"error": "server"}, status_code=503)
+        fake.enqueue(json_body={"unexpected": "retry"})
+        mock_sleep = AsyncMock()
+        middleware = AsyncRetryMiddleware(fake, RetryConfig(max_attempts=3))
+
+        response = await middleware.request(
+            "POST",
+            AuthRoutes.REDEEM_TOKEN,
+            _sleep_fn=mock_sleep,
+        )
+
+        assert response.status_code == 503
+        assert len(fake.calls) == 1
+        mock_sleep.assert_not_awaited()
+
+    async def test_one_shot_redemption_transport_error_is_not_retried(self) -> None:
+        fake = AsyncFakeTransport()
+        fake.enqueue_error(httpx.ReadError("redemption response lost"))
+        fake.enqueue(json_body={"unexpected": "retry"})
+        mock_sleep = AsyncMock()
+        middleware = AsyncRetryMiddleware(fake, RetryConfig(max_attempts=3))
+
+        with pytest.raises(httpx.ReadError, match="redemption response lost"):
+            _ = await middleware.request(
+                "POST",
+                AuthRoutes.REDEEM_TOKEN,
+                _sleep_fn=mock_sleep,
+            )
+
         assert len(fake.calls) == 1
         mock_sleep.assert_not_awaited()
 
