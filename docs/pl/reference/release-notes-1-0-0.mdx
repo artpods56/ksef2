@@ -91,6 +91,26 @@ Wydania pre-1.0 ukształtowały SDK wokół stabilnej powierzchni aplikacyjnej:
 - dokumentacja publiczna została podzielona na `getting-started`, `concepts`,
   `how-to-guides` i `reference`.
 
+## Zatwierdzenie wydania
+
+Stabilne wydania są zatwierdzane względem jednego, dokładnego commita zaufanego
+repozytorium. Przed utworzeniem tagu wydania maintainer może ręcznie uruchomić
+workflow **Integration Tests** w GitHub Actions i wybrać ten commit albo branch.
+Workflow działa tylko dla zaufanych zdarzeń repozytorium, a nie dla pull requestów
+ani forków, więc dane TEST KSeF nie są udostępniane niezaufanemu kodowi.
+
+Utworzenie adnotowanego tagu, na przykład `v1.0.0`, uruchamia **Publish to
+PyPI** dla otagowanego commita. Job `integration` uruchamia uwierzytelniony
+zestaw testów KSeF TEST i zapisuje tag, SHA commita oraz środowisko `TEST` w
+podsumowaniu joba GitHub Actions. Przed uznaniem wydania za udane sprawdź ten
+zapis zatwierdzenia.
+
+Job `publish` nie może rozpocząć się, dopóki job integracyjny nie zakończy się
+sukcesem. Następnie uruchamia kontrole wydania, weryfikuje zgodność tagu,
+wersji źródłowej, changeloga i zbudowanych artefaktów, instaluje wheel w czystym
+środowisku oraz testuje stabilne importy przed publikacją. Nieudana integracja
+albo weryfikacja blokuje upload do PyPI.
+
 ## Skrót migracji
 
 Przenieś importy aplikacji na udokumentowane ścieżki publiczne, przetestuj

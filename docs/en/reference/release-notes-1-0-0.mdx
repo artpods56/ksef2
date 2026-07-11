@@ -88,6 +88,25 @@ Pre-1.0 releases shaped the SDK around a stable application surface:
 - moved public documentation into `getting-started`, `concepts`,
   `how-to-guides`, and `reference`.
 
+## Release sign-off
+
+Stable releases are signed off against one exact trusted commit. Before creating
+a release tag, a maintainer can run the **Integration Tests** workflow manually
+from GitHub Actions and select that commit or branch. The workflow runs only for
+trusted repository events, not pull requests or forks, so KSeF TEST credentials
+are never exposed to untrusted code.
+
+Creating an annotated tag such as `v1.0.0` starts **Publish to PyPI** for the
+tagged commit. Its `integration` job runs the credentialed KSeF TEST suite and
+writes the tag, commit SHA, and `TEST` environment to the GitHub Actions job
+summary. Inspect that sign-off before treating the release as successful.
+
+The `publish` job cannot start until that integration job succeeds. It then
+runs the release checks, verifies that the tag, source version, changelog, and
+built artifacts agree, installs the wheel in a clean environment, and smoke
+tests stable imports before publishing. A failed integration or verification
+step prevents the PyPI upload.
+
 ## Upgrade summary
 
 Move application imports to the documented public paths, retest authentication
