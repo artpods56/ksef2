@@ -2,7 +2,7 @@
   "openapi": "3.0.4",
   "info": {
     "title": "KSeF API TE",
-    "description": "**Wersja API:** 2.6.1 (build 2.6.1-te-20260708.1+5e5a9b72886d25e3520d1eb7d45d8c500a12ed82)<br>\n**Klucze publiczne** Ministerstwa Finansów (dla danego środowiska): [Pobierz klucze](#tag/Certyfikaty-klucza-publicznego)<br>\n**Historia zmian:** [Changelog](https://github.com/CIRFMF/ksef-api/blob/main/api-changelog.md)<br>\n**Rozszerzona dokumentacja API:** [ksef-docs](https://github.com/CIRFMF/ksef-api/tree/main)\n\n**Adres serwera API:**\n- Środowisko TEST: `https://api-test.ksef.mf.gov.pl/v2`\n",
+    "description": "**Wersja API:** 2.7.0 (build 2.7.0-te-20260721.1+baa2a62ac3c0b55fd0516ef9517ed2589d4a6187)<br>\n**Klucze publiczne** Ministerstwa Finansów (dla danego środowiska): [Pobierz klucze](#tag/Certyfikaty-klucza-publicznego)<br>\n**Historia zmian:** [Changelog](https://github.com/CIRFMF/ksef-api/blob/main/api-changelog.md)<br>\n**Rozszerzona dokumentacja API:** [ksef-docs](https://github.com/CIRFMF/ksef-api/tree/main)\n\n**Adres serwera API:**\n- Środowisko TEST: `https://api-test.ksef.mf.gov.pl/v2`\n",
     "version": "v2"
   },
   "servers": [
@@ -697,6 +697,24 @@
           }
         ],
         "responses": {
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoneProblemDetails"
+                },
+                "example": {
+                  "title": "Gone",
+                  "status": 410,
+                  "instance": "{{uri_path}}",
+                  "detail": "Operacja wygasła i nie jest już dostępna.",
+                  "timestamp": "2025-07-11T12:23:56.0154302+00:00",
+                  "traceId": "673843e023c432286660bc0501a3af44"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "headers": {
@@ -717,24 +735,6 @@
                     "code": 100,
                     "description": "Wniosek przyjęty do realizacji"
                   }
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GoneProblemDetails"
-                },
-                "example": {
-                  "title": "Gone",
-                  "status": 410,
-                  "instance": "{{uri_path}}",
-                  "detail": "Operacja wygasła i nie jest już dostępna.",
-                  "timestamp": "2025-07-11T12:23:56.0154302+00:00",
-                  "traceId": "673843e023c432286660bc0501a3af44"
                 }
               }
             }
@@ -1223,6 +1223,126 @@
             "direction": "Desc"
           }
         ]
+      }
+    },
+    "/testdata/certificates/{serialNumber}": {
+      "put": {
+        "tags": [
+          "Certyfikaty"
+        ],
+        "summary": "Aktualizacja certyfikatu",
+        "description": "Aktualizuje dane wskazanego certyfikatu KSeF uwierzytelnionego podmiotu. **Tylko na środowiskach testowych.**\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).",
+        "parameters": [
+          {
+            "name": "serialNumber",
+            "in": "path",
+            "description": "Numer seryjny certyfikatu (w formacie szesnastkowym).",
+            "required": true,
+            "schema": {
+              "maxLength": 16,
+              "minLength": 16,
+              "pattern": "^[0-9A-F]{16}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "validTo"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TestDataUpdateCertificateRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-System-Warning": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemWarning"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "| ExceptionCode       | ExceptionDescription                                       | Details |\n|---------------------|------------------------------------------------------------|---------|\n| 25008               | Certyfikat o podanym numerze seryjnym nie istnieje.        |         |\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestProblemDetails"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 30 | 120 | other\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsProblemDetails"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 10,
+          "perMinute": 30,
+          "perHour": 120
+        }
       }
     },
     "/security/public-key-certificates": {
@@ -2168,6 +2288,468 @@
         }
       }
     },
+    "/collective-identifiers": {
+      "post": {
+        "tags": [
+          "Identyfikatory zbiorcze"
+        ],
+        "summary": "Generowanie identyfikatora zbiorczego",
+        "description": "Generuje identyfikator zbiorczy dla przekazanej listy numerów KSeF faktur\nwystawionych przez tego samego sprzedawcę.\n\nMaksymalna liczba faktur przypisanych do jednego identyfikatora zbiorczego wynosi 500.\nJedna faktura może zostać przypisana do maksymalnie 132 identyfikatorów zbiorczych\nw ramach jednego kontekstu.\n            \nIdentyfikator zbiorczy ma format:\n`9999999999-IZRRRRMM-FFFFFFFFFFFF-FF`, gdzie:\n- `9999999999` – 10-cyfrowy NIP sprzedawcy,\n- `IZ` – stały prefiks,\n- `RRRRMM` – rok i miesiąc utworzenia,\n- `FFFFFFFFFFFF` –  część techniczna składająca się z 12 znaków w zapisie szesnastkowym, tylko [0–9 A–F], wielkie litery,\n- `FF` –  suma kontrolna CRC-8 - 2 znaki w zapisie szesnastkowym, tylko [0–9 A–F], wielkie litery.\n            \nDo obliczenia sumy kontrolnej stosowany jest algorytm CRC-8 z parametrami:\n- Polinom: 0x07\n- Wartość początkowa: 0x00\n- Format wyniku: 2-znakowy zapis szesnastkowy(HEX, wielkie litery)\n\nPrzykład:\n`1111111111-IZ202607-65ED02180000-E7`.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceRead`, `InvoiceWrite`, `CollectiveIdentifierManage`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "invoices"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GenerateCollectiveIdentifierRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "X-System-Warning": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemWarning"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateCollectiveIdentifierResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "| ExceptionCode       | ExceptionDescription                                                         | Details                                                | \n|---------------------|------------------------------------------------------------------------------|--------------------------------------------------------|\n| 71001               | Faktura nie może zostac przypisana do Identyfikatora Zbiorczego.                        | Faktura o numerze KSeF {ksefNumber} nie może zostac przypisana do Identyfikatora Zbiorczego. |\n| 71002               | Faktura jest już przypisana do maksymalnej liczby Identyfikatorów Zbiorczych.            | Faktura o numerze KSeF {ksefNumber} jest już przypisana do maksymalnej liczby Identyfikatorów Zbiorczych. |\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestProblemDetails"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "429": {
+            "description": "| | req / s | req / min | req / h | grupa\n| --- | --- | --- | --- | --- |\n| **Limity liczby żądań** | 10 | 60 | 120 | collectiveIdentifier\n",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryAfter"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsResponse"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsProblemDetails"
+                }
+              }
+            },
+            "x-summary": "Too Many Requests"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-rate-limits": {
+          "perSecond": 10,
+          "perMinute": 60,
+          "perHour": 120
+        },
+        "x-required-permissions": [
+          "InvoiceRead",
+          "InvoiceWrite",
+          "CollectiveIdentifierManage"
+        ]
+      }
+    },
+    "/collective-identifiers/query": {
+      "post": {
+        "tags": [
+          "Identyfikatory zbiorcze"
+        ],
+        "summary": "Pobranie listy identyfikatorów zbiorczych powiązanych z kontekstem",
+        "description": "Zwraca listę identyfikatorów zbiorczych wygenerowanych w kontekście.\nDla kontekstu typu NIP zwracane są również identyfikatory zbiorcze, dla których podmiot występuje w roli Podmiotu 1 na fakturze.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- dateCreated (Desc)\n- collectiveIdentifierNumber (Desc)\n\n\n\n**Wymagane jedno z uprawnień**: `InvoiceRead`, `InvoiceWrite`, `CollectiveIdentifierManage`.",
+        "parameters": [
+          {
+            "name": "x-continuation-token",
+            "in": "header",
+            "description": "Token służący do pobrania kolejnej strony wyników.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 200,
+              "minimum": 10,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "dateCreatedFrom",
+                  "dateCreatedTo"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CollectiveIdentifiersQueryRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-System-Warning": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemWarning"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectiveIdentifiersQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "| ExceptionCode       | ExceptionDescription                                | Details                                                     | \n|---------------------|-----------------------------------------------------|-------------------------------------------------------------|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestProblemDetails"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-sort": [
+          {
+            "field": "dateCreated",
+            "direction": "Desc"
+          },
+          {
+            "field": "collectiveIdentifierNumber",
+            "direction": "Desc"
+          }
+        ],
+        "x-required-permissions": [
+          "InvoiceRead",
+          "InvoiceWrite",
+          "CollectiveIdentifierManage"
+        ]
+      }
+    },
+    "/collective-identifiers/{collectiveIdentifierNumber}/invoices": {
+      "get": {
+        "tags": [
+          "Identyfikatory zbiorcze"
+        ],
+        "summary": "Pobranie listy faktur wchodzących w skład identyfikatora zbiorczego",
+        "description": "Zwraca listę numerów KSeF faktur wchodzących w skład identyfikatora zbiorczego.\n            \nInformacje o kwocie i walucie płatności są zwracane wyłącznie podmiotowi, który utworzył identyfikator zbiorczy, lub podmiotowi występującemu w roli na danej fakturze.\n\nJeżeli kwota i waluta płatności zostały określone podczas tworzenia identyfikatora zbiorczego, a podmiot nie ma dostępu do tych informacji, pola dotyczące kwoty i waluty płatności nie są zwracane, a pole <b>paymentDetailsHidden</b> przyjmuje wartość <b>true</b>.\n\nJeżeli kwota i waluta płatności nie zostały określone podczas tworzenia identyfikatora zbiorczego, ich wartości pozostają puste, a pole <b>paymentDetailsHidden</b> przyjmuje wartość <b>false</b>.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- ksefNumber (Desc)\n\n\n\n**Wymagane jedno z uprawnień**: `InvoiceRead`, `InvoiceWrite`, `CollectiveIdentifierManage`.",
+        "parameters": [
+          {
+            "name": "collectiveIdentifierNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-continuation-token",
+            "in": "header",
+            "description": "Token służący do pobrania kolejnej strony wyników.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 200,
+              "minimum": 10,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-System-Warning": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemWarning"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectiveIdentifierInvoicesQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "| ExceptionCode       | ExceptionDescription                                | Details                                                     | \n|---------------------|-----------------------------------------------------|-------------------------------------------------------------|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestProblemDetails"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-sort": [
+          {
+            "field": "ksefNumber",
+            "direction": "Desc"
+          }
+        ],
+        "x-required-permissions": [
+          "InvoiceRead",
+          "InvoiceWrite",
+          "CollectiveIdentifierManage"
+        ]
+      }
+    },
+    "/collective-identifiers/ksef/{ksefNumber}": {
+      "get": {
+        "tags": [
+          "Identyfikatory zbiorcze"
+        ],
+        "summary": "Pobranie listy identyfikatorów zbiorczych po numerze KSeF",
+        "description": "Zwraca listę identyfikatorów zbiorczych związanych z podanym numerem KSeF.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- dateCreated (Desc)\n- collectiveIdentifierNumber (Desc)\n\n\n\n**Wymagane jedno z uprawnień**: `InvoiceRead`, `InvoiceWrite`, `CollectiveIdentifierManage`.",
+        "parameters": [
+          {
+            "name": "ksefNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/KsefNumber"
+            }
+          },
+          {
+            "name": "x-continuation-token",
+            "in": "header",
+            "description": "Token służący do pobrania kolejnej strony wyników.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 200,
+              "minimum": 10,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-System-Warning": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemWarning"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectiveIdentifiersByKsefNumberQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "| ExceptionCode       | ExceptionDescription                                | Details                                                     | \n|---------------------|-----------------------------------------------------|-------------------------------------------------------------|\n| 21405 | Błąd walidacji danych wejściowych. | {treść błędu z walidatora} |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResponse"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestProblemDetails"
+                }
+              }
+            },
+            "x-summary": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ],
+        "x-sort": [
+          {
+            "field": "dateCreated",
+            "direction": "Desc"
+          },
+          {
+            "field": "collectiveIdentifierNumber",
+            "direction": "Desc"
+          }
+        ],
+        "x-required-permissions": [
+          "InvoiceRead",
+          "InvoiceWrite",
+          "CollectiveIdentifierManage"
+        ]
+      }
+    },
     "/limits/context": {
       "get": {
         "tags": [
@@ -2459,6 +3041,11 @@
                     "perSecond": 8,
                     "perMinute": 16,
                     "perHour": 64
+                  },
+                  "collectiveIdentifier": {
+                    "perSecond": 10,
+                    "perMinute": 60,
+                    "perHour": 120
                   },
                   "other": {
                     "perSecond": 10,
@@ -3217,7 +3804,7 @@
           "Nadawanie uprawnień"
         ],
         "summary": "Nadanie osobom fizycznym uprawnień do pracy w KSeF",
-        "description": "Metoda pozwala na nadanie osobie wskazanej w żądaniu uprawnień do pracy w KSeF  \nw kontekście bieżącym.\n            \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur,  \n- **InvoiceRead** – przeglądanie faktur,  \n- **CredentialsManage** – zarządzanie uprawnieniami,  \n- **CredentialsRead** – przeglądanie uprawnień,  \n- **Introspection** – przeglądanie historii sesji i generowanie UPO,  \n- **SubunitManage** – zarządzanie jednostkami podrzędnymi,  \n- **EnforcementOperations** – wykonywanie operacji egzekucyjnych.\n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.  \nUprawnienie **EnforcementOperations** może być nadane wyłącznie wtedy,  \ngdy podmiot kontekstu ma rolę **EnforcementAuthority** (organ egzekucyjny)  \nlub **CourtBailiff** (komornik sądowy).\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadawanie-uprawnie%C5%84-osobom-fizycznym-do-pracy-w-ksef)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`.",
+        "description": "Metoda pozwala na nadanie osobie wskazanej w żądaniu uprawnień do pracy w KSeF  \nw kontekście bieżącym.\n            \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur,  \n- **InvoiceRead** – przeglądanie faktur,  \n- **CredentialsManage** – zarządzanie uprawnieniami,  \n- **CredentialsRead** – przeglądanie uprawnień,  \n- **Introspection** – przeglądanie historii sesji i generowanie UPO,  \n- **SubunitManage** – zarządzanie jednostkami podrzędnymi,  \n- **EnforcementOperations** – wykonywanie operacji egzekucyjnych.\n- **CollectiveIdentifierManage** – zarządzanie identyfikatorami zbiorczymi  \n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.  \nUprawnienie **EnforcementOperations** może być nadane wyłącznie wtedy,  \ngdy podmiot kontekstu ma rolę **EnforcementAuthority** (organ egzekucyjny)  \nlub **CourtBailiff** (komornik sądowy).\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadawanie-uprawnie%C5%84-osobom-fizycznym-do-pracy-w-ksef)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `CredentialsManage`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3359,7 +3946,7 @@
           "Nadawanie uprawnień"
         ],
         "summary": "Nadanie podmiotom uprawnień do obsługi faktur",
-        "description": "Metoda pozwala na nadanie podmiotowi wskazanemu w żądaniu uprawnień do obsługi faktur podmiotu kontekstu.  \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.  \nDla każdego uprawnienia może być ustawiona flaga **canDelegate**, mówiąca o możliwości jego dalszego przekazywania poprzez nadawanie w sposób pośredni.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-podmiotom-uprawnie%C5%84-do-obs%C5%82ugi-faktur)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`.",
+        "description": "Metoda pozwala na nadanie podmiotowi wskazanemu w żądaniu uprawnień do obsługi faktur podmiotu kontekstu.  \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.  \nDla każdego uprawnienia może być ustawiona flaga **canDelegate**, mówiąca o możliwości jego dalszego przekazywania poprzez nadawanie w sposób pośredni.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-podmiotom-uprawnie%C5%84-do-obs%C5%82ugi-faktur)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `CredentialsManage`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3501,7 +4088,7 @@
           "Nadawanie uprawnień"
         ],
         "summary": "Nadanie uprawnień podmiotowych",
-        "description": "Metoda pozwala na nadanie jednego z uprawnień podmiotowych do obsługi podmiotu kontekstu  podmiotowi wskazanemu w żądaniu.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-podmiotowych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`.",
+        "description": "Metoda pozwala na nadanie jednego z uprawnień podmiotowych do obsługi podmiotu kontekstu  podmiotowi wskazanemu w żądaniu.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-podmiotowych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `CredentialsManage`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3634,7 +4221,7 @@
           "Nadawanie uprawnień"
         ],
         "summary": "Nadanie uprawnień w sposób pośredni",
-        "description": "Metoda pozwala na nadanie w sposób pośredni osobie wskazanej w żądaniu uprawnień do obsługi faktur innego podmiotu – klienta.  \nMoże to być jedna z możliwości:  \n- nadanie uprawnień generalnych – do obsługi wszystkich klientów  \n- nadanie uprawnień selektywnych – do obsługi wskazanego klienta  \n            \nUprawnienie selektywne może być nadane wyłącznie wtedy, gdy klient nadał wcześniej podmiotowi bieżącego kontekstu dowolne uprawnienie z prawem do jego dalszego przekazywania (patrz [POST /v2/permissions/entities/grants](/docs/v2/index.html#tag/Nadawanie-uprawnien/paths/~1permissions~1entities~1grants/post)).  \n            \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-w-spos%C3%B3b-po%C5%9Bredni)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`.",
+        "description": "Metoda pozwala na nadanie w sposób pośredni osobie wskazanej w żądaniu uprawnień do obsługi faktur innego podmiotu – klienta.  \nMoże to być jedna z możliwości:  \n- nadanie uprawnień generalnych – do obsługi wszystkich klientów  \n- nadanie uprawnień selektywnych – do obsługi wskazanego klienta  \n            \nUprawnienie selektywne może być nadane wyłącznie wtedy, gdy klient nadał wcześniej podmiotowi bieżącego kontekstu dowolne uprawnienie z prawem do jego dalszego przekazywania (patrz [POST /v2/permissions/entities/grants](/docs/v2/index.html#tag/Nadawanie-uprawnien/paths/~1permissions~1entities~1grants/post)).  \n            \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-w-spos%C3%B3b-po%C5%9Bredni)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `CredentialsManage`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3778,7 +4365,7 @@
           "Nadawanie uprawnień"
         ],
         "summary": "Nadanie uprawnień administratora podmiotu podrzędnego",
-        "description": "Metoda pozwala na nadanie wskazanemu w żądaniu podmiotowi lub osobie fizycznej uprawnień administratora w kontekście:  \n- wskazanego NIP podmiotu podrzędnego – wyłącznie jeżeli podmiot bieżącego kontekstu logowania ma rolę podmiotu nadrzędnego:\n  - **LocalGovernmentUnit** \n  - **VatGroupUnit**  \n- wskazanego lub utworzonego identyfikatora wewnętrznego  \n            \nWraz z utworzeniem administratora jednostki podrzędnej tworzony jest identyfikator wewnętrzny składający się z numeru NIP podmiotu kontekstu logowania oraz 5 cyfr unikalnie identyfikujących jednostkę wewnętrzną.\nOstatnia cyfra musi być poprawną sumą kontrolną, która jest obliczana według poniższego algorytmu.\n\nAlgorytm używa naprzemiennych wag (1×, 3×, 1×, 3×, ...), sumuje wyniki i zwraca resztę z dzielenia przez 10.\n\nPrzykład:\n- Wejście: \"6824515772-1234\" (bez cyfry kontrolnej)\n- Pozycja 0 (1. cyfra): 6 × 1 = 6\n- Pozycja 1 (2. cyfra): 8 × 3 = 24\n- Pozycja 2 (3. cyfra): 2 × 1 = 2\n- Pozycja 3 (4. cyfra): 4 × 3 = 12\n- Pozycja 4 (5. cyfra): 5 × 1 = 5\n- Pozycja 5 (6. cyfra): 1 × 3 = 3\n- Pozycja 6 (7. cyfra): 5 × 1 = 5\n- Pozycja 7 (8. cyfra): 7 × 3 = 21\n- Pozycja 8 (9. cyfra): 7 × 1 = 7\n- Pozycja 9 (10. cyfra): 2 × 3 = 6\n- Pozycja 10 (11. cyfra): 1 × 1 = 1\n- Pozycja 11 (12. cyfra): 2 × 3 = 6\n- Pozycja 12 (13. cyfra): 3 × 1 = 3\n- Pozycja 13 (14. cyfra): 4 × 3 = 12\n- Suma: 6 + 24 + 2 + 12 + 5 + 3 + 5 + 21 + 7 + 6 + 1 + 6 + 3 + 12 = 113\n- Cyfra kontrolna (15. cyfra): 113 % 10 = 3\n\nW żądaniu podaje się również nazwę tej jednostki.  \n            \nUprawnienia administratora jednostki podrzędnej obejmują:  \n- **CredentialsManage** – zarządzanie uprawnieniami  \n            \nMetoda automatycznie nadaje powyższe uprawnienie, bez konieczności podawania go w żądaniu.\n            \n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-administratora-podmiotu-podrz%C4%99dnego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `SubunitManage`.",
+        "description": "Metoda pozwala na nadanie wskazanemu w żądaniu podmiotowi lub osobie fizycznej uprawnień administratora w kontekście:  \n- wskazanego NIP podmiotu podrzędnego – wyłącznie jeżeli podmiot bieżącego kontekstu logowania ma rolę podmiotu nadrzędnego:\n  - **LocalGovernmentUnit** \n  - **VatGroupUnit**  \n- wskazanego lub utworzonego identyfikatora wewnętrznego  \n            \nWraz z utworzeniem administratora jednostki podrzędnej tworzony jest identyfikator wewnętrzny składający się z numeru NIP podmiotu kontekstu logowania oraz 5 cyfr unikalnie identyfikujących jednostkę wewnętrzną.\nOstatnia cyfra musi być poprawną sumą kontrolną, która jest obliczana według poniższego algorytmu.\n\nAlgorytm używa naprzemiennych wag (1×, 3×, 1×, 3×, ...), sumuje wyniki i zwraca resztę z dzielenia przez 10.\n\nPrzykład:\n- Wejście: \"6824515772-1234\" (bez cyfry kontrolnej)\n- Pozycja 0 (1. cyfra): 6 × 1 = 6\n- Pozycja 1 (2. cyfra): 8 × 3 = 24\n- Pozycja 2 (3. cyfra): 2 × 1 = 2\n- Pozycja 3 (4. cyfra): 4 × 3 = 12\n- Pozycja 4 (5. cyfra): 5 × 1 = 5\n- Pozycja 5 (6. cyfra): 1 × 3 = 3\n- Pozycja 6 (7. cyfra): 5 × 1 = 5\n- Pozycja 7 (8. cyfra): 7 × 3 = 21\n- Pozycja 8 (9. cyfra): 7 × 1 = 7\n- Pozycja 9 (10. cyfra): 2 × 3 = 6\n- Pozycja 10 (11. cyfra): 1 × 1 = 1\n- Pozycja 11 (12. cyfra): 2 × 3 = 6\n- Pozycja 12 (13. cyfra): 3 × 1 = 3\n- Pozycja 13 (14. cyfra): 4 × 3 = 12\n- Suma: 6 + 24 + 2 + 12 + 5 + 3 + 5 + 21 + 7 + 6 + 1 + 6 + 3 + 12 = 113\n- Cyfra kontrolna (15. cyfra): 113 % 10 = 3\n\nW żądaniu podaje się również nazwę tej jednostki.  \n            \nUprawnienia administratora jednostki podrzędnej obejmują:  \n- **CredentialsManage** – zarządzanie uprawnieniami  \n            \nMetoda automatycznie nadaje powyższe uprawnienie, bez konieczności podawania go w żądaniu.\n            \n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-administratora-podmiotu-podrz%C4%99dnego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `SubunitManage`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3919,7 +4506,7 @@
           "Nadawanie uprawnień"
         ],
         "summary": "Nadanie uprawnień administratora podmiotu unijnego",
-        "description": "Metoda pozwala na nadanie wskazanemu w żądaniu podmiotowi lub osobie fizycznej uprawnień administratora w kontekście złożonym z identyfikatora NIP podmiotu kontekstu bieżącego oraz numeru VAT UE podmiotu unijnego wskazanego w żądaniu.  \nWraz z utworzeniem administratora podmiotu unijnego tworzony jest kontekst złożony składający się z numeru NIP podmiotu kontekstu logowania oraz wskazanego numeru identyfikacyjnego VAT UE podmiotu unijnego.  \nW żądaniu podaje się również nazwę i adres podmiotu unijnego.  \n            \nJedynym sposobem identyfikacji uprawnianego jest odcisk palca certyfikatu kwalifikowanego:  \n- certyfikat podpisu elektronicznego dla osób fizycznych  \n- certyfikat pieczęci elektronicznej dla podmiotów  \n            \nUprawnienia administratora podmiotu unijnego obejmują:  \n- **VatEuManage** – zarządzanie uprawnieniami w ramach podmiotu unijnego  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n- **Introspection** – przeglądanie historii sesji  \n            \nMetoda automatycznie nadaje wszystkie powyższe uprawnienia, bez konieczności ich wskazywania w żądaniu.\n            \n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-administratora-podmiotu-unijnego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`.",
+        "description": "Metoda pozwala na nadanie wskazanemu w żądaniu podmiotowi lub osobie fizycznej uprawnień administratora w kontekście złożonym z identyfikatora NIP podmiotu kontekstu bieżącego oraz numeru VAT UE podmiotu unijnego wskazanego w żądaniu.  \nWraz z utworzeniem administratora podmiotu unijnego tworzony jest kontekst złożony składający się z numeru NIP podmiotu kontekstu logowania oraz wskazanego numeru identyfikacyjnego VAT UE podmiotu unijnego.  \nW żądaniu podaje się również nazwę i adres podmiotu unijnego.  \n            \nJedynym sposobem identyfikacji uprawnianego jest odcisk palca certyfikatu kwalifikowanego:  \n- certyfikat podpisu elektronicznego dla osób fizycznych  \n- certyfikat pieczęci elektronicznej dla podmiotów  \n            \nUprawnienia administratora podmiotu unijnego obejmują:  \n- **VatEuManage** – zarządzanie uprawnieniami w ramach podmiotu unijnego  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n- **Introspection** – przeglądanie historii sesji  \n            \nMetoda automatycznie nadaje wszystkie powyższe uprawnienia, bez konieczności ich wskazywania w żądaniu.\n            \n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-administratora-podmiotu-unijnego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `CredentialsManage`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4070,7 +4657,7 @@
           "Nadawanie uprawnień"
         ],
         "summary": "Nadanie uprawnień reprezentanta podmiotu unijnego",
-        "description": "Metoda pozwala na nadanie wskazanemu w żądaniu podmiotowi lub osobie fizycznej uprawnień do wystawiania i/lub przeglądania faktur w kontekście złożonym kontekstu bieżącego.  \n            \nJedynym sposobem identyfikacji uprawnianego jest odcisk palca certyfikatu kwalifikowanego:  \n- certyfikat podpisu elektronicznego dla osób fizycznych  \n- certyfikat pieczęci elektronicznej dla podmiotów  \n            \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-reprezentanta-podmiotu-unijnego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `VatUeManage`.",
+        "description": "Metoda pozwala na nadanie wskazanemu w żądaniu podmiotowi lub osobie fizycznej uprawnień do wystawiania i/lub przeglądania faktur w kontekście złożonym kontekstu bieżącego.  \n            \nJedynym sposobem identyfikacji uprawnianego jest odcisk palca certyfikatu kwalifikowanego:  \n- certyfikat podpisu elektronicznego dla osób fizycznych  \n- certyfikat pieczęci elektronicznej dla podmiotów  \n            \nW żądaniu określane są nadawane uprawnienia ze zbioru:  \n- **InvoiceWrite** – wystawianie faktur  \n- **InvoiceRead** – przeglądanie faktur  \n            \nMetoda pozwala na wybór dowolnej kombinacji powyższych uprawnień.\n\n> Więcej informacji:\n> - [Nadawanie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#nadanie-uprawnie%C5%84-reprezentanta-podmiotu-unijnego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `VatUeManage`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4214,7 +4801,7 @@
           "Odbieranie uprawnień"
         ],
         "summary": "Odebranie uprawnień",
-        "description": "Metoda pozwala na odebranie uprawnienia o wskazanym identyfikatorze.  \nWymagane jest wcześniejsze odczytanie uprawnień w celu uzyskania  \nidentyfikatora uprawnienia, które ma zostać odebrane.\n\n> Więcej informacji:\n> - [Odbieranie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#odebranie-uprawnie%C5%84)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`, `VatUeManage`, `SubunitManage`.",
+        "description": "Metoda pozwala na odebranie uprawnienia o wskazanym identyfikatorze.  \nWymagane jest wcześniejsze odczytanie uprawnień w celu uzyskania  \nidentyfikatora uprawnienia, które ma zostać odebrane.\n\n> Więcej informacji:\n> - [Odbieranie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#odebranie-uprawnie%C5%84)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `VatUeManage`, `SubunitManage`.",
         "parameters": [
           {
             "name": "permissionId",
@@ -4330,7 +4917,7 @@
           "Odbieranie uprawnień"
         ],
         "summary": "Odebranie uprawnień podmiotowych",
-        "description": "Metoda pozwala na odebranie uprawnienia podmiotowego o wskazanym identyfikatorze.  \nWymagane jest wcześniejsze odczytanie uprawnień w celu uzyskania  \nidentyfikatora uprawnienia, które ma zostać odebrane.\n            \n> Więcej informacji:\n> - [Odbieranie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#odebranie-uprawnie%C5%84-podmiotowych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`.",
+        "description": "Metoda pozwala na odebranie uprawnienia podmiotowego o wskazanym identyfikatorze.  \nWymagane jest wcześniejsze odczytanie uprawnień w celu uzyskania  \nidentyfikatora uprawnienia, które ma zostać odebrane.\n            \n> Więcej informacji:\n> - [Odbieranie uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#odebranie-uprawnie%C5%84-podmiotowych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `CredentialsManage`.",
         "parameters": [
           {
             "name": "permissionId",
@@ -4576,7 +5163,7 @@
           "Operacje"
         ],
         "summary": "Sprawdzenie statusu zgody na wystawianie faktur z załącznikiem",
-        "description": "Sprawdzenie czy obecny kontekst posiada zgodę na wystawianie faktur z załącznikiem.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`.",
+        "description": "Sprawdzenie czy obecny kontekst posiada zgodę na wystawianie faktur z załącznikiem.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`.",
         "responses": {
           "200": {
             "description": "OK",
@@ -4677,7 +5264,7 @@
           "Pobieranie faktur"
         ],
         "summary": "Pobranie faktury po numerze KSeF",
-        "description": "Zwraca fakturę o podanym numerze KSeF.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceRead`.",
+        "description": "Zwraca fakturę o podanym numerze KSeF.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienie**: `InvoiceRead`.",
         "parameters": [
           {
             "name": "ksefNumber",
@@ -4794,7 +5381,7 @@
           "Pobieranie faktur"
         ],
         "summary": "Pobranie listy metadanych faktur",
-        "description": "Zwraca metadane faktur spełniających filtry.\n\nLimit techniczny: ≤ 10 000 rekordów na zestaw filtrów, po jego osiągnięciu <b>isTruncated = true</b> i należy ponownie ustawić <b>dateRange</b>, używając ostatniej daty z wyników (tj. ustawić from/to - w zależności od kierunku sortowania, od daty ostatniego zwróconego rekordu) oraz wyzerować <b>pageOffset</b>.\n\n`Do scenariusza przyrostowego należy używać daty PermanentStorage oraz kolejność sortowania Asc`.\n            \n<b>Scenariusz pobierania przyrostowego (skrót):</b>\n* Gdy <b>hasMore = false</b>, należy zakończyć,\n* Gdy <b>hasMore = true</b> i <b>isTruncated = false</b>, należy zwiększyć <b>pageOffset</b>,\n* Gdy <b>hasMore = true</b> i <b>isTruncated = true</b>, należy zawęzić <b>dateRange</b> (ustawić from od daty ostatniego rekordu), wyzerować <b>pageOffset</b> i kontynuować\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- permanentStorageDate | invoicingDate | issueDate (Asc | Desc) - pole wybierane na podstawie filtrów\n\n\n\n**Wymagane uprawnienia**: `InvoiceRead`.",
+        "description": "Zwraca metadane faktur spełniających filtry.\n\nLimit techniczny: ≤ 10 000 rekordów na zestaw filtrów, po jego osiągnięciu <b>isTruncated = true</b> i należy ponownie ustawić <b>dateRange</b>, używając ostatniej daty z wyników (tj. ustawić from/to - w zależności od kierunku sortowania, od daty ostatniego zwróconego rekordu) oraz wyzerować <b>pageOffset</b>.\n\n`Do scenariusza przyrostowego należy używać daty PermanentStorage oraz kolejność sortowania Asc`.\n            \n<b>Scenariusz pobierania przyrostowego (skrót):</b>\n* Gdy <b>hasMore = false</b>, należy zakończyć,\n* Gdy <b>hasMore = true</b> i <b>isTruncated = false</b>, należy zwiększyć <b>pageOffset</b>,\n* Gdy <b>hasMore = true</b> i <b>isTruncated = true</b>, należy zawęzić <b>dateRange</b> (ustawić from od daty ostatniego rekordu), wyzerować <b>pageOffset</b> i kontynuować\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- permanentStorageDate | invoicingDate | issueDate (Asc | Desc) - pole wybierane na podstawie filtrów\n\n\n\n**Wymagane uprawnienie**: `InvoiceRead`.",
         "parameters": [
           {
             "name": "sortOrder",
@@ -5071,7 +5658,7 @@
           "Pobieranie faktur"
         ],
         "summary": "Eksport paczki faktur",
-        "description": "Rozpoczyna asynchroniczny proces wyszukiwania faktur w systemie KSeF na podstawie przekazanych filtrów oraz przygotowania ich w formie zaszyfrowanej paczki.\nWymagane jest przekazanie informacji o szyfrowaniu w polu <b>Encryption</b>, które służą do zabezpieczenia przygotowanej paczki z fakturami.\nMaksymalnie można uruchomić 10 równoczesnych eksportów w zalogowanym kontekście.\n            \nSystem pobiera faktury rosnąco według daty określonej w filtrze (Invoicing, Issue, PermanentStorage) i dodaje faktury(nazwa pliku: <b>{ksefNumber}.xml</b>) do paczki aż do osiągnięcia jednego z poniższych limitów:\n* Limit liczby faktur: 10 000 sztuk\n* Limit rozmiaru danych(skompresowanych): 1GB\n\nPaczka eksportu zawiera dodatkowy plik z metadanymi faktur w formacie JSON (`_metadata.json`). Zawartość pliku to\nobiekt z tablicą <b>invoices</b>, gdzie każdy element jest obiektem typu <b>InvoiceMetadata</b>\n(taki jak zwracany przez endpoint `POST /invoices/query/metadata`).\n\n<b>Plik z metadanymi(_metadata.json) nie jest wliczany do limitów algorytmu budowania paczki</b>. \n\n`Do realizacji pobierania przyrostowego należy stosować filtrowanie po dacie PermanentStorage`.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- permanentStorageDate | invoicingDate | issueDate (Asc) - pole wybierane na podstawie filtrów\n\n\n\n**Wymagane uprawnienia**: `InvoiceRead`.",
+        "description": "Rozpoczyna asynchroniczny proces wyszukiwania faktur w systemie KSeF na podstawie przekazanych filtrów oraz przygotowania ich w formie zaszyfrowanej paczki.\nWymagane jest przekazanie informacji o szyfrowaniu w polu <b>Encryption</b>, które służą do zabezpieczenia przygotowanej paczki z fakturami.\nMaksymalnie można uruchomić 10 równoczesnych eksportów w zalogowanym kontekście.\n            \nSystem pobiera faktury rosnąco według daty określonej w filtrze (Invoicing, Issue, PermanentStorage) i dodaje faktury(nazwa pliku: <b>{ksefNumber}.xml</b>) do paczki aż do osiągnięcia jednego z poniższych limitów:\n* Limit liczby faktur: 10 000 sztuk\n* Limit rozmiaru danych(skompresowanych): 1GB\n\nPaczka eksportu zawiera dodatkowy plik z metadanymi faktur w formacie JSON (`_metadata.json`). Zawartość pliku to\nobiekt z tablicą <b>invoices</b>, gdzie każdy element jest obiektem typu <b>InvoiceMetadata</b>\n(taki jak zwracany przez endpoint `POST /invoices/query/metadata`).\n\n<b>Plik z metadanymi(_metadata.json) nie jest wliczany do limitów algorytmu budowania paczki</b>. \n\n`Do realizacji pobierania przyrostowego należy stosować filtrowanie po dacie PermanentStorage`.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- permanentStorageDate | invoicingDate | issueDate (Asc) - pole wybierane na podstawie filtrów\n\n\n\n**Wymagane uprawnienie**: `InvoiceRead`.",
         "requestBody": {
           "description": "Dane wejściowe określające kryteria i format eksportu paczki faktur.",
           "content": {
@@ -5219,7 +5806,7 @@
           "Pobieranie faktur"
         ],
         "summary": "Pobranie statusu eksportu paczki faktur",
-        "description": "Paczka faktur jest dzielona na części o maksymalnym rozmiarze 50 MB. Każda część jest zaszyfrowana algorytmem AES-256-CBC z dopełnieniem PKCS#7, przy użyciu klucza symetrycznego przekazanego podczas inicjowania eksportu. \n\nW przypadku ucięcia wyniku eksportu z powodu przekroczenia limitów, zwracana jest flaga <b>IsTruncated = true</b> oraz odpowiednia data, którą należy wykorzystać do wykonania kolejnego eksportu, aż do momentu, gdy flaga <b>IsTruncated = false</b>.\n\nStatus eksportu paczki faktur jest dostępny przez 7 dni.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- permanentStorageDate | invoicingDate | issueDate (Asc) - pole wybierane na podstawie filtrów\n\n\n\n**Wymagane uprawnienia**: `InvoiceRead`.",
+        "description": "Paczka faktur jest dzielona na części o maksymalnym rozmiarze 50 MB. Każda część jest zaszyfrowana algorytmem AES-256-CBC z dopełnieniem PKCS#7, przy użyciu klucza symetrycznego przekazanego podczas inicjowania eksportu. \n\nW przypadku ucięcia wyniku eksportu z powodu przekroczenia limitów, zwracana jest flaga <b>IsTruncated = true</b> oraz odpowiednia data, którą należy wykorzystać do wykonania kolejnego eksportu, aż do momentu, gdy flaga <b>IsTruncated = false</b>.\n\nStatus eksportu paczki faktur jest dostępny przez 7 dni.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- permanentStorageDate | invoicingDate | issueDate (Asc) - pole wybierane na podstawie filtrów\n\n\n\n**Wymagane uprawnienie**: `InvoiceRead`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -5232,6 +5819,24 @@
           }
         ],
         "responses": {
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoneProblemDetails"
+                },
+                "example": {
+                  "title": "Gone",
+                  "status": 410,
+                  "instance": "{{uri_path}}",
+                  "detail": "Operacja wygasła i nie jest już dostępna.",
+                  "timestamp": "2025-07-11T12:23:56.0154302+00:00",
+                  "traceId": "673843e023c432286660bc0501a3af44"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "headers": {
@@ -5272,24 +5877,6 @@
                     "lastPermanentStorageDate": "2025-09-11T11:40:40.266578+00:00",
                     "permanentStorageHwmDate": "2025-09-11T12:00:40.266578+00:00"
                   }
-                }
-              }
-            }
-          },
-          "410": {
-            "description": "Gone",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GoneProblemDetails"
-                },
-                "example": {
-                  "title": "Gone",
-                  "status": 410,
-                  "instance": "{{uri_path}}",
-                  "detail": "Operacja wygasła i nie jest już dostępna.",
-                  "timestamp": "2025-07-11T12:23:56.0154302+00:00",
-                  "traceId": "673843e023c432286660bc0501a3af44"
                 }
               }
             }
@@ -5385,7 +5972,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie listy sesji",
-        "description": "Zwraca listę sesji spełniających podane kryteria wyszukiwania.\n\n\n\n**Sortowanie:**\n\n- dateCreated (Desc)\n\n\n**Wymagane uprawnienia**:\n- `Introspection`/`EnforcementOperations` – pozwala pobrać wszystkie sesje w bieżącym kontekście uwierzytelnienia `(ContextIdentifier)`.\n- `InvoiceWrite` – pozwala pobrać wyłącznie sesje utworzone przez podmiot uwierzytelniający, czyli podmiot inicjujący uwierzytelnienie.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).",
+        "description": "Zwraca listę sesji spełniających podane kryteria wyszukiwania.\n\n**Wymagane jedno z uprawnień**:\n- `Introspection`/`EnforcementOperations` – pozwala pobrać wszystkie sesje w bieżącym kontekście uwierzytelnienia `(ContextIdentifier)`.\n- `InvoiceWrite` – pozwala pobrać wyłącznie sesje utworzone przez podmiot uwierzytelniający, czyli podmiot inicjujący uwierzytelnienie.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- dateCreated (Desc)\n\n",
         "parameters": [
           {
             "name": "pageSize",
@@ -5632,7 +6219,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie statusu sesji",
-        "description": "Sprawdza bieżący status sesji o podanym numerze referencyjnym.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Sprawdza bieżący status sesji o podanym numerze referencyjnym.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -5766,7 +6353,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie faktur sesji",
-        "description": "Zwraca listę faktur przesłanych w sesji wraz z ich statusami, oraz informacje na temat ilości poprawnie i niepoprawnie przetworzonych faktur.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zwraca listę faktur przesłanych w sesji wraz z ich statusami, oraz informacje na temat ilości poprawnie i niepoprawnie przetworzonych faktur.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "x-continuation-token",
@@ -5938,7 +6525,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie statusu faktury z sesji",
-        "description": "Zwraca fakturę przesłaną w sesji wraz ze statusem.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zwraca fakturę przesłaną w sesji wraz ze statusem.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -6077,7 +6664,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie niepoprawnie przetworzonych faktur sesji",
-        "description": "Zwraca listę niepoprawnie przetworzonych faktur przesłanych w sesji wraz z ich statusami.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zwraca listę niepoprawnie przetworzonych faktur przesłanych w sesji wraz z ich statusami.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "x-continuation-token",
@@ -6234,7 +6821,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie UPO faktury z sesji na podstawie numeru KSeF",
-        "description": "Zwraca UPO faktury przesłanego w sesji na podstawie jego numeru KSeF.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zwraca UPO faktury przesłanego w sesji na podstawie jego numeru KSeF.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -6363,7 +6950,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie UPO faktury z sesji na podstawie numeru referencyjnego faktury",
-        "description": "Zwraca UPO faktury przesłanego w sesji na podstawie jego numeru KSeF.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zwraca UPO faktury przesłanego w sesji na podstawie jego numeru KSeF.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -6492,7 +7079,7 @@
           "Status wysyłki i UPO"
         ],
         "summary": "Pobranie UPO dla sesji",
-        "description": "Zwraca XML zawierający zbiorcze UPO dla sesji.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zwraca XML zawierający zbiorcze UPO dla sesji.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `Introspection`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -7981,7 +8568,7 @@
           "Wysyłka interaktywna"
         ],
         "summary": "Otwarcie sesji interaktywnej",
-        "description": "Otwiera sesję do wysyłki pojedynczych faktur. Należy przekazać schemat wysyłanych faktur oraz informacje o kluczu używanym do szyfrowania.\n\n> Więcej informacji:\n> - [Otwarcie sesji interaktywnej](https://github.com/CIRFMF/ksef-api/blob/main/sesja-interaktywna.md#1-otwarcie-sesji)\n> - [Klucz publiczny Ministerstwa Finansów](/docs/v2/index.html#tag/Certyfikaty-klucza-publicznego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Otwiera sesję do wysyłki pojedynczych faktur. Należy przekazać schemat wysyłanych faktur oraz informacje o kluczu używanym do szyfrowania.\n\n> Więcej informacji:\n> - [Otwarcie sesji interaktywnej](https://github.com/CIRFMF/ksef-api/blob/main/sesja-interaktywna.md#1-otwarcie-sesji)\n> - [Klucz publiczny Ministerstwa Finansów](/docs/v2/index.html#tag/Certyfikaty-klucza-publicznego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -8116,7 +8703,7 @@
           "Wysyłka interaktywna"
         ],
         "summary": "Wysłanie faktury",
-        "description": "Przyjmuje zaszyfrowaną fakturę oraz jej metadane i rozpoczyna jej przetwarzanie.\n\n> Więcej informacji:\n> - [Wysłanie faktury](https://github.com/CIRFMF/ksef-api/blob/main/sesja-interaktywna.md#2-wys%C5%82anie-faktury)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Przyjmuje zaszyfrowaną fakturę oraz jej metadane i rozpoczyna jej przetwarzanie.\n\n> Więcej informacji:\n> - [Wysłanie faktury](https://github.com/CIRFMF/ksef-api/blob/main/sesja-interaktywna.md#2-wys%C5%82anie-faktury)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -8261,7 +8848,7 @@
           "Wysyłka interaktywna"
         ],
         "summary": "Zamknięcie sesji interaktywnej",
-        "description": "Zamyka sesję interaktywną i rozpoczyna generowanie zbiorczego UPO dla sesji.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `PefInvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zamyka sesję interaktywną i rozpoczyna generowanie zbiorczego UPO dla sesji.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `PefInvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -8367,7 +8954,7 @@
           "Wysyłka wsadowa"
         ],
         "summary": "Otwarcie sesji wsadowej",
-        "description": "Otwiera sesję do wysyłki wsadowej faktur. Należy przekazać schemat wysyłanych faktur, informacje o paczce faktur oraz informacje o kluczu używanym do szyfrowania.\n\n> Więcej informacji:\n> - [Przygotowanie paczki faktur](https://github.com/CIRFMF/ksef-api/blob/main/sesja-wsadowa.md)\n> - [Klucz publiczny Ministerstwa Finansów](/docs/v2/index.html#tag/Certyfikaty-klucza-publicznego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `EnforcementOperations`.",
+        "description": "Otwiera sesję do wysyłki wsadowej faktur. Należy przekazać schemat wysyłanych faktur, informacje o paczce faktur oraz informacje o kluczu używanym do szyfrowania.\n\n> Więcej informacji:\n> - [Przygotowanie paczki faktur](https://github.com/CIRFMF/ksef-api/blob/main/sesja-wsadowa.md)\n> - [Klucz publiczny Ministerstwa Finansów](/docs/v2/index.html#tag/Certyfikaty-klucza-publicznego)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `EnforcementOperations`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -8523,7 +9110,7 @@
           "Wysyłka wsadowa"
         ],
         "summary": "Zamknięcie sesji wsadowej",
-        "description": "Zamyka sesję wsadową, rozpoczyna procesowanie paczki faktur i generowanie UPO dla prawidłowych faktur oraz zbiorczego UPO dla sesji.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane uprawnienia**: `InvoiceWrite`, `EnforcementOperations`.",
+        "description": "Zamyka sesję wsadową, rozpoczyna procesowanie paczki faktur i generowanie UPO dla prawidłowych faktur oraz zbiorczego UPO dla sesji.\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Wymagane jedno z uprawnień**: `InvoiceWrite`, `EnforcementOperations`.",
         "parameters": [
           {
             "name": "referenceNumber",
@@ -8628,7 +9215,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy własnych uprawnień",
-        "description": " Metoda pozwala na odczytanie własnych uprawnień uwierzytelnionego klienta API w bieżącym kontekście logowania.  \n\n W odpowiedzi przekazywane są następujące uprawnienia:  \n - nadane w sposób bezpośredni w bieżącym kontekście  \n - nadane przez podmiot nadrzędny  \n - nadane w sposób pośredni, jeżeli podmiot kontekstu logowania jest w uprawnieniu pośrednikiem lub podmiotem docelowym  \n - nadane podmiotowi do obsługi faktur przez inny podmiot, jeśli podmiot uwierzytelniony ma w bieżącym kontekście uprawnienia właścicielskie  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **CredentialsManage** – zarządzanie uprawnieniami  \n - **CredentialsRead** – przeglądanie uprawnień  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n - **Introspection** – przeglądanie historii sesji  \n - **SubunitManage** – zarządzanie podmiotami podrzędnymi  \n - **EnforcementOperations** – wykonywanie operacji egzekucyjnych  \n - **VatEuManage** – zarządzanie uprawnieniami w ramach podmiotu unijnego  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **contextIdentifier** – identyfikator podmiotu, który nadał uprawnienie do obsługi faktur  \n - **targetIdentifier** – identyfikator podmiotu docelowego dla uprawnień nadanych pośrednio  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n - **permissionState** – status uprawnienia  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-w%C5%82asnych-uprawnie%C5%84)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n",
+        "description": " Metoda pozwala na odczytanie własnych uprawnień uwierzytelnionego klienta API w bieżącym kontekście logowania.  \n\n W odpowiedzi przekazywane są następujące uprawnienia:  \n - nadane w sposób bezpośredni w bieżącym kontekście  \n - nadane przez podmiot nadrzędny  \n - nadane w sposób pośredni, jeżeli podmiot kontekstu logowania jest w uprawnieniu pośrednikiem lub podmiotem docelowym  \n - nadane podmiotowi do obsługi faktur przez inny podmiot, jeśli podmiot uwierzytelniony ma w bieżącym kontekście uprawnienia właścicielskie  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **CredentialsManage** – zarządzanie uprawnieniami  \n - **CredentialsRead** – przeglądanie uprawnień  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n - **Introspection** – przeglądanie historii sesji  \n - **SubunitManage** – zarządzanie podmiotami podrzędnymi  \n - **EnforcementOperations** – wykonywanie operacji egzekucyjnych  \n - **VatEuManage** – zarządzanie uprawnieniami w ramach podmiotu unijnego  \n - **CollectiveIdentifierManage** – zarządzanie identyfikatorami zbiorczymi  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **contextIdentifier** – identyfikator podmiotu, który nadał uprawnienie do obsługi faktur  \n - **targetIdentifier** – identyfikator podmiotu docelowego dla uprawnień nadanych pośrednio  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n - **permissionState** – status uprawnienia  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-w%C5%82asnych-uprawnie%C5%84)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n",
         "parameters": [
           {
             "name": "pageOffset",
@@ -8804,7 +9391,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy uprawnień do pracy w KSeF nadanych osobom fizycznym lub podmiotom",
-        "description": " Metoda pozwala na odczytanie uprawnień nadanych osobie fizycznej lub podmiotowi.  \n Lista pobranych uprawnień może być dwóch rodzajów:  \n - Lista wszystkich uprawnień obowiązujących w bieżącym kontekście logowania (używana, gdy administrator chce przejrzeć uprawnienia wszystkich użytkowników w bieżącym kontekście)  \n - Lista wszystkich uprawnień nadanych w bieżącym kontekście przez uwierzytelnionego klienta API (używana, gdy administrator chce przejrzeć listę nadanych przez siebie uprawnień w bieżącym kontekście)  \n\n Dla pierwszej listy (obowiązujących uprawnień) w odpowiedzi przekazywane są:  \n - osoby i podmioty mogące pracować w bieżącym kontekście z wyjątkiem osób uprawnionych w sposób pośredni  \n - osoby uprawnione w sposób pośredni przez podmiot bieżącego kontekstu  \n\n Dla drugiej listy (nadanych uprawnień) w odpowiedzi przekazywane są:  \n - uprawnienia nadane w sposób bezpośredni do pracy w bieżącym kontekście lub w kontekście jednostek podrzędnych  \n - uprawnienia nadane w sposób pośredni do obsługi klientów podmiotu bieżącego kontekstu  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **CredentialsManage** – zarządzanie uprawnieniami  \n - **CredentialsRead** – przeglądanie uprawnień  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n - **Introspection** – przeglądanie historii sesji  \n - **SubunitManage** – zarządzanie podmiotami podrzędnymi  \n - **EnforcementOperations** – wykonywanie operacji egzekucyjnych  \n\n Odpowiedź może być filtrowana na podstawie parametrów:  \n - **authorIdentifier** – identyfikator osoby, która nadała uprawnienie  \n - **authorizedIdentifier** – identyfikator osoby lub podmiotu uprawnionego  \n - **targetIdentifier** – identyfikator podmiotu docelowego dla uprawnień nadanych pośrednio  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n - **permissionState** – status uprawnienia  \n - **queryType** – typ zapytania określający, która z dwóch list ma zostać zwrócona  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-do-pracy-w-ksef-nadanych-osobom-fizycznym-lub-podmiotom)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`, `SubunitManage`.",
+        "description": " Metoda pozwala na odczytanie uprawnień nadanych osobie fizycznej lub podmiotowi.  \n Lista pobranych uprawnień może być dwóch rodzajów:  \n - Lista wszystkich uprawnień obowiązujących w bieżącym kontekście logowania (używana, gdy administrator chce przejrzeć uprawnienia wszystkich użytkowników w bieżącym kontekście)  \n - Lista wszystkich uprawnień nadanych w bieżącym kontekście przez uwierzytelnionego klienta API (używana, gdy administrator chce przejrzeć listę nadanych przez siebie uprawnień w bieżącym kontekście)  \n\n Dla pierwszej listy (obowiązujących uprawnień) w odpowiedzi przekazywane są:  \n - osoby i podmioty mogące pracować w bieżącym kontekście z wyjątkiem osób uprawnionych w sposób pośredni  \n - osoby uprawnione w sposób pośredni przez podmiot bieżącego kontekstu  \n\n Dla drugiej listy (nadanych uprawnień) w odpowiedzi przekazywane są:  \n - uprawnienia nadane w sposób bezpośredni do pracy w bieżącym kontekście lub w kontekście jednostek podrzędnych  \n - uprawnienia nadane w sposób pośredni do obsługi klientów podmiotu bieżącego kontekstu  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **CredentialsManage** – zarządzanie uprawnieniami  \n - **CredentialsRead** – przeglądanie uprawnień  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n - **Introspection** – przeglądanie historii sesji  \n - **SubunitManage** – zarządzanie podmiotami podrzędnymi  \n - **EnforcementOperations** – wykonywanie operacji egzekucyjnych  \n - **CollectiveIdentifierManage** – zarządzanie identyfikatorami zbiorczymi  \n\n Odpowiedź może być filtrowana na podstawie parametrów:  \n - **authorIdentifier** – identyfikator osoby, która nadała uprawnienie  \n - **authorizedIdentifier** – identyfikator osoby lub podmiotu uprawnionego  \n - **targetIdentifier** – identyfikator podmiotu docelowego dla uprawnień nadanych pośrednio  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n - **permissionState** – status uprawnienia  \n - **queryType** – typ zapytania określający, która z dwóch list ma zostać zwrócona  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-do-pracy-w-ksef-nadanych-osobom-fizycznym-lub-podmiotom)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`, `SubunitManage`.",
         "parameters": [
           {
             "name": "pageOffset",
@@ -8995,7 +9582,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy uprawnień administratorów jednostek i podmiotów podrzędnych",
-        "description": " Metoda pozwala na odczytanie uprawnień do zarządzania uprawnieniami nadanych administratorom:  \n - jednostek podrzędnych identyfikowanych identyfikatorem wewnętrznym  \n - podmiotów podrzędnych (podrzędnych JST lub członków grupy VAT) identyfikowanych przez NIP  \n\n Lista zwraca wyłącznie uprawnienia do zarządzania uprawnieniami nadane z kontekstu bieżącego (z podmiotu nadrzędnego).  \n Nie są odczytywane uprawnienia nadane przez administratorów jednostek podrzędnych wewnątrz tych jednostek.  \n\n Odpowiedź może być filtrowana na podstawie parametru:  \n - **subunitIdentifier** – identyfikator jednostki lub podmiotu podrzędnego  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-administrator%C3%B3w-jednostek-i-podmiot%C3%B3w-podrz%C4%99dnych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`, `SubunitManage`.",
+        "description": " Metoda pozwala na odczytanie uprawnień do zarządzania uprawnieniami nadanych administratorom:  \n - jednostek podrzędnych identyfikowanych identyfikatorem wewnętrznym  \n - podmiotów podrzędnych (podrzędnych JST lub członków grupy VAT) identyfikowanych przez NIP  \n\n Lista zwraca wyłącznie uprawnienia do zarządzania uprawnieniami nadane z kontekstu bieżącego (z podmiotu nadrzędnego).  \n Nie są odczytywane uprawnienia nadane przez administratorów jednostek podrzędnych wewnątrz tych jednostek.  \n\n Odpowiedź może być filtrowana na podstawie parametru:  \n - **subunitIdentifier** – identyfikator jednostki lub podmiotu podrzędnego  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-administrator%C3%B3w-jednostek-i-podmiot%C3%B3w-podrz%C4%99dnych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`, `SubunitManage`.",
         "parameters": [
           {
             "name": "pageOffset",
@@ -9174,7 +9761,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy uprawnień do obsługi faktur w bieżącym kontekście",
-        "description": " Metoda pozwala na odczytanie otrzymanych uprawnień do obsługi faktur w bieżącym kontekście logowania.  \n\n W odpowiedzi przekazywane są następujące uprawnienia:  \n - nadane podmiotowi do obsługi faktur przez inny podmiot \n\n Uprawnienia zwracane przez operację obejmują:  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **contextIdentifier** – identyfikator podmiotu, który nadał uprawnienie do obsługi faktur  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-do-obs%C5%82ugi-faktur-w-bie%C5%BC%C4%85cym-kontek%C5%9Bcie)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`.",
+        "description": " Metoda pozwala na odczytanie otrzymanych uprawnień do obsługi faktur w bieżącym kontekście logowania.  \n\n W odpowiedzi przekazywane są następujące uprawnienia:  \n - nadane podmiotowi do obsługi faktur przez inny podmiot \n\n Uprawnienia zwracane przez operację obejmują:  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **contextIdentifier** – identyfikator podmiotu, który nadał uprawnienie do obsługi faktur  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-do-obs%C5%82ugi-faktur-w-bie%C5%BC%C4%85cym-kontek%C5%9Bcie)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`.",
         "parameters": [
           {
             "name": "pageOffset",
@@ -9345,7 +9932,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy ról podmiotu",
-        "description": " Metoda pozwala na **odczytanie listy ról podmiotu bieżącego kontekstu logowania**.\n\n#### Role podmiotów zwracane przez operację:\n- **CourtBailiff** – komornik sądowy  \n- **EnforcementAuthority** – organ egzekucyjny  \n- **LocalGovernmentUnit** – nadrzędna JST  \n- **LocalGovernmentSubUnit** – podrzędne JST  \n- **VatGroupUnit** – grupa VAT  \n- **VatGroupSubUnit** – członek grupy VAT\n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n \n > Więcej informacji:\n > - [Pobieranie listy ról](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-r%C3%B3l-podmiotu)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`.",
+        "description": " Metoda pozwala na **odczytanie listy ról podmiotu bieżącego kontekstu logowania**.\n\n#### Role podmiotów zwracane przez operację:\n- **CourtBailiff** – komornik sądowy  \n- **EnforcementAuthority** – organ egzekucyjny  \n- **LocalGovernmentUnit** – nadrzędna JST  \n- **LocalGovernmentSubUnit** – podrzędne JST  \n- **VatGroupUnit** – grupa VAT  \n- **VatGroupSubUnit** – członek grupy VAT\n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n \n > Więcej informacji:\n > - [Pobieranie listy ról](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-r%C3%B3l-podmiotu)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`.",
         "parameters": [
           {
             "name": "pageOffset",
@@ -9491,7 +10078,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy podmiotów podrzędnych",
-        "description": " Metoda pozwala na odczytanie listy podmiotów podrzędnych,  \n jeżeli podmiot bieżącego kontekstu ma rolę podmiotu nadrzędnego:\n - **nadrzędna JST** – odczytywane są podrzędne JST,  \n - **grupa VAT** – odczytywane są podmioty będące członkami grupy VAT.\n\n Role podmiotów zwracane przez operację obejmują:  \n - **LocalGovernmentSubUnit** – podrzędne JST,  \n - **VatGroupSubUnit** – członek grupy VAT.\n\n Odpowiedź może być filtrowana według parametru:  \n - **subordinateEntityIdentifier** – identyfikator podmiotu podrzędnego.\n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n  \n > Więcej informacji:\n > - [Pobieranie listy podmiotów podrzędnych](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-podmiot%C3%B3w-podrz%C4%99dnych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`, `SubunitManage`.",
+        "description": " Metoda pozwala na odczytanie listy podmiotów podrzędnych,  \n jeżeli podmiot bieżącego kontekstu ma rolę podmiotu nadrzędnego:\n - **nadrzędna JST** – odczytywane są podrzędne JST,  \n - **grupa VAT** – odczytywane są podmioty będące członkami grupy VAT.\n\n Role podmiotów zwracane przez operację obejmują:  \n - **LocalGovernmentSubUnit** – podrzędne JST,  \n - **VatGroupSubUnit** – członek grupy VAT.\n\n Odpowiedź może być filtrowana według parametru:  \n - **subordinateEntityIdentifier** – identyfikator podmiotu podrzędnego.\n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n  \n > Więcej informacji:\n > - [Pobieranie listy podmiotów podrzędnych](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-podmiot%C3%B3w-podrz%C4%99dnych)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`, `SubunitManage`.",
         "parameters": [
           {
             "name": "pageOffset",
@@ -9661,7 +10248,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy uprawnień podmiotowych do obsługi faktur",
-        "description": " Metoda pozwala na odczytanie uprawnień podmiotowych:  \n - otrzymanych przez podmiot bieżącego kontekstu  \n - nadanych przez podmiot bieżącego kontekstu  \n\n Wybór listy nadanych lub otrzymanych uprawnień odbywa się przy użyciu parametru **queryType**.  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **SelfInvoicing** – wystawianie faktur w trybie samofakturowania  \n - **TaxRepresentative** – wykonywanie operacji przedstawiciela podatkowego  \n - **RRInvoicing** – wystawianie faktur VAT RR  \n - **PefInvoicing** – wystawianie faktur PEF  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **authorizingIdentifier** – identyfikator podmiotu uprawniającego (stosowane przy queryType = Received)  \n - **authorizedIdentifier** – identyfikator podmiotu uprawnionego (stosowane przy queryType = Granted)  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-podmiotowych-do-obs%C5%82ugi-faktur)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`, `PefInvoiceWrite`.",
+        "description": " Metoda pozwala na odczytanie uprawnień podmiotowych:  \n - otrzymanych przez podmiot bieżącego kontekstu  \n - nadanych przez podmiot bieżącego kontekstu  \n\n Wybór listy nadanych lub otrzymanych uprawnień odbywa się przy użyciu parametru **queryType**.  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **SelfInvoicing** – wystawianie faktur w trybie samofakturowania  \n - **TaxRepresentative** – wykonywanie operacji przedstawiciela podatkowego  \n - **RRInvoicing** – wystawianie faktur VAT RR  \n - **PefInvoicing** – wystawianie faktur PEF  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **authorizingIdentifier** – identyfikator podmiotu uprawniającego (stosowane przy queryType = Received)  \n - **authorizedIdentifier** – identyfikator podmiotu uprawnionego (stosowane przy queryType = Granted)  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n\n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-podmiotowych-do-obs%C5%82ugi-faktur)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`, `PefInvoiceWrite`.",
         "parameters": [
           {
             "name": "pageOffset",
@@ -9849,7 +10436,7 @@
           "Wyszukiwanie nadanych uprawnień"
         ],
         "summary": "Pobranie listy uprawnień administratorów lub reprezentantów podmiotów unijnych uprawnionych do samofakturowania",
-        "description": " Metoda pozwala na odczytanie uprawnień administratorów lub reprezentantów podmiotów unijnych:  \n - Jeżeli kontekstem logowania jest NIP, możliwe jest odczytanie uprawnień administratorów podmiotów unijnych powiązanych z podmiotem bieżącego kontekstu, czyli takich, dla których pierwszy człon kontekstu złożonego jest równy NIP-owi kontekstu logowania.  \n - Jeżeli kontekst logowania jest złożony (NIP-VAT UE), możliwe jest pobranie wszystkich uprawnień administratorów i reprezentantów podmiotu w bieżącym kontekście złożonym.  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **VatUeManage** – zarządzanie uprawnieniami w ramach podmiotu unijnego  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n - **Introspection** – przeglądanie historii sesji  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **vatUeIdentifier** – identyfikator podmiotu unijnego  \n - **authorizedFingerprintIdentifier** – odcisk palca certyfikatu uprawnionej osoby lub podmiotu  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n \n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-administrator%C3%B3w-lub-reprezentant%C3%B3w-podmiot%C3%B3w-unijnych-uprawnionych-do-samofakturowania)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane uprawnienia**: `CredentialsManage`, `CredentialsRead`, `VatUeManage`.",
+        "description": " Metoda pozwala na odczytanie uprawnień administratorów lub reprezentantów podmiotów unijnych:  \n - Jeżeli kontekstem logowania jest NIP, możliwe jest odczytanie uprawnień administratorów podmiotów unijnych powiązanych z podmiotem bieżącego kontekstu, czyli takich, dla których pierwszy człon kontekstu złożonego jest równy NIP-owi kontekstu logowania.  \n - Jeżeli kontekst logowania jest złożony (NIP-VAT UE), możliwe jest pobranie wszystkich uprawnień administratorów i reprezentantów podmiotu w bieżącym kontekście złożonym.  \n\n Uprawnienia zwracane przez operację obejmują:  \n - **VatUeManage** – zarządzanie uprawnieniami w ramach podmiotu unijnego  \n - **InvoiceWrite** – wystawianie faktur  \n - **InvoiceRead** – przeglądanie faktur  \n - **Introspection** – przeglądanie historii sesji  \n\n Odpowiedź może być filtrowana na podstawie następujących parametrów:  \n - **vatUeIdentifier** – identyfikator podmiotu unijnego  \n - **authorizedFingerprintIdentifier** – odcisk palca certyfikatu uprawnionej osoby lub podmiotu  \n - **permissionTypes** – lista rodzajów wyszukiwanych uprawnień  \n\n#### Stronicowanie wyników\nZapytanie zwraca **jedną stronę wyników** o numerze i rozmiarze podanym w ścieżce.\n- Przy pierwszym wywołaniu należy ustawić parametr `pageOffset = 0`.  \n- Jeżeli dostępna jest kolejna strona wyników, w odpowiedzi pojawi się flaga **`hasMore`**.  \n- W takim przypadku można wywołać zapytanie ponownie z kolejnym numerem strony.\n \n > Więcej informacji:\n > - [Pobieranie listy uprawnień](https://github.com/CIRFMF/ksef-api/blob/main/uprawnienia.md#pobranie-listy-uprawnie%C5%84-administrator%C3%B3w-lub-reprezentant%C3%B3w-podmiot%C3%B3w-unijnych-uprawnionych-do-samofakturowania)\n\n**Headers:**\n\n`X-Error-Format: problem-details` - ustawienie tego nagłówka powoduje zwracanie błędów w formacie **Problem Details** (`application/problem+json`).\n\n**Sortowanie:**\n\n- startDate (Desc)\n- id (Asc)\n\n\n\n**Wymagane jedno z uprawnień**: `CredentialsManage`, `CredentialsRead`, `VatUeManage`.",
         "parameters": [
           {
             "name": "pageOffset",
@@ -10121,6 +10708,7 @@
       "ApiRateLimitsOverride": {
         "required": [
           "batchSession",
+          "collectiveIdentifier",
           "invoiceDownload",
           "invoiceExport",
           "invoiceExportStatus",
@@ -10277,6 +10865,19 @@
               }
             ],
             "description": "Limity dla pobierania faktur po numerze KSeF."
+          },
+          "collectiveIdentifier": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApiRateLimitValuesOverride"
+              }
+            ],
+            "description": "Limity dla identyfikatorów zbiorczych."
           },
           "other": {
             "required": [
@@ -11235,6 +11836,282 @@
           }
         }
       },
+      "CollectiveIdentifierInvoice": {
+        "required": [
+          "ksefNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "ksefNumber": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KsefNumber"
+              }
+            ],
+            "description": "Numer ksef faktury."
+          },
+          "payment": {
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CollectiveIdentifierInvoicePayment"
+              }
+            ],
+            "description": "Dane o płatności za fakturę",
+            "nullable": true
+          },
+          "description": {
+            "maxLength": 512,
+            "type": "string",
+            "description": "Opis",
+            "nullable": true
+          }
+        }
+      },
+      "CollectiveIdentifierInvoicePayment": {
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Kwota płatności za fakturę.",
+            "format": "double"
+          },
+          "currency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CurrencyCode"
+              }
+            ],
+            "description": "Kod waluty."
+          }
+        }
+      },
+      "CollectiveIdentifierInvoicesQueryResponse": {
+        "required": [
+          "invoices"
+        ],
+        "type": "object",
+        "properties": {
+          "continuationToken": {
+            "type": "string",
+            "description": "Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.",
+            "nullable": true
+          },
+          "invoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectiveIdentifierInvoicesQueryResponseItem"
+            },
+            "description": "Lista faktur."
+          }
+        }
+      },
+      "CollectiveIdentifierInvoicesQueryResponseItem": {
+        "required": [
+          "detailsHidden",
+          "ksefNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "ksefNumber": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KsefNumber"
+              }
+            ],
+            "description": "Numer ksef faktury."
+          },
+          "payment": {
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CollectiveIdentifierInvoicesQueryResponseItemPayment"
+              }
+            ],
+            "description": "Dane o płatności za fakturę",
+            "nullable": true
+          },
+          "description": {
+            "maxLength": 512,
+            "type": "string",
+            "description": "Opis",
+            "nullable": true
+          },
+          "detailsHidden": {
+            "type": "boolean",
+            "description": "Określa czy informacje o szczegółach zostały ukryte z powodu braku dostępu do faktury."
+          }
+        }
+      },
+      "CollectiveIdentifierInvoicesQueryResponseItemPayment": {
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Kwota płatności za fakturę.",
+            "format": "double"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string",
+            "description": "Kod waluty."
+          }
+        }
+      },
+      "CollectiveIdentifiersByKsefNumberQueryResponse": {
+        "required": [
+          "collectiveIdentifiers"
+        ],
+        "type": "object",
+        "properties": {
+          "continuationToken": {
+            "type": "string",
+            "description": "Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.",
+            "nullable": true
+          },
+          "collectiveIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectiveIdentifiersByKsefNumberQueryResponseItem"
+            },
+            "description": "Lista identyfikatorów zbiorczych."
+          }
+        }
+      },
+      "CollectiveIdentifiersByKsefNumberQueryResponseItem": {
+        "required": [
+          "collectiveIdentifierNumber",
+          "createdInCurrentContext",
+          "dateCreated"
+        ],
+        "type": "object",
+        "properties": {
+          "collectiveIdentifierNumber": {
+            "maxLength": 35,
+            "minLength": 35,
+            "type": "string",
+            "description": "Numer identyfikatora zbiorczego."
+          },
+          "createdInCurrentContext": {
+            "type": "boolean",
+            "description": "Określa czy identyfikator zbiorczy został wygenerowany w bieżącym kontekście."
+          },
+          "dateCreated": {
+            "type": "string",
+            "description": "Data utworzenia identyfikatora zbiorczego.",
+            "format": "date-time"
+          }
+        }
+      },
+      "CollectiveIdentifiersQueryRequest": {
+        "required": [
+          "dateCreatedFrom",
+          "dateCreatedTo"
+        ],
+        "type": "object",
+        "properties": {
+          "collectiveIdentifierNumber": {
+            "type": "string",
+            "description": "Numer identyfikatora zbiorczego.",
+            "nullable": true
+          },
+          "dateCreatedFrom": {
+            "type": "string",
+            "description": "Data utworzenia identyfikatora zbiorczego (od), maksymalny przedział czasu to 100 dni.",
+            "format": "date-time"
+          },
+          "dateCreatedTo": {
+            "type": "string",
+            "description": "Data utworzenia identyfikatora zbiorczego (do).",
+            "format": "date-time"
+          },
+          "invoiceCountFrom": {
+            "type": "integer",
+            "description": "Liczba faktur w identyfikatorze zbiorczym (od).",
+            "format": "int32",
+            "nullable": true
+          },
+          "invoiceCountTo": {
+            "type": "integer",
+            "description": "Liczba faktur w identyfikatorze zbiorczym (do).",
+            "format": "int32",
+            "nullable": true
+          },
+          "createdInCurrentContext": {
+            "type": "boolean",
+            "description": "Określa czy identyfikator zbiorczy został wygenerowany w bieżącym kontekście.",
+            "nullable": true
+          }
+        }
+      },
+      "CollectiveIdentifiersQueryResponse": {
+        "required": [
+          "collectiveIdentifiers"
+        ],
+        "type": "object",
+        "properties": {
+          "continuationToken": {
+            "type": "string",
+            "description": "Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.",
+            "nullable": true
+          },
+          "collectiveIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectiveIdentifiersQueryResponseItem"
+            },
+            "description": "Lista identyfikatorów zbiorczych."
+          }
+        }
+      },
+      "CollectiveIdentifiersQueryResponseItem": {
+        "required": [
+          "collectiveIdentifierNumber",
+          "createdInCurrentContext",
+          "dateCreated",
+          "invoiceCount"
+        ],
+        "type": "object",
+        "properties": {
+          "collectiveIdentifierNumber": {
+            "maxLength": 35,
+            "minLength": 35,
+            "type": "string",
+            "description": "Numer identyfikatora zbiorczego."
+          },
+          "dateCreated": {
+            "type": "string",
+            "description": "Data utworzenia identyfikatora zbiorczego.",
+            "format": "date-time"
+          },
+          "invoiceCount": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "integer",
+            "description": "Liczba faktura składająca się na identyfikator zbiorczy.",
+            "format": "int32"
+          },
+          "createdInCurrentContext": {
+            "type": "boolean",
+            "description": "Określa czy identyfikator zbiorczy został wygenerowany w bieżącym kontekście."
+          }
+        }
+      },
       "CommonSessionStatus": {
         "enum": [
           "InProgress",
@@ -11467,6 +12344,7 @@
       "EffectiveApiRateLimits": {
         "required": [
           "batchSession",
+          "collectiveIdentifier",
           "invoiceDownload",
           "invoiceExport",
           "invoiceExportStatus",
@@ -11623,6 +12501,19 @@
               }
             ],
             "description": "Limity dla pobierania faktur po numerze KSeF."
+          },
+          "collectiveIdentifier": {
+            "required": [
+              "perSecond",
+              "perMinute",
+              "perHour"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EffectiveApiRateLimitValues"
+              }
+            ],
+            "description": "Limity dla identyfikatorów zbiorczych"
           },
           "other": {
             "required": [
@@ -13178,6 +14069,35 @@
           }
         }
       },
+      "GenerateCollectiveIdentifierRequest": {
+        "required": [
+          "invoices"
+        ],
+        "type": "object",
+        "properties": {
+          "invoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectiveIdentifierInvoice"
+            },
+            "description": "Lista faktur wchodząca w skład identyfikatora zbiorczego. Limit faktur wynosi 500."
+          }
+        }
+      },
+      "GenerateCollectiveIdentifierResponse": {
+        "required": [
+          "collectiveIdentifierNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "collectiveIdentifierNumber": {
+            "maxLength": 35,
+            "minLength": 35,
+            "type": "string",
+            "description": "Wygenerowany identyfikator zbiorczy"
+          }
+        }
+      },
       "GenerateTokenRequest": {
         "required": [
           "description",
@@ -14331,7 +15251,7 @@
         "minLength": 35,
         "pattern": "^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$",
         "type": "string",
-        "description": "Numer KSeF o długości 36 znaków jest akceptowany, by zachować kompatybilność wsteczna z KSeF 1.0. W KSeF 2.0 numery są generowane wyłącznie w formacie 35-znakowym."
+        "description": "Numer KSeF o długości 36 znaków jest akceptowany, by zachować kompatybilność wsteczną z KSeF 1.0. W KSeF 2.0 numery są generowane wyłącznie w formacie 35-znakowym."
       },
       "Nip": {
         "maxLength": 10,
@@ -15172,7 +16092,8 @@
           "InvoiceRead",
           "Introspection",
           "SubunitManage",
-          "EnforcementOperations"
+          "EnforcementOperations",
+          "CollectiveIdentifierManage"
         ],
         "type": "string"
       },
@@ -15251,7 +16172,8 @@
           "InvoiceRead",
           "Introspection",
           "SubunitManage",
-          "EnforcementOperations"
+          "EnforcementOperations",
+          "CollectiveIdentifierManage"
         ],
         "type": "string"
       },
@@ -15706,7 +16628,8 @@
           "Introspection",
           "SubunitManage",
           "EnforcementOperations",
-          "VatUeManage"
+          "VatUeManage",
+          "CollectiveIdentifierManage"
         ],
         "type": "string"
       },
@@ -15719,7 +16642,8 @@
           "Introspection",
           "SubunitManage",
           "EnforcementOperations",
-          "VatUeManage"
+          "VatUeManage",
+          "CollectiveIdentifierManage"
         ],
         "type": "string"
       },
@@ -16782,6 +17706,7 @@
               "invoiceExport",
               "invoiceExportStatus",
               "invoiceDownload",
+              "collectiveIdentifier",
               "other"
             ],
             "allOf": [
@@ -17525,7 +18450,8 @@
           "CredentialsRead",
           "CredentialsManage",
           "EnforcementOperations",
-          "SubunitManage"
+          "SubunitManage",
+          "CollectiveIdentifierManage"
         ],
         "type": "string"
       },
@@ -17595,6 +18521,19 @@
                 "$ref": "#/components/schemas/TestDataAuthorizedIdentifier"
               }
             ]
+          }
+        }
+      },
+      "TestDataUpdateCertificateRequest": {
+        "required": [
+          "validTo"
+        ],
+        "type": "object",
+        "properties": {
+          "validTo": {
+            "type": "string",
+            "description": "Nowa data ważności certyfikatu, nie może być późniejsza niż obecna.",
+            "format": "date-time"
           }
         }
       },
@@ -17696,7 +18635,8 @@
           "CredentialsManage",
           "SubunitManage",
           "EnforcementOperations",
-          "Introspection"
+          "Introspection",
+          "CollectiveIdentifierManage"
         ],
         "type": "string"
       },
@@ -18010,6 +18950,9 @@
       "description": "API służy do tworzenia i zarządzania danymi testowymi, takimi jak podmioty, osoby fizyczne oraz uprawnienia. Możliwe do utworzenia podmioty to: organ egzekucyjny, grupa VAT oraz jednostki samorządu terytorialnego. W przypadku osób fizycznych można określić, czy dana osoba jest komornikiem. Funkcjonalność nadawania i odbierania uprawnień ma na celu odwzorowanie działania formularza ZAW-FA w środowisku testowym.\n\nWięcej informacji:\n- [Scenariusze testowe](https://github.com/CIRFMF/ksef-api/blob/main/dane-testowe-scenariusze.md)"
     },
     {
+      "name": "Identyfikatory zbiorcze"
+    },
+    {
       "name": "Limity i ograniczenia"
     },
     {
@@ -18098,6 +19041,12 @@
       "name": "Tokeny KSeF",
       "tags": [
         "Tokeny KSeF"
+      ]
+    },
+    {
+      "name": "Identyfikatory zbiorcze",
+      "tags": [
+        "Identyfikatory zbiorcze"
       ]
     },
     {
