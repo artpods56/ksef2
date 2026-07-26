@@ -134,6 +134,10 @@ class ApiRateLimitsOverride(BaseModel):
     """
     Limity dla pobierania faktur po numerze KSeF.
     """
+    collectiveIdentifier: ApiRateLimitValuesOverride
+    """
+    Limity dla identyfikatorów zbiorczych.
+    """
     other: ApiRateLimitValuesOverride
     """
     Limity dla pozostałych operacji API.
@@ -437,6 +441,78 @@ class CheckAttachmentPermissionStatusResponse(BaseModel):
     """
 
 
+class CollectiveIdentifierInvoicesQueryResponseItemPayment(BaseModel):
+    amount: float
+    """
+    Kwota płatności za fakturę.
+    """
+    currency: Annotated[str, Field(max_length=3, min_length=3)]
+    """
+    Kod waluty.
+    """
+
+
+class CollectiveIdentifiersByKsefNumberQueryResponseItem(BaseModel):
+    collectiveIdentifierNumber: Annotated[str, Field(max_length=35, min_length=35)]
+    """
+    Numer identyfikatora zbiorczego.
+    """
+    createdInCurrentContext: bool
+    """
+    Określa czy identyfikator zbiorczy został wygenerowany w bieżącym kontekście.
+    """
+    dateCreated: AwareDatetime
+    """
+    Data utworzenia identyfikatora zbiorczego.
+    """
+
+
+class CollectiveIdentifiersQueryRequest(BaseModel):
+    collectiveIdentifierNumber: str | None = None
+    """
+    Numer identyfikatora zbiorczego.
+    """
+    dateCreatedFrom: AwareDatetime
+    """
+    Data utworzenia identyfikatora zbiorczego (od), maksymalny przedział czasu to 100 dni.
+    """
+    dateCreatedTo: AwareDatetime
+    """
+    Data utworzenia identyfikatora zbiorczego (do).
+    """
+    invoiceCountFrom: int | None = None
+    """
+    Liczba faktur w identyfikatorze zbiorczym (od).
+    """
+    invoiceCountTo: int | None = None
+    """
+    Liczba faktur w identyfikatorze zbiorczym (do).
+    """
+    createdInCurrentContext: bool | None = None
+    """
+    Określa czy identyfikator zbiorczy został wygenerowany w bieżącym kontekście.
+    """
+
+
+class CollectiveIdentifiersQueryResponseItem(BaseModel):
+    collectiveIdentifierNumber: Annotated[str, Field(max_length=35, min_length=35)]
+    """
+    Numer identyfikatora zbiorczego.
+    """
+    dateCreated: AwareDatetime
+    """
+    Data utworzenia identyfikatora zbiorczego.
+    """
+    invoiceCount: Annotated[int, Field(gt=0)]
+    """
+    Liczba faktura składająca się na identyfikator zbiorczy.
+    """
+    createdInCurrentContext: bool
+    """
+    Określa czy identyfikator zbiorczy został wygenerowany w bieżącym kontekście.
+    """
+
+
 class CommonSessionStatus(StrEnum):
     """
     | Wartość | Opis |
@@ -703,6 +779,10 @@ class EffectiveApiRateLimits(BaseModel):
     invoiceDownload: EffectiveApiRateLimitValues
     """
     Limity dla pobierania faktur po numerze KSeF.
+    """
+    collectiveIdentifier: EffectiveApiRateLimitValues
+    """
+    Limity dla identyfikatorów zbiorczych
     """
     other: EffectiveApiRateLimitValues
     """
@@ -996,6 +1076,13 @@ class FormCode(BaseModel):
     value: str
     """
     Wartość
+    """
+
+
+class GenerateCollectiveIdentifierResponse(BaseModel):
+    collectiveIdentifierNumber: Annotated[str, Field(max_length=35, min_length=35)]
+    """
+    Wygenerowany identyfikator zbiorczy
     """
 
 
@@ -1457,6 +1544,7 @@ class PersonPermissionScope(StrEnum):
     Introspection = "Introspection"
     SubunitManage = "SubunitManage"
     EnforcementOperations = "EnforcementOperations"
+    CollectiveIdentifierManage = "CollectiveIdentifierManage"
 
 
 class PersonPermissionSubjectDetailsType(StrEnum):
@@ -1482,6 +1570,7 @@ class PersonPermissionType(StrEnum):
     Introspection = "Introspection"
     SubunitManage = "SubunitManage"
     EnforcementOperations = "EnforcementOperations"
+    CollectiveIdentifierManage = "CollectiveIdentifierManage"
 
 
 class PersonPermissionsAuthorIdentifierType(StrEnum):
@@ -1568,6 +1657,7 @@ class PersonalPermissionScope(StrEnum):
     SubunitManage = "SubunitManage"
     EnforcementOperations = "EnforcementOperations"
     VatUeManage = "VatUeManage"
+    CollectiveIdentifierManage = "CollectiveIdentifierManage"
 
 
 class PersonalPermissionType(StrEnum):
@@ -1579,6 +1669,7 @@ class PersonalPermissionType(StrEnum):
     SubunitManage = "SubunitManage"
     EnforcementOperations = "EnforcementOperations"
     VatUeManage = "VatUeManage"
+    CollectiveIdentifierManage = "CollectiveIdentifierManage"
 
 
 class PersonalPermissionsAuthorizedIdentifierType(StrEnum):
@@ -1907,6 +1998,14 @@ class TestDataPermissionType(StrEnum):
     CredentialsManage = "CredentialsManage"
     EnforcementOperations = "EnforcementOperations"
     SubunitManage = "SubunitManage"
+    CollectiveIdentifierManage = "CollectiveIdentifierManage"
+
+
+class TestDataUpdateCertificateRequest(BaseModel):
+    validTo: AwareDatetime
+    """
+    Nowa data ważności certyfikatu, nie może być późniejsza niż obecna.
+    """
 
 
 class ThirdSubjectIdentifierType(StrEnum):
@@ -2014,6 +2113,7 @@ class TokenPermissionType(StrEnum):
     SubunitManage = "SubunitManage"
     EnforcementOperations = "EnforcementOperations"
     Introspection = "Introspection"
+    CollectiveIdentifierManage = "CollectiveIdentifierManage"
 
 
 class TokenStatusResponse(BaseModel):
@@ -2466,6 +2566,65 @@ class CertificateSubjectIdentifier(BaseModel):
     value: Annotated[str, Field(max_length=64, min_length=10)]
     """
     Wartość identyfikatora.
+    """
+
+
+class CollectiveIdentifierInvoicePayment(BaseModel):
+    amount: float
+    """
+    Kwota płatności za fakturę.
+    """
+    currency: CurrencyCode
+    """
+    Kod waluty.
+    """
+
+
+class CollectiveIdentifierInvoicesQueryResponseItem(BaseModel):
+    ksefNumber: Annotated[
+        str,
+        Field(
+            max_length=36,
+            min_length=35,
+            pattern="^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$",
+        ),
+    ]
+    """
+    Numer ksef faktury.
+    """
+    payment: CollectiveIdentifierInvoicesQueryResponseItemPayment | None = None
+    """
+    Dane o płatności za fakturę
+    """
+    description: Annotated[str | None, Field(max_length=512)] = None
+    """
+    Opis
+    """
+    detailsHidden: bool
+    """
+    Określa czy informacje o szczegółach zostały ukryte z powodu braku dostępu do faktury.
+    """
+
+
+class CollectiveIdentifiersByKsefNumberQueryResponse(BaseModel):
+    continuationToken: str | None = None
+    """
+    Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
+    """
+    collectiveIdentifiers: list[CollectiveIdentifiersByKsefNumberQueryResponseItem]
+    """
+    Lista identyfikatorów zbiorczych.
+    """
+
+
+class CollectiveIdentifiersQueryResponse(BaseModel):
+    continuationToken: str | None = None
+    """
+    Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
+    """
+    collectiveIdentifiers: list[CollectiveIdentifiersQueryResponseItem]
+    """
+    Lista identyfikatorów zbiorczych.
     """
 
 
@@ -3986,6 +4145,39 @@ class CertificateListItem(BaseModel):
     """
 
 
+class CollectiveIdentifierInvoice(BaseModel):
+    ksefNumber: Annotated[
+        str,
+        Field(
+            max_length=36,
+            min_length=35,
+            pattern="^([1-9](\\d[1-9]|[1-9]\\d)\\d{7})-(20[2-9][0-9]|2[1-9]\\d{2}|[3-9]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])-([0-9A-F]{6})-?([0-9A-F]{6})-([0-9A-F]{2})$",
+        ),
+    ]
+    """
+    Numer ksef faktury.
+    """
+    payment: CollectiveIdentifierInvoicePayment | None = None
+    """
+    Dane o płatności za fakturę
+    """
+    description: Annotated[str | None, Field(max_length=512)] = None
+    """
+    Opis
+    """
+
+
+class CollectiveIdentifierInvoicesQueryResponse(BaseModel):
+    continuationToken: str | None = None
+    """
+    Token służący do pobrania kolejnej strony wyników. Jeśli jest pusty, to nie ma kolejnych stron.
+    """
+    invoices: list[CollectiveIdentifierInvoicesQueryResponseItem]
+    """
+    Lista faktur.
+    """
+
+
 class EntityAuthorizationGrant(BaseModel):
     id: Annotated[str, Field(max_length=36, min_length=36)]
     """
@@ -4158,6 +4350,13 @@ class EntityRole(BaseModel):
     startDate: AwareDatetime
     """
     Data rozpoczęcia obowiązywania roli.
+    """
+
+
+class GenerateCollectiveIdentifierRequest(BaseModel):
+    invoices: list[CollectiveIdentifierInvoice]
+    """
+    Lista faktur wchodząca w skład identyfikatora zbiorczego. Limit faktur wynosi 500.
     """
 
 

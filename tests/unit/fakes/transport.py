@@ -68,6 +68,19 @@ class FakeTransport(protocols.Middleware):
             "POST", path, headers=headers, json=json, params=params, content=content
         )
 
+    def put(
+        self,
+        path: str,
+        *,
+        headers: dict[str, str] | None = None,
+        params: Mapping[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+        content: bytes | None = None,
+    ) -> httpx.Response:
+        return self.request(
+            "PUT", path, headers=headers, json=json, params=params, content=content
+        )
+
     def delete(
         self,
         path: str,
@@ -159,6 +172,19 @@ class AsyncFakeTransport(AsyncMiddleware):
     ) -> httpx.Response:
         return await self.request(
             "POST", path, headers=headers, json=json, params=params, content=content
+        )
+
+    async def put(
+        self,
+        path: str,
+        *,
+        headers: dict[str, str] | None = None,
+        params: Mapping[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+        content: bytes | None = None,
+    ) -> httpx.Response:
+        return await self.request(
+            "PUT", path, headers=headers, json=json, params=params, content=content
         )
 
     async def delete(

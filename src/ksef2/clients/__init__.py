@@ -6,6 +6,9 @@ from ksef2.clients.async_authenticated import AsyncAuthenticatedClient
 from ksef2.clients.async_batch import AsyncBatchSessionClient
 from ksef2.clients.async_base import AsyncClient
 from ksef2.clients.async_certificates import AsyncCertificatesClient
+from ksef2.clients.async_collective_identifiers import (
+    AsyncCollectiveIdentifiersClient,
+)
 from ksef2.clients.async_encryption import AsyncEncryptionClient
 from ksef2.clients.async_invoice_sessions import AsyncInvoiceSessionsClient
 from ksef2.clients.async_invoices import AsyncInvoicesClient
@@ -21,6 +24,7 @@ from ksef2.clients.authenticated import AuthenticatedClient
 from ksef2.clients.base import Client
 from ksef2.clients.batch import BatchSessionClient
 from ksef2.clients.certificates import CertificatesClient
+from ksef2.clients.collective_identifiers import CollectiveIdentifiersClient
 from ksef2.clients.encryption import EncryptionClient
 from ksef2.clients.invoice_sessions import InvoiceSessionsClient
 from ksef2.clients.invoices import InvoicesClient
@@ -45,6 +49,7 @@ __all__ = [
     "AsyncBatchSessionClient",
     "AsyncClient",
     "AsyncCertificatesClient",
+    "AsyncCollectiveIdentifiersClient",
     "AsyncEncryptionClient",
     "AsyncInvoiceSessionsClient",
     "AsyncInvoicesService",
@@ -62,6 +67,7 @@ __all__ = [
     "BatchService",
     "BatchSessionClient",
     "CertificatesClient",
+    "CollectiveIdentifiersClient",
     "Client",
     "EncryptionClient",
     "InvoiceSessionsClient",

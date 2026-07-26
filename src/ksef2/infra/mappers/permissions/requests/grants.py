@@ -128,6 +128,8 @@ def person_permission_scope_from_literal(value: str) -> spec.PersonPermissionSco
             return spec.PersonPermissionScope.EnforcementOperations
         case "subunit_manage":
             return spec.PersonPermissionScope.SubunitManage
+        case "collective_identifier_manage":
+            return spec.PersonPermissionScope.CollectiveIdentifierManage
         case _:
             raise ValueError(f"Unknown person permission type: {value!r}")
 
@@ -148,6 +150,8 @@ def person_permission_type_from_literal(value: str) -> spec.PersonPermissionType
             return spec.PersonPermissionType.EnforcementOperations
         case "subunit_manage":
             return spec.PersonPermissionType.SubunitManage
+        case "collective_identifier_manage":
+            return spec.PersonPermissionType.CollectiveIdentifierManage
         case _:
             raise ValueError(f"Unknown person permission type: {value!r}")
 
@@ -170,6 +174,8 @@ def person_permission_scope_from_enum(
             return spec.PersonPermissionScope.EnforcementOperations
         case PersonPermissionTypeEnum.SUBUNIT_MANAGE:
             return spec.PersonPermissionScope.SubunitManage
+        case PersonPermissionTypeEnum.COLLECTIVE_IDENTIFIER_MANAGE:
+            return spec.PersonPermissionScope.CollectiveIdentifierManage
         case PersonPermissionTypeEnum.PEF_INVOICE_WRITE:
             raise ValueError(
                 "Permission 'pef_invoice_write' is not valid for person grants"

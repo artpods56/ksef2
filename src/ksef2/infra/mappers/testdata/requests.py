@@ -25,8 +25,10 @@ from ksef2.domain.models.testdata import (
     SubjectTypeEnum,
     SubUnit,
     UnblockContextRequest,
+    UpdateCertificateRequest,
 )
 from ksef2.infra.mappers.helpers import get_matching_enum
+from ksef2.infra.schema.api import spec
 from ksef2.infra.schema.api.supp import testdata as supp
 
 
@@ -54,6 +56,7 @@ type SuppPermissionType = Literal[
     "EnforcementOperations",
     "SubunitManage",
     "VatUeManage",
+    "CollectiveIdentifierManage",
 ]
 
 
@@ -95,6 +98,12 @@ def to_spec(request: BlockContextRequest) -> supp.BlockContextRequest: ...
 
 @overload
 def to_spec(request: UnblockContextRequest) -> supp.UnblockContextRequest: ...
+
+
+@overload
+def to_spec(
+    request: UpdateCertificateRequest,
+) -> spec.TestDataUpdateCertificateRequest: ...
 
 
 @overload
@@ -229,6 +238,8 @@ def _(request: PermissionTypeEnum) -> SuppPermissionType:
             return "SubunitManage"
         case PermissionTypeEnum.VAT_UE_MANAGE:
             return "VatUeManage"
+        case PermissionTypeEnum.COLLECTIVE_IDENTIFIER_MANAGE:
+            return "CollectiveIdentifierManage"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 
@@ -338,3 +349,8 @@ def _(request: BlockContextRequest) -> supp.BlockContextRequest:
 @_to_spec.register
 def _(request: UnblockContextRequest) -> supp.UnblockContextRequest:
     return supp.UnblockContextRequest(contextIdentifier=to_spec(request.context))
+
+
+@_to_spec.register
+def _(request: UpdateCertificateRequest) -> spec.TestDataUpdateCertificateRequest:
+    return spec.TestDataUpdateCertificateRequest(validTo=request.valid_to)

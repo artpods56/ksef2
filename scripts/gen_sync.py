@@ -40,6 +40,10 @@ GENERATED_PAIRS: tuple[GeneratedPair, ...] = (
         Path("src/ksef2/endpoints/certificates.py"),
     ),
     GeneratedPair(
+        Path("src/ksef2/endpoints/async_collective_identifiers.py"),
+        Path("src/ksef2/endpoints/collective_identifiers.py"),
+    ),
+    GeneratedPair(
         Path("src/ksef2/endpoints/async_encryption.py"),
         Path("src/ksef2/endpoints/encryption.py"),
     ),
@@ -116,6 +120,10 @@ GENERATED_PAIRS: tuple[GeneratedPair, ...] = (
     GeneratedPair(
         Path("src/ksef2/clients/async_certificates.py"),
         Path("src/ksef2/clients/certificates.py"),
+    ),
+    GeneratedPair(
+        Path("src/ksef2/clients/async_collective_identifiers.py"),
+        Path("src/ksef2/clients/collective_identifiers.py"),
     ),
     GeneratedPair(
         Path("src/ksef2/clients/async_encryption.py"),

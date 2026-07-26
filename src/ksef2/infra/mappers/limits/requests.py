@@ -99,6 +99,7 @@ def _(request: ApiRateLimits) -> spec.SetRateLimitsRequest:
             invoiceExport=_map_rate_limit_values(request.invoice_export),
             invoiceExportStatus=_map_rate_limit_values(request.invoice_export_status),
             invoiceDownload=_map_rate_limit_values(request.invoice_download),
+            collectiveIdentifier=_map_rate_limit_values(request.collective_identifier),
             other=_map_rate_limit_values(request.other),
         )
     )

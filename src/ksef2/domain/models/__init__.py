@@ -59,6 +59,18 @@ from ksef2.domain.models.invoices import (
     SortOrder,
     ThirdSubjectIdentifierType,
 )
+from ksef2.domain.models.collective_identifiers import (
+    CollectiveIdentifierInvoice,
+    CollectiveIdentifierInvoiceDetails,
+    CollectiveIdentifierInvoicePayment,
+    CollectiveIdentifierInvoicesPage,
+    CollectiveIdentifierReference,
+    CollectiveIdentifierReferencesPage,
+    CollectiveIdentifierSummary,
+    CollectiveIdentifiersPage,
+    CollectiveIdentifiersQuery,
+    GenerateCollectiveIdentifierResponse,
+)
 from ksef2.domain.models.permissions import (
     AttachmentPermissionStatus,
     AuthorizationGrantDetail,
@@ -142,6 +154,7 @@ from ksef2.domain.models.testdata import (
     SubjectType,
     SubUnit,
     UnblockContextRequest,
+    UpdateCertificateRequest,
 )
 from ksef2.domain.models.tokens import (
     QueryTokensResponse,
@@ -185,7 +198,10 @@ from ksef2.domain.models.peppol import (
     PeppolProvider,
     ListPeppolProvidersResponse,
 )
-from ksef2.domain.models.pagination import InvoiceMetadataParams
+from ksef2.domain.models.pagination import (
+    CollectiveIdentifierParams,
+    InvoiceMetadataParams,
+)
 
 if TYPE_CHECKING:
     BaseSessionState = BaseSessionResumeState
@@ -279,6 +295,18 @@ __all__ = [
     "SendInvoiceResponse",
     "SortOrder",
     "ThirdSubjectIdentifierType",
+    # collective identifiers
+    "CollectiveIdentifierInvoice",
+    "CollectiveIdentifierInvoiceDetails",
+    "CollectiveIdentifierInvoicePayment",
+    "CollectiveIdentifierInvoicesPage",
+    "CollectiveIdentifierParams",
+    "CollectiveIdentifierReference",
+    "CollectiveIdentifierReferencesPage",
+    "CollectiveIdentifierSummary",
+    "CollectiveIdentifiersPage",
+    "CollectiveIdentifiersQuery",
+    "GenerateCollectiveIdentifierResponse",
     # permissions
     "AttachmentPermissionStatus",
     "AuthorizationGrantDetail",
@@ -361,6 +389,7 @@ __all__ = [
     "SubjectType",
     "SubUnit",
     "UnblockContextRequest",
+    "UpdateCertificateRequest",
     # tokens
     "QueryTokensResponse",
     "TokenAuthorIdentifier",

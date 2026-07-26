@@ -48,6 +48,7 @@ class TestDataRoutes(StrEnum):
     REVOKE_ATTACHMENTS = "/testdata/attachment/revoke"
     BLOCK_CONTEXT = "/testdata/context/block"
     UNBLOCK_CONTEXT = "/testdata/context/unblock"
+    UPDATE_CERTIFICATE = "/testdata/certificates/{serialNumber}"
 
 
 class LimitRoutes(StrEnum):
@@ -113,6 +114,13 @@ class InvoiceRoutes(StrEnum):
     )
 
 
+class CollectiveIdentifierRoutes(StrEnum):
+    GENERATE = "/collective-identifiers"
+    QUERY = "/collective-identifiers/query"
+    QUERY_BY_KSEF_NUMBER = "/collective-identifiers/ksef/{ksefNumber}"
+    LIST_INVOICES = "/collective-identifiers/{collectiveIdentifierNumber}/invoices"
+
+
 class CertificateRoutes(StrEnum):
     LIMITS = "/certificates/limits"
     ENROLLMENT_DATA = "/certificates/enrollments/data"
@@ -136,6 +144,7 @@ ALL_ROUTES = [
     *CertificateRoutes,
     *SessionRoutes,
     *InvoiceRoutes,
+    *CollectiveIdentifierRoutes,
 ]
 
 RETRYABLE_POST_PATHS = frozenset(
@@ -143,6 +152,7 @@ RETRYABLE_POST_PATHS = frozenset(
         AuthRoutes.CHALLENGE,
         AuthRoutes.REFRESH_TOKEN,
         InvoiceRoutes.QUERY_METADATA,
+        CollectiveIdentifierRoutes.QUERY,
         CertificateRoutes.QUERY,
         CertificateRoutes.RETRIEVE,
         QueryPermissionsRoutes.QUERY_PERSONAL_GRANTS,

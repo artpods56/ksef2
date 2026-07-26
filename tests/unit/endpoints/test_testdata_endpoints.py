@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import cast, Callable
 
 import pytest
@@ -8,6 +9,7 @@ from pydantic import BaseModel
 from ksef2.core import exceptions
 from ksef2.core.routes import TestDataRoutes
 from ksef2.endpoints.testdata import TestDataEndpoints
+from ksef2.infra.schema.api import spec
 from tests.unit.fakes import transport
 
 from ksef2.core.middlewares.exceptions import KSeFExceptionMiddleware
@@ -200,3 +202,22 @@ class TestTestDataEndpoints:
             assert call.content is None
 
             assert fake_transport.responses == []
+
+    def test_update_certificate_uses_put(
+        self,
+        testdata_eps: TestDataEndpoints,
+        fake_transport: transport.FakeTransport,
+    ) -> None:
+        request = spec.TestDataUpdateCertificateRequest(
+            validTo=datetime(2026, 7, 22, 10, 0, tzinfo=timezone.utc)
+        )
+        fake_transport.enqueue({})
+
+        testdata_eps.update_certificate("0123456789ABCDEF", request)
+
+        call = fake_transport.calls[0]
+        assert call.method == "PUT"
+        assert call.path == TestDataRoutes.UPDATE_CERTIFICATE.format(
+            serialNumber="0123456789ABCDEF"
+        )
+        assert call.json == {"validTo": "2026-07-22T10:00:00Z"}

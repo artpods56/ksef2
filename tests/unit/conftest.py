@@ -2,6 +2,7 @@ import pytest
 from tests.unit.fakes import transport
 
 from tests.unit.factories.certificates import *  # noqa
+from tests.unit.factories.collective_identifiers import *  # noqa
 from tests.unit.factories.encryption import *  # noqa
 from tests.unit.factories.invoices import *  # noqa
 from tests.unit.factories.auth import *  # noqa

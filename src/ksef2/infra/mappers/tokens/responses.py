@@ -126,6 +126,8 @@ def _(response: spec.TokenPermissionType) -> TokenPermission:
             return "subunit_manage"
         case spec.TokenPermissionType.EnforcementOperations:
             return "enforcement_operations"
+        case spec.TokenPermissionType.CollectiveIdentifierManage:
+            return "collective_identifier_manage"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 

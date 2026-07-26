@@ -77,6 +77,7 @@ class PermissionInput(BaseModel):
             "EnforcementOperations",
             "SubunitManage",
             "VatUeManage",
+            "CollectiveIdentifierManage",
         ],
         Field(description="Typ uprawnienia"),
     ]

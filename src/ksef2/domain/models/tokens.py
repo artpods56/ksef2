@@ -16,6 +16,7 @@ type TokenPermission = Literal[
     "credentials_manage",
     "subunit_manage",
     "enforcement_operations",
+    "collective_identifier_manage",
 ]
 
 type TokenStatus = Literal["pending", "active", "revoking", "revoked", "failed"]
@@ -37,6 +38,7 @@ class TokenPermissionEnum(StrEnum):
     CREDENTIALS_MANAGE = "credentials_manage"
     SUBUNIT_MANAGE = "subunit_manage"
     ENFORCEMENT_OPERATIONS = "enforcement_operations"
+    COLLECTIVE_IDENTIFIER_MANAGE = "collective_identifier_manage"
 
 
 class TokenStatusEnum(StrEnum):

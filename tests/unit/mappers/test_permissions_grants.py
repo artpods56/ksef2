@@ -113,6 +113,10 @@ class TestPermissionsGrantRequestMapper:
                 indirect_permission_from_enum,
                 domain_permissions.IndirectPermissionTypeEnum.INVOICE_READ,
             ),
+            (
+                person_permission_scope_from_enum,
+                domain_permissions.PersonPermissionTypeEnum.COLLECTIVE_IDENTIFIER_MANAGE,
+            ),
         ],
     )
     def test_maps_enum_inputs(

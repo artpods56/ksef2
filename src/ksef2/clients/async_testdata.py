@@ -24,6 +24,7 @@ from ksef2.domain.models.testdata import (
     SubjectType,
     SubUnit,
     UnblockContextRequest,
+    UpdateCertificateRequest,
 )
 from ksef2.endpoints.async_testdata import AsyncTestDataEndpoints
 from ksef2.infra.mappers.testdata import to_spec
@@ -151,6 +152,19 @@ class AsyncTestDataClient:
         """Unblock authentication for a specific test context."""
         await self._endpoints.unblock_context(
             to_spec(UnblockContextRequest(context=context))
+        )
+
+    async def update_certificate_valid_to(
+        self,
+        *,
+        serial_number: str,
+        valid_to: datetime,
+    ) -> None:
+        """Shorten the validity of a certificate in the TEST environment."""
+        request = UpdateCertificateRequest(valid_to=valid_to)
+        await self._endpoints.update_certificate(
+            serial_number=serial_number,
+            body=to_spec(request),
         )
 
     def temporal(self) -> "AsyncTemporalTestData":

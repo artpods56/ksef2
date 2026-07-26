@@ -54,6 +54,12 @@ class TestTokensResponseMapper:
             == "enforcement_operations"
         )
 
+    def test_map_permission_collective_identifier_manage(self):
+        assert (
+            from_spec(spec.TokenPermissionType.CollectiveIdentifierManage)
+            == "collective_identifier_manage"
+        )
+
     def test_map_author_identifier_type_nip(self):
         assert from_spec(spec.TokenAuthorIdentifierType.Nip) == "nip"
 
@@ -163,6 +169,12 @@ class TestTokensRequestMapper:
         assert (
             to_spec("enforcement_operations")
             == spec.TokenPermissionType.EnforcementOperations
+        )
+
+    def test_to_spec_permission_collective_identifier_manage(self):
+        assert (
+            to_spec("collective_identifier_manage")
+            == spec.TokenPermissionType.CollectiveIdentifierManage
         )
 
     def test_to_spec_status_pending(self):
