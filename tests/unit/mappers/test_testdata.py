@@ -1,7 +1,10 @@
+from datetime import datetime, timezone
+
 from polyfactory import BaseFactory
 
 from ksef2.domain.models import testdata as domain_testdata
 from ksef2.infra.mappers.testdata import to_spec
+from ksef2.infra.schema.api import spec
 from ksef2.infra.schema.api.supp import testdata as supp
 
 
@@ -9,6 +12,7 @@ class TestTestDataMapper:
     def test_to_spec_string_values(self) -> None:
         assert to_spec("enforcement_authority") == "EnforcementAuthority"
         assert to_spec("invoice_write") == "InvoiceWrite"
+        assert to_spec("collective_identifier_manage") == "CollectiveIdentifierManage"
         assert (
             to_spec(domain_testdata.AuthContextIdentifierTypeEnum.PEPPOL_ID)
             == "PeppolId"
@@ -145,3 +149,11 @@ class TestTestDataMapper:
         assert isinstance(result, supp.UnblockContextRequest)
         assert result.contextIdentifier.type == "Nip"
         assert result.contextIdentifier.value == request.context.value
+
+    def test_to_spec_update_certificate_request(self) -> None:
+        valid_to = datetime(2026, 7, 22, 10, 0, tzinfo=timezone.utc)
+
+        result = to_spec(domain_testdata.UpdateCertificateRequest(valid_to=valid_to))
+
+        assert isinstance(result, spec.TestDataUpdateCertificateRequest)
+        assert result.validTo == valid_to

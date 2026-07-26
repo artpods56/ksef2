@@ -8,6 +8,7 @@ from ksef2.core import exceptions
 from ksef2.core.protocols import Middleware
 from ksef2.endpoints.auth import AuthEndpoints
 from ksef2.endpoints.certificates import CertificatesEndpoints
+from ksef2.endpoints.collective_identifiers import CollectiveIdentifiersEndpoints
 from ksef2.endpoints.encryption import EncryptionEndpoints
 from ksef2.endpoints.invoices import InvoicesEndpoints
 from ksef2.endpoints.limits import LimitEndpoints
@@ -125,6 +126,11 @@ class RawAuthenticatedClient:
         return LimitEndpoints(self._authed_transport)
 
     @cached_property
+    def collective_identifiers(self) -> CollectiveIdentifiersEndpoints:
+        """Return raw collective invoice identifier endpoints."""
+        return CollectiveIdentifiersEndpoints(self._authed_transport)
+
+    @cached_property
     def peppol(self) -> PeppolEndpoints:
         """Return raw Peppol provider endpoints."""
         return PeppolEndpoints(self._transport)
@@ -146,7 +152,7 @@ class RawAuthenticatedClient:
             raise exceptions.KSeFUnsupportedEnvironmentError(
                 "testdata is only available for Environment.TEST"
             )
-        return TestDataEndpoints(self._transport)
+        return TestDataEndpoints(self._authed_transport)
 
     @cached_property
     def tokens(self) -> TokenEndpoints:

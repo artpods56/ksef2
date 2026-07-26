@@ -8,6 +8,9 @@ from ksef2.core import exceptions
 from ksef2.core.async_protocols import AsyncMiddleware
 from ksef2.endpoints.async_auth import AsyncAuthEndpoints
 from ksef2.endpoints.async_certificates import AsyncCertificatesEndpoints
+from ksef2.endpoints.async_collective_identifiers import (
+    AsyncCollectiveIdentifiersEndpoints,
+)
 from ksef2.endpoints.async_encryption import AsyncEncryptionEndpoints
 from ksef2.endpoints.async_invoices import AsyncInvoicesEndpoints
 from ksef2.endpoints.async_limits import AsyncLimitEndpoints
@@ -125,6 +128,11 @@ class AsyncRawAuthenticatedClient:
         return AsyncLimitEndpoints(self._authed_transport)
 
     @cached_property
+    def collective_identifiers(self) -> AsyncCollectiveIdentifiersEndpoints:
+        """Return raw collective invoice identifier endpoints."""
+        return AsyncCollectiveIdentifiersEndpoints(self._authed_transport)
+
+    @cached_property
     def peppol(self) -> AsyncPeppolEndpoints:
         """Return raw Peppol provider endpoints."""
         return AsyncPeppolEndpoints(self._transport)
@@ -146,7 +154,7 @@ class AsyncRawAuthenticatedClient:
             raise exceptions.KSeFUnsupportedEnvironmentError(
                 "testdata is only available for Environment.TEST"
             )
-        return AsyncTestDataEndpoints(self._transport)
+        return AsyncTestDataEndpoints(self._authed_transport)
 
     @cached_property
     def tokens(self) -> AsyncTokenEndpoints:

@@ -100,5 +100,6 @@ def _(response: spec.EffectiveApiRateLimits) -> ApiRateLimits:
         invoice_export=_map_rate_limit_values(response.invoiceExport),
         invoice_export_status=_map_rate_limit_values(response.invoiceExportStatus),
         invoice_download=_map_rate_limit_values(response.invoiceDownload),
+        collective_identifier=_map_rate_limit_values(response.collectiveIdentifier),
         other=_map_rate_limit_values(response.other),
     )

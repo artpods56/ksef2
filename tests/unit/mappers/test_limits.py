@@ -51,6 +51,10 @@ class TestLimitRequestMappers:
             result.rateLimits.onlineSession.perSecond
             == request.online_session.per_second
         )
+        assert (
+            result.rateLimits.collectiveIdentifier.perMinute
+            == request.collective_identifier.per_minute
+        )
         assert result.rateLimits.other.perHour == request.other.per_hour
 
 
@@ -100,4 +104,8 @@ class TestLimitResponseMappers:
 
         assert isinstance(result, ApiRateLimits)
         assert result.invoice_send.per_minute == response.invoiceSend.perMinute
+        assert (
+            result.collective_identifier.per_hour
+            == response.collectiveIdentifier.perHour
+        )
         assert result.other.per_hour == response.other.perHour

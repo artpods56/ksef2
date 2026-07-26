@@ -21,6 +21,7 @@ from ksef2.domain.models.session import (
 )
 from ksef2.domain.models.tokens import TokenAuthorIdentifierType, TokenStatus
 from ksef2.domain.types import (
+    CollectiveIdentifierQueryParams,
     InvoiceMetadataQueryParams,
     ListSessionsQueryParams,
     ListTokensQueryParams,
@@ -94,6 +95,14 @@ class TokenPaginationParams(KSeFBaseParams[dict[str, object]]):
     """Base for endpoints using pageSize + x-continuation-token header."""
 
     page_size: int = Field(default=10, ge=10, le=100)
+
+
+class CollectiveIdentifierParams(
+    KSeFBaseParams[CollectiveIdentifierQueryParams], PageSizeMixin
+):
+    """Continuation-token pagination for collective identifier endpoints."""
+
+    page_size: int = Field(default=10, ge=10, le=200)
 
 
 class SessionFiltersMixin(BaseModel):

@@ -6,6 +6,9 @@ from typing import final
 from ksef2.clients._async_session import _AwaitableSession
 from ksef2.clients.async_batch import AsyncBatchSessionClient
 from ksef2.clients.async_certificates import AsyncCertificatesClient
+from ksef2.clients.async_collective_identifiers import (
+    AsyncCollectiveIdentifiersClient,
+)
 from ksef2.clients.async_encryption import AsyncEncryptionClient
 from ksef2.clients.async_invoice_sessions import AsyncInvoiceSessionsClient
 from ksef2.clients.async_invoices import AsyncInvoicesClient
@@ -13,6 +16,7 @@ from ksef2.clients.async_limits import AsyncLimitsClient
 from ksef2.clients.async_online import AsyncOnlineSessionClient
 from ksef2.clients.async_permissions import AsyncPermissionsClient
 from ksef2.clients.async_session_management import AsyncSessionManagementClient
+from ksef2.clients.async_testdata import AsyncTestDataClient
 from ksef2.clients.async_tokens import AsyncTokensClient
 from ksef2.config import Environment
 from ksef2.core.async_protocols import AsyncMiddleware
@@ -379,6 +383,11 @@ class AsyncAuthenticatedClient:
         return AsyncLimitsClient(self._authed_transport)
 
     @cached_property
+    def collective_identifiers(self) -> AsyncCollectiveIdentifiersClient:
+        """Return the collective invoice identifier branch."""
+        return AsyncCollectiveIdentifiersClient(self._authed_transport)
+
+    @cached_property
     def tokens(self) -> AsyncTokensClient:
         """Return the authenticated token lifecycle branch."""
         return AsyncTokensClient(self._authed_transport)
@@ -402,6 +411,15 @@ class AsyncAuthenticatedClient:
     def permissions(self) -> AsyncPermissionsClient:
         """Return the authenticated permissions branch."""
         return AsyncPermissionsClient(self._authed_transport)
+
+    @cached_property
+    def testdata(self) -> AsyncTestDataClient:
+        """Return authenticated TEST-only data mutation helpers."""
+        if self._environment is not Environment.TEST:
+            raise exceptions.KSeFUnsupportedEnvironmentError(
+                "testdata is only available for Environment.TEST"
+            )
+        return AsyncTestDataClient(self._authed_transport)
 
     @cached_property
     def raw(self) -> AsyncRawAuthenticatedClient:

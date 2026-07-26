@@ -88,6 +88,8 @@ def _(request: TokenPermissionEnum) -> spec.TokenPermissionType:
             return spec.TokenPermissionType.SubunitManage
         case TokenPermissionEnum.ENFORCEMENT_OPERATIONS:
             return spec.TokenPermissionType.EnforcementOperations
+        case TokenPermissionEnum.COLLECTIVE_IDENTIFIER_MANAGE:
+            return spec.TokenPermissionType.CollectiveIdentifierManage
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 

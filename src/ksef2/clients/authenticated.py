@@ -8,6 +8,9 @@ from typing import final
 
 from ksef2.clients.batch import BatchSessionClient
 from ksef2.clients.certificates import CertificatesClient
+from ksef2.clients.collective_identifiers import (
+    CollectiveIdentifiersClient,
+)
 from ksef2.clients.encryption import EncryptionClient
 from ksef2.clients.invoice_sessions import InvoiceSessionsClient
 from ksef2.clients.invoices import InvoicesClient
@@ -15,6 +18,7 @@ from ksef2.clients.limits import LimitsClient
 from ksef2.clients.online import OnlineSessionClient
 from ksef2.clients.permissions import PermissionsClient
 from ksef2.clients.session_management import SessionManagementClient
+from ksef2.clients.testdata import TestDataClient
 from ksef2.clients.tokens import TokensClient
 from ksef2.config import Environment
 from ksef2.core import exceptions
@@ -375,6 +379,11 @@ class AuthenticatedClient:
         return LimitsClient(self._authed_transport)
 
     @cached_property
+    def collective_identifiers(self) -> CollectiveIdentifiersClient:
+        """Return the collective invoice identifier branch."""
+        return CollectiveIdentifiersClient(self._authed_transport)
+
+    @cached_property
     def tokens(self) -> TokensClient:
         """Return the authenticated token lifecycle branch."""
         return TokensClient(self._authed_transport)
@@ -398,6 +407,15 @@ class AuthenticatedClient:
     def permissions(self) -> PermissionsClient:
         """Return the authenticated permissions branch."""
         return PermissionsClient(self._authed_transport)
+
+    @cached_property
+    def testdata(self) -> TestDataClient:
+        """Return authenticated TEST-only data mutation helpers."""
+        if self._environment is not Environment.TEST:
+            raise exceptions.KSeFUnsupportedEnvironmentError(
+                "testdata is only available for Environment.TEST"
+            )
+        return TestDataClient(self._authed_transport)
 
     @cached_property
     def raw(self) -> RawAuthenticatedClient:

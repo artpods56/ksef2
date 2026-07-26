@@ -4,6 +4,7 @@ from typing import final
 
 from ksef2.core import routes
 from ksef2.endpoints.async_base import AsyncBaseEndpoints
+from ksef2.infra.schema.api import spec
 from ksef2.infra.schema.api.supp.testdata import (
     BlockContextRequest,
     CreatePersonRequest,
@@ -89,5 +90,18 @@ class AsyncTestDataEndpoints(AsyncBaseEndpoints):
         """Unblock authentication in a test context."""
         _ = await self._transport.post(
             path=routes.TestDataRoutes.UNBLOCK_CONTEXT,
+            json=body.model_dump(mode="json", by_alias=True),
+        )
+
+    async def update_certificate(
+        self,
+        serial_number: str,
+        body: spec.TestDataUpdateCertificateRequest,
+    ) -> None:
+        """Shorten the validity of a TEST certificate."""
+        _ = await self._transport.put(
+            path=routes.TestDataRoutes.UPDATE_CERTIFICATE.format(
+                serialNumber=serial_number
+            ),
             json=body.model_dump(mode="json", by_alias=True),
         )

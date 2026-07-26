@@ -5,7 +5,7 @@ import httpx
 from ksef2.core.middlewares.base import BaseMiddleware
 from ksef2.core.types import Headers, JsonObject, QueryParamsInput
 
-HttpMethod = Literal["POST", "GET", "DELETE"]
+HttpMethod = Literal["POST", "GET", "PUT", "DELETE"]
 
 
 @final

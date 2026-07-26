@@ -24,7 +24,7 @@ class AsyncRetryMiddleware(AsyncBaseMiddleware):
         self._config = config
 
     def _is_retryable_request(self, method: str, path: str) -> bool:
-        if method in {"GET", "DELETE"}:
+        if method in {"GET", "PUT", "DELETE"}:
             return True
         return method == "POST" and path in routes.RETRYABLE_POST_PATHS
 

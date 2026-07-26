@@ -278,6 +278,8 @@ def personal_permission_type_from_literal(
             return spec.PersonalPermissionType.SubunitManage
         case "vat_ue_manage":
             return spec.PersonalPermissionType.VatUeManage
+        case "collective_identifier_manage":
+            return spec.PersonalPermissionType.CollectiveIdentifierManage
         case _:
             raise ValueError(f"Unknown personal permission type: {value!r}")
 
@@ -298,6 +300,8 @@ def person_permission_type_from_literal(value: str) -> spec.PersonPermissionScop
             return spec.PersonPermissionScope.EnforcementOperations
         case "subunit_manage":
             return spec.PersonPermissionScope.SubunitManage
+        case "collective_identifier_manage":
+            return spec.PersonPermissionScope.CollectiveIdentifierManage
         case _:
             raise ValueError(f"Unknown person permission type: {value!r}")
 

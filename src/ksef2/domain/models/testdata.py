@@ -23,6 +23,7 @@ type PermissionType = Literal[
     "enforcement_operations",
     "subunit_manage",
     "vat_ue_manage",
+    "collective_identifier_manage",
 ]
 
 
@@ -64,6 +65,7 @@ class PermissionTypeEnum(StrEnum):
     ENFORCEMENT_OPERATIONS = "enforcement_operations"
     SUBUNIT_MANAGE = "subunit_manage"
     VAT_UE_MANAGE = "vat_ue_manage"
+    COLLECTIVE_IDENTIFIER_MANAGE = "collective_identifier_manage"
 
 
 class SubUnit(KSeFBaseModel):
@@ -165,3 +167,9 @@ class UnblockContextRequest(KSeFBaseModel):
     """Payload used to unblock authentication for a TEST context."""
 
     context: AuthContextIdentifier
+
+
+class UpdateCertificateRequest(KSeFBaseModel):
+    """Payload used to shorten a TEST certificate's validity."""
+
+    valid_to: AwareDatetime

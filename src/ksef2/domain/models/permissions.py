@@ -34,6 +34,7 @@ type PersonPermissionScope = Literal[
     "credentials_manage",
     "enforcement_operations",
     "subunit_manage",
+    "collective_identifier_manage",
 ]
 
 type PersonalPermissionScope = Literal[
@@ -45,6 +46,7 @@ type PersonalPermissionScope = Literal[
     "enforcement_operations",
     "subunit_manage",
     "vat_ue_manage",
+    "collective_identifier_manage",
 ]
 
 type EntityPermissionType = Literal["invoice_read", "invoice_write"]
@@ -133,6 +135,7 @@ class PersonPermissionTypeEnum(StrEnum):
     ENFORCEMENT_OPERATIONS = "enforcement_operations"
     SUBUNIT_MANAGE = "subunit_manage"
     VAT_UE_MANAGE = "vat_ue_manage"
+    COLLECTIVE_IDENTIFIER_MANAGE = "collective_identifier_manage"
 
 
 class EntityPermissionTypeEnum(StrEnum):

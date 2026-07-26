@@ -8,6 +8,7 @@ from ksef2.endpoints import (
     encryption as encryption,
     auth as auth,
     invoices as invoices,
+    collective_identifiers as collective_identifiers,
     certificates as certificates,
     session as session,
 )
@@ -57,6 +58,13 @@ __invoices_status_endpoints__ = [
     EndpointRef("GET", routes.InvoiceRoutes.INVOICE_UPO_BY_REFERENCE),
 ]
 
+__collective_identifier_endpoints__ = [
+    EndpointRef("POST", routes.CollectiveIdentifierRoutes.GENERATE),
+    EndpointRef("POST", routes.CollectiveIdentifierRoutes.QUERY),
+    EndpointRef("GET", routes.CollectiveIdentifierRoutes.QUERY_BY_KSEF_NUMBER),
+    EndpointRef("GET", routes.CollectiveIdentifierRoutes.LIST_INVOICES),
+]
+
 __session_endpoints__ = [
     EndpointRef("POST", routes.SessionRoutes.OPEN_ONLINE),
     EndpointRef("POST", routes.SessionRoutes.TERMINATE_ONLINE),
@@ -76,6 +84,7 @@ __testdata_endpoints__ = [
     EndpointRef("POST", routes.TestDataRoutes.REVOKE_ATTACHMENTS),
     EndpointRef("POST", routes.TestDataRoutes.BLOCK_CONTEXT),
     EndpointRef("POST", routes.TestDataRoutes.UNBLOCK_CONTEXT),
+    EndpointRef("PUT", routes.TestDataRoutes.UPDATE_CERTIFICATE),
 ]
 
 __tokens_endpoints__ = [
@@ -146,6 +155,7 @@ __all_endpoints__: list[EndpointRef] = [
     *__invoices_endpoints__,
     *__invoices_query_endpoints__,
     *__invoices_status_endpoints__,
+    *__collective_identifier_endpoints__,
     *__peppol_endpoints__,
     *__session_endpoints__,
     *__testdata_endpoints__,

@@ -45,6 +45,24 @@ class AsyncBaseMiddleware(abc.ABC):
             content=content,
         )
 
+    async def put(
+        self,
+        path: str,
+        *,
+        headers: Headers | None = None,
+        params: QueryParamsInput | None = None,
+        json: JsonObject | None = None,
+        content: bytes | None = None,
+    ) -> httpx.Response:
+        return await self.request(
+            "PUT",
+            path,
+            headers=headers,
+            json=json,
+            params=params,
+            content=content,
+        )
+
     async def delete(
         self,
         path: str,

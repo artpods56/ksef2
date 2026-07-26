@@ -95,6 +95,8 @@ def _map_person_permission(
             return "enforcement_operations"
         case spec.PersonPermissionScope.SubunitManage:
             return "subunit_manage"
+        case spec.PersonPermissionScope.CollectiveIdentifierManage:
+            return "collective_identifier_manage"
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 

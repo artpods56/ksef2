@@ -39,6 +39,16 @@ class Middleware(Protocol):
         content: bytes | None = None,
     ) -> httpx.Response: ...
 
+    def put(
+        self,
+        path: str,
+        *,
+        headers: Headers | None = None,
+        params: QueryParamsInput | None = None,
+        json: JsonObject | None = None,
+        content: bytes | None = None,
+    ) -> httpx.Response: ...
+
     def delete(
         self,
         path: str,

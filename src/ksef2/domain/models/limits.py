@@ -59,4 +59,5 @@ class ApiRateLimits(KSeFBaseModel):
     invoice_export: RateLimitValues
     invoice_export_status: RateLimitValues
     invoice_download: RateLimitValues
+    collective_identifier: RateLimitValues
     other: RateLimitValues

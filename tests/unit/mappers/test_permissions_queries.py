@@ -148,7 +148,10 @@ class TestPermissionsQueryRequestMapper:
         ],
     ) -> None:
         request = domain_perm_query_personal.build(
-            permission_types=["vat_ue_manage"],
+            permission_types=[
+                "vat_ue_manage",
+                "collective_identifier_manage",
+            ],
             permission_state="active",
             context_type="internal_id",
             context_value="1234567890-12345",
@@ -159,7 +162,10 @@ class TestPermissionsQueryRequestMapper:
         output = query_to_spec(request)
 
         assert isinstance(output, spec.PersonalPermissionsQueryRequest)
-        assert output.permissionTypes == [spec.PersonalPermissionType.VatUeManage]
+        assert output.permissionTypes == [
+            spec.PersonalPermissionType.VatUeManage,
+            spec.PersonalPermissionType.CollectiveIdentifierManage,
+        ]
         assert output.contextIdentifier is not None
         assert (
             output.contextIdentifier.type
@@ -259,6 +265,25 @@ class TestPermissionsQueryRequestMapper:
 
 
 class TestPermissionsQueryResponseMapper:
+    def test_maps_collective_identifier_permission_scopes(
+        self,
+        perm_person_item: BaseFactory[spec.PersonPermission],
+        perm_personal_permission_item: BaseFactory[spec.PersonalPermission],
+    ) -> None:
+        person = person_from_spec(
+            perm_person_item.build(
+                permissionScope=spec.PersonPermissionScope.CollectiveIdentifierManage
+            )
+        )
+        personal = personal_from_spec(
+            perm_personal_permission_item.build(
+                permissionScope=spec.PersonalPermissionScope.CollectiveIdentifierManage
+            )
+        )
+
+        assert person.permission_type == "collective_identifier_manage"
+        assert personal.permission_type == "collective_identifier_manage"
+
     def test_maps_person_permission_item(
         self,
         perm_person_item: BaseFactory[spec.PersonPermission],

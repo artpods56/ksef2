@@ -1,0 +1,105 @@
+from datetime import datetime, timezone
+
+from polyfactory.factories import BaseFactory
+
+from ksef2.clients.collective_identifiers import CollectiveIdentifiersClient
+from ksef2.core.routes import CollectiveIdentifierRoutes
+from ksef2.domain.models.collective_identifiers import (
+    CollectiveIdentifierInvoice,
+    CollectiveIdentifiersQuery,
+)
+from ksef2.infra.schema.api import spec
+from tests.unit.factories.collective_identifiers import (
+    CollectiveIdentifiersQueryResponseFactory,
+)
+from tests.unit.fakes.transport import FakeTransport
+
+_KSEF_NUMBER = "1234567890-20250625-ABC123-DEF456-07"
+_COLLECTIVE_IDENTIFIER_NUMBER = "1111111111-IZ202607-65ED02180000-E7"
+_DATE_CREATED = datetime(2026, 7, 22, 10, 0, tzinfo=timezone.utc)
+
+
+class TestCollectiveIdentifiersClient:
+    def test_generate_maps_domain_invoice(
+        self,
+        fake_transport: FakeTransport,
+        collective_generate_resp: BaseFactory[
+            spec.GenerateCollectiveIdentifierResponse
+        ],
+    ) -> None:
+        expected = collective_generate_resp.build()
+        fake_transport.enqueue(expected.model_dump(mode="json"))
+
+        result = CollectiveIdentifiersClient(fake_transport).generate(
+            invoices=[CollectiveIdentifierInvoice(ksef_number=_KSEF_NUMBER)]
+        )
+
+        assert (
+            result.collective_identifier_number == expected.collectiveIdentifierNumber
+        )
+        assert fake_transport.calls[0].json == {
+            "invoices": [
+                {
+                    "ksefNumber": _KSEF_NUMBER,
+                    "payment": None,
+                    "description": None,
+                }
+            ]
+        }
+
+    def test_query_all_follows_continuation_token(
+        self,
+        fake_transport: FakeTransport,
+    ) -> None:
+        first = CollectiveIdentifiersQueryResponseFactory.build(
+            continuationToken="next-page"
+        )
+        second = CollectiveIdentifiersQueryResponseFactory.build(continuationToken=None)
+        fake_transport.enqueue(first.model_dump(mode="json"))
+        fake_transport.enqueue(second.model_dump(mode="json"))
+
+        pages = list(
+            CollectiveIdentifiersClient(fake_transport).query_all(
+                filters=CollectiveIdentifiersQuery(
+                    date_created_from=_DATE_CREATED,
+                    date_created_to=_DATE_CREATED,
+                )
+            )
+        )
+
+        assert len(pages) == 2
+        assert pages[0].continuation_token == "next-page"
+        assert fake_transport.calls[1].headers == {"x-continuation-token": "next-page"}
+
+    def test_query_by_ksef_and_list_invoices_map_responses(
+        self,
+        fake_transport: FakeTransport,
+        collective_by_ksef_resp: BaseFactory[
+            spec.CollectiveIdentifiersByKsefNumberQueryResponse
+        ],
+        collective_invoices_resp: BaseFactory[
+            spec.CollectiveIdentifierInvoicesQueryResponse
+        ],
+    ) -> None:
+        fake_transport.enqueue(collective_by_ksef_resp.build().model_dump(mode="json"))
+        fake_transport.enqueue(collective_invoices_resp.build().model_dump(mode="json"))
+        client = CollectiveIdentifiersClient(fake_transport)
+
+        identifiers = client.query_by_ksef_number(ksef_number=_KSEF_NUMBER)
+        invoices = client.list_invoices(
+            collective_identifier_number=_COLLECTIVE_IDENTIFIER_NUMBER
+        )
+
+        assert (
+            identifiers.collective_identifiers[0].collective_identifier_number
+            == _COLLECTIVE_IDENTIFIER_NUMBER
+        )
+        assert invoices.invoices[0].ksef_number == _KSEF_NUMBER
+        assert [call.path for call in fake_transport.calls] == [
+            CollectiveIdentifierRoutes.QUERY_BY_KSEF_NUMBER.format(
+                ksefNumber=_KSEF_NUMBER
+            ),
+            CollectiveIdentifierRoutes.LIST_INVOICES.format(
+                collectiveIdentifierNumber=_COLLECTIVE_IDENTIFIER_NUMBER
+            ),
+        ]

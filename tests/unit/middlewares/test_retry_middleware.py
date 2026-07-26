@@ -56,6 +56,22 @@ class TestRetryMiddleware:
         sleep_mock.assert_called_once()
 
     @patch("ksef2.core.middlewares.retry.time.sleep")
+    def test_retries_put_on_retryable_status(
+        self,
+        sleep_mock,
+    ) -> None:
+        transport = FakeTransport()
+        transport.enqueue(status_code=503, json_body={"message": "busy"})
+        transport.enqueue(status_code=200, json_body={"ok": True})
+        middleware = RetryMiddleware(transport, RetryConfig(max_attempts=2))
+
+        response = middleware.put("/resource", json={"value": "updated"})
+
+        assert response.status_code == 200
+        assert len(transport.calls) == 2
+        sleep_mock.assert_called_once()
+
+    @patch("ksef2.core.middlewares.retry.time.sleep")
     def test_does_not_retry_non_retryable_post(
         self,
         sleep_mock,

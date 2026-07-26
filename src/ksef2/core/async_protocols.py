@@ -36,6 +36,16 @@ class AsyncMiddleware(Protocol):
         content: bytes | None = None,
     ) -> httpx.Response: ...
 
+    async def put(
+        self,
+        path: str,
+        *,
+        headers: Headers | None = None,
+        params: QueryParamsInput | None = None,
+        json: JsonObject | None = None,
+        content: bytes | None = None,
+    ) -> httpx.Response: ...
+
     async def delete(
         self,
         path: str,

@@ -135,6 +135,25 @@ class TestTestDataClient:
             ApiRoutes.UNBLOCK_CONTEXT,
         ]
 
+    def test_update_certificate_valid_to(
+        self,
+        testdata_client: KSeFTestDataClient,
+        fake_transport: FakeTransport,
+    ) -> None:
+        fake_transport.enqueue({})
+
+        testdata_client.update_certificate_valid_to(
+            serial_number="0123456789ABCDEF",
+            valid_to=datetime(2026, 7, 22, 10, 0, tzinfo=timezone.utc),
+        )
+
+        call = fake_transport.calls[0]
+        assert call.method == "PUT"
+        assert call.path == ApiRoutes.UPDATE_CERTIFICATE.format(
+            serialNumber="0123456789ABCDEF"
+        )
+        assert call.json == {"validTo": "2026-07-22T10:00:00Z"}
+
     def test_temporal_returns_helper(
         self,
         testdata_client: KSeFTestDataClient,

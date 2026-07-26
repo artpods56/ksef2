@@ -48,6 +48,24 @@ class BaseMiddleware(abc.ABC):
             content=content,
         )
 
+    def put(
+        self,
+        path: str,
+        *,
+        headers: Headers | None = None,
+        params: QueryParamsInput | None = None,
+        json: JsonObject | None = None,
+        content: bytes | None = None,
+    ) -> httpx.Response:
+        return self.request(
+            "PUT",
+            path,
+            headers=headers,
+            json=json,
+            params=params,
+            content=content,
+        )
+
     def delete(
         self,
         path: str,

@@ -46,6 +46,13 @@ ListTokensQueryParams = TypedDict(
     },
 )
 
+CollectiveIdentifierQueryParams = TypedDict(
+    "CollectiveIdentifierQueryParams",
+    {
+        "pageSize": NotRequired[int | None],
+    },
+)
+
 type CurrencyCodes = Literal[
     "AED",
     "AFN",
