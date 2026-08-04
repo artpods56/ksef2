@@ -29,6 +29,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify downstream docs dispatch configuration
+        env:
+          DOCS_DISPATCH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$DOCS_DISPATCH_TOKEN" ]; then
+            echo "::error::DOCS_DISPATCH_TOKEN is not configured; tagged docs cannot be deployed."
+            exit 1
+          fi
+
       - uses: astral-sh/setup-uv@v4
 
       - name: Install Python 3.12
