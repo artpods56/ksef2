@@ -441,6 +441,27 @@ class CheckAttachmentPermissionStatusResponse(BaseModel):
     """
 
 
+class CollectiveIdentifierContextLimitsOverride(BaseModel):
+    maxInvoices: Annotated[int, Field(ge=2, le=5000)]
+    """
+    Maksymalna ilość faktur które można przesłać w pojedynczym identyfikatorze zbiorczym.
+    """
+
+
+class CollectiveIdentifierEffectiveContextLimits(BaseModel):
+    maxInvoices: Annotated[int, Field(ge=2)]
+    """
+    Maksymalna ilość faktur które można przesłać w pojedynczym identyfikatorze zbiorczym.
+    """
+
+
+class CollectiveIdentifierInvoicesQueryRequest(BaseModel):
+    collectiveIdentifierNumbers: list[str]
+    """
+    Numery identyfikatorów zbiorczych. Maksymalna liczba to 10.
+    """
+
+
 class CollectiveIdentifierInvoicesQueryResponseItemPayment(BaseModel):
     amount: float
     """
@@ -1083,6 +1104,22 @@ class GenerateCollectiveIdentifierResponse(BaseModel):
     collectiveIdentifierNumber: Annotated[str, Field(max_length=35, min_length=35)]
     """
     Wygenerowany identyfikator zbiorczy
+
+    Identyfikator zbiorczy ma format:
+    `9999999999-IZRRRRMM-FFFFFFFFFFFF-FF`, gdzie:
+    - `9999999999` – 10-cyfrowy NIP sprzedawcy,
+    - `IZ` – stały prefiks,
+    - `RRRRMM` – rok i miesiąc utworzenia,
+    - `FFFFFFFFFFFF` –  część techniczna składająca się z 12 znaków w zapisie szesnastkowym, tylko [0–9 A–F], wielkie litery,
+    - `FF` –  suma kontrolna CRC-8 - 2 znaki w zapisie szesnastkowym, tylko [0–9 A–F], wielkie litery.
+                
+    Do obliczenia sumy kontrolnej stosowany jest algorytm CRC-8 z parametrami:
+    - Polinom: 0x07
+    - Wartość początkowa: 0x00
+    - Format wyniku: 2-znakowy zapis szesnastkowy(HEX, wielkie litery)
+
+    Przykład:
+    `1111111111-IZ202607-65ED02180000-E7`.
     """
 
 
@@ -1857,6 +1894,10 @@ class SetSessionLimitsRequest(BaseModel):
     """
     Limity dla sesji wsadowych.
     """
+    collectiveIdentifier: CollectiveIdentifierContextLimitsOverride
+    """
+    Limity dla identyfikatorów zbiorczych.
+    """
 
 
 class SortOrder(StrEnum):
@@ -1968,8 +2009,7 @@ class SystemWarning(RootModel[str]):
     `[code]: message | [code]: message`
 
     Regex pojedynczego ostrzeżenia: `\\[(?<code>[^\\]]+)\\]: (?<message>[^|]+)`<br/><br/>
-    Generowanie ostrzeżeń można wymusić przekazując nagłówek:
-        `X-Test-System-Warning`, którego treść zostanie zwrócona w odpowiedzi.
+    W celu przetestowania obsługi ostrzeżeń można przekazać nagłówek `X-Test-System-Warning`. Jego treść zostanie zwrócona w odpowiedzi jako `X-System-Warning`.
     """
 
 
@@ -2592,6 +2632,10 @@ class CollectiveIdentifierInvoicesQueryResponseItem(BaseModel):
     """
     Numer ksef faktury.
     """
+    collectiveIdentifierNumber: str
+    """
+    Numer identyfikatora zbiorczego.
+    """
     payment: CollectiveIdentifierInvoicesQueryResponseItemPayment | None = None
     """
     Dane o płatności za fakturę
@@ -2636,6 +2680,10 @@ class EffectiveContextLimits(BaseModel):
     batchSession: BatchSessionEffectiveContextLimits
     """
     Limity dla sesji wsadowych.
+    """
+    collectiveIdentifier: CollectiveIdentifierEffectiveContextLimits
+    """
+    Limity dla identyfikatorów zbiorczych.
     """
 
 
@@ -3218,14 +3266,13 @@ class InvoiceQueryFilters(BaseModel):
     dateRange: InvoiceQueryDateRange
     """
     Typ i zakres dat, według którego filtrowane są faktury.
-    Maksymalny dozwolony okres wynosi 3 miesiące w strefie UTC lub w strefie Europe/Warsaw (WAW).
+    Maksymalny dozwolony okres wynosi 100 dni w strefie UTC
                 
     Format daty:
      * Daty muszą być przekazane w formacie ISO 8601, np. `yyyy-MM-ddTHH:mm:ss`.
      * Dopuszczalne są następujące warianty:
        - z sufiksem `Z` (czas UTC),
-       - z jawnym offsetem, np. `+01:00`, `+03:00`,
-       - bez offsetu (interpretowane jako czas lokalny strefy Europe/Warsaw).
+       - z jawnym offsetem, np. `+01:00`, `+03:00`
     """
     ksefNumber: Annotated[
         str | None,
@@ -4156,6 +4203,8 @@ class CollectiveIdentifierInvoice(BaseModel):
     ]
     """
     Numer ksef faktury.
+
+    Jedna faktura może zostać przypisana do maksymalnie 132 identyfikatorów zbiorczych w ramach jednego kontekstu.
     """
     payment: CollectiveIdentifierInvoicePayment | None = None
     """
@@ -4354,9 +4403,9 @@ class EntityRole(BaseModel):
 
 
 class GenerateCollectiveIdentifierRequest(BaseModel):
-    invoices: list[CollectiveIdentifierInvoice]
+    invoices: Annotated[list[CollectiveIdentifierInvoice], Field(min_length=2)]
     """
-    Lista faktur wchodząca w skład identyfikatora zbiorczego. Limit faktur wynosi 500.
+    Lista faktur wchodząca w skład identyfikatora zbiorczego. Domyślny [limit](https://github.com/CIRFMF/ksef-api/blob/main/limity/limity.md) faktur wynosi 500.
     """
 
 
@@ -4458,6 +4507,7 @@ class InvoicePackage(BaseModel):
 
     Dla dateType = Issue lub Invoicing – null.
     """
+    compressionType: CompressionType
 
 
 class OpenBatchSessionRequest(BaseModel):
