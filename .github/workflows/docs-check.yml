@@ -2,10 +2,6 @@ name: Docs
 
 on:
   pull_request:
-    paths:
-      - "docs/**"
-      - "scripts/validate_docs_frontmatter.py"
-      - ".github/workflows/docs-check.yml"
 
 jobs:
   validate:
