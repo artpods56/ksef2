@@ -11,11 +11,18 @@ class SessionLimits(KSeFBaseModel):
     max_invoices: int
 
 
+class CollectiveIdentifierLimits(KSeFBaseModel):
+    """Invoice count limit for one collective identifier."""
+
+    max_invoices: int
+
+
 class ContextLimits(KSeFBaseModel):
-    """Limits applied separately to online and batch sessions."""
+    """Limits applied to sessions and collective identifiers."""
 
     online_session: SessionLimits
     batch_session: SessionLimits
+    collective_identifier: CollectiveIdentifierLimits
 
 
 class SubjectCertificateLimits(KSeFBaseModel):

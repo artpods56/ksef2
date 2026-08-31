@@ -19,6 +19,10 @@ class TestLimitRequestMappers:
         assert result.batchSession.maxInvoiceSizeInMB == (
             request.batch_session.max_invoice_size_mb
         )
+        assert (
+            result.collectiveIdentifier.maxInvoices
+            == request.collective_identifier.max_invoices
+        )
 
     def test_to_spec_subject_limits(
         self,
@@ -71,6 +75,10 @@ class TestLimitResponseMappers:
         assert result.online_session.max_invoices == response.onlineSession.maxInvoices
         assert result.batch_session.max_invoice_size_mb == (
             response.batchSession.maxInvoiceSizeInMB
+        )
+        assert (
+            result.collective_identifier.max_invoices
+            == response.collectiveIdentifier.maxInvoices
         )
 
     def test_from_spec_subject_limits(
