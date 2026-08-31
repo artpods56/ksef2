@@ -68,6 +68,7 @@ class CollectiveIdentifierInvoicesResponseFactory(
     invoices = [
         spec.CollectiveIdentifierInvoicesQueryResponseItem(
             ksefNumber=_KSEF_NUMBER,
+            collectiveIdentifierNumber=_COLLECTIVE_IDENTIFIER_NUMBER,
             description="Settlement",
             detailsHidden=False,
         )
