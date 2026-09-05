@@ -441,6 +441,27 @@ class CheckAttachmentPermissionStatusResponse(BaseModel):
     """
 
 
+class CollectiveIdentifierContextLimitsOverride(BaseModel):
+    maxInvoices: Annotated[int, Field(ge=2, le=5000)]
+    """
+    Maksymalna ilość faktur które można przesłać w pojedynczym identyfikatorze zbiorczym.
+    """
+
+
+class CollectiveIdentifierEffectiveContextLimits(BaseModel):
+    maxInvoices: Annotated[int, Field(ge=2)]
+    """
+    Maksymalna ilość faktur które można przesłać w pojedynczym identyfikatorze zbiorczym.
+    """
+
+
+class CollectiveIdentifierInvoicesQueryRequest(BaseModel):
+    collectiveIdentifierNumbers: list[str]
+    """
+    Numery identyfikatorów zbiorczych. Maksymalna liczba to 10.
+    """
+
+
 class CollectiveIdentifierInvoicesQueryResponseItemPayment(BaseModel):
     amount: float
     """
@@ -1033,13 +1054,13 @@ class ForbiddenProblemDetails(BaseModel):
     reasonCode: str
     """
      Kod przyczyny odmowy dostępu.
-    | Code | Opis |  
+    | Code | Opis |
     |------|-------------|
-    | missing-permissions | Brak wymaganych uprawnień do wykonania operacji w bieżącym kontekście. | 
-    | ip-not-allowed | Żądanie pochodzi z adresu IP innego niż wskazany podczas uwierzytelnienia. | 
-    | insufficient-resource-access | Brak dostępu do wskazanego zasobu. | 
-    | auth-method-not-allowed | Ta operacja nie jest dostępna dla użytej metody uwierzytelnienia. | 
-    | security-service-blocked | Żądanie zostało zablokowane przez mechanizmy bezpieczeństwa. | 
+    | missing-permissions | Brak wymaganych uprawnień do wykonania operacji w bieżącym kontekście. |
+    | ip-not-allowed | Żądanie pochodzi z adresu IP innego niż wskazany podczas uwierzytelnienia. |
+    | insufficient-resource-access | Brak dostępu do wskazanego zasobu. |
+    | auth-method-not-allowed | Ta operacja nie jest dostępna dla użytej metody uwierzytelnienia. |
+    | security-service-blocked | Żądanie zostało zablokowane przez mechanizmy bezpieczeństwa. |
     | context-type-not-allowed | Operacja nie jest dostępna dla uwierzytelnionego typu kontekstu. |
     """
     security: dict[str, Any] | None = None
@@ -1083,6 +1104,22 @@ class GenerateCollectiveIdentifierResponse(BaseModel):
     collectiveIdentifierNumber: Annotated[str, Field(max_length=35, min_length=35)]
     """
     Wygenerowany identyfikator zbiorczy
+
+    Identyfikator zbiorczy ma format:
+    `9999999999-IZRRRRMM-FFFFFFFFFFFF-FF`, gdzie:
+    - `9999999999` – 10-cyfrowy NIP sprzedawcy,
+    - `IZ` – stały prefiks,
+    - `RRRRMM` – rok i miesiąc utworzenia,
+    - `FFFFFFFFFFFF` –  część techniczna składająca się z 12 znaków w zapisie szesnastkowym, tylko [0–9 A–F], wielkie litery,
+    - `FF` –  suma kontrolna CRC-8 - 2 znaki w zapisie szesnastkowym, tylko [0–9 A–F], wielkie litery.
+
+    Do obliczenia sumy kontrolnej stosowany jest algorytm CRC-8 z parametrami:
+    - Polinom: 0x07
+    - Wartość początkowa: 0x00
+    - Format wyniku: 2-znakowy zapis szesnastkowy(HEX, wielkie litery)
+
+    Przykład:
+    `1111111111-IZ202607-65ED02180000-E7`.
     """
 
 
@@ -1857,6 +1894,10 @@ class SetSessionLimitsRequest(BaseModel):
     """
     Limity dla sesji wsadowych.
     """
+    collectiveIdentifier: CollectiveIdentifierContextLimitsOverride
+    """
+    Limity dla identyfikatorów zbiorczych.
+    """
 
 
 class SortOrder(StrEnum):
@@ -1968,8 +2009,7 @@ class SystemWarning(RootModel[str]):
     `[code]: message | [code]: message`
 
     Regex pojedynczego ostrzeżenia: `\\[(?<code>[^\\]]+)\\]: (?<message>[^|]+)`<br/><br/>
-    Generowanie ostrzeżeń można wymusić przekazując nagłówek:
-        `X-Test-System-Warning`, którego treść zostanie zwrócona w odpowiedzi.
+    W celu przetestowania obsługi ostrzeżeń można przekazać nagłówek `X-Test-System-Warning`. Jego treść zostanie zwrócona w odpowiedzi jako `X-System-Warning`.
     """
 
 
@@ -2250,8 +2290,8 @@ class UpoPageResponse(BaseModel):
     """
     downloadUrl: AnyUrl
     """
-    Adres do pobrania strony UPO. Link generowany jest przy każdym odpytaniu o status. 
-    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego. 
+    Adres do pobrania strony UPO. Link generowany jest przy każdym odpytaniu o status.
+    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego.
     Link nie podlega limitom API i wygasa po określonym czasie w `DownloadUrlExpirationDate`.
 
     Odpowiedź HTTP zawiera dodatkowe nagłówki:
@@ -2544,7 +2584,7 @@ class CertificateEnrollmentStatusResponse(BaseModel):
         str | None, Field(max_length=16, min_length=16, pattern="^[0-9A-F]{16}$")
     ] = None
     """
-    Numer seryjny wygenerowanego certyfikatu (w formacie szesnastkowym). 
+    Numer seryjny wygenerowanego certyfikatu (w formacie szesnastkowym).
     Zwracany w przypadku prawidłowego przeprocesowania wniosku certyfikacyjnego.
     """
 
@@ -2592,6 +2632,10 @@ class CollectiveIdentifierInvoicesQueryResponseItem(BaseModel):
     """
     Numer ksef faktury.
     """
+    collectiveIdentifierNumber: str
+    """
+    Numer identyfikatora zbiorczego.
+    """
     payment: CollectiveIdentifierInvoicesQueryResponseItemPayment | None = None
     """
     Dane o płatności za fakturę
@@ -2636,6 +2680,10 @@ class EffectiveContextLimits(BaseModel):
     batchSession: BatchSessionEffectiveContextLimits
     """
     Limity dla sesji wsadowych.
+    """
+    collectiveIdentifier: CollectiveIdentifierEffectiveContextLimits
+    """
+    Limity dla identyfikatorów zbiorczych.
     """
 
 
@@ -3196,8 +3244,8 @@ class InvoiceQueryDateRange(BaseModel):
     """
     Określa, czy system ma ograniczyć filtrowanie (zakres dateRange.to) do wartości `PermanentStorageHwmDate`.
 
-    * Dotyczy wyłącznie zapytań z `dateType = PermanentStorage`,  
-    * Gdy `true`, system ogranicza filtrowanie tak, aby wartość `dateRange.to` nie przekraczała wartości `PermanentStorageHwmDate`,  
+    * Dotyczy wyłącznie zapytań z `dateType = PermanentStorage`,
+    * Gdy `true`, system ogranicza filtrowanie tak, aby wartość `dateRange.to` nie przekraczała wartości `PermanentStorageHwmDate`,
     * Gdy `null` lub `false`, filtrowanie może wykraczać poza `PermanentStorageHwmDate`.
     """
 
@@ -3218,14 +3266,13 @@ class InvoiceQueryFilters(BaseModel):
     dateRange: InvoiceQueryDateRange
     """
     Typ i zakres dat, według którego filtrowane są faktury.
-    Maksymalny dozwolony okres wynosi 3 miesiące w strefie UTC lub w strefie Europe/Warsaw (WAW).
-                
+    Maksymalny dozwolony okres wynosi 100 dni w strefie UTC
+
     Format daty:
      * Daty muszą być przekazane w formacie ISO 8601, np. `yyyy-MM-ddTHH:mm:ss`.
      * Dopuszczalne są następujące warianty:
        - z sufiksem `Z` (czas UTC),
-       - z jawnym offsetem, np. `+01:00`, `+03:00`,
-       - bez offsetu (interpretowane jako czas lokalny strefy Europe/Warsaw).
+       - z jawnym offsetem, np. `+01:00`, `+03:00`
     """
     ksefNumber: Annotated[
         str | None,
@@ -3331,7 +3378,7 @@ class OpenBatchSessionResponse(BaseModel):
     * dołączyć treść części pliku w korpusie żądania.
 
     `Uwaga: nie należy dodawać do nagłówków token dostępu (accessToken).`
-     
+
     Każdą część przesyła się oddzielnym żądaniem HTTP.Zwracane kody odpowiedzi:
      * <b>201</b> – poprawne przyjęcie pliku,
      * <b>400</b> – błędne dane,
@@ -3733,8 +3780,8 @@ class SessionInvoiceStatusResponse(BaseModel):
     """
     upoDownloadUrl: AnyUrl | None = None
     """
-    Adres do pobrania UPO. Link generowany jest przy każdym odpytaniu o status. 
-    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego. 
+    Adres do pobrania UPO. Link generowany jest przy każdym odpytaniu o status.
+    Dostęp odbywa się metodą `HTTP GET` i <b>nie należy</b> wysyłać tokenu dostępowego.
     Link nie podlega limitom API i wygasa po określonym czasie w `UpoDownloadUrlExpirationDate`.
 
     Odpowiedź HTTP zawiera dodatkowe nagłówki:
@@ -3784,7 +3831,7 @@ class SessionStatusResponse(BaseModel):
     status: StatusInfo
     """
     Informacje o aktualnym statusie.
-                
+
     Sesja wsadowa:
     | Code | Description | Details |
     | --- | --- | --- |
@@ -4156,6 +4203,8 @@ class CollectiveIdentifierInvoice(BaseModel):
     ]
     """
     Numer ksef faktury.
+
+    Jedna faktura może zostać przypisana do maksymalnie 132 identyfikatorów zbiorczych w ramach jednego kontekstu.
     """
     payment: CollectiveIdentifierInvoicePayment | None = None
     """
@@ -4354,9 +4403,9 @@ class EntityRole(BaseModel):
 
 
 class GenerateCollectiveIdentifierRequest(BaseModel):
-    invoices: list[CollectiveIdentifierInvoice]
+    invoices: Annotated[list[CollectiveIdentifierInvoice], Field(min_length=2)]
     """
-    Lista faktur wchodząca w skład identyfikatora zbiorczego. Limit faktur wynosi 500.
+    Lista faktur wchodząca w skład identyfikatora zbiorczego. Domyślny [limit](https://github.com/CIRFMF/ksef-api/blob/main/limity/limity.md) faktur wynosi 500.
     """
 
 
@@ -4451,13 +4500,14 @@ class InvoicePackage(BaseModel):
     """
     Dotyczy wyłącznie zapytań filtrowanych po typie daty <b>PermanentStorage</b>.
     Jeśli zapytanie dotyczyło najnowszego okresu, wartość ta może być wartością nieznacznie skorygowaną względem górnej granicy podanej w warunkach zapytania.
-    Dla okresów starszych, będzie to zgodne z warunkami zapytania. 
+    Dla okresów starszych, będzie to zgodne z warunkami zapytania.
 
     System gwarantuje, że dane poniżej tej wartości są spójne i kompletne.
-    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur). 
+    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur).
 
     Dla dateType = Issue lub Invoicing – null.
     """
+    compressionType: CompressionType
 
 
 class OpenBatchSessionRequest(BaseModel):
@@ -4733,7 +4783,7 @@ class PersonPermissionsQueryRequest(BaseModel):
     """
     permissionState: PermissionState | None = None
     """
-    Stan uprawnienia. 
+    Stan uprawnienia.
     | Type | Value |
     | --- | --- |
     | Active | Uprawnienia aktywne |
@@ -4832,7 +4882,7 @@ class PersonalPermissionsQueryRequest(BaseModel):
     """
     permissionState: PermissionState | None = None
     """
-    Stan uprawnienia. 
+    Stan uprawnienia.
     | Type | Value |
     | --- | --- |
     | Active | Uprawnienia aktywne |
@@ -5356,13 +5406,13 @@ class QueryInvoicesMetadataResponse(BaseModel):
     """
     Dotyczy wyłącznie zapytań filtrowanych po typie daty <b>PermanentStorage</b>.
     Jeśli zapytanie dotyczyło najnowszego okresu, wartość ta może być wartością nieznacznie skorygowaną względem górnej granicy podanej w warunkach zapytania.
-    Dla okresów starszych, będzie to zgodne z warunkami zapytania. 
+    Dla okresów starszych, będzie to zgodne z warunkami zapytania.
 
     Wartość jest stała dla wszystkich stron tego samego zapytania
     i nie zależy od paginacji ani sortowania.
 
     System gwarantuje, że dane poniżej tej wartości są spójne i kompletne.
-    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur). 
+    Ponowne zapytania obejmujące zakresem dane poniżej tego kroczącego znacznika czasu nie zwrócą w przyszłości innych wyników (np.dodatkowych faktur).
 
     Dla dateType = Issue lub Invoicing – null.
     """
@@ -5415,7 +5465,7 @@ class EuEntityAdministrationPermissionsGrantRequest(BaseModel):
     """
     euEntityName: Annotated[str, Field(max_length=256, min_length=5)]
     """
-    Nazwa i adres podmiotu unijnego w formacie: 
+    Nazwa i adres podmiotu unijnego w formacie:
     `{euSubjectName}, {euSubjectAddress}`
     """
     subjectDetails: EuEntityPermissionSubjectDetails

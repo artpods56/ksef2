@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from ksef2.domain.models.limits import (
     ApiRateLimits,
+    CollectiveIdentifierLimits,
     ContextLimits,
     RateLimitValues,
     SessionLimits,
@@ -54,6 +55,9 @@ def _(response: spec.EffectiveContextLimits) -> ContextLimits:
             max_invoice_size_mb=response.batchSession.maxInvoiceSizeInMB,
             max_invoice_with_attachment_size_mb=response.batchSession.maxInvoiceWithAttachmentSizeInMB,
             max_invoices=response.batchSession.maxInvoices,
+        ),
+        collective_identifier=CollectiveIdentifierLimits(
+            max_invoices=response.collectiveIdentifier.maxInvoices,
         ),
     )
 

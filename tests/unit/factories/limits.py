@@ -11,10 +11,19 @@ class DomainSessionLimitsFactory(ModelFactory[domain_limits.SessionLimits]):
     max_invoices: int = 100
 
 
+class DomainCollectiveIdentifierLimitsFactory(
+    ModelFactory[domain_limits.CollectiveIdentifierLimits]
+):
+    max_invoices: int = 500
+
+
 @register_fixture(name="domain_limit_context")
 class DomainContextLimitsFactory(ModelFactory[domain_limits.ContextLimits]):
     online_session: domain_limits.SessionLimits = DomainSessionLimitsFactory.build()
     batch_session: domain_limits.SessionLimits = DomainSessionLimitsFactory.build()
+    collective_identifier: domain_limits.CollectiveIdentifierLimits = (
+        DomainCollectiveIdentifierLimitsFactory.build()
+    )
 
 
 @register_fixture(name="domain_limit_subject_certificate")

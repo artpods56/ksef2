@@ -15,6 +15,7 @@ from tests.unit.factories.collective_identifiers import (
 from tests.unit.fakes.transport import FakeTransport
 
 _KSEF_NUMBER = "1234567890-20250625-ABC123-DEF456-07"
+_SECOND_KSEF_NUMBER = "1234567890-20250625-ABC123-DEF457-08"
 _COLLECTIVE_IDENTIFIER_NUMBER = "1111111111-IZ202607-65ED02180000-E7"
 _DATE_CREATED = datetime(2026, 7, 22, 10, 0, tzinfo=timezone.utc)
 
@@ -31,7 +32,10 @@ class TestCollectiveIdentifiersClient:
         fake_transport.enqueue(expected.model_dump(mode="json"))
 
         result = CollectiveIdentifiersClient(fake_transport).generate(
-            invoices=[CollectiveIdentifierInvoice(ksef_number=_KSEF_NUMBER)]
+            invoices=[
+                CollectiveIdentifierInvoice(ksef_number=_KSEF_NUMBER),
+                CollectiveIdentifierInvoice(ksef_number=_SECOND_KSEF_NUMBER),
+            ]
         )
 
         assert (
@@ -43,7 +47,12 @@ class TestCollectiveIdentifiersClient:
                     "ksefNumber": _KSEF_NUMBER,
                     "payment": None,
                     "description": None,
-                }
+                },
+                {
+                    "ksefNumber": _SECOND_KSEF_NUMBER,
+                    "payment": None,
+                    "description": None,
+                },
             ]
         }
 

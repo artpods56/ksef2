@@ -73,6 +73,11 @@ def run(config: ExampleConfig) -> None:
                 f"{context_limits.batch_session.max_invoice_size_mb}"
             )
 
+            print("  Collective identifier:")
+            print(
+                f"    Max invoices: {context_limits.collective_identifier.max_invoices}"
+            )
+
             print("Subject limits (certificate/enrollment):")
             subject_limits = auth.limits.get_subject_limits()
             if subject_limits.certificate:
@@ -83,7 +88,6 @@ def run(config: ExampleConfig) -> None:
                 print(
                     f"  Max enrollments:  {subject_limits.enrollment.max_enrollments}"
                 )
-
             print("API rate limits:")
             rate_limits = auth.limits.get_api_rate_limits()
             inv = rate_limits.invoice_send

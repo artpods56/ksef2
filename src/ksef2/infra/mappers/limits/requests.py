@@ -52,6 +52,9 @@ def _(request: ContextLimits) -> spec.SetSessionLimitsRequest:
             maxInvoiceSizeInMB=request.batch_session.max_invoice_size_mb,
             maxInvoiceWithAttachmentSizeInMB=request.batch_session.max_invoice_with_attachment_size_mb,
         ),
+        collectiveIdentifier=spec.CollectiveIdentifierContextLimitsOverride(
+            maxInvoices=request.collective_identifier.max_invoices,
+        ),
     )
 
 

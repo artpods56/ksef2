@@ -5,6 +5,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 from polyfactory.pytest_plugin import register_fixture
 
 _KSEF_NUMBER = "1234567890-20250625-ABC123-DEF456-07"
+_SECOND_KSEF_NUMBER = "1234567890-20250625-ABC123-DEF457-08"
 _COLLECTIVE_IDENTIFIER_NUMBER = "1111111111-IZ202607-65ED02180000-E7"
 _DATE_CREATED = datetime(2026, 7, 22, 10, 0, tzinfo=timezone.utc)
 
@@ -13,7 +14,10 @@ _DATE_CREATED = datetime(2026, 7, 22, 10, 0, tzinfo=timezone.utc)
 class GenerateCollectiveIdentifierRequestFactory(
     ModelFactory[spec.GenerateCollectiveIdentifierRequest]
 ):
-    invoices = [spec.CollectiveIdentifierInvoice(ksefNumber=_KSEF_NUMBER)]
+    invoices = [
+        spec.CollectiveIdentifierInvoice(ksefNumber=_KSEF_NUMBER),
+        spec.CollectiveIdentifierInvoice(ksefNumber=_SECOND_KSEF_NUMBER),
+    ]
 
 
 @register_fixture(name="collective_generate_resp")
@@ -68,6 +72,7 @@ class CollectiveIdentifierInvoicesResponseFactory(
     invoices = [
         spec.CollectiveIdentifierInvoicesQueryResponseItem(
             ksefNumber=_KSEF_NUMBER,
+            collectiveIdentifierNumber=_COLLECTIVE_IDENTIFIER_NUMBER,
             description="Settlement",
             detailsHidden=False,
         )

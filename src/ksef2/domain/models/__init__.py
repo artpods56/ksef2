@@ -190,6 +190,7 @@ from ksef2.domain.models.certificates import (
 )
 from ksef2.domain.models.limits import (
     ApiRateLimits,
+    CollectiveIdentifierLimits,
     ContextLimits,
     SessionLimits,
     SubjectLimits,
@@ -421,6 +422,7 @@ __all__ = [
     "CertificateTypeValue",
     # limits
     "ApiRateLimits",
+    "CollectiveIdentifierLimits",
     "ContextLimits",
     "SessionLimits",
     "SubjectLimits",
