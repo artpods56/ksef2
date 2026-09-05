@@ -1,4 +1,4 @@
-## v1.0.0 (2026-07-11)
+## v0.19.0 (2026-09-05)
 
 ### Feat
 
@@ -6,6 +6,8 @@
   `ksef2.raw`, `ksef2.xades`, and `ksef2.profiles` compatibility surfaces
 - add complete sync and async high-level workflows for authentication, sessions,
   invoices, tokens, permissions, certificates, limits, PEPPOL, and TEST data
+- target KSeF OpenAPI 2.7.1 and expose collective-identifier workflows through
+  matching sync and async public clients
 - add the public FA(3) invoice builder, versioned draft state, and XSD conformance
 - return one-time generated tokens before explicit activation polling
 - version authentication and session resume-state documents
@@ -31,26 +33,6 @@
 
 - publish the 1.0 public API contract, migration guide, and bilingual workflow
   documentation
-
-## v0.19.0 (2026-06-23)
-
-### Feat
-
-- expose the low-level `ksef2.raw` endpoint API and public raw mappers
-- add the public `ksef2.xades` facade for certificate and XAdES helpers
-
-### Docs
-
-- sync README OpenAPI target version with KSeF API 2.6.1
-- document the low-level API, public API contract, error handling, and sync code generation
-
-### Refactor
-
-- remove the FA(3) invoice builder and legacy generated sample-invoice helpers
-
-### Build
-
-- run `just release-check` in CI and the PyPI publish workflow
 
 ## v0.18.0 (2026-06-21)
 
