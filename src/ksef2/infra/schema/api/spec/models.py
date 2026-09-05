@@ -739,6 +739,11 @@ class CurrencyCode(StrEnum):
     ZAR = "ZAR"
     ZMW = "ZMW"
     ZWL = "ZWL"
+    CNH = "CNH"
+    VED = "VED"
+    XTS = "XTS"
+    ZWG = "ZWG"
+    SLE = "SLE"
 
 
 class EffectiveApiRateLimitValues(BaseModel):
